@@ -2,6 +2,10 @@ import Foundation
 
 /// Synthetic ISIN for S&P 500 index levels stored in the prices table (benchmark comparison).
 let SP500IndexIsin = "INDEX:SP500"
+/// Synthetic ISIN for Gold index levels (benchmark comparison).
+let GoldIndexIsin = "INDEX:GOLD"
+/// Synthetic ISIN for MSCI World index levels (benchmark comparison).
+let MSCIWorldIndexIsin = "INDEX:MSCI_WORLD"
 
 // MARK: - Instrument
 struct Instrument: Identifiable, Codable, Hashable {

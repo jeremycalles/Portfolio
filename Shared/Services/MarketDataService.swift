@@ -1061,6 +1061,18 @@ actor MarketDataService {
         await fetchHistoricalPricesFromYahooChart(tickerSymbol: "^GSPC", isin: SP500IndexIsin, period: period, interval: interval)
     }
     
+    /// Fetches Gold daily history from Yahoo Finance (GC=F) for benchmark comparison.
+    /// Store with isin GoldIndexIsin; call in background after instrument price updates.
+    func fetchGoldHistory(period: String = "2y", interval: String = "1d") async -> [Price] {
+        await fetchHistoricalPricesFromYahooChart(tickerSymbol: "GC=F", isin: GoldIndexIsin, period: period, interval: interval)
+    }
+
+    /// Fetches MSCI World daily history from Yahoo Finance (URTH) for benchmark comparison.
+    /// Store with isin MSCIWorldIndexIsin; call in background after instrument price updates.
+    func fetchMSCIWorldHistory(period: String = "2y", interval: String = "1d") async -> [Price] {
+        await fetchHistoricalPricesFromYahooChart(tickerSymbol: "URTH", isin: MSCIWorldIndexIsin, period: period, interval: interval)
+    }
+    
     func fetchHistoricalRates(from fromCurrency: String, to toCurrency: String, period: String = "1y", interval: String = "1mo") async -> [ExchangeRate] {
         let pair = "\(fromCurrency)\(toCurrency)=X"
         

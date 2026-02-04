@@ -297,18 +297,31 @@ class AppViewModel: ObservableObject {
         // Align with Settings "Last refresh" (same key as iOS BackgroundTaskManager)
         UserDefaults.standard.set(Date(), forKey: "lastBackgroundRefresh")
         
-        // Fetch and store S&P 500 history in background (no UI blocking)
-        Task { await fetchAndStoreSP500InBackground() }
+        // Fetch and store benchmarks history in background (no UI blocking)
+        Task { await fetchAndStoreBenchmarksInBackground() }
         
         // Clear status after delay
         try? await Task.sleep(nanoseconds: 2_000_000_000)
         statusMessage = ""
     }
     
-    /// Fetches S&P 500 daily history and stores it in the prices table (INDEX:SP500). Called in background after updateAllPrices.
-    func fetchAndStoreSP500InBackground() async {
-        let prices = await marketData.fetchSP500History(period: "2y", interval: "1d")
-        for price in prices {
+    /// Fetches benchmark (S&P 500, Gold, MSCI World) daily history and stores it in the prices table. Called in background after updateAllPrices.
+    func fetchAndStoreBenchmarksInBackground() async {
+        // S&P 500
+        let sp500Prices = await marketData.fetchSP500History(period: "2y", interval: "1d")
+        for price in sp500Prices {
+            db.addPrice(price)
+        }
+        
+        // Gold
+        let goldPrices = await marketData.fetchGoldHistory(period: "2y", interval: "1d")
+        for price in goldPrices {
+            db.addPrice(price)
+        }
+        
+        // MSCI World
+        let msciPrices = await marketData.fetchMSCIWorldHistory(period: "2y", interval: "1d")
+        for price in msciPrices {
             db.addPrice(price)
         }
     }
@@ -870,6 +883,46 @@ class AppViewModel: ObservableObject {
             let dateStr = formatter.string(from: point.date)
             guard let sp = db.getPriceOnOrBefore(forIsin: SP500IndexIsin, date: dateStr), sp.value > 0 else { continue }
             let scaled = value0 * (sp.value / spAtStart.value)
+            result.append((date: point.date, value: scaled))
+        }
+        return result
+    }
+
+    /// Gold comparison: same-date series as portfolio history, values = initial portfolio value scaled by Gold performance.
+    func getGoldComparisonHistory() -> [(date: Date, value: Double)] {
+        let portfolioHistory = getPortfolioValueHistory()
+        guard let first = portfolioHistory.first, first.value > 0 else { return [] }
+        let (date0, value0) = (first.date, first.value)
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let date0Str = formatter.string(from: date0)
+        guard let goldAtStart = db.getPriceOnOrBefore(forIsin: GoldIndexIsin, date: date0Str), goldAtStart.value > 0 else { return [] }
+        
+        var result: [(date: Date, value: Double)] = []
+        for point in portfolioHistory {
+            let dateStr = formatter.string(from: point.date)
+            guard let gold = db.getPriceOnOrBefore(forIsin: GoldIndexIsin, date: dateStr), gold.value > 0 else { continue }
+            let scaled = value0 * (gold.value / goldAtStart.value)
+            result.append((date: point.date, value: scaled))
+        }
+        return result
+    }
+
+    /// MSCI World comparison: same-date series as portfolio history, values = initial portfolio value scaled by MSCI World performance.
+    func getMSCIWorldComparisonHistory() -> [(date: Date, value: Double)] {
+        let portfolioHistory = getPortfolioValueHistory()
+        guard let first = portfolioHistory.first, first.value > 0 else { return [] }
+        let (date0, value0) = (first.date, first.value)
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let date0Str = formatter.string(from: date0)
+        guard let msciAtStart = db.getPriceOnOrBefore(forIsin: MSCIWorldIndexIsin, date: date0Str), msciAtStart.value > 0 else { return [] }
+        
+        var result: [(date: Date, value: Double)] = []
+        for point in portfolioHistory {
+            let dateStr = formatter.string(from: point.date)
+            guard let msci = db.getPriceOnOrBefore(forIsin: MSCIWorldIndexIsin, date: dateStr), msci.value > 0 else { continue }
+            let scaled = value0 * (msci.value / msciAtStart.value)
             result.append((date: point.date, value: scaled))
         }
         return result

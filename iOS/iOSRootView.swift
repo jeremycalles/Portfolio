@@ -1125,13 +1125,16 @@ struct iOSDashboardView: View {
                     accentColor: accentColor
                 )
                 
-                // MARK: - Interactive Portfolio Chart (Total Performance)
+                // MARK: - Portfolio Trend Chart (Total Performance) – same as macOS
                 VStack(alignment: .leading, spacing: 12) {
                     Text(L10n.generalPerformance)
                         .font(.headline)
                         .padding(.horizontal)
                     
                     let history = viewModel.getPortfolioValueHistory()
+                    let sp500History = viewModel.getSP500ComparisonHistory()
+                    let goldHistory = viewModel.getGoldComparisonHistory()
+                    let msciWorldHistory = viewModel.getMSCIWorldComparisonHistory()
                     if history.isEmpty {
                         HStack {
                             Spacer()
@@ -1147,9 +1150,22 @@ struct iOSDashboardView: View {
                         }
                         .frame(height: 200)
                     } else {
-                        InteractivePortfolioChart(history: history, isPositive: isPositiveChange, privacyMode: privacyMode)
+                        ZStack {
+                            PortfolioTrendChart(
+                                history: history,
+                                sp500History: sp500History.isEmpty ? nil : sp500History,
+                                goldHistory: goldHistory.isEmpty ? nil : goldHistory,
+                                msciWorldHistory: msciWorldHistory.isEmpty ? nil : msciWorldHistory
+                            )
                             .frame(height: 250)
                             .padding(.horizontal)
+                            .blur(radius: privacyMode ? 8 : 0)
+                            if privacyMode {
+                                Image(systemName: "eye.slash.fill")
+                                    .font(.system(size: 32))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
                     }
                 }
                 .padding(.vertical, 16)

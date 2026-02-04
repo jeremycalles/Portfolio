@@ -233,6 +233,8 @@
 "chart.noPriceHistory" = "Aucun historique de prix";
 "chart.portfolioLabel" = "Portefeuille";
 "chart.sp500Comparison" = "S&P 500";
+"chart.goldComparison" = "Or";
+"chart.msciWorldComparison" = "MSCI World";
 
 // MARK: - Privacy
 "privacy.hidden" = "•••";

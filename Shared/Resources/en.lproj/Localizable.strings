@@ -233,6 +233,8 @@
 "chart.noPriceHistory" = "No price history";
 "chart.portfolioLabel" = "Portfolio";
 "chart.sp500Comparison" = "S&P 500";
+"chart.goldComparison" = "Gold";
+"chart.msciWorldComparison" = "MSCI World";
 
 // MARK: - Privacy
 "privacy.hidden" = "•••";

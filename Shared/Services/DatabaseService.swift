@@ -23,12 +23,14 @@ enum StorageLocation: String, CaseIterable {
 class DatabaseService: ObservableObject {
     static let shared = DatabaseService()
 
+    #if os(macOS)
     /// Project root path under user home (uses HOME env when set, else FileManager home).
     static func projectRootPath() -> String {
         let home = ProcessInfo.processInfo.environment["HOME"]
             ?? FileManager.default.homeDirectoryForCurrentUser.path
         return (home as NSString).appendingPathComponent("github/Portfolio")
     }
+    #endif
     
     private var db: Connection?
     private var dbPath: String
