@@ -27,7 +27,7 @@ class DatabaseService: ObservableObject {
     static func projectRootPath() -> String {
         let home = ProcessInfo.processInfo.environment["HOME"]
             ?? FileManager.default.homeDirectoryForCurrentUser.path
-        return (home as NSString).appendingPathComponent("github/PortfolioMultiplatform")
+        return (home as NSString).appendingPathComponent("github/Portfolio")
     }
     
     private var db: Connection?

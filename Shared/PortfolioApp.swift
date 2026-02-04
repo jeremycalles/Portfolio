@@ -292,7 +292,7 @@ class LaunchAgentManager: ObservableObject {
     init() {
         let homePath = ProcessInfo.processInfo.environment["HOME"]
             ?? FileManager.default.homeDirectoryForCurrentUser.path
-        projectRootPath = (homePath as NSString).appendingPathComponent("github/PortfolioMultiplatform")
+        projectRootPath = (homePath as NSString).appendingPathComponent("github/Portfolio")
         scriptPath = (projectRootPath as NSString).appendingPathComponent("scripts/refresh-prices.sh")
         logPath = (projectRootPath as NSString).appendingPathComponent("logs/refresh.log")
         let homeDir = FileManager.default.homeDirectoryForCurrentUser

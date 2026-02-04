@@ -115,8 +115,8 @@ The native SwiftUI application provides the best experience for tracking your po
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/<owner>/PortfolioMultiplatform.git
-   cd PortfolioMultiplatform
+   git clone https://github.com/jeremycalles/Portfolio.git
+   cd Portfolio
    ```
 
 2. Open the Xcode project:
@@ -149,7 +149,7 @@ For advanced users and automation, Portfolio may include a Python CLI (optional;
 
 ```bash
 # Navigate to the project directory (after cloning)
-cd PortfolioMultiplatform
+cd Portfolio
 
 # Create and activate virtual environment
 python3 -m venv venv
@@ -473,7 +473,7 @@ Enable automatic price updates:
 2. Enable the launch agent
 3. Prices update automatically every 3 hours
 
-On macOS, local storage and background refresh scripts/logs use the project root resolved as `$HOME/github/PortfolioMultiplatform`. Cloning or symlinking the repo there keeps paths consistent.
+On macOS, local storage and background refresh scripts/logs use the project root resolved as `$HOME/github/Portfolio`. Cloning or symlinking the repo there keeps paths consistent.
 
 #### Background Tasks (iOS)
 
@@ -534,7 +534,7 @@ Automate price fetching on macOS/Linux:
 crontab -e
 
 # Add this line (uses $HOME; update if your clone path differs)
-0 18 * * * cd "$HOME/github/PortfolioMultiplatform" && "$HOME/github/PortfolioMultiplatform/venv/bin/python3" src/main.py update >> "$HOME/github/PortfolioMultiplatform/update.log" 2>&1
+0 18 * * * cd "$HOME/github/Portfolio" && "$HOME/github/Portfolio/venv/bin/python3" src/main.py update >> "$HOME/github/Portfolio/update.log" 2>&1
 ```
 
 This runs the update every day at 6 PM.
@@ -560,7 +560,7 @@ iOS uses the system's Background Tasks framework:
 ### Project Structure
 
 ```
-PortfolioMultiplatform/
+Portfolio/
 ├── Shared/                       # Shared code
 │   ├── Models/                   # Data models
 │   ├── Services/                 # Database, API, Language
