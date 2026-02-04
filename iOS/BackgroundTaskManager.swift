@@ -192,11 +192,28 @@ class BackgroundTaskManager: ObservableObject {
         // Save last refresh time
         UserDefaults.standard.set(Date(), forKey: "lastBackgroundRefresh")
         
-        // Fetch and store S&P 500 history in background (does not block refresh completion)
+        // Fetch and store benchmarks history (S&P 500, Gold, MSCI World) in background
         Task.detached(priority: .utility) {
-            let prices = await MarketDataService.shared.fetchSP500History(period: "2y", interval: "1d")
+            // S&P 500
+            let sp500Prices = await MarketDataService.shared.fetchSP500History(period: "2y", interval: "1d")
             await MainActor.run {
-                for price in prices {
+                for price in sp500Prices {
+                    DatabaseService.shared.addPrice(price)
+                }
+            }
+            
+            // Gold
+            let goldPrices = await MarketDataService.shared.fetchGoldHistory(period: "2y", interval: "1d")
+            await MainActor.run {
+                for price in goldPrices {
+                    DatabaseService.shared.addPrice(price)
+                }
+            }
+            
+            // MSCI World
+            let msciPrices = await MarketDataService.shared.fetchMSCIWorldHistory(period: "2y", interval: "1d")
+            await MainActor.run {
+                for price in msciPrices {
                     DatabaseService.shared.addPrice(price)
                 }
             }
