@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2C2C2E"/>
+      <stop offset="100%" style="stop-color:#1C1C1E"/>
+    </linearGradient>
+    <linearGradient id="chartGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#30D158"/>
+      <stop offset="100%" style="stop-color:#34C759"/>
+    </linearGradient>
+    <linearGradient id="letterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF"/>
+      <stop offset="100%" style="stop-color:#E5E5EA"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background with rounded corners for iOS -->
+  <rect width="1024" height="1024" rx="0" ry="0" fill="url(#bgGrad)"/>
+  
+  <!-- Subtle grid pattern for financial feel -->
+  <g opacity="0.08" stroke="#FFFFFF" stroke-width="1">
+    <line x1="256" y1="200" x2="256" y2="824"/>
+    <line x1="512" y1="200" x2="512" y2="824"/>
+    <line x1="768" y1="200" x2="768" y2="824"/>
+    <line x1="200" y1="350" x2="824" y2="350"/>
+    <line x1="200" y1="512" x2="824" y2="512"/>
+    <line x1="200" y1="674" x2="824" y2="674"/>
+  </g>
+  
+  <!-- Chart line (upward trend) -->
+  <path d="M 220 680 
+           Q 320 650, 380 580 
+           Q 450 500, 520 520 
+           Q 600 545, 660 420 
+           Q 720 300, 804 250" 
+        fill="none" 
+        stroke="url(#chartGrad)" 
+        stroke-width="48" 
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+  
+  <!-- Glow effect for chart -->
+  <path d="M 220 680 
+           Q 320 650, 380 580 
+           Q 450 500, 520 520 
+           Q 600 545, 660 420 
+           Q 720 300, 804 250" 
+        fill="none" 
+        stroke="#30D158" 
+        stroke-width="80" 
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        opacity="0.3"
+        filter="blur(20px)"/>
+  
+  <!-- Letter P -->
+  <g transform="translate(280, 220)">
+    <path d="M 80 0 
+             L 80 584
+             M 80 0 
+             L 220 0 
+             Q 340 0, 340 120
+             Q 340 240, 220 260
+             L 80 260" 
+          fill="none" 
+          stroke="url(#letterGrad)" 
+          stroke-width="64" 
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+  </g>
+  
+  <!-- Small arrow indicator at chart end -->
+  <circle cx="804" cy="250" r="24" fill="#30D158"/>
+  <circle cx="804" cy="250" r="40" fill="#30D158" opacity="0.3"/>
+</svg>

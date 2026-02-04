@@ -1,0 +1,252 @@
+/* French Localization */
+
+// MARK: - General
+"app.name" = "Portfolio";
+"app.tagline" = "Suivi actions, OPCVM & Or";
+"general.cancel" = "Annuler";
+"general.save" = "Enregistrer";
+"general.delete" = "Supprimer";
+"general.edit" = "Modifier";
+"general.add" = "Ajouter";
+"general.done" = "Terminé";
+"general.ok" = "OK";
+"general.error" = "Erreur";
+"general.loading" = "Chargement...";
+"general.noData" = "Aucune donnée";
+"general.overview" = "Aperçu";
+"general.manage" = "Gérer";
+"general.data" = "Données";
+"general.total" = "Total";
+"general.subtotal" = "Sous-total";
+"general.grandTotal" = "Total général";
+"general.performance" = "Performance";
+"general.na" = "N/D";
+"general.build" = "Build";
+
+// MARK: - Navigation
+"nav.dashboard" = "Tableau de bord";
+"nav.instruments" = "Instruments";
+"nav.accounts" = "Comptes";
+"nav.reports" = "Rapports";
+"nav.settings" = "Paramètres";
+"nav.quadrantReport" = "Rapport par quadrant";
+"nav.allHoldings" = "Toutes les positions";
+"nav.quadrants" = "Quadrants";
+"nav.bankAccounts" = "Comptes bancaires";
+"nav.holdings" = "Positions";
+"nav.priceHistory" = "Historique des prix";
+"nav.priceGraph" = "Graphique des prix";
+
+// MARK: - Dashboard
+"dashboard.portfolioSummary" = "Résumé du portefeuille";
+"dashboard.portfolioTrend" = "Tendance du portefeuille";
+"dashboard.portfolioValue" = "Valeur du portefeuille";
+"dashboard.portfolioValueGold" = "Valeur du portefeuille (Or)";
+"dashboard.quadrantAllocation" = "Répartition par quadrant";
+"dashboard.accountAllocation" = "Répartition par compte";
+"dashboard.noHoldings" = "Aucune position à afficher";
+"dashboard.noHistoricalData" = "Aucun historique disponible";
+"dashboard.comparisonPeriod" = "Période de comparaison :";
+"dashboard.viewMode" = "Vue :";
+"dashboard.quadrants" = "Quadrants";
+"dashboard.holdings" = "Positions";
+"dashboard.accounts" = "Comptes";
+"dashboard.totalPortfolioValue" = "Valeur totale du portefeuille";
+"dashboard.noAccountsWithData" = "Aucun compte avec données";
+"dashboard.noDataAvailable" = "Aucune donnée disponible";
+
+// MARK: - Portfolio Summary
+"summary.gold" = "Or";
+"summary.from" = "depuis";
+"summary.oz" = "oz";
+"summary.totalEur" = "Total (EUR)";
+"summary.lastUpdate" = "Mis à jour";
+
+// MARK: - Periods
+"period.1day" = "1 Jour";
+"period.1week" = "1 Semaine";
+"period.1month" = "1 Mois";
+"period.3months" = "3 Mois";
+"period.6months" = "6 Mois";
+"period.1year" = "1 An";
+"period.2years" = "2 Ans";
+"period.5years" = "5 Ans";
+"period.all" = "Tout";
+"period.yearToDate" = "1er Janvier";
+
+// MARK: - Instruments
+"instruments.title" = "Instruments";
+"instruments.quadrants" = "Quadrants";
+"instruments.addInstrument" = "Ajouter un instrument";
+"instruments.editInstrument" = "Modifier l'instrument";
+"instruments.name" = "Nom";
+"instruments.isin" = "ISIN";
+"instruments.ticker" = "Ticker";
+"instruments.currency" = "Devise";
+"instruments.quadrant" = "Quadrant";
+"instruments.unassigned" = "Non assigné";
+"instruments.isinHint" = "Entrez un ISIN, symbole ticker ou identifiant spécial (ex: VERACASH:GOLD_SPOT)";
+"instruments.removeFromQuadrant" = "Retirer du quadrant";
+"instruments.assignToQuadrant" = "Assigner au quadrant";
+"instruments.deleteInstrument" = "Supprimer l'instrument";
+"instruments.noQuadrantsAvailable" = "Aucun quadrant disponible";
+"instruments.count" = "%d instruments";
+
+// MARK: - Accounts
+"accounts.title" = "Comptes";
+"accounts.addAccount" = "Ajouter un compte";
+"accounts.editAccount" = "Modifier le compte";
+"accounts.bankName" = "Nom de la banque";
+"accounts.accountName" = "Nom du compte";
+"accounts.holdings" = "Positions";
+"accounts.noAccounts" = "Aucun compte";
+"accounts.otherAccounts" = "Autres comptes";
+"accounts.noBankAccounts" = "Aucun compte bancaire configuré";
+"accounts.addBankAccountFirst" = "Ajoutez un compte bancaire pour commencer à suivre vos positions";
+"accounts.selectAccount" = "Sélectionner un compte";
+"accounts.selectAnAccount" = "Sélectionnez un compte";
+"accounts.holdingsCount" = "%d positions";
+"accounts.bankAccountsCount" = "Comptes bancaires (%d)";
+"accounts.holdingsCountTitle" = "Positions (%d)";
+"accounts.noHoldingsInAccount" = "Aucune position dans ce compte";
+"accounts.noHoldingsYet" = "Aucune position";
+"accounts.tapToAddHolding" = "Appuyez sur + pour ajouter votre première position";
+"accounts.acrossAllAccounts" = "sur tous les comptes";
+
+// MARK: - Holdings
+"holdings.addHolding" = "Ajouter une position";
+"holdings.selectInstrument" = "Sélectionner un instrument";
+"holdings.selectAnInstrument" = "Sélectionnez un instrument pour voir l'historique des prix";
+"holdings.selectAnInstrumentGraph" = "Sélectionnez un instrument pour voir le graphique";
+"holdings.quantity" = "Quantité";
+"holdings.quantityUnits" = "%@ unités";
+"holdings.purchaseDetails" = "Détails d'achat";
+"holdings.purchaseDetailsHint" = "Optionnel : Suivez votre prix de revient pour le calcul de performance";
+"holdings.instrument" = "Instrument";
+"holdings.value" = "Valeur";
+"holdings.change" = "Variation";
+"holdings.qty" = "Qté";
+"holdings.noHoldings" = "Aucune position";
+"holdings.noChartData" = "Aucune donnée graphique";
+
+// MARK: - Quadrants
+"quadrants.addQuadrant" = "Ajouter un quadrant";
+"quadrants.quadrantDetails" = "Détails du quadrant";
+"quadrants.quadrantDetailsHint" = "Exemples : 'Actions de croissance', 'Obligations', 'Immobilier', 'Or'";
+"quadrants.quadrantAssignment" = "Assignation au quadrant";
+"quadrants.quadrantAssignmentHint" = "Les quadrants aident à organiser votre portefeuille en catégories pour les rapports";
+"quadrants.quadrantsCount" = "Quadrants (%d)";
+"quadrants.categorizeHint" = "Les quadrants catégorisent les instruments pour l'analyse du portefeuille. Assignez via l'onglet Instruments.";
+
+// MARK: - Reports
+"reports.quadrantReport" = "Rapport par quadrant";
+"reports.comparisonPeriod" = "Période de comparaison :";
+"reports.vs" = "vs %@";
+"reports.noHoldingsToDisplay" = "Aucune position à afficher";
+"reports.addInstrumentsHint" = "Ajoutez des instruments et des positions pour voir votre rapport par quadrant";
+"reports.asOf" = "au %@";
+"reports.noPriceHistoryAvailable" = "Aucun historique de prix disponible";
+"reports.clickToAddPrice" = "Cliquez sur + pour ajouter un prix";
+"reports.noPriceDataForPeriod" = "Aucune donnée de prix pour cette période";
+"reports.deleteConfirmation" = "Voulez-vous vraiment supprimer le prix du %@ ?";
+
+// MARK: - Stats
+"stats.bestPerformer" = "Meilleure performance";
+"stats.worstPerformer" = "Pire performance";
+"stats.largestPosition" = "Plus grande position";
+"stats.totalHoldings" = "Total des positions";
+"stats.moreItems" = "+%d autres";
+
+// MARK: - Settings
+"settings.demoMode" = "Mode Démo";
+"settings.demoModeDescription" = "Anonymiser les valeurs du portefeuille avec des quantités aléatoires pour les présentations";
+"settings.demoModeEnable" = "Activer le mode démo";
+"settings.demoModeActive" = "Mode démo actif - les valeurs sont aléatoires";
+"settings.demoModeRandomize" = "Aléatoire";
+"settings.title" = "Paramètres";
+"settings.language" = "Langue";
+"settings.languageDescription" = "Sélectionnez la langue de l'application";
+"settings.english" = "Anglais";
+"settings.french" = "Français";
+"settings.dataManagement" = "Gestion des données";
+"settings.updatePrices" = "Mettre à jour les prix";
+"settings.backfillData" = "Récupérer l'historique";
+"settings.about" = "À propos";
+"settings.version" = "Version";
+"settings.general" = "Général";
+"settings.database" = "Base de données";
+"settings.background" = "Arrière-plan";
+"settings.storage" = "Stockage";
+"settings.storageDescription" = "Le stockage iCloud synchronise votre base de données sur tous vos appareils Apple.";
+"settings.importExportHint" = "Utilisez Import/Export pour transférer manuellement votre base de données entre appareils.";
+"settings.localStorage" = "Stockage local";
+"settings.localStorageOnly" = "Stockage local uniquement";
+"settings.syncingWithICloud" = "Synchronisation avec iCloud";
+"settings.iCloudRequirement" = "La synchronisation iCloud nécessite l'Apple Developer Program (99$/an)";
+"settings.importDatabase" = "Importer la base de données";
+"settings.exportDatabase" = "Exporter la base de données";
+"settings.openInFinder" = "Ouvrir dans le Finder";
+"settings.moveData" = "Déplacer les données";
+"settings.startFresh" = "Recommencer à zéro";
+"settings.moveDataConfirmation" = "Voulez-vous déplacer vos données existantes vers %@, ou recommencer avec une base de données vierge ?";
+"settings.privacyMode" = "Mode privé";
+"settings.backgroundRefresh" = "Actualisation en arrière-plan";
+"settings.backgroundRefreshInterval" = "Toutes les 3 heures";
+"settings.lastRefresh" = "Dernière actualisation";
+"settings.backgroundUpdates" = "Mises à jour en arrière-plan";
+"settings.backgroundUpdatesDescription" = "Les prix sont automatiquement mis à jour en arrière-plan lorsque l'app n'est pas utilisée. Appui long pour voir les logs.";
+"settings.automaticUpdates" = "Mises à jour automatiques";
+"settings.automaticUpdatesDescription" = "Actualiser les prix toutes les 3 heures, même lorsque l'app est fermée";
+"settings.statusActive" = "Actif";
+"settings.statusInstalledNotRunning" = "Installé mais non actif";
+"settings.statusNotInstalled" = "Non installé";
+"settings.enable" = "Activer";
+"settings.disable" = "Désactiver";
+"settings.runNow" = "Exécuter maintenant";
+"settings.refreshStatus" = "Actualiser le statut";
+"settings.recentActivity" = "Activité récente";
+"settings.openLogsFolder" = "Ouvrir le dossier des logs";
+"settings.noLogsAvailable" = "Aucun log disponible";
+"settings.logsDescription" = "Les logs apparaîtront ici après la première actualisation en arrière-plan.";
+"settings.backgroundRefreshLogs" = "Logs d'actualisation";
+"settings.accountDetails" = "Détails du compte";
+"settings.accountDetailsHint" = "Exemple : Banque = 'Degiro', Compte = 'CTO' ou 'PEA'";
+"settings.updatePricesDescription" = "Mettre à jour les prix et récupérer l'historique";
+
+// MARK: - Actions
+"action.updatePrices" = "Mettre à jour les prix";
+"action.updateAllPrices" = "Mettre à jour tous les prix";
+"action.backfill1Year" = "Historique 1 an (mensuel)";
+"action.backfill2Years" = "Historique 2 ans (mensuel)";
+"action.backfill5Years" = "Historique 5 ans (mensuel)";
+"action.backfill1Month" = "Historique 1 mois (quotidien)";
+"action.backfillHistorical1Year" = "Historique (1 an)";
+"action.backfillHistorical2Years" = "Historique (2 ans)";
+"action.backfillHistorical5Years" = "Historique (5 ans)";
+"action.addPrice" = "Ajouter un prix";
+"action.editPrice" = "Modifier le prix";
+
+// MARK: - Chart
+"chart.noGoldPriceData" = "Aucune donnée de prix de l'or";
+"chart.dataPoints" = "%d points de données";
+"chart.clickToToggle" = "Cliquez pour basculer entre EUR et Onces d'or";
+"chart.noPriceHistory" = "Aucun historique de prix";
+"chart.portfolioLabel" = "Portefeuille";
+"chart.sp500Comparison" = "S&P 500";
+
+// MARK: - Privacy
+"privacy.hidden" = "•••";
+"privacy.hiddenLong" = "••••••";
+"privacy.hiddenStars" = "***";
+
+// MARK: - Tooltips
+"tooltip.updateAllPrices" = "Mettre à jour tous les prix";
+"tooltip.backfillHistoricalData" = "Récupérer l'historique";
+"tooltip.addPrice" = "Ajouter un prix";
+"tooltip.edit" = "Modifier";
+"tooltip.delete" = "Supprimer";
+
+// MARK: - Errors
+"error.fetchFailed" = "Échec de la récupération des données";
+"error.saveFailed" = "Échec de l'enregistrement";
+"error.deleteFailed" = "Échec de la suppression";

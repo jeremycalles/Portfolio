@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
+
+# Database (privacy; do not commit user data)
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm

@@ -1,0 +1,875 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F0C1E7B52F3002500066E539 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C1E7B42F3002500066E539 /* SettingsView.swift */; };
+		F0C1E7B62F3002500066E539 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C1E7B42F3002500066E539 /* SettingsView.swift */; };
+		F0C1E7BD2F3002810066E539 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F0C1E7BB2F3002810066E539 /* Localizable.strings */; };
+		F0C1E7BE2F3002810066E539 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F0C1E7B82F3002810066E539 /* Localizable.strings */; };
+		F0C1E7BF2F3002810066E539 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F0C1E7BB2F3002810066E539 /* Localizable.strings */; };
+		F0C1E7C02F3002810066E539 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F0C1E7B82F3002810066E539 /* Localizable.strings */; };
+		F0C1E7C22F3003410066E539 /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C1E7C12F3003410066E539 /* LanguageManager.swift */; };
+		F0C1E7C32F3003410066E539 /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C1E7C12F3003410066E539 /* LanguageManager.swift */; };
+		I001 /* PortfolioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = S001 /* PortfolioApp.swift */; };
+		I002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S002 /* ContentView.swift */; };
+		I003 /* InstrumentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S003 /* InstrumentsView.swift */; };
+		I004 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S004 /* AccountsView.swift */; };
+		I005 /* ReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S005 /* ReportsView.swift */; };
+		I006 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = S006 /* Models.swift */; };
+		I007 /* DatabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = S007 /* DatabaseService.swift */; };
+		I008 /* MarketDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = S008 /* MarketDataService.swift */; };
+		I009 /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = S009 /* AppViewModel.swift */; };
+		I010 /* iOSRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S010 /* iOSRootView.swift */; };
+		I011 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = P003 /* SQLite */; };
+		I012 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = P004 /* SwiftSoup */; };
+		I013 /* BackgroundTaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = S011 /* BackgroundTaskManager.swift */; };
+		I014 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A001 /* Assets.xcassets */; };
+		M001 /* PortfolioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = S001 /* PortfolioApp.swift */; };
+		M002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S002 /* ContentView.swift */; };
+		M003 /* InstrumentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S003 /* InstrumentsView.swift */; };
+		M004 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S004 /* AccountsView.swift */; };
+		M005 /* ReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S005 /* ReportsView.swift */; };
+		M006 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = S006 /* Models.swift */; };
+		M007 /* DatabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = S007 /* DatabaseService.swift */; };
+		M008 /* MarketDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = S008 /* MarketDataService.swift */; };
+		M009 /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = S009 /* AppViewModel.swift */; };
+		M010 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = P001 /* SQLite */; };
+		M011 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = P002 /* SwiftSoup */; };
+		M012 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A001 /* Assets.xcassets */; };
+		TS01 /* PortfolioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ST01 /* PortfolioTests.swift */; };
+		TS02 /* CurrencyConversionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ST02 /* CurrencyConversionTests.swift */; };
+		TS03 /* DashboardSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ST03 /* DashboardSnapshotTests.swift */; };
+		TS04 /* MockDatabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ST04 /* MockDatabaseService.swift */; };
+		TS05 /* TestFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = ST05 /* TestFixtures.swift */; };
+		TS06 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = P005 /* SnapshotTesting */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		CP01 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = PJ01 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = T002;
+			remoteInfo = "Portfolio iOS";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E001 /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
+		E002 /* iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iOS.entitlements; sourceTree = "<group>"; };
+		F0C1E7B42F3002500066E539 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsView.swift; path = Shared/Views/SettingsView.swift; sourceTree = SOURCE_ROOT; };
+		F0C1E7B72F3002810066E539 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Localizable.strings; sourceTree = "<group>"; };
+		F0C1E7BA2F3002810066E539 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = Localizable.strings; sourceTree = "<group>"; };
+		F0C1E7C12F3003410066E539 /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
+		PR01 /* Portfolio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Portfolio.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		PR02 /* Portfolio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Portfolio.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		PR03 /* PortfolioTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PortfolioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		S001 /* PortfolioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioApp.swift; sourceTree = "<group>"; };
+		S002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		S003 /* InstrumentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentsView.swift; sourceTree = "<group>"; };
+		S004 /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
+		S005 /* ReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsView.swift; sourceTree = "<group>"; };
+		S006 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		S007 /* DatabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseService.swift; sourceTree = "<group>"; };
+		S008 /* MarketDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketDataService.swift; sourceTree = "<group>"; };
+		S009 /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
+		S010 /* iOSRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSRootView.swift; sourceTree = "<group>"; };
+		S011 /* BackgroundTaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundTaskManager.swift; sourceTree = "<group>"; };
+		S012 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		ST01 /* PortfolioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioTests.swift; sourceTree = "<group>"; };
+		ST02 /* CurrencyConversionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyConversionTests.swift; sourceTree = "<group>"; };
+		ST03 /* DashboardSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardSnapshotTests.swift; sourceTree = "<group>"; };
+		ST04 /* MockDatabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDatabaseService.swift; sourceTree = "<group>"; };
+		ST05 /* TestFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestFixtures.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		FM01 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				M011 /* SwiftSoup in Frameworks */,
+				M010 /* SQLite in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FM02 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				I012 /* SwiftSoup in Frameworks */,
+				I011 /* SQLite in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FM03 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				TS06 /* SnapshotTesting in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F0C1E7B92F3002810066E539 /* en.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				F0C1E7B82F3002810066E539 /* Localizable.strings */,
+			);
+			name = en.lproj;
+			path = Shared/Resources/en.lproj;
+			sourceTree = "<group>";
+		};
+		F0C1E7BC2F3002810066E539 /* fr.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				F0C1E7BB2F3002810066E539 /* Localizable.strings */,
+			);
+			name = fr.lproj;
+			path = Shared/Resources/fr.lproj;
+			sourceTree = "<group>";
+		};
+		G000 = {
+			isa = PBXGroup;
+			children = (
+				G001 /* Shared */,
+				G002 /* macOS */,
+				G003 /* iOS */,
+				G005 /* PortfolioTests */,
+				G004 /* Products */,
+				F0C1E7B92F3002810066E539 /* en.lproj */,
+				F0C1E7BC2F3002810066E539 /* fr.lproj */,
+			);
+			sourceTree = "<group>";
+		};
+		G001 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				S001 /* PortfolioApp.swift */,
+				A001 /* Assets.xcassets */,
+				G010 /* Views */,
+				G011 /* Models */,
+				G012 /* Services */,
+				G013 /* ViewModels */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		G002 /* macOS */ = {
+			isa = PBXGroup;
+			children = (
+				E001 /* macOS.entitlements */,
+			);
+			path = macOS;
+			sourceTree = "<group>";
+		};
+		G003 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				F0C1E7B42F3002500066E539 /* SettingsView.swift */,
+				S010 /* iOSRootView.swift */,
+				S011 /* BackgroundTaskManager.swift */,
+				S012 /* Info.plist */,
+				E002 /* iOS.entitlements */,
+			);
+			path = iOS;
+			sourceTree = "<group>";
+		};
+		G004 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				PR01 /* Portfolio.app */,
+				PR02 /* Portfolio.app */,
+				PR03 /* PortfolioTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		G005 /* PortfolioTests */ = {
+			isa = PBXGroup;
+			children = (
+				ST01 /* PortfolioTests.swift */,
+				ST02 /* CurrencyConversionTests.swift */,
+				ST03 /* DashboardSnapshotTests.swift */,
+				G006 /* Mocks */,
+				G007 /* Fixtures */,
+			);
+			path = PortfolioTests;
+			sourceTree = "<group>";
+		};
+		G006 /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				ST04 /* MockDatabaseService.swift */,
+			);
+			path = Mocks;
+			sourceTree = "<group>";
+		};
+		G007 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				ST05 /* TestFixtures.swift */,
+			);
+			path = Fixtures;
+			sourceTree = "<group>";
+		};
+		G010 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				S002 /* ContentView.swift */,
+				S003 /* InstrumentsView.swift */,
+				S004 /* AccountsView.swift */,
+				S005 /* ReportsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		G011 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				S006 /* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		G012 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				S007 /* DatabaseService.swift */,
+				S008 /* MarketDataService.swift */,
+				F0C1E7C12F3003410066E539 /* LanguageManager.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		G013 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				S009 /* AppViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		T001 /* Portfolio macOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CL01 /* Build configuration list for PBXNativeTarget "Portfolio macOS" */;
+			buildPhases = (
+				SP01 /* Sources */,
+				FM01 /* Frameworks */,
+				RM01 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Portfolio macOS";
+			packageProductDependencies = (
+				P001 /* SQLite */,
+				P002 /* SwiftSoup */,
+			);
+			productName = Portfolio;
+			productReference = PR01 /* Portfolio.app */;
+			productType = "com.apple.product-type.application";
+		};
+		T002 /* Portfolio iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CL02 /* Build configuration list for PBXNativeTarget "Portfolio iOS" */;
+			buildPhases = (
+				SP02 /* Sources */,
+				FM02 /* Frameworks */,
+				RM02 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Portfolio iOS";
+			packageProductDependencies = (
+				P003 /* SQLite */,
+				P004 /* SwiftSoup */,
+			);
+			productName = Portfolio;
+			productReference = PR02 /* Portfolio.app */;
+			productType = "com.apple.product-type.application";
+		};
+		T003 /* PortfolioTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CL04 /* Build configuration list for PBXNativeTarget "PortfolioTests" */;
+			buildPhases = (
+				SP03 /* Sources */,
+				FM03 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				TD01 /* PBXTargetDependency */,
+			);
+			name = PortfolioTests;
+			packageProductDependencies = (
+				P005 /* SnapshotTesting */,
+			);
+			productName = PortfolioTests;
+			productReference = PR03 /* PortfolioTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		PJ01 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					T001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					T002 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					T003 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = T002;
+					};
+				};
+			};
+			buildConfigurationList = CL03 /* Build configuration list for PBXProject "PortfolioMultiplatform" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				fr,
+			);
+			mainGroup = G000;
+			packageReferences = (
+				PKG1 /* XCRemoteSwiftPackageReference "SQLite.swift" */,
+				PKG2 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+				PKG3 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
+			);
+			productRefGroup = G004 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				T001 /* Portfolio macOS */,
+				T002 /* Portfolio iOS */,
+				T003 /* PortfolioTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		RM01 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F0C1E7BD2F3002810066E539 /* Localizable.strings in Resources */,
+				F0C1E7BE2F3002810066E539 /* Localizable.strings in Resources */,
+				M012 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		RM02 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F0C1E7BF2F3002810066E539 /* Localizable.strings in Resources */,
+				F0C1E7C02F3002810066E539 /* Localizable.strings in Resources */,
+				I014 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		SP01 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				M001 /* PortfolioApp.swift in Sources */,
+				M002 /* ContentView.swift in Sources */,
+				M003 /* InstrumentsView.swift in Sources */,
+				M004 /* AccountsView.swift in Sources */,
+				M005 /* ReportsView.swift in Sources */,
+				F0C1E7B52F3002500066E539 /* SettingsView.swift in Sources */,
+				M006 /* Models.swift in Sources */,
+				F0C1E7C22F3003410066E539 /* LanguageManager.swift in Sources */,
+				M007 /* DatabaseService.swift in Sources */,
+				M008 /* MarketDataService.swift in Sources */,
+				M009 /* AppViewModel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		SP02 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				I001 /* PortfolioApp.swift in Sources */,
+				F0C1E7C32F3003410066E539 /* LanguageManager.swift in Sources */,
+				I002 /* ContentView.swift in Sources */,
+				I003 /* InstrumentsView.swift in Sources */,
+				I004 /* AccountsView.swift in Sources */,
+				I005 /* ReportsView.swift in Sources */,
+				I006 /* Models.swift in Sources */,
+				I007 /* DatabaseService.swift in Sources */,
+				I008 /* MarketDataService.swift in Sources */,
+				I009 /* AppViewModel.swift in Sources */,
+				F0C1E7B62F3002500066E539 /* SettingsView.swift in Sources */,
+				I010 /* iOSRootView.swift in Sources */,
+				I013 /* BackgroundTaskManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		SP03 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				TS01 /* PortfolioTests.swift in Sources */,
+				TS02 /* CurrencyConversionTests.swift in Sources */,
+				TS03 /* DashboardSnapshotTests.swift in Sources */,
+				TS04 /* MockDatabaseService.swift in Sources */,
+				TS05 /* TestFixtures.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		TD01 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = T002 /* Portfolio iOS */;
+			targetProxy = CP01 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		F0C1E7B82F3002810066E539 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F0C1E7B72F3002810066E539 /* en */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		F0C1E7BB2F3002810066E539 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F0C1E7BA2F3002810066E539 /* fr */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		BC01 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 73Y2U9Q7Q7;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		BC02 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 73Y2U9Q7Q7;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		BC03 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 73Y2U9Q7Q7;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.macos;
+				PRODUCT_NAME = Portfolio;
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		BC04 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 73Y2U9Q7Q7;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.macos;
+				PRODUCT_NAME = Portfolio;
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		BC05 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
+				CODE_SIGN_ENTITLEMENTS = iOS/iOS.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 73Y2U9Q7Q7;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = iOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Portfolio;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.ios;
+				PRODUCT_NAME = Portfolio;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		BC06 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
+				CODE_SIGN_ENTITLEMENTS = iOS/iOS.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 73Y2U9Q7Q7;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = iOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Portfolio;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.ios;
+				PRODUCT_NAME = Portfolio;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		BC07 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.PortfolioTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Portfolio.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Portfolio";
+			};
+			name = Debug;
+		};
+		BC08 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.PortfolioTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Portfolio.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Portfolio";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CL01 /* Build configuration list for PBXNativeTarget "Portfolio macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC03 /* Debug */,
+				BC04 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CL02 /* Build configuration list for PBXNativeTarget "Portfolio iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC05 /* Debug */,
+				BC06 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CL03 /* Build configuration list for PBXProject "PortfolioMultiplatform" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC01 /* Debug */,
+				BC02 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CL04 /* Build configuration list for PBXNativeTarget "PortfolioTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC07 /* Debug */,
+				BC08 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		PKG1 /* XCRemoteSwiftPackageReference "SQLite.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stephencelis/SQLite.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.15.0;
+			};
+		};
+		PKG2 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
+		PKG3 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.15.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		P001 /* SQLite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = PKG1 /* XCRemoteSwiftPackageReference "SQLite.swift" */;
+			productName = SQLite;
+		};
+		P002 /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = PKG2 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+		P003 /* SQLite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = PKG1 /* XCRemoteSwiftPackageReference "SQLite.swift" */;
+			productName = SQLite;
+		};
+		P004 /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = PKG2 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+		P005 /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = PKG3 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = PJ01 /* Project object */;
+}
