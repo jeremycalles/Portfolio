@@ -143,7 +143,6 @@
 				G001 /* Shared */,
 				G002 /* macOS */,
 				G003 /* iOS */,
-				G005 /* PortfolioTests */,
 				G004 /* Products */,
 				F0C1E7B92F3002810066E539 /* en.lproj */,
 				F0C1E7BC2F3002810066E539 /* fr.lproj */,
@@ -188,7 +187,6 @@
 			children = (
 				PR01 /* Portfolio.app */,
 				PR02 /* Portfolio.app */,
-				PR03 /* PortfolioTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -303,26 +301,6 @@
 			productReference = PR02 /* Portfolio.app */;
 			productType = "com.apple.product-type.application";
 		};
-		T003 /* PortfolioTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = CL04 /* Build configuration list for PBXNativeTarget "PortfolioTests" */;
-			buildPhases = (
-				SP03 /* Sources */,
-				FM03 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				TD01 /* PBXTargetDependency */,
-			);
-			name = PortfolioTests;
-			packageProductDependencies = (
-				P005 /* SnapshotTesting */,
-			);
-			productName = PortfolioTests;
-			productReference = PR03 /* PortfolioTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -338,10 +316,6 @@
 					};
 					T002 = {
 						CreatedOnToolsVersion = 15.0;
-					};
-					T003 = {
-						CreatedOnToolsVersion = 15.0;
-						TestTargetID = T002;
 					};
 				};
 			};
@@ -366,7 +340,6 @@
 			targets = (
 				T001 /* Portfolio macOS */,
 				T002 /* Portfolio iOS */,
-				T003 /* PortfolioTests */,
 			);
 		};
 /* End PBXProject section */

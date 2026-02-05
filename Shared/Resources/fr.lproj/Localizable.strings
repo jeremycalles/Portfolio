@@ -27,13 +27,13 @@
 "nav.dashboard" = "Tableau de bord";
 "nav.instruments" = "Instruments";
 "nav.accounts" = "Comptes";
-"nav.reports" = "Rapports";
+"nav.reports" = "Quadrants";
 "nav.settings" = "Paramètres";
 "nav.quadrantReport" = "Rapport par quadrant";
 "nav.allHoldings" = "Toutes les positions";
 "nav.quadrants" = "Quadrants";
 "nav.bankAccounts" = "Comptes bancaires";
-"nav.holdings" = "Positions";
+"nav.holdings" = "Comptes";
 "nav.priceHistory" = "Historique des prix";
 "nav.priceGraph" = "Graphique des prix";
 
