@@ -3,6 +3,7 @@
 // MARK: - General
 "app.name" = "Portfolio";
 "app.tagline" = "Suivi actions, OPCVM & Or";
+"general.comparisonPeriod" = "Période de comparaison";
 "general.cancel" = "Annuler";
 "general.save" = "Enregistrer";
 "general.delete" = "Supprimer";

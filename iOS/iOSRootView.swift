@@ -1663,7 +1663,7 @@ struct iOSQuadrantReportView: View {
         List {
             // Period Picker
             Section {
-                Picker("Comparison Period", selection: $viewModel.selectedPeriod) {
+                Picker(L10n.generalComparisonPeriod, selection: $viewModel.selectedPeriod) {
                     ForEach(ReportPeriod.allCases) { period in
                         Text(period.displayName).tag(period)
                     }
@@ -1738,7 +1738,7 @@ struct iOSAllHoldingsView: View {
         List {
             // Period Picker
             Section {
-                Picker("Comparison Period", selection: $viewModel.selectedPeriod) {
+                Picker(L10n.generalComparisonPeriod, selection: $viewModel.selectedPeriod) {
                     ForEach(ReportPeriod.allCases) { period in
                         Text(period.displayName).tag(period)
                     }

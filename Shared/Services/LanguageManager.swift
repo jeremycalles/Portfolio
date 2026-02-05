@@ -87,6 +87,7 @@ struct L10n {
     // General
     static var appName: String { manager.localized("app.name") }
     static var appTagline: String { manager.localized("app.tagline") }
+    static var generalComparisonPeriod: String { manager.localized("general.comparisonPeriod") }
     static var generalCancel: String { manager.localized("general.cancel") }
     static var generalSave: String { manager.localized("general.save") }
     static var generalDelete: String { manager.localized("general.delete") }

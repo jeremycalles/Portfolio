@@ -3,6 +3,7 @@
 // MARK: - General
 "app.name" = "Portfolio";
 "app.tagline" = "Stock, OPCVM & Gold Tracker";
+"general.comparisonPeriod" = "Comparison Period";
 "general.cancel" = "Cancel";
 "general.save" = "Save";
 "general.delete" = "Delete";
