@@ -37,6 +37,15 @@
 
 Portfolio vous aide à prendre le contrôle de votre portefeuille d'investissement en consolidant tous vos actifs financiers dans une vue unique et unifiée. Que vous suiviez des actions chez plusieurs courtiers, surveilliez vos pièces d'or ou analysiez la performance de vos OPCVM, Portfolio fournit les outils dont vous avez besoin.
 
+### Captures d'écran
+
+#### iOS
+
+<p float="left">
+  <img src="assets/screenshots/ios-quadrants.png" width="300" />
+  <img src="assets/screenshots/ios-accounts.png" width="300" />
+</p>
+
 ### Pourquoi Portfolio ?
 
 - **Suivi Tout-en-Un** : Actions, ETF, OPCVM, cryptomonnaies, métaux précieux et comptes bancaires dans une seule application
