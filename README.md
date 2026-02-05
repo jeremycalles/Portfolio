@@ -42,8 +42,11 @@ Portfolio helps you take control of your investment portfolio by consolidating a
 #### iOS
 
 <p float="left">
-  <img src="assets/screenshots/ios-quadrants.png" width="300" />
-  <img src="assets/screenshots/ios-accounts.png" width="300" />
+  <img src="assets/screenshots/ios-1-dashboard.png" width="200" />
+  <img src="assets/screenshots/ios-2-dashboard-quadrants.png" width="200" />
+  <img src="assets/screenshots/ios-3-dashboard-accounts.png" width="200" />
+  <img src="assets/screenshots/ios-4-quadrants.png" width="200" />
+  <img src="assets/screenshots/ios-5-positions.png" width="200" />
 </p>
 
 ### Why Portfolio?
