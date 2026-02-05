@@ -228,7 +228,6 @@ struct PriceHistoryView: View {
     @State private var selectedInstrument: Instrument?
     @State private var priceHistory: [Price] = []
     @State private var showingAddSheet = false
-    @State private var showingEditSheet = false
     @State private var showingDeleteAlert = false
     @State private var priceToEdit: Price?
     @State private var priceToDelete: Price?
@@ -344,7 +343,6 @@ struct PriceHistoryView: View {
                                     HStack(spacing: 8) {
                                         Button {
                                             priceToEdit = price
-                                            showingEditSheet = true
                                         } label: {
                                             Image(systemName: "pencil")
                                                 .foregroundColor(.blue)
@@ -394,8 +392,8 @@ struct PriceHistoryView: View {
                 )
             }
         }
-        .sheet(isPresented: $showingEditSheet) {
-            if let instrument = selectedInstrument, let price = priceToEdit {
+        .sheet(item: $priceToEdit) { price in
+            if let instrument = selectedInstrument {
                 PriceEditorSheet(
                     instrument: instrument,
                     existingPrice: price,

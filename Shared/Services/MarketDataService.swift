@@ -421,17 +421,17 @@ actor MarketDataService {
 #if canImport(SwiftSoup)
     private func scrapeVeracashGold(premium: Bool) async -> Double? {
         let url = URL(string: "https://www.veracash.com/gold-price-and-chart")!
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 30)
+        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         
         do {
-            let (data, _) = try await session.data(from: url)
+            let (data, _) = try await session.data(for: request)
             guard let html = String(data: data, encoding: .utf8) else { return nil }
             
             let doc = try SwiftSoup.parse(html)
             
-            // Look for list items containing gold prices
-            for li in try doc.select("li") {
-                let text = try li.text()
-                
+            // Helper to check text and extract price
+            func checkText(_ text: String) -> Double? {
                 // For premium gold, look for "GoldPremium" or similar
                 if premium {
                     if text.contains("GoldPremium") || (text.contains("Gold") && text.contains("Premium")) {
@@ -454,7 +454,23 @@ actor MarketDataService {
                         }
                     }
                 }
+                return nil
             }
+            
+            // 1. Look for list items (Mobile/List view)
+            for li in try doc.select("li") {
+                if let price = checkText(try li.text()) {
+                    return price
+                }
+            }
+            
+            // 2. Fallback: Look for table rows (Desktop/Table view)
+            for tr in try doc.select("tr") {
+                if let price = checkText(try tr.text()) {
+                    return price
+                }
+            }
+            
         } catch {
             print("Veracash gold scraping failed: \(error)")
         }
@@ -469,16 +485,16 @@ actor MarketDataService {
 #if canImport(SwiftSoup)
     private func scrapeVeracashSilver() async -> Double? {
         let url = URL(string: "https://www.veracash.com/gold-price-and-chart")!
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 30)
+        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         
         do {
-            let (data, _) = try await session.data(from: url)
+            let (data, _) = try await session.data(for: request)
             guard let html = String(data: data, encoding: .utf8) else { return nil }
             
             let doc = try SwiftSoup.parse(html)
             
-            for li in try doc.select("li") {
-                let text = try li.text()
-                
+            func checkText(_ text: String) -> Double? {
                 if text.contains("Silver") && text.contains("€") {
                     if let price = extractEuroPrice(from: text) {
                         if text.lowercased().contains("ounce") {
@@ -487,6 +503,15 @@ actor MarketDataService {
                         return price
                     }
                 }
+                return nil
+            }
+            
+            for li in try doc.select("li") {
+                if let price = checkText(try li.text()) { return price }
+            }
+            
+            for tr in try doc.select("tr") {
+                if let price = checkText(try tr.text()) { return price }
             }
         } catch {
             print("Veracash silver scraping failed: \(error)")
@@ -503,24 +528,27 @@ actor MarketDataService {
     // MARK: - AuCOFFRE Coin Scraping
     // Coin configuration: maps pseudo-ISIN to scraping source
     // Uses either /cours-or main page (for common coins) or specific quotation pages
-    private static let coinConfigs: [String: (url: String, searchText: String, name: String, ticker: String)] = [
+    private static let coinConfigs: [String: (url: String, searchText: String, name: String, ticker: String, quantity: Double)] = [
         "COIN:NAPOLEON_20F": (
             url: "https://www.aucoffre.com/cours-or",
             searchText: "Napoléon 20F",
             name: "Napoléon 20F",
-            ticker: "NAPOLEON_20F"
+            ticker: "NAPOLEON_20F",
+            quantity: 1.0
         ),
         "COIN:VERAMAX_GOLD_1/10OZ": (
             url: "https://www.aucoffre.com/cours/categorie-supertype/graphique-cotation-187",
             searchText: "Vera Max",
             name: "Vera Max 1/10 oz Or",
-            ticker: "VERAMAX_GOLD"
+            ticker: "VERAMAX_GOLD",
+            quantity: 1.0
         ),
         "COIN:GECKO_SILVER_1OZ": (
-            url: "https://www.aucoffre.com/cours-argent",
-            searchText: "Vera Silver 1 once 2021",
+            url: "https://www.aucoffre.com/precommandes/voir-845",
+            searchText: "Prix unitaire",
             name: "Vera Silver Gecko 1 oz",
-            ticker: "GECKO_SILVER"
+            ticker: "GECKO_SILVER",
+            quantity: 10.0
         ),
         // Note: COIN:GOLD_BAR_1OZ uses Veracash gold spot price - handled separately below
     ]
@@ -530,7 +558,7 @@ actor MarketDataService {
     private static let coinHistoricalURLs: [String: String] = [
         "COIN:NAPOLEON_20F": "https://www.aucoffre.com/cours/categorie-supertype/graphique-cotation-1",
         "COIN:VERAMAX_GOLD_1/10OZ": "https://www.aucoffre.com/cours/categorie-supertype/graphique-cotation-187",
-        "COIN:GECKO_SILVER_1OZ": "https://www.aucoffre.com/cours/categorie-supertype/graphique-cotation-291",
+        "COIN:GECKO_SILVER_1OZ": "https://www.aucoffre.com/cours/categorie-supertype/graphique-cotation-197",
         // Note: COIN:GOLD_BAR_1OZ uses Yahoo Finance gold futures (GC=F) - handled separately
     ]
     
@@ -576,8 +604,7 @@ actor MarketDataService {
             
             let doc = try SwiftSoup.parse(html)
             
-            // Strategy: Find table rows containing the product name, then extract the price
-            // The /cours-or and /cours-argent pages have tables with: Product | Variation | Price | Premium
+            // Strategy 1: Find table rows (existing logic)
             for row in try doc.select("tr") {
                 let rowText = try row.text()
                 
@@ -590,15 +617,16 @@ actor MarketDataService {
                         // Price cell contains € but not % (to exclude variation column)
                         if cellText.contains("€") && !cellText.contains("%") {
                             if let price = extractAuCoffrePrice(from: cellText) {
-                                print("[AuCOFFRE] Found \(config.name): \(price) EUR")
-                                return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: price, currency: "EUR", date: String(today))
+                                let unitPrice = price / config.quantity
+                                print("[AuCOFFRE] Found \(config.name): \(price) / \(config.quantity) = \(unitPrice) EUR")
+                                return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: unitPrice, currency: "EUR", date: String(today))
                             }
                         }
                     }
                 }
             }
             
-            // Fallback: Look for the product in links and find price in same context
+            // Strategy 2: Look for the product in links and find price in same context
             for link in try doc.select("a") {
                 let linkText = try link.text()
                 if linkText.contains(config.searchText) {
@@ -606,9 +634,26 @@ actor MarketDataService {
                     if let parentRow = link.parent()?.parent() {
                         let rowText = try parentRow.text()
                         if let price = extractAuCoffrePrice(from: rowText) {
-                            print("[AuCOFFRE] Found \(config.name) via link: \(price) EUR")
-                            return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: price, currency: "EUR", date: String(today))
+                            let unitPrice = price / config.quantity
+                            print("[AuCOFFRE] Found \(config.name) via link: \(price) / \(config.quantity) = \(unitPrice) EUR")
+                            return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: unitPrice, currency: "EUR", date: String(today))
                         }
+                    }
+                }
+            }
+            
+            // Strategy 3: Full body text search (fallback for "Prix unitaire" etc.)
+            let bodyText = try doc.body()?.text() ?? ""
+            if bodyText.contains(config.searchText) {
+                // If searchText is "Prix unitaire", look for price after it
+                if let range = bodyText.range(of: config.searchText) {
+                    let suffix = String(bodyText[range.upperBound...])
+                    // Extract price from the next 50 chars
+                    let candidate = String(suffix.prefix(50))
+                    if let price = extractAuCoffrePrice(from: candidate) {
+                        let unitPrice = price / config.quantity
+                        print("[AuCOFFRE] Found \(config.name) in body: \(price) / \(config.quantity) = \(unitPrice) EUR")
+                        return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: unitPrice, currency: "EUR", date: String(today))
                     }
                 }
             }
@@ -947,10 +992,29 @@ actor MarketDataService {
     }
     
     func fetchHistoricalData(isin: String, ticker: String?, period: String = "1y", interval: String = "1mo") async -> [Price] {
-        // Veracash - no historical data available
+        // Veracash - use XAUEUR=X proxy
         if isin.starts(with: "VERACASH:") {
-            print("Historical data not available for \(isin) (scraped data)")
-            return []
+            let proxyTicker = "XAUEUR=X"
+            // Default to 0% premium (Spot)
+            var premium: Double = 0.0
+            
+            if isin == "VERACASH:GOLD_PREMIUM" {
+                premium = 0.038 // ~3.8% premium estimate
+            }
+            
+            let prices = await fetchHistoricalPricesFromYahooChart(tickerSymbol: proxyTicker, isin: isin, period: period, interval: interval)
+            
+            // Convert per oz -> per gram and apply premium
+            return prices.map { price in
+                let gramPrice = (price.value / 31.1034768) * (1.0 + premium)
+                return Price(
+                    id: price.id,
+                    isin: isin,
+                    date: price.date,
+                    value: round(gramPrice * 100) / 100,
+                    currency: price.currency
+                )
+            }
         }
         
         // AuCOFFRE coins - scrape historical data from quotation pages

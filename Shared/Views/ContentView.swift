@@ -111,28 +111,6 @@ struct ContentView: View {
                 }
                 .disabled(viewModel.isLoading)
                 .help(L10n.tooltipUpdateAllPrices)
-                
-                Menu {
-                    Button(L10n.actionBackfill1Year) {
-                        Task {
-                            await viewModel.backfillHistorical(period: "1y", interval: "1mo")
-                        }
-                    }
-                    Button(L10n.actionBackfill2Years) {
-                        Task {
-                            await viewModel.backfillHistorical(period: "2y", interval: "1mo")
-                        }
-                    }
-                    Button(L10n.actionBackfill5Years) {
-                        Task {
-                            await viewModel.backfillHistorical(period: "5y", interval: "1mo")
-                        }
-                    }
-                } label: {
-                    Label(L10n.settingsBackfillData, systemImage: "clock.arrow.circlepath")
-                }
-                .disabled(viewModel.isLoading)
-                .help(L10n.tooltipBackfillHistoricalData)
             }
         }
     }
