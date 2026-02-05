@@ -39,6 +39,10 @@ Portfolio helps you take control of your investment portfolio by consolidating a
 
 ### Screenshots
 
+#### macOS
+
+<img src="assets/screenshots/macos-dashboard.png" width="800" />
+
 #### iOS
 
 <p float="left">

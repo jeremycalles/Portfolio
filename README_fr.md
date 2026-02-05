@@ -39,6 +39,10 @@ Portfolio vous aide à prendre le contrôle de votre portefeuille d'investisseme
 
 ### Captures d'écran
 
+#### macOS
+
+<img src="assets/screenshots/macos-dashboard.png" width="800" />
+
 #### iOS
 
 <p float="left">
