@@ -33,7 +33,7 @@
 "nav.allHoldings" = "Toutes les positions";
 "nav.quadrants" = "Quadrants";
 "nav.bankAccounts" = "Comptes bancaires";
-"nav.holdings" = "Comptes";
+"nav.holdings" = "Positions";
 "nav.priceHistory" = "Historique des prix";
 "nav.priceGraph" = "Graphique des prix";
 
