@@ -5,32 +5,54 @@ extension AppViewModel {
     func addManualPrice(isin: String, date: String, value: Double, currency: String) {
         let price = Price(id: nil, isin: isin, date: date, value: value, currency: currency)
         db.addPrice(price)
-        refreshAll()
+        // Prices aren't stored in @Published arrays — no table reload needed
     }
     
     // MARK: - Update Prices
     func updateAllPrices() async {
         isLoading = true
         let total = instruments.count
+        let batchSize = 4
         
-        for (index, instrument) in instruments.enumerated() {
-            statusMessage = "Updating \(index + 1)/\(total): \(instrument.displayName)"
+        for batchStart in stride(from: 0, to: total, by: batchSize) {
+            let batchEnd = min(batchStart + batchSize, total)
+            let batch = Array(instruments[batchStart..<batchEnd])
             
-            let result = await marketData.fetchData(isin: instrument.isin, ticker: instrument.ticker)
+            statusMessage = "Updating \(min(batchEnd, total))/\(total)..."
             
-            if let value = result.value {
-                let price = Price(
-                    id: nil,
-                    isin: instrument.isin,
-                    date: result.date,
-                    value: value,
-                    currency: result.currency
-                )
-                db.addPrice(price)
+            // Fetch prices concurrently within the batch
+            let results: [(Instrument, MarketDataResult)] = await withTaskGroup(of: (Instrument, MarketDataResult).self, returning: [(Instrument, MarketDataResult)].self) { group in
+                for instrument in batch {
+                    group.addTask {
+                        let result = await self.marketData.fetchData(isin: instrument.isin, ticker: instrument.ticker)
+                        return (instrument, result)
+                    }
+                }
+                var collected: [(Instrument, MarketDataResult)] = []
+                for await pair in group {
+                    collected.append(pair)
+                }
+                return collected
             }
             
-            // Small delay to be polite to APIs
-            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+            // Store results on MainActor
+            for (instrument, result) in results {
+                if let value = result.value {
+                    let price = Price(
+                        id: nil,
+                        isin: instrument.isin,
+                        date: result.date,
+                        value: value,
+                        currency: result.currency
+                    )
+                    db.addPrice(price)
+                }
+            }
+            
+            // Inter-batch courtesy delay to reduce chance of 429
+            if batchEnd < total {
+                try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+            }
         }
         
         // Update exchange rates
@@ -45,33 +67,34 @@ extension AppViewModel {
         // Align with Settings "Last refresh" (same key as iOS BackgroundTaskManager)
         UserDefaults.standard.set(Date(), forKey: "lastBackgroundRefresh")
         
+        // Recompute cached dashboard data after price updates
+        recomputeDashboardCache()
+        
         // Fetch and store benchmarks history in background (no UI blocking)
-        Task { await fetchAndStoreBenchmarksInBackground() }
+        Task {
+            await fetchAndStoreBenchmarksInBackground()
+            // Recompute again after benchmarks are stored for up-to-date comparison charts
+            await MainActor.run { recomputeDashboardCache() }
+        }
         
         // Clear status after delay
         try? await Task.sleep(nanoseconds: 2_000_000_000)
         statusMessage = ""
     }
     
-    /// Fetches benchmark (S&P 500, Gold, MSCI World) daily history and stores it in the prices table. Called in background after updateAllPrices.
+    /// Fetches benchmark (S&P 500, Gold, MSCI World) daily history in parallel and stores in the prices table.
     func fetchAndStoreBenchmarksInBackground() async {
-        // S&P 500
-        let sp500Prices = await marketData.fetchSP500History(period: "2y", interval: "1d")
-        for price in sp500Prices {
-            db.addPrice(price)
-        }
+        // Fetch all three benchmarks in parallel
+        async let sp500Prices = marketData.fetchSP500History(period: "2y", interval: "1d")
+        async let goldPrices = marketData.fetchGoldHistory(period: "2y", interval: "1d")
+        async let msciPrices = marketData.fetchMSCIWorldHistory(period: "2y", interval: "1d")
         
-        // Gold
-        let goldPrices = await marketData.fetchGoldHistory(period: "2y", interval: "1d")
-        for price in goldPrices {
-            db.addPrice(price)
-        }
+        let (sp500Result, goldResult, msciResult) = await (sp500Prices, goldPrices, msciPrices)
         
-        // MSCI World
-        let msciPrices = await marketData.fetchMSCIWorldHistory(period: "2y", interval: "1d")
-        for price in msciPrices {
-            db.addPrice(price)
-        }
+        // Store results (must be on MainActor for db access)
+        for price in sp500Result { db.addPrice(price) }
+        for price in goldResult { db.addPrice(price) }
+        for price in msciResult { db.addPrice(price) }
     }
     
     // MARK: - Backfill Historical Data
@@ -177,9 +200,10 @@ extension AppViewModel {
         var addedCount = 0
         var skippedCount = 0
         
+        // Batch-load existing dates to avoid N individual db.getPrice() calls
+        let existingDates = Set(db.getPriceHistory(forIsin: instrument.isin).map { $0.date })
         for price in prices {
-            let existingPrice = db.getPrice(forIsin: instrument.isin, date: price.date)
-            if existingPrice == nil {
+            if !existingDates.contains(price.date) {
                 db.addPrice(price)
                 addedCount += 1
             } else {

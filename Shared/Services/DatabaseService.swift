@@ -306,6 +306,12 @@ class DatabaseService: ObservableObject {
                 t.column(lastUpdated)
             })
             
+            // Create indexes for frequently queried columns
+            try db.run(prices.createIndex(priceIsin, date, ifNotExists: true))
+            try db.run(exchangeRates.createIndex(fromCurrency, toCurrency, rateDate, ifNotExists: true))
+            try db.run(holdings.createIndex(holdingIsin, ifNotExists: true))
+            try db.run(holdings.createIndex(holdingAccountId, ifNotExists: true))
+            
             print("Database tables initialized")
         } catch {
             print("Failed to initialize database: \(error)")
@@ -627,17 +633,12 @@ class DatabaseService: ObservableObject {
     
     func getTotalQuantity(forIsin instrumentIsin: String) -> Double {
         guard let db = db else { return 0 }
-        
         do {
-            var total = 0.0
-            for row in try db.prepare(holdings.filter(holdingIsin == instrumentIsin)) {
-                total += row[quantity]
-            }
-            return total
+            return try db.scalar(holdings.filter(holdingIsin == instrumentIsin).select(quantity.sum)) ?? 0
         } catch {
             print("Failed to get total quantity: \(error)")
+            return 0
         }
-        return 0
     }
     
     // MARK: - Database Path

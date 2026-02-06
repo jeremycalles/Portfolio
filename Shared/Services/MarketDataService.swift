@@ -31,6 +31,32 @@ actor MarketDataService {
         return request
     }
     
+    /// Executes a URLRequest with automatic retry on HTTP 429.
+    /// Uses exponential backoff: 1s, 2s, 4s (up to maxRetries).
+    private func performRequest(_ request: URLRequest, maxRetries: Int = 3) async throws -> (Data, URLResponse) {
+        var lastError: Error?
+        for attempt in 0...maxRetries {
+            if attempt > 0 {
+                let delay = UInt64(pow(2.0, Double(attempt - 1))) * 1_000_000_000
+                print("[HTTP] Rate limited (429), retrying in \(Int(pow(2.0, Double(attempt - 1))))s...")
+                try? await Task.sleep(nanoseconds: delay)
+            }
+            let (data, response) = try await session.data(for: request)
+            if let http = response as? HTTPURLResponse, http.statusCode == 429 {
+                lastError = URLError(.resourceUnavailable)
+                continue
+            }
+            return (data, response)
+        }
+        throw lastError ?? URLError(.unknown)
+    }
+    
+    /// Convenience: performs a GET request to a URL with automatic 429 retry.
+    private func performRequest(from url: URL, maxRetries: Int = 3) async throws -> (Data, URLResponse) {
+        let request = createRequest(url: url)
+        return try await performRequest(request, maxRetries: maxRetries)
+    }
+    
     /// Parses Yahoo Finance chart JSON response into timestamps, close prices, currency, and full result dictionary.
     private func parseYahooChartJSON(_ data: Data) -> (timestamps: [Int], closes: [Double?], currency: String, result: [String: Any])? {
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -207,7 +233,7 @@ actor MarketDataService {
         guard let url = URL(string: "https://query1.finance.yahoo.com/v8/finance/chart/\(encoded)?interval=1d&range=5d") else { return nil }
         
         do {
-            let (data, response) = try await session.data(from: url)
+            let (data, response) = try await performRequest(from: url)
             
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 return nil
@@ -266,7 +292,7 @@ actor MarketDataService {
         guard let url = URL(string: "https://query1.finance.yahoo.com/v7/finance/quote?symbols=\(encoded)") else { return nil }
         
         do {
-            let (data, _) = try await session.data(from: url)
+            let (data, _) = try await performRequest(from: url)
             
             if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let quoteResponse = json["quoteResponse"] as? [String: Any],
@@ -290,40 +316,28 @@ actor MarketDataService {
         
         let request = createRequest(url: url)
         
-        // Try up to 2 times with a delay (Yahoo sometimes rate-limits)
-        for attempt in 0..<2 {
-            if attempt > 0 {
-                print("[Yahoo Search] Retrying after delay...")
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
+        do {
+            let (data, response) = try await performRequest(request)
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("[Yahoo Search] HTTP status: \(httpResponse.statusCode)")
             }
             
-            do {
-                let (data, response) = try await session.data(for: request)
-                
-                if let httpResponse = response as? HTTPURLResponse {
-                    print("[Yahoo Search] HTTP status: \(httpResponse.statusCode)")
-                    if httpResponse.statusCode == 429 {
-                        print("[Yahoo Search] Rate limited, will retry")
-                        continue
-                    }
-                }
-                
-                if let responseStr = String(data: data, encoding: .utf8) {
-                    print("[Yahoo Search] Response: \(responseStr.prefix(200))...")
-                }
-                
-                if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let quotes = json["quotes"] as? [[String: Any]] {
-                    print("[Yahoo Search] Found \(quotes.count) quotes")
-                    if let first = quotes.first,
-                       let symbol = first["symbol"] as? String {
-                        print("[Yahoo Search] Resolved to: \(symbol)")
-                        return symbol
-                    }
-                }
-            } catch {
-                print("[Yahoo Search] Error (attempt \(attempt + 1)): \(error)")
+            if let responseStr = String(data: data, encoding: .utf8) {
+                print("[Yahoo Search] Response: \(responseStr.prefix(200))...")
             }
+            
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let quotes = json["quotes"] as? [[String: Any]] {
+                print("[Yahoo Search] Found \(quotes.count) quotes")
+                if let first = quotes.first,
+                   let symbol = first["symbol"] as? String {
+                    print("[Yahoo Search] Resolved to: \(symbol)")
+                    return symbol
+                }
+            }
+        } catch {
+            print("[Yahoo Search] Error: \(error)")
         }
         print("[Yahoo Search] Failed to resolve \(isin)")
         return nil
@@ -347,7 +361,7 @@ actor MarketDataService {
             let request = createRequest(url: url, additionalHeaders: [("Accept", "text/html,application/xhtml+xml")])
             
             do {
-                let (data, response) = try await session.data(for: request)
+                let (data, response) = try await performRequest(request)
                 
                 guard let httpResponse = response as? HTTPURLResponse else {
                     print("[FT] No HTTP response")
@@ -444,7 +458,7 @@ actor MarketDataService {
         request.timeoutInterval = 30
         
         do {
-            let (data, _) = try await session.data(for: request)
+            let (data, _) = try await performRequest(request)
             guard let html = String(data: data, encoding: .utf8) else { return nil }
             
             let doc = try SwiftSoup.parse(html)
@@ -509,7 +523,7 @@ actor MarketDataService {
         request.timeoutInterval = 30
         
         do {
-            let (data, _) = try await session.data(for: request)
+            let (data, _) = try await performRequest(request)
             guard let html = String(data: data, encoding: .utf8) else { return nil }
             
             let doc = try SwiftSoup.parse(html)
@@ -611,7 +625,7 @@ actor MarketDataService {
         let request = createRequest(url: url, additionalHeaders: [("Accept", "text/html,application/xhtml+xml")])
         
         do {
-            let (data, response) = try await session.data(for: request)
+            let (data, response) = try await performRequest(request)
             
             guard let httpResponse = response as? HTTPURLResponse,
                   (200...399).contains(httpResponse.statusCode),
@@ -744,7 +758,7 @@ actor MarketDataService {
         ])
         
         do {
-            let (data, response) = try await session.data(for: request)
+            let (data, response) = try await performRequest(request)
             
             guard let httpResponse = response as? HTTPURLResponse,
                   (200...399).contains(httpResponse.statusCode),
@@ -866,7 +880,7 @@ actor MarketDataService {
         let url = URL(string: "https://query1.finance.yahoo.com/v8/finance/chart/\(pair)?interval=1d&range=5d")!
         
         do {
-            let (data, response) = try await session.data(from: url)
+            let (data, response) = try await performRequest(from: url)
             
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 return nil
@@ -924,8 +938,8 @@ actor MarketDataService {
         
         do {
             // Fetch gold prices and FX rates in parallel
-            async let goldData = session.data(from: goldUrl)
-            async let fxData = session.data(from: fxUrl)
+            async let goldData = performRequest(from: goldUrl)
+            async let fxData = performRequest(from: fxUrl)
             
             let (goldResult, fxResult) = try await (goldData, fxData)
             
@@ -1061,7 +1075,7 @@ actor MarketDataService {
         guard let url = URL(string: "https://query1.finance.yahoo.com/v8/finance/chart/\(encoded)?interval=\(interval)&range=\(period)") else { return [] }
         
         do {
-            let (data, response) = try await session.data(from: url)
+            let (data, response) = try await performRequest(from: url)
             
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 return []
@@ -1121,7 +1135,7 @@ actor MarketDataService {
         let url = URL(string: "https://query1.finance.yahoo.com/v8/finance/chart/\(pair)?interval=\(interval)&range=\(period)")!
         
         do {
-            let (data, response) = try await session.data(from: url)
+            let (data, response) = try await performRequest(from: url)
             
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 return []

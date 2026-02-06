@@ -17,21 +17,24 @@ struct PortfolioTrendChart: View {
     var compact: Bool = false
     var unit: String = "EUR"  // "EUR" or "oz" for gold ounces
 
-    private var allValues: [Double] {
-        var v = history.map { $0.value }
-        if let sp = sp500History { v.append(contentsOf: sp.map { $0.value }) }
-        if let gd = goldHistory { v.append(contentsOf: gd.map { $0.value }) }
-        if let mw = msciWorldHistory { v.append(contentsOf: mw.map { $0.value }) }
-        return v
+    private var valueRange: (min: Double, max: Double) {
+        var lo = Double.greatestFiniteMagnitude
+        var hi = -Double.greatestFiniteMagnitude
+        func scan(_ items: [(date: Date, value: Double)]) {
+            for item in items {
+                if item.value < lo { lo = item.value }
+                if item.value > hi { hi = item.value }
+            }
+        }
+        scan(history)
+        if let sp = sp500History { scan(sp) }
+        if let gd = goldHistory { scan(gd) }
+        if let mw = msciWorldHistory { scan(mw) }
+        return history.isEmpty ? (0, 0) : (lo, hi)
     }
 
-    private var minValue: Double {
-        allValues.min() ?? 0
-    }
-
-    private var maxValue: Double {
-        allValues.max() ?? 0
-    }
+    private var minValue: Double { valueRange.min }
+    private var maxValue: Double { valueRange.max }
 
     private var valueChange: Double? {
         guard let first = history.first?.value, let last = history.last?.value, first > 0 else {
@@ -55,10 +58,20 @@ struct PortfolioTrendChart: View {
         history.last?.date
     }
 
+    private static let shortDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateStyle = .short
+        return f
+    }()
+    
+    private static let mediumDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateStyle = .medium
+        return f
+    }()
+    
     private var dateFormatter: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateStyle = compact ? .short : .medium
-        return formatter
+        compact ? Self.shortDateFormatter : Self.mediumDateFormatter
     }
 
     private func formatValue(_ value: Double) -> String {

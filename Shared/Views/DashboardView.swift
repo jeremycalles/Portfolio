@@ -90,9 +90,9 @@ struct DashboardView: View {
                     // Portfolio Totals (hidden in privacy mode)
                     if !privacyMode {
                         GroupBox(L10n.dashboardPortfolioSummary) {
-                            let totals = viewModel.getGrandTotalsEUR()
+                            let totals = viewModel.cachedGrandTotalsEUR
                             let goldTotals = viewModel.getGrandTotalsInGold()
-                            let history = viewModel.getPortfolioValueHistory()
+                            let history = viewModel.cachedPortfolioHistory
                             let goldHistory = viewModel.getGoldOzHistory()
                             
                             // Compute change from history (same as Trend chart)
@@ -189,10 +189,10 @@ struct DashboardView: View {
                     
                     // Portfolio Trend Chart
                     GroupBox(L10n.dashboardPortfolioTrend) {
-                        let history = viewModel.getPortfolioValueHistory()
-                        let sp500History = viewModel.getSP500ComparisonHistory()
-                        let goldHistory = viewModel.getGoldComparisonHistory()
-                        let msciWorldHistory = viewModel.getMSCIWorldComparisonHistory()
+                        let history = viewModel.cachedPortfolioHistory
+                        let sp500History = viewModel.cachedSP500History
+                        let goldHistory = viewModel.cachedGoldHistory
+                        let msciWorldHistory = viewModel.cachedMSCIWorldHistory
                         
                         if history.isEmpty {
                             Text(L10n.dashboardNoHistoricalData)

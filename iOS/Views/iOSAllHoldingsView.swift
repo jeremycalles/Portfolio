@@ -132,17 +132,17 @@ struct AddHoldingSheet: View {
     @State private var purchaseDate = Date()
     @State private var includePurchaseInfo = false
     
-    // Locale-aware number formatter
-    private var numberFormatter: NumberFormatter {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.locale = Locale.current
-        return formatter
-    }
+    // Locale-aware number formatter (static to avoid re-creation)
+    private static let numberFormatter: NumberFormatter = {
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        f.locale = .current
+        return f
+    }()
     
     private func parseNumber(_ text: String) -> Double? {
         // First try with current locale (handles comma as decimal separator)
-        if let number = numberFormatter.number(from: text) {
+        if let number = Self.numberFormatter.number(from: text) {
             return number.doubleValue
         }
         // Fallback: try replacing comma with period for users who type comma on period-locale

@@ -113,7 +113,21 @@ class AppViewModel: ObservableObject {
     @Published var statusMessage = ""
     @Published var errorMessage: String?
     
-    @Published var selectedPeriod: ReportPeriod = .oneWeek
+    @Published var selectedPeriod: ReportPeriod = .oneWeek {
+        didSet {
+            if oldValue != selectedPeriod {
+                recomputeDashboardCache()
+            }
+        }
+    }
+    
+    // MARK: - Cached Dashboard Data
+    @Published private(set) var cachedPortfolioHistory: [(date: Date, value: Double)] = []
+    @Published private(set) var cachedSP500History: [(date: Date, value: Double)] = []
+    @Published private(set) var cachedGoldHistory: [(date: Date, value: Double)] = []
+    @Published private(set) var cachedMSCIWorldHistory: [(date: Date, value: Double)] = []
+    @Published private(set) var cachedGrandTotalsEUR: (current: Double, previous: Double) = (0, 0)
+    @Published private(set) var cachedQuadrantReport: [QuadrantReportItem] = []
     
     // Backfill logs for single instrument
     @Published var backfillLogs: [String] = []
@@ -122,6 +136,8 @@ class AppViewModel: ObservableObject {
     let db = DatabaseService.shared
     let marketData = MarketDataService.shared
     private let demoMode = DemoModeManager.shared
+    private var currencyByIsin: [String: String] = [:]
+    private var eurRateCache: [String: Double] = [:]
     
     init() {
         refreshAll()
@@ -158,13 +174,20 @@ class AppViewModel: ObservableObject {
     func convertToEUR(value: Double, fromCurrency: String?, onDate: String) -> Double {
         guard let currency = fromCurrency, currency != "EUR" else { return value }
         
+        let cacheKey = "\(currency)|\(onDate)"
+        if let cachedRate = eurRateCache[cacheKey] {
+            return value * cachedRate
+        }
+        
         // Try to get rate on or before the specified date
         if let rate = db.getRateOnOrBefore(from: currency, to: "EUR", date: onDate) {
+            eurRateCache[cacheKey] = rate.rate
             return value * rate.rate
         }
         
         // Fallback to latest rate if no historical rate
         if let rate = db.getLatestRate(from: currency, to: "EUR") {
+            eurRateCache[cacheKey] = rate.rate
             return value * rate.rate
         }
         
@@ -172,9 +195,14 @@ class AppViewModel: ObservableObject {
         return value
     }
     
-    /// Gets the instrument currency for a given ISIN
+    /// Clears the exchange rate cache. Call at the start of each history/report computation.
+    func clearRateCache() {
+        eurRateCache.removeAll(keepingCapacity: true)
+    }
+    
+    /// Gets the instrument currency for a given ISIN (O(1) dictionary lookup)
     func getInstrumentCurrency(forIsin isin: String) -> String? {
-        return instruments.first(where: { $0.isin == isin })?.currency
+        return currencyByIsin[isin]
     }
     
     // MARK: - Refresh Data
@@ -182,6 +210,47 @@ class AppViewModel: ObservableObject {
         instruments = db.getAllInstruments()
         quadrants = db.getAllQuadrants()
         bankAccounts = db.getAllBankAccounts()
+        holdings = db.getAllHoldings()
+        rebuildCurrencyIndex()
+        recomputeDashboardCache()
+    }
+    
+    private func rebuildCurrencyIndex() {
+        var dict: [String: String] = [:]
+        dict.reserveCapacity(instruments.count)
+        for instrument in instruments {
+            if let currency = instrument.currency {
+                dict[instrument.isin] = currency
+            }
+        }
+        currencyByIsin = dict
+    }
+    
+    /// Recomputes all cached dashboard data. Called after refreshAll(), price updates, and period changes.
+    func recomputeDashboardCache() {
+        cachedPortfolioHistory = getPortfolioValueHistory()
+        cachedSP500History = getSP500ComparisonHistory()
+        cachedGoldHistory = getGoldComparisonHistory()
+        cachedMSCIWorldHistory = getMSCIWorldComparisonHistory()
+        cachedGrandTotalsEUR = getGrandTotalsEUR()
+        cachedQuadrantReport = getQuadrantReport()
+    }
+    
+    // MARK: - Targeted Refresh Methods
+    func refreshInstruments() {
+        instruments = db.getAllInstruments()
+        rebuildCurrencyIndex()
+    }
+    
+    func refreshQuadrants() {
+        quadrants = db.getAllQuadrants()
+    }
+    
+    func refreshBankAccounts() {
+        bankAccounts = db.getAllBankAccounts()
+    }
+    
+    func refreshHoldings() {
         holdings = db.getAllHoldings()
     }
     
@@ -217,7 +286,7 @@ class AppViewModel: ObservableObject {
             }
             
             statusMessage = "Added: \(result.name ?? isin)"
-            refreshAll()
+            refreshInstruments()
         } else {
             errorMessage = Self.addInstrumentErrorMessage(for: isin)
             statusMessage = ""
@@ -240,23 +309,24 @@ class AppViewModel: ObservableObject {
     
     func deleteInstrument(_ isin: String) {
         db.deleteInstrument(isin)
-        refreshAll()
+        refreshInstruments()
+        refreshHoldings()
     }
     
     func assignQuadrant(instrumentIsin: String, quadrantId: Int?) {
         db.assignQuadrant(instrumentIsin: instrumentIsin, quadrantId: quadrantId)
-        refreshAll()
+        refreshInstruments()
     }
     
     func deletePrice(isin: String, date: String) {
         db.deletePrice(isin: isin, date: date)
-        refreshAll()
+        // Prices aren't stored in @Published arrays — no table reload needed
     }
     
     // MARK: - Quadrants
     func addQuadrant(name: String) {
         if db.addQuadrant(name: name) {
-            refreshAll()
+            refreshQuadrants()
         } else {
             errorMessage = "Quadrant '\(name)' already exists"
         }
@@ -264,13 +334,14 @@ class AppViewModel: ObservableObject {
     
     func deleteQuadrant(id: Int) {
         db.deleteQuadrant(id: id)
-        refreshAll()
+        refreshQuadrants()
+        refreshInstruments() // quadrant assignment may be cleared
     }
     
     // MARK: - Bank Accounts
     func addBankAccount(bank: String, account: String) {
         if db.addBankAccount(bank: bank, account: account) {
-            refreshAll()
+            refreshBankAccounts()
         } else {
             errorMessage = "Account '\(bank) - \(account)' already exists"
         }
@@ -278,7 +349,8 @@ class AppViewModel: ObservableObject {
     
     func deleteBankAccount(id: Int) {
         db.deleteBankAccount(id: id)
-        refreshAll()
+        refreshBankAccounts()
+        refreshHoldings() // holdings for deleted account are removed
     }
     
     // MARK: - Holdings
@@ -293,12 +365,12 @@ class AppViewModel: ObservableObject {
             lastUpdated: nil
         )
         db.addOrUpdateHolding(holding)
-        refreshAll()
+        refreshHoldings()
     }
     
     func deleteHolding(accountId: Int, isin: String) {
         db.deleteHolding(accountIdValue: accountId, instrumentIsin: isin)
-        refreshAll()
+        refreshHoldings()
     }
     
     /// Date when the app last refreshed prices (background or manual). Same source as Settings "Last refresh".

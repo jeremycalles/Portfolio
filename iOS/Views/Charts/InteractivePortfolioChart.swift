@@ -10,13 +10,18 @@ struct InteractivePortfolioChart: View {
     @State private var selectedDate: Date?
     @State private var lastHapticDate: Date?
     
-    private var minValue: Double {
-        history.map { $0.value }.min() ?? 0
+    private var valueRange: (min: Double, max: Double) {
+        var lo = Double.greatestFiniteMagnitude
+        var hi = -Double.greatestFiniteMagnitude
+        for item in history {
+            if item.value < lo { lo = item.value }
+            if item.value > hi { hi = item.value }
+        }
+        return history.isEmpty ? (0, 0) : (lo, hi)
     }
     
-    private var maxValue: Double {
-        history.map { $0.value }.max() ?? 0
-    }
+    private var minValue: Double { valueRange.min }
+    private var maxValue: Double { valueRange.max }
     
     private var chartColor: Color {
         isPositive ? .green : .red

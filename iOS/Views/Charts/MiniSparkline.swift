@@ -7,12 +7,17 @@ struct MiniSparkline: View {
     let isPositive: Bool
     
     private var normalizedData: [Double] {
-        guard let minVal = data.map({ $0.value }).min(),
-              let maxVal = data.map({ $0.value }).max(),
-              maxVal > minVal else {
+        var minVal = Double.greatestFiniteMagnitude
+        var maxVal = -Double.greatestFiniteMagnitude
+        for item in data {
+            if item.value < minVal { minVal = item.value }
+            if item.value > maxVal { maxVal = item.value }
+        }
+        guard !data.isEmpty, maxVal > minVal else {
             return data.map { _ in 0.5 }
         }
-        return data.map { ($0.value - minVal) / (maxVal - minVal) }
+        let range = maxVal - minVal
+        return data.map { ($0.value - minVal) / range }
     }
     
     private var chartColor: Color {

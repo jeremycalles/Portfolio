@@ -106,7 +106,7 @@ struct iOSDashboardView: View {
     @State private var viewMode: iOSDashboardViewMode = .quadrants
     
     private var portfolioChange: (amount: Double, percent: Double)? {
-        let totals = viewModel.getGrandTotalsEUR()
+        let totals = viewModel.cachedGrandTotalsEUR
         guard totals.previous > 0 else { return nil }
         let amount = totals.current - totals.previous
         let percent = (amount / totals.previous) * 100
@@ -125,8 +125,8 @@ struct iOSDashboardView: View {
         ScrollView {
             VStack(spacing: 20) {
                 // MARK: - Enhanced Hero Portfolio Card
-                let totals = viewModel.getGrandTotalsEUR()
-                let history = viewModel.getPortfolioValueHistory()
+                let totals = viewModel.cachedGrandTotalsEUR
+                let history = viewModel.cachedPortfolioHistory
                 let sparklineData = Array(history.suffix(20))
                 // Use first value from history for change calculation (consistent with Trend chart)
                 let previousFromHistory = history.first?.value ?? 0
@@ -153,10 +153,10 @@ struct iOSDashboardView: View {
                         .font(.headline)
                         .padding(.horizontal)
                     
-                    let history = viewModel.getPortfolioValueHistory()
-                    let sp500History = viewModel.getSP500ComparisonHistory()
-                    let goldHistory = viewModel.getGoldComparisonHistory()
-                    let msciWorldHistory = viewModel.getMSCIWorldComparisonHistory()
+                    let history = viewModel.cachedPortfolioHistory
+                    let sp500History = viewModel.cachedSP500History
+                    let goldHistory = viewModel.cachedGoldHistory
+                    let msciWorldHistory = viewModel.cachedMSCIWorldHistory
                     if history.isEmpty {
                         HStack {
                             Spacer()

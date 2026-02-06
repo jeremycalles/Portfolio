@@ -11,7 +11,7 @@ struct EnhancedAllocationRingChart: View {
         let colors: [Color] = [.blue, .green, .orange, .purple, .pink, .cyan, .yellow, .mint, .indigo, .teal]
         
         if isQuadrants {
-            let report = viewModel.getQuadrantReport()
+            let report = viewModel.cachedQuadrantReport
             var data: [(name: String, value: Double, color: Color)] = []
             for (index, item) in report.enumerated() {
                 let totalValue = item.totalValue.values.reduce(0, +)

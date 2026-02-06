@@ -3,6 +3,7 @@ import Foundation
 extension AppViewModel {
     // MARK: - Reports
     func getHoldingDetails(forAccount accountId: Int) -> [HoldingDetail] {
+        clearRateCache()
         let accountHoldings = holdings.filter { $0.accountId == accountId }
         let comparisonDate = selectedPeriod.comparisonDate
         let comparisonDateStr = AppDateFormatter.yearMonthDay.string(from: comparisonDate)
@@ -57,6 +58,7 @@ extension AppViewModel {
     }
     
     func getQuadrantReport() -> [QuadrantReportItem] {
+        clearRateCache()
         var items: [QuadrantReportItem] = []
         let comparisonDate = selectedPeriod.comparisonDate
         let comparisonDateStr = AppDateFormatter.yearMonthDay.string(from: comparisonDate)
