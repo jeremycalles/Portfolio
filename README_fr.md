@@ -488,7 +488,9 @@ Choisissez où stocker vos données :
 
 #### Actualisation en Arrière-plan (macOS)
 
-Activez les mises à jour automatiques des prix :
+Au premier lancement, l'application propose d'activer les mises à jour automatiques des prix. Vous pouvez accepter, refuser, ou cocher **"Ne plus demander"** pour supprimer définitivement cette invite. Vous pouvez toujours activer ou désactiver l'actualisation automatique ultérieurement depuis les Paramètres.
+
+Pour configurer manuellement :
 1. Allez dans **Paramètres** → **Actualisation en Arrière-plan**
 2. Choisissez un intervalle (1 heure, 3 heures, 6 heures ou 12 heures)
 3. Cliquez sur **Activer** pour installer l'Agent de Lancement et démarrer le minuteur intégré

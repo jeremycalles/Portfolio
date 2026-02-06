@@ -488,7 +488,9 @@ Choose where to store your data:
 
 #### Background Refresh (macOS)
 
-Enable automatic price updates:
+On first launch, the app offers to enable automatic price updates. You can accept, decline, or check **"Don't ask again"** to dismiss the prompt permanently. You can always enable or disable automatic refresh later from Settings.
+
+To configure manually:
 1. Go to **Settings** → **Background Refresh**
 2. Choose an interval (1 hour, 3 hours, 6 hours, or 12 hours)
 3. Click **Enable** to install the Launch Agent and start the in-app timer
