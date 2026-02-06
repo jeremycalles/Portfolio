@@ -549,20 +549,6 @@ Lors d’une actualisation des prix, l’app demande des **données de marché p
 
 ## Automatisation
 
-### Mises à jour Quotidiennes (Cron)
-
-Automatisez la récupération des prix sur macOS/Linux :
-
-```bash
-# Éditez la crontab
-crontab -e
-
-# Ajoutez cette ligne (utilise $HOME ; mettez à jour si votre chemin de clone diffère)
-0 18 * * * cd "$HOME/github/Portfolio" && "$HOME/github/Portfolio/venv/bin/python3" src/main.py update >> "$HOME/github/Portfolio/update.log" 2>&1
-```
-
-Ceci exécute la mise à jour chaque jour à 18h.
-
 ### Agent de Lancement macOS
 
 L'application gère un Agent de Lancement pour les mises à jour automatiques en arrière-plan :

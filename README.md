@@ -549,20 +549,6 @@ When you refresh prices, the app requests **public market data** from public API
 
 ## Automation
 
-### Daily Price Updates (Cron)
-
-Automate price fetching on macOS/Linux:
-
-```bash
-# Edit crontab
-crontab -e
-
-# Add this line (uses $HOME; update if your clone path differs)
-0 18 * * * cd "$HOME/github/Portfolio" && "$HOME/github/Portfolio/venv/bin/python3" src/main.py update >> "$HOME/github/Portfolio/update.log" 2>&1
-```
-
-This runs the update every day at 6 PM.
-
 ### macOS Launch Agent
 
 The app manages a proper Launch Agent for automatic background updates:
