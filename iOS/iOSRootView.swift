@@ -675,15 +675,30 @@ struct EnhancedTrendCard: View {
                 }
             }
             
-            // Value
-            if let value = currentValue {
-                if privacyMode {
-                    Text("•••")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                } else {
-                    Text(formatValue(value))
-                        .font(.system(size: 18, weight: .bold, design: .rounded))
+            // Start value (left) and current value (right)
+            HStack {
+                // Value at starting date of the graph (left)
+                if let startValue = history.first?.value {
+                    if privacyMode {
+                        Text("•••")
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text(formatValue(startValue))
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                    }
+                }
+                Spacer()
+                // Current price (right)
+                if let value = currentValue {
+                    if privacyMode {
+                        Text("•••")
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text(formatValue(value))
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                    }
                 }
             }
             
