@@ -7,6 +7,10 @@
 
 **Portfolio** is a comprehensive, privacy-focused portfolio tracker for managing your financial assets. Track stocks, ETFs, mutual funds, precious metals, cryptocurrencies, and bank accounts—all in one place with beautiful native apps for iOS and macOS.
 
+### Privacy disclaimer
+
+This application is designed **privacy-first**. Your portfolio data (instruments, holdings, accounts, prices history) are stored **only on your device** in a local SQLite database. There is **no backend server**; no personal or financial data is sent to any server. Optional iCloud storage uses your own Apple account to sync the same local database across your devices—you remain in control. Price updates request only public market data (e.g. tickers or ISINs) from public APIs; no account linking or personally identifiable information is ever transmitted.
+
 ---
 
 ## Table of Contents
@@ -517,25 +521,23 @@ Portfolio uses multiple data sources to ensure accurate pricing:
 
 ## Privacy & Security
 
-### Local-First Design
+### Privacy-first design
 
-- **No Cloud Accounts**: Your data stays on your device
-- **No Telemetry**: No usage data is collected or transmitted
-- **Full Control**: Export, backup, or delete your data anytime
+Portfolio is built so that **your data never leaves your control**:
 
-### Data Storage
+- **No server for your data**: There is no backend or cloud service that stores your portfolio. All positions, accounts, instruments, and price history live only on your device (and, if you enable it, in your own iCloud).
+- **No personal data sent**: The app does not send any personally identifiable information or portfolio contents to any third party. No telemetry, analytics, or crash reporting.
+- **Local storage only**: The app uses a single SQLite database (`stocks.db`) stored in the app’s Documents directory (iOS: `Documents/PortfolioData/`; macOS: project `data/` folder or custom path). Preferences (e.g. language, storage location, privacy mode) are stored in system `UserDefaults` on device only.
+- **Optional iCloud**: If you enable iCloud, the same database file is synced via your Apple ID. No data is sent to the app developer or any other server.
 
-- All data stored in local SQLite database
-- Database location: App Documents folder (customizable on macOS)
-- Optional iCloud sync for cross-device access
+### What leaves your device (market data only)
 
-### Privacy Mode
+When you refresh prices, the app requests **public market data** from public APIs (Yahoo Finance, Financial Times, Veracash, AuCOFFRE). Only instrument identifiers (e.g. ticker symbols, ISINs) are sent to fetch prices; no portfolio structure, holdings quantities, or personal details are included. This is the same as opening a financial website in a browser.
 
-Hide sensitive values instantly:
-- Toggle with the eye icon
-- All monetary values masked
-- App remains fully functional
-- Perfect for public viewing
+### Data you control
+
+- **Export, backup, delete**: You can copy, move, or delete the database file at any time. On macOS you can choose the project/data path; on iOS the database lives in the app container.
+- **Privacy mode**: Toggle with the eye icon to hide all monetary values on screen; state is stored locally only. Perfect for public viewing.
 
 ---
 

@@ -7,6 +7,10 @@
 
 **Portfolio** est un outil complet de suivi de portefeuille, axé sur la confidentialité, pour gérer vos actifs financiers. Suivez vos actions, ETF, OPCVM (fonds communs de placement), métaux précieux, cryptomonnaies et comptes bancaires—le tout en un seul endroit avec de magnifiques applications natives pour iOS et macOS.
 
+### Avertissement confidentialité
+
+Cette application est conçue **priorité confidentialité**. Les données de votre portefeuille (instruments, positions, comptes, historique des prix) sont stockées **uniquement sur votre appareil** dans une base SQLite locale. Il n’y a **aucun serveur backend** ; aucune donnée personnelle ou financière n’est envoyée vers un serveur. Le stockage iCloud optionnel utilise votre propre compte Apple pour synchroniser la même base locale entre vos appareils—vous gardez le contrôle. Les mises à jour de prix ne demandent que des données de marché publiques (ex. symboles, codes ISIN) auprès d’API publiques ; aucun lien de compte ni donnée personnelle identifiable n’est transmis.
+
 ---
 
 ## Table des Matières
@@ -517,25 +521,23 @@ Portfolio utilise plusieurs sources de données pour assurer une tarification pr
 
 ## Confidentialité & Sécurité
 
-### Conception Local-First
+### Conception priorité confidentialité
 
-- **Pas de Comptes Cloud** : Vos données restent sur votre appareil
-- **Pas de Télémétrie** : Aucune donnée d'utilisation n'est collectée ou transmise
-- **Contrôle Total** : Exportez, sauvegardez ou supprimez vos données à tout moment
+Portfolio est conçu pour que **vos données ne quittent jamais votre contrôle** :
 
-### Stockage des Données
+- **Aucun serveur pour vos données** : Il n’existe pas de backend ni de service cloud hébergeant votre portefeuille. Positions, comptes, instruments et historique des prix restent uniquement sur votre appareil (et, si vous l’activez, dans votre iCloud).
+- **Aucune donnée personnelle envoyée** : L’application n’envoie aucune donnée personnelle identifiable ni contenu du portefeuille à un tiers. Pas de télémétrie, analytique ou rapport de plantage.
+- **Stockage local uniquement** : L’application utilise une base SQLite unique (`stocks.db`) dans le dossier Documents de l’app (iOS : `Documents/PortfolioData/` ; macOS : dossier `data/` du projet ou chemin personnalisé). Les préférences (langue, emplacement de stockage, mode privé) sont stockées dans les `UserDefaults` du système, sur l’appareil uniquement.
+- **iCloud optionnel** : Si vous activez iCloud, le même fichier de base est synchronisé via votre compte Apple. Aucune donnée n’est envoyée au développeur de l’app ni à un autre serveur.
 
-- Toutes les données stockées dans une base de données SQLite locale
-- Emplacement de la base de données : Dossier Documents de l'application (personnalisable sur macOS)
-- Synchronisation iCloud optionnelle pour l'accès inter-appareils
+### Ce qui quitte votre appareil (données de marché uniquement)
 
-### Mode Privé
+Lors d’une actualisation des prix, l’app demande des **données de marché publiques** à des API publiques (Yahoo Finance, Financial Times, Veracash, AuCOFFRE). Seuls les identifiants d’instruments (symboles, codes ISIN) sont envoyés pour récupérer les prix ; ni structure du portefeuille, ni quantités détenues, ni informations personnelles. C’est équivalent à consulter un site financier dans un navigateur.
 
-Masquez les valeurs sensibles instantanément :
-- Basculez avec l'icône œil
-- Toutes les valeurs monétaires masquées
-- L'application reste entièrement fonctionnelle
-- Parfait pour la consultation en public
+### Données sous votre contrôle
+
+- **Exporter, sauvegarder, supprimer** : Vous pouvez copier, déplacer ou supprimer le fichier de base à tout moment. Sur macOS vous pouvez choisir le chemin des données ; sur iOS la base se trouve dans le conteneur de l’app.
+- **Mode privé** : Basculez avec l’icône œil pour masquer toutes les valeurs monétaires à l’écran ; l’état est stocké localement uniquement. Idéal pour une consultation en public.
 
 ---
 
