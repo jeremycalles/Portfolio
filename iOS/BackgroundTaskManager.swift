@@ -64,12 +64,9 @@ class BackgroundTaskManager: ObservableObject {
             return "No background refresh logs available yet.\n\nLogs will appear here after the first background refresh occurs."
         }
         
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        
         return lastRefreshLogs.map { entry in
             let prefix = entry.isError ? "❌" : "✓"
-            return "\(prefix) [\(dateFormatter.string(from: entry.timestamp))] \(entry.message)"
+            return "\(prefix) [\(AppDateFormatter.yearMonthDayTime.string(from: entry.timestamp))] \(entry.message)"
         }.joined(separator: "\n")
     }
     

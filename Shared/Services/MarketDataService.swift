@@ -17,6 +17,38 @@ actor MarketDataService {
         session = URLSession(configuration: config)
     }
     
+    // MARK: - Constants
+    static let troyOunceGrams = 31.1034768
+    private static let supportedCurrencies: Set<String> = ["USD", "EUR", "GBP", "CHF", "JPY", "CAD", "AUD", "SGD", "HKD"]
+    
+    // MARK: - Helpers
+    private func createRequest(url: URL, additionalHeaders: [(String, String)] = []) -> URLRequest {
+        var request = URLRequest(url: url)
+        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+        for (field, value) in additionalHeaders {
+            request.setValue(value, forHTTPHeaderField: field)
+        }
+        return request
+    }
+    
+    /// Parses Yahoo Finance chart JSON response into timestamps, close prices, currency, and full result dictionary.
+    private func parseYahooChartJSON(_ data: Data) -> (timestamps: [Int], closes: [Double?], currency: String, result: [String: Any])? {
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let chart = json["chart"] as? [String: Any],
+              let results = chart["result"] as? [[String: Any]],
+              let result = results.first,
+              let meta = result["meta"] as? [String: Any],
+              let currency = meta["currency"] as? String,
+              let timestamps = result["timestamp"] as? [Int],
+              let indicators = result["indicators"] as? [String: Any],
+              let quotes = indicators["quote"] as? [[String: Any]],
+              let quote = quotes.first,
+              let closes = quote["close"] as? [Double?] else {
+            return nil
+        }
+        return (timestamps, closes, currency, result)
+    }
+    
     /// When identifier is "ISIN:CURRENCY" (e.g. LU0169518387:USD), returns the 12-char ISIN for FT/search; otherwise returns the original.
     private func coreIsinForLookup(_ isin: String) -> String {
         if let colonIndex = isin.firstIndex(of: ":"), colonIndex == isin.index(isin.startIndex, offsetBy: 12) {
@@ -37,12 +69,12 @@ actor MarketDataService {
     private func desiredCurrencyFromIdentifier(_ isin: String) -> String? {
         guard let colonIdx = isin.firstIndex(of: ":"), isin.distance(from: isin.startIndex, to: colonIdx) == 12 else { return nil }
         let suffix = String(isin[isin.index(after: colonIdx)...]).uppercased()
-        return ["USD", "EUR", "GBP", "CHF", "JPY", "CAD", "AUD", "SGD", "HKD"].contains(suffix) ? suffix : nil
+        return Self.supportedCurrencies.contains(suffix) ? suffix : nil
     }
     
     // MARK: - Fetch Market Data
     func fetchData(isin: String, ticker: String? = nil) async -> MarketDataResult {
-        let today = ISO8601DateFormatter().string(from: Date()).prefix(10)
+        let today = AppDateFormatter.todayString
         let coreIsin = coreIsinForLookup(isin)
         
         // Special case: Veracash Gold Premium
@@ -54,7 +86,7 @@ actor MarketDataService {
                 name: "Veracash Gold Premium Gram",
                 value: value,
                 currency: "EUR",
-                date: String(today)
+                date: today
             )
         }
         
@@ -67,7 +99,7 @@ actor MarketDataService {
                 name: "Veracash Gold Spot Gram",
                 value: value,
                 currency: "EUR",
-                date: String(today)
+                date: today
             )
         }
         
@@ -80,7 +112,7 @@ actor MarketDataService {
                 name: "Veracash Silver Spot Gram",
                 value: value,
                 currency: "EUR",
-                date: String(today)
+                date: today
             )
         }
         
@@ -162,13 +194,13 @@ actor MarketDataService {
             name: nil,
             value: nil,
             currency: nil,
-            date: String(today)
+            date: today
         )
     }
     
     // MARK: - Yahoo Finance
     private func fetchYahooFinance(ticker: String, isin: String) async -> MarketDataResult? {
-        let today = ISO8601DateFormatter().string(from: Date()).prefix(10)
+        let today = AppDateFormatter.todayString
         let encoded = urlEncodedTicker(ticker)
         
         // Try the Yahoo Finance quote API (ticker URL-encoded so symbols like LU0169518387:USD work)
@@ -181,45 +213,34 @@ actor MarketDataService {
                 return nil
             }
             
-            guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let chart = json["chart"] as? [String: Any],
-                  let results = chart["result"] as? [[String: Any]],
-                  let result = results.first else {
+            guard let parsed = parseYahooChartJSON(data) else {
                 return nil
             }
             
+            let (timestamps, closes, currency, result) = parsed
+            
             // Get price
             var price: Double?
-            var priceDate = String(today)
+            var priceDate = today
             
             if let meta = result["meta"] as? [String: Any] {
                 price = meta["regularMarketPrice"] as? Double
             }
             
             // Fallback to indicators
-            if price == nil,
-               let indicators = result["indicators"] as? [String: Any],
-               let quote = (indicators["quote"] as? [[String: Any]])?.first,
-               let closes = quote["close"] as? [Double?] {
+            if price == nil {
                 // Get last non-nil close
                 price = closes.compactMap { $0 }.last
             }
             
             // Get timestamps for date
-            if let timestamps = result["timestamp"] as? [Int], let lastTimestamp = timestamps.last {
+            if let lastTimestamp = timestamps.last {
                 let date = Date(timeIntervalSince1970: TimeInterval(lastTimestamp))
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyy-MM-dd"
-                priceDate = formatter.string(from: date)
+                priceDate = AppDateFormatter.yearMonthDay.string(from: date)
             }
             
             // Get metadata
             var name: String?
-            var currency = "USD"
-            
-            if let meta = result["meta"] as? [String: Any] {
-                currency = meta["currency"] as? String ?? "USD"
-            }
             
             // Try to get name from quote summary
             name = await fetchYahooName(ticker: ticker)
@@ -267,8 +288,7 @@ actor MarketDataService {
             return nil
         }
         
-        var request = URLRequest(url: url)
-        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+        let request = createRequest(url: url)
         
         // Try up to 2 times with a delay (Yahoo sometimes rate-limits)
         for attempt in 0..<2 {
@@ -312,7 +332,7 @@ actor MarketDataService {
     // MARK: - Financial Times Scraping
 #if canImport(SwiftSoup)
     private func scrapeFT(isin: String) async -> MarketDataResult? {
-        let today = ISO8601DateFormatter().string(from: Date()).prefix(10)
+        let today = AppDateFormatter.todayString
         
         // Try both funds and ETFs pages (FT may redirect between them)
         let urls = [
@@ -324,9 +344,7 @@ actor MarketDataService {
             guard let url = URL(string: urlString) else { continue }
             print("[FT] Trying URL: \(urlString)")
             
-            var request = URLRequest(url: url)
-            request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
-            request.setValue("text/html,application/xhtml+xml", forHTTPHeaderField: "Accept")
+            let request = createRequest(url: url, additionalHeaders: [("Accept", "text/html,application/xhtml+xml")])
             
             do {
                 let (data, response) = try await session.data(for: request)
@@ -399,7 +417,7 @@ actor MarketDataService {
                     name: name,
                     value: finalPrice,
                     currency: currency,
-                    date: String(today)
+                    date: today
                 )
             } catch {
                 print("[FT] Exception for \(isin) at \(urlString): \(error)")
@@ -421,8 +439,9 @@ actor MarketDataService {
 #if canImport(SwiftSoup)
     private func scrapeVeracashGold(premium: Bool) async -> Double? {
         let url = URL(string: "https://www.veracash.com/gold-price-and-chart")!
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 30)
-        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+        var request = createRequest(url: url)
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        request.timeoutInterval = 30
         
         do {
             let (data, _) = try await session.data(for: request)
@@ -438,7 +457,7 @@ actor MarketDataService {
                         if let price = extractEuroPrice(from: text) {
                             // Check if it's per gram or per ounce
                             if text.lowercased().contains("ounce") {
-                                return price / 31.1034768 // Convert troy ounce to gram
+                                return price / Self.troyOunceGrams // Convert troy ounce to gram
                             }
                             return price
                         }
@@ -448,7 +467,7 @@ actor MarketDataService {
                     if text.contains("Gold") && text.contains("€") && !text.contains("Premium") && !text.contains("GoldPremium") {
                         if let price = extractEuroPrice(from: text) {
                             if text.lowercased().contains("ounce") {
-                                return price / 31.1034768
+                                return price / Self.troyOunceGrams
                             }
                             return price
                         }
@@ -485,8 +504,9 @@ actor MarketDataService {
 #if canImport(SwiftSoup)
     private func scrapeVeracashSilver() async -> Double? {
         let url = URL(string: "https://www.veracash.com/gold-price-and-chart")!
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 30)
-        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+        var request = createRequest(url: url)
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        request.timeoutInterval = 30
         
         do {
             let (data, _) = try await session.data(for: request)
@@ -498,7 +518,7 @@ actor MarketDataService {
                 if text.contains("Silver") && text.contains("€") {
                     if let price = extractEuroPrice(from: text) {
                         if text.lowercased().contains("ounce") {
-                            return price / 31.1034768
+                            return price / Self.troyOunceGrams
                         }
                         return price
                     }
@@ -564,33 +584,31 @@ actor MarketDataService {
     
 #if canImport(SwiftSoup)
     private func scrapeAuCoffreCoin(isin: String) async -> MarketDataResult {
-        let today = ISO8601DateFormatter().string(from: Date()).prefix(10)
+        let today = AppDateFormatter.todayString
         
         // Special case: Gold bar uses Veracash spot price × troy ounce weight
         if isin == "COIN:GOLD_BAR_1OZ" {
             let gramPrice = await scrapeVeracashGold(premium: false)
-            let ouncePrice = gramPrice.map { $0 * 31.1034768 } // Convert gram to troy ounce
+            let ouncePrice = gramPrice.map { $0 * Self.troyOunceGrams } // Convert gram to troy ounce
             return MarketDataResult(
                 isin: isin,
                 ticker: "GOLD_BAR_1OZ",
                 name: "Lingot Or 1 once (Veracash Spot)",
                 value: ouncePrice,
                 currency: "EUR",
-                date: String(today)
+                date: today
             )
         }
         
         guard let config = Self.coinConfigs[isin] else {
-            return MarketDataResult(isin: isin, ticker: nil, name: nil, value: nil, currency: "EUR", date: String(today))
+            return MarketDataResult(isin: isin, ticker: nil, name: nil, value: nil, currency: "EUR", date: today)
         }
         
         guard let url = URL(string: config.url) else {
-            return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: nil, currency: "EUR", date: String(today))
+            return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: nil, currency: "EUR", date: today)
         }
         
-        var request = URLRequest(url: url)
-        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
-        request.setValue("text/html,application/xhtml+xml", forHTTPHeaderField: "Accept")
+        let request = createRequest(url: url, additionalHeaders: [("Accept", "text/html,application/xhtml+xml")])
         
         do {
             let (data, response) = try await session.data(for: request)
@@ -599,7 +617,7 @@ actor MarketDataService {
                   (200...399).contains(httpResponse.statusCode),
                   let html = String(data: data, encoding: .utf8) else {
                 print("[AuCOFFRE] Failed to fetch \(config.url)")
-                return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: nil, currency: "EUR", date: String(today))
+                return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: nil, currency: "EUR", date: today)
             }
             
             let doc = try SwiftSoup.parse(html)
@@ -619,7 +637,7 @@ actor MarketDataService {
                             if let price = extractAuCoffrePrice(from: cellText) {
                                 let unitPrice = price / config.quantity
                                 print("[AuCOFFRE] Found \(config.name): \(price) / \(config.quantity) = \(unitPrice) EUR")
-                                return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: unitPrice, currency: "EUR", date: String(today))
+                                return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: unitPrice, currency: "EUR", date: today)
                             }
                         }
                     }
@@ -636,7 +654,7 @@ actor MarketDataService {
                         if let price = extractAuCoffrePrice(from: rowText) {
                             let unitPrice = price / config.quantity
                             print("[AuCOFFRE] Found \(config.name) via link: \(price) / \(config.quantity) = \(unitPrice) EUR")
-                            return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: unitPrice, currency: "EUR", date: String(today))
+                            return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: unitPrice, currency: "EUR", date: today)
                         }
                     }
                 }
@@ -653,7 +671,7 @@ actor MarketDataService {
                     if let price = extractAuCoffrePrice(from: candidate) {
                         let unitPrice = price / config.quantity
                         print("[AuCOFFRE] Found \(config.name) in body: \(price) / \(config.quantity) = \(unitPrice) EUR")
-                        return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: unitPrice, currency: "EUR", date: String(today))
+                        return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: unitPrice, currency: "EUR", date: today)
                     }
                 }
             }
@@ -663,7 +681,7 @@ actor MarketDataService {
             print("[AuCOFFRE] Scraping error for \(isin): \(error)")
         }
         
-        return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: nil, currency: "EUR", date: String(today))
+        return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: nil, currency: "EUR", date: today)
     }
     
     private func extractAuCoffrePrice(from text: String) -> Double? {
@@ -720,10 +738,10 @@ actor MarketDataService {
             return []
         }
         
-        var request = URLRequest(url: url)
-        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
-        request.setValue("fr-FR,fr;q=0.9,en;q=0.8", forHTTPHeaderField: "Accept-Language")
-        request.setValue("text/html,application/xhtml+xml", forHTTPHeaderField: "Accept")
+        let request = createRequest(url: url, additionalHeaders: [
+            ("Accept-Language", "fr-FR,fr;q=0.9,en;q=0.8"),
+            ("Accept", "text/html,application/xhtml+xml")
+        ])
         
         do {
             let (data, response) = try await session.data(for: request)
@@ -762,8 +780,6 @@ actor MarketDataService {
             // Convert [timestamp_ms, price] pairs to Price objects
             var prices: [Price] = []
             var seenDates: Set<String> = []
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd"
             
             for point in historical {
                 guard point.count >= 2,
@@ -771,7 +787,7 @@ actor MarketDataService {
                       let price = point[1] as? Double else { continue }
                 
                 let date = Date(timeIntervalSince1970: timestampMs / 1000)
-                let dateString = dateFormatter.string(from: date)
+                let dateString = AppDateFormatter.yearMonthDay.string(from: date)
                 
                 // Keep only one price per day (use the first occurrence)
                 if !seenDates.contains(dateString) {
@@ -799,15 +815,15 @@ actor MarketDataService {
     }
 #else
     private func scrapeAuCoffreCoin(isin: String) async -> MarketDataResult {
-        let today = ISO8601DateFormatter().string(from: Date()).prefix(10)
+        let today = AppDateFormatter.todayString
         // Gold bar uses Veracash spot even without SwiftSoup (calls the #else stub)
         if isin == "COIN:GOLD_BAR_1OZ" {
             let gramPrice = await scrapeVeracashGold(premium: false)
-            let ouncePrice = gramPrice.map { $0 * 31.1034768 }
-            return MarketDataResult(isin: isin, ticker: "GOLD_BAR_1OZ", name: "Lingot Or 1 once (Veracash Spot)", value: ouncePrice, currency: "EUR", date: String(today))
+            let ouncePrice = gramPrice.map { $0 * Self.troyOunceGrams }
+            return MarketDataResult(isin: isin, ticker: "GOLD_BAR_1OZ", name: "Lingot Or 1 once (Veracash Spot)", value: ouncePrice, currency: "EUR", date: today)
         }
         let config = Self.coinConfigs[isin]
-        return MarketDataResult(isin: isin, ticker: config?.ticker, name: config?.name, value: nil, currency: "EUR", date: String(today))
+        return MarketDataResult(isin: isin, ticker: config?.ticker, name: config?.name, value: nil, currency: "EUR", date: today)
     }
     
     // Stub: SwiftSoup not available, cannot scrape historical data
@@ -845,7 +861,7 @@ actor MarketDataService {
     // MARK: - Exchange Rate
     func fetchExchangeRate(from fromCurrency: String, to toCurrency: String) async -> ExchangeRate? {
         let pair = "\(fromCurrency)\(toCurrency)=X"
-        let today = ISO8601DateFormatter().string(from: Date()).prefix(10)
+        let today = AppDateFormatter.todayString
         
         let url = URL(string: "https://query1.finance.yahoo.com/v8/finance/chart/\(pair)?interval=1d&range=5d")!
         
@@ -856,15 +872,14 @@ actor MarketDataService {
                 return nil
             }
             
-            guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let chart = json["chart"] as? [String: Any],
-                  let results = chart["result"] as? [[String: Any]],
-                  let result = results.first else {
+            guard let parsed = parseYahooChartJSON(data) else {
                 return nil
             }
             
+            let (timestamps, closes, _, result) = parsed
+            
             var rate: Double?
-            var rateDate = String(today)
+            var rateDate = today
             
             // Get rate from meta
             if let meta = result["meta"] as? [String: Any] {
@@ -872,19 +887,14 @@ actor MarketDataService {
             }
             
             // Fallback to indicators
-            if rate == nil,
-               let indicators = result["indicators"] as? [String: Any],
-               let quote = (indicators["quote"] as? [[String: Any]])?.first,
-               let closes = quote["close"] as? [Double?] {
+            if rate == nil {
                 rate = closes.compactMap { $0 }.last
             }
             
             // Get date
-            if let timestamps = result["timestamp"] as? [Int], let lastTimestamp = timestamps.last {
+            if let lastTimestamp = timestamps.last {
                 let date = Date(timeIntervalSince1970: TimeInterval(lastTimestamp))
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyy-MM-dd"
-                rateDate = formatter.string(from: date)
+                rateDate = AppDateFormatter.yearMonthDay.string(from: date)
             }
             
             guard let finalRate = rate else { return nil }
@@ -920,36 +930,21 @@ actor MarketDataService {
             let (goldResult, fxResult) = try await (goldData, fxData)
             
             // Parse gold prices
-            guard let goldJson = try? JSONSerialization.jsonObject(with: goldResult.0) as? [String: Any],
-                  let goldChart = goldJson["chart"] as? [String: Any],
-                  let goldResults = goldChart["result"] as? [[String: Any]],
-                  let goldFirst = goldResults.first,
-                  let goldTimestamps = goldFirst["timestamp"] as? [Int],
-                  let goldIndicators = goldFirst["indicators"] as? [String: Any],
-                  let goldQuote = (goldIndicators["quote"] as? [[String: Any]])?.first,
-                  let goldCloses = goldQuote["close"] as? [Double?] else {
+            guard let goldParsed = parseYahooChartJSON(goldResult.0) else {
                 print("[Gold Futures] Failed to parse gold futures data")
                 return []
             }
+            let (goldTimestamps, goldCloses, _, _) = goldParsed
             
             // Parse FX rates
             var fxRates: [String: Double] = [:]
-            if let fxJson = try? JSONSerialization.jsonObject(with: fxResult.0) as? [String: Any],
-               let fxChart = fxJson["chart"] as? [String: Any],
-               let fxResults = fxChart["result"] as? [[String: Any]],
-               let fxFirst = fxResults.first,
-               let fxTimestamps = fxFirst["timestamp"] as? [Int],
-               let fxIndicators = fxFirst["indicators"] as? [String: Any],
-               let fxQuote = (fxIndicators["quote"] as? [[String: Any]])?.first,
-               let fxCloses = fxQuote["close"] as? [Double?] {
-                
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyy-MM-dd"
+            if let fxParsed = parseYahooChartJSON(fxResult.0) {
+                let (fxTimestamps, fxCloses, _, _) = fxParsed
                 
                 for (index, timestamp) in fxTimestamps.enumerated() {
                     if let rate = fxCloses[index] {
                         let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
-                        let dateString = formatter.string(from: date)
+                        let dateString = AppDateFormatter.yearMonthDay.string(from: date)
                         fxRates[dateString] = rate
                     }
                 }
@@ -960,14 +955,12 @@ actor MarketDataService {
             
             // Convert gold prices from USD to EUR
             var prices: [Price] = []
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
             
             for (index, timestamp) in goldTimestamps.enumerated() {
                 guard let usdPrice = goldCloses[index] else { continue }
                 
                 let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
-                let dateString = formatter.string(from: date)
+                let dateString = AppDateFormatter.yearMonthDay.string(from: date)
                 
                 // Use date-specific FX rate or fallback to current
                 let fxRate = fxRates[dateString] ?? currentFxRate
@@ -1006,7 +999,7 @@ actor MarketDataService {
             
             // Convert per oz -> per gram and apply premium
             return prices.map { price in
-                let gramPrice = (price.value / 31.1034768) * (1.0 + premium)
+                let gramPrice = (price.value / Self.troyOunceGrams) * (1.0 + premium)
                 return Price(
                     id: price.id,
                     isin: isin,
@@ -1074,34 +1067,19 @@ actor MarketDataService {
                 return []
             }
             
-            guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let chart = json["chart"] as? [String: Any],
-                  let results = chart["result"] as? [[String: Any]],
-                  let result = results.first else {
+            guard let parsed = parseYahooChartJSON(data) else {
                 return []
             }
             
-            var currency = "USD"
-            if let meta = result["meta"] as? [String: Any] {
-                currency = meta["currency"] as? String ?? "USD"
-            }
-            
-            guard let timestamps = result["timestamp"] as? [Int],
-                  let indicators = result["indicators"] as? [String: Any],
-                  let quote = (indicators["quote"] as? [[String: Any]])?.first,
-                  let closes = quote["close"] as? [Double?] else {
-                return []
-            }
+            let (timestamps, closes, currency, _) = parsed
             
             var prices: [Price] = []
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
             
             for (index, timestamp) in timestamps.enumerated() {
                 guard let close = closes[index] else { continue }
                 
                 let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
-                let dateString = formatter.string(from: date)
+                let dateString = AppDateFormatter.yearMonthDay.string(from: date)
                 
                 prices.append(Price(
                     id: nil,
@@ -1149,29 +1127,19 @@ actor MarketDataService {
                 return []
             }
             
-            guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let chart = json["chart"] as? [String: Any],
-                  let results = chart["result"] as? [[String: Any]],
-                  let result = results.first else {
+            guard let parsed = parseYahooChartJSON(data) else {
                 return []
             }
             
-            guard let timestamps = result["timestamp"] as? [Int],
-                  let indicators = result["indicators"] as? [String: Any],
-                  let quote = (indicators["quote"] as? [[String: Any]])?.first,
-                  let closes = quote["close"] as? [Double?] else {
-                return []
-            }
+            let (timestamps, closes, _, _) = parsed
             
             var rates: [ExchangeRate] = []
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
             
             for (index, timestamp) in timestamps.enumerated() {
                 guard let close = closes[index] else { continue }
                 
                 let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
-                let dateString = formatter.string(from: date)
+                let dateString = AppDateFormatter.yearMonthDay.string(from: date)
                 
                 rates.append(ExchangeRate(
                     id: nil,

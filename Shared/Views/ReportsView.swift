@@ -453,11 +453,8 @@ struct PriceEditorSheet: View {
         self.existingPrice = existingPrice
         self.onSave = onSave
         
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        
         if let price = existingPrice {
-            _selectedDate = State(initialValue: formatter.date(from: price.date) ?? Date())
+            _selectedDate = State(initialValue: AppDateFormatter.yearMonthDay.date(from: price.date) ?? Date())
             _priceValue = State(initialValue: String(format: "%.4f", price.value))
             _selectedCurrency = State(initialValue: price.currency ?? instrument.currency ?? "EUR")
         } else {
@@ -515,9 +512,7 @@ struct PriceEditorSheet: View {
                 
                 Button(existingPrice == nil ? L10n.generalAdd : L10n.generalSave) {
                     if let value = Double(priceValue) {
-                        let formatter = DateFormatter()
-                        formatter.dateFormat = "yyyy-MM-dd"
-                        let dateString = formatter.string(from: selectedDate)
+                        let dateString = AppDateFormatter.yearMonthDay.string(from: selectedDate)
                         onSave(dateString, value, selectedCurrency)
                         dismiss()
                     }
@@ -643,9 +638,7 @@ struct PriceGraphView: View {
             return priceHistory
         }
         
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        let cutoffStr = formatter.string(from: cutoffDate)
+        let cutoffStr = AppDateFormatter.yearMonthDay.string(from: cutoffDate)
         
         return priceHistory.filter { $0.date >= cutoffStr }
     }
@@ -797,11 +790,8 @@ struct PriceChartView: View {
     let prices: [Price]
     
     private var chartData: [(date: Date, value: Double)] {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        
         return prices.reversed().compactMap { price in
-            guard let date = formatter.date(from: price.date) else { return nil }
+            guard let date = AppDateFormatter.yearMonthDay.date(from: price.date) else { return nil }
             return (date: date, value: price.value)
         }
     }

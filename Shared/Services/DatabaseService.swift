@@ -86,6 +86,79 @@ class DatabaseService: ObservableObject {
     private let purchasePrice = SQLite.Expression<Double?>("purchase_price")
     private let lastUpdated = SQLite.Expression<String?>("last_updated")
     
+    // MARK: - Row-to-Model Mappers
+    private func instrumentFromRow(_ row: Row) -> Instrument {
+        return Instrument(
+            isin: row[isin],
+            ticker: row[ticker],
+            name: row[name],
+            type: row[type],
+            currency: row[currency],
+            quadrantId: row[quadrantId]
+        )
+    }
+    
+    private func priceFromRow(_ row: Row) -> Price {
+        return Price(
+            id: row[priceId],
+            isin: row[priceIsin],
+            date: row[date],
+            value: row[value],
+            currency: row[priceCurrency]
+        )
+    }
+    
+    private func exchangeRateFromRow(_ row: Row) -> ExchangeRate {
+        return ExchangeRate(
+            id: row[rateId],
+            date: row[rateDate],
+            fromCurrency: row[fromCurrency],
+            toCurrency: row[toCurrency],
+            rate: row[rate]
+        )
+    }
+    
+    private func quadrantFromRow(_ row: Row) -> Quadrant {
+        return Quadrant(
+            id: row[quadId],
+            name: row[quadName]
+        )
+    }
+    
+    private func bankAccountFromRow(_ row: Row) -> BankAccount {
+        return BankAccount(
+            id: row[accountId],
+            bankName: row[bankName],
+            accountName: row[accountName]
+        )
+    }
+    
+    private func holdingFromRow(_ row: Row) -> Holding {
+        return Holding(
+            id: row[holdingId],
+            accountId: row[holdingAccountId],
+            isin: row[holdingIsin],
+            quantity: row[quantity],
+            purchaseDate: row[purchaseDate],
+            purchasePrice: row[purchasePrice],
+            lastUpdated: row[lastUpdated]
+        )
+    }
+    
+    // MARK: - Generic Fetch Helper
+    private func fetchAll<T>(query: QueryType, mapper: (Row) -> T) -> [T] {
+        guard let db = db else { return [] }
+        var result: [T] = []
+        do {
+            for row in try db.prepare(query) {
+                result.append(mapper(row))
+            }
+        } catch {
+            print("Error fetching: \(error)")
+        }
+        return result
+    }
+    
     private init() {
         // Check saved storage preference
         let savedLocation = UserDefaults.standard.string(forKey: "storageLocation") ?? "local"
@@ -241,24 +314,7 @@ class DatabaseService: ObservableObject {
     
     // MARK: - Instruments
     func getAllInstruments() -> [Instrument] {
-        guard let db = db else { return [] }
-        
-        var result: [Instrument] = []
-        do {
-            for row in try db.prepare(instruments) {
-                result.append(Instrument(
-                    isin: row[isin],
-                    ticker: row[ticker],
-                    name: row[name],
-                    type: row[type],
-                    currency: row[currency],
-                    quadrantId: row[quadrantId]
-                ))
-            }
-        } catch {
-            print("Failed to fetch instruments: \(error)")
-        }
-        return result
+        return fetchAll(query: instruments, mapper: instrumentFromRow)
     }
     
     func getInstrument(byIsin instrumentIsin: String) -> Instrument? {
@@ -266,14 +322,7 @@ class DatabaseService: ObservableObject {
         
         do {
             if let row = try db.pluck(instruments.filter(isin == instrumentIsin)) {
-                return Instrument(
-                    isin: row[isin],
-                    ticker: row[ticker],
-                    name: row[name],
-                    type: row[type],
-                    currency: row[currency],
-                    quadrantId: row[quadrantId]
-                )
+                return instrumentFromRow(row)
             }
         } catch {
             print("Failed to fetch instrument: \(error)")
@@ -353,13 +402,7 @@ class DatabaseService: ObservableObject {
         do {
             let query = prices.filter(priceIsin == instrumentIsin).order(date.desc).limit(1)
             if let row = try db.pluck(query) {
-                return Price(
-                    id: row[priceId],
-                    isin: row[priceIsin],
-                    date: row[date],
-                    value: row[value],
-                    currency: row[priceCurrency]
-                )
+                return priceFromRow(row)
             }
         } catch {
             print("Failed to fetch latest price: \(error)")
@@ -387,13 +430,7 @@ class DatabaseService: ObservableObject {
         do {
             let query = prices.filter(priceIsin == instrumentIsin && date == targetDate).limit(1)
             if let row = try db.pluck(query) {
-                return Price(
-                    id: row[priceId],
-                    isin: row[priceIsin],
-                    date: row[date],
-                    value: row[value],
-                    currency: row[priceCurrency]
-                )
+                return priceFromRow(row)
             }
         } catch {
             print("Failed to fetch price: \(error)")
@@ -402,23 +439,7 @@ class DatabaseService: ObservableObject {
     }
     
     func getPriceHistory(forIsin instrumentIsin: String) -> [Price] {
-        guard let db = db else { return [] }
-        
-        var result: [Price] = []
-        do {
-            for row in try db.prepare(prices.filter(priceIsin == instrumentIsin).order(date.desc)) {
-                result.append(Price(
-                    id: row[priceId],
-                    isin: row[priceIsin],
-                    date: row[date],
-                    value: row[value],
-                    currency: row[priceCurrency]
-                ))
-            }
-        } catch {
-            print("Failed to fetch price history: \(error)")
-        }
-        return result
+        return fetchAll(query: prices.filter(priceIsin == instrumentIsin).order(date.desc), mapper: priceFromRow)
     }
     
     func getPriceOnOrBefore(forIsin instrumentIsin: String, date targetDate: String, windowDays: Int = 30) -> Price? {
@@ -431,13 +452,7 @@ class DatabaseService: ObservableObject {
                 .limit(1)
             
             if let row = try db.pluck(query) {
-                return Price(
-                    id: row[priceId],
-                    isin: row[priceIsin],
-                    date: row[date],
-                    value: row[value],
-                    currency: row[priceCurrency]
-                )
+                return priceFromRow(row)
             }
         } catch {
             print("Failed to fetch price on or before: \(error)")
@@ -455,13 +470,7 @@ class DatabaseService: ObservableObject {
                 .limit(1)
             
             if let row = try db.pluck(query) {
-                return Price(
-                    id: row[priceId],
-                    isin: row[priceIsin],
-                    date: row[date],
-                    value: row[value],
-                    currency: row[priceCurrency]
-                )
+                return priceFromRow(row)
             }
         } catch {
             print("Failed to fetch price before: \(error)")
@@ -495,13 +504,7 @@ class DatabaseService: ObservableObject {
                 .limit(1)
             
             if let row = try db.pluck(query) {
-                return ExchangeRate(
-                    id: row[rateId],
-                    date: row[rateDate],
-                    fromCurrency: row[fromCurrency],
-                    toCurrency: row[toCurrency],
-                    rate: row[rate]
-                )
+                return exchangeRateFromRow(row)
             }
         } catch {
             print("Failed to fetch exchange rate: \(error)")
@@ -520,13 +523,7 @@ class DatabaseService: ObservableObject {
                 .limit(1)
             
             if let row = try db.pluck(query) {
-                return ExchangeRate(
-                    id: row[rateId],
-                    date: row[rateDate],
-                    fromCurrency: row[fromCurrency],
-                    toCurrency: row[toCurrency],
-                    rate: row[rate]
-                )
+                return exchangeRateFromRow(row)
             }
         } catch {
             print("Failed to fetch exchange rate on or before \(targetDate): \(error)")
@@ -536,20 +533,7 @@ class DatabaseService: ObservableObject {
     
     // MARK: - Quadrants
     func getAllQuadrants() -> [Quadrant] {
-        guard let db = db else { return [] }
-        
-        var result: [Quadrant] = []
-        do {
-            for row in try db.prepare(quadrants.order(quadName)) {
-                result.append(Quadrant(
-                    id: row[quadId],
-                    name: row[quadName]
-                ))
-            }
-        } catch {
-            print("Failed to fetch quadrants: \(error)")
-        }
-        return result
+        return fetchAll(query: quadrants.order(quadName), mapper: quadrantFromRow)
     }
     
     func addQuadrant(name quadrantName: String) -> Bool {
@@ -577,21 +561,7 @@ class DatabaseService: ObservableObject {
     
     // MARK: - Bank Accounts
     func getAllBankAccounts() -> [BankAccount] {
-        guard let db = db else { return [] }
-        
-        var result: [BankAccount] = []
-        do {
-            for row in try db.prepare(bankAccounts.order(bankName, accountName)) {
-                result.append(BankAccount(
-                    id: row[accountId],
-                    bankName: row[bankName],
-                    accountName: row[accountName]
-                ))
-            }
-        } catch {
-            print("Failed to fetch bank accounts: \(error)")
-        }
-        return result
+        return fetchAll(query: bankAccounts.order(bankName, accountName), mapper: bankAccountFromRow)
     }
     
     func addBankAccount(bank: String, account: String) -> Bool {
@@ -619,53 +589,17 @@ class DatabaseService: ObservableObject {
     
     // MARK: - Holdings
     func getHoldings(forAccount accountIdValue: Int) -> [Holding] {
-        guard let db = db else { return [] }
-        
-        var result: [Holding] = []
-        do {
-            for row in try db.prepare(holdings.filter(holdingAccountId == accountIdValue)) {
-                result.append(Holding(
-                    id: row[holdingId],
-                    accountId: row[holdingAccountId],
-                    isin: row[holdingIsin],
-                    quantity: row[quantity],
-                    purchaseDate: row[purchaseDate],
-                    purchasePrice: row[purchasePrice],
-                    lastUpdated: row[lastUpdated]
-                ))
-            }
-        } catch {
-            print("Failed to fetch holdings: \(error)")
-        }
-        return result
+        return fetchAll(query: holdings.filter(holdingAccountId == accountIdValue), mapper: holdingFromRow)
     }
     
     func getAllHoldings() -> [Holding] {
-        guard let db = db else { return [] }
-        
-        var result: [Holding] = []
-        do {
-            for row in try db.prepare(holdings) {
-                result.append(Holding(
-                    id: row[holdingId],
-                    accountId: row[holdingAccountId],
-                    isin: row[holdingIsin],
-                    quantity: row[quantity],
-                    purchaseDate: row[purchaseDate],
-                    purchasePrice: row[purchasePrice],
-                    lastUpdated: row[lastUpdated]
-                ))
-            }
-        } catch {
-            print("Failed to fetch all holdings: \(error)")
-        }
-        return result
+        return fetchAll(query: holdings, mapper: holdingFromRow)
     }
     
     func addOrUpdateHolding(_ holding: Holding) {
         guard let db = db else { return }
         
-        let now = ISO8601DateFormatter().string(from: Date())
+        let now = AppDateFormatter.iso8601.string(from: Date())
         
         do {
             try db.run(holdings.insert(or: .replace,
