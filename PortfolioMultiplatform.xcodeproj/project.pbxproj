@@ -85,6 +85,7 @@
 		IV14 /* iOSAllHoldingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V014 /* iOSAllHoldingsView.swift */; };
 		IV15 /* iOSInstrumentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V015 /* iOSInstrumentsView.swift */; };
 		IV16 /* iOSSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V016 /* iOSSettingsView.swift */; };
+		M024 /* MacOSSchedulerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = S025 /* MacOSSchedulerManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -152,6 +153,8 @@
 		V014 /* iOSAllHoldingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = iOSAllHoldingsView.swift; path = iOS/Views/iOSAllHoldingsView.swift; sourceTree = SOURCE_ROOT; };
 		V015 /* iOSInstrumentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = iOSInstrumentsView.swift; path = iOS/Views/iOSInstrumentsView.swift; sourceTree = SOURCE_ROOT; };
 		V016 /* iOSSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = iOSSettingsView.swift; path = iOS/Views/iOSSettingsView.swift; sourceTree = SOURCE_ROOT; };
+		S024 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		S025 /* MacOSSchedulerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MacOSSchedulerManager.swift; path = macOS/MacOSSchedulerManager.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -233,6 +236,8 @@
 			isa = PBXGroup;
 			children = (
 				E001 /* macOS.entitlements */,
+				S024 /* Info.plist */,
+				S025 /* MacOSSchedulerManager.swift */,
 			);
 			path = macOS;
 			sourceTree = "<group>";
@@ -486,6 +491,7 @@
 				M021 /* PortfolioTrendChart.swift in Sources */,
 				M022 /* QuadrantPieChart.swift in Sources */,
 				M023 /* AccountsPieChart.swift in Sources */,
+				M024 /* MacOSSchedulerManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -714,6 +720,7 @@
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = macOS/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -748,6 +755,7 @@
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = macOS/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
