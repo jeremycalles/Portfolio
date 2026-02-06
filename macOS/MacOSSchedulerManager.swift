@@ -389,6 +389,18 @@ class MacOSSchedulerManager: ObservableObject {
         NSWorkspace.shared.open(logDir)
     }
     
+    // MARK: - Launch Prompt
+    
+    /// Whether we should show the "enable automatic refresh?" prompt at launch.
+    /// True when auto-refresh is not set up AND the user hasn't dismissed the prompt permanently.
+    var shouldPromptForAutoRefresh: Bool {
+        !isInstalled && !timerEnabled && !UserDefaults.standard.bool(forKey: "dismissedAutoRefreshPrompt")
+    }
+    
+    func dismissPromptPermanently() {
+        UserDefaults.standard.set(true, forKey: "dismissedAutoRefreshPrompt")
+    }
+    
     // MARK: - Last Refresh Time
     
     func timeSinceLastRefresh() -> String? {

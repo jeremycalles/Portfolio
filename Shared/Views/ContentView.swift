@@ -6,6 +6,7 @@ struct ContentView: View {
     @StateObject private var viewModel = AppViewModel()
     @StateObject private var languageManager = LanguageManager.shared
     @State private var selectedTab = 0
+    @State private var showAutoRefreshPrompt = false
     
     var body: some View {
         NavigationSplitView {
@@ -112,6 +113,84 @@ struct ContentView: View {
                 .help(L10n.tooltipUpdateAllPrices)
             }
         }
+        .onAppear {
+            if MacOSSchedulerManager.shared.shouldPromptForAutoRefresh {
+                // Small delay so the window finishes rendering before showing the sheet
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    showAutoRefreshPrompt = true
+                }
+            }
+        }
+        .sheet(isPresented: $showAutoRefreshPrompt) {
+            AutoRefreshPromptView()
+        }
+    }
+}
+
+// MARK: - Auto-Refresh Prompt
+struct AutoRefreshPromptView: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var dontAskAgain = false
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "arrow.clockwise.circle.fill")
+                .font(.system(size: 48))
+                .foregroundStyle(.blue)
+            
+            Text(L10n.settingsAutomaticUpdates)
+                .font(.title2.bold())
+            
+            Text(L10n.settingsAutomaticUpdatesDescription)
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 340)
+            
+            // Interval info
+            HStack(spacing: 6) {
+                Image(systemName: "clock")
+                    .foregroundColor(.secondary)
+                Text("Default interval: \(MacOSSchedulerManager.shared.selectedInterval.displayName)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            Divider()
+                .padding(.horizontal)
+            
+            // Don't ask again checkbox
+            Toggle(isOn: $dontAskAgain) {
+                Text("Don't ask again")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .toggleStyle(.checkbox)
+            
+            // Action buttons
+            HStack(spacing: 12) {
+                Button("Not now") {
+                    if dontAskAgain {
+                        MacOSSchedulerManager.shared.dismissPromptPermanently()
+                    }
+                    dismiss()
+                }
+                .buttonStyle(.bordered)
+                .keyboardShortcut(.cancelAction)
+                
+                Button(L10n.settingsEnable) {
+                    MacOSSchedulerManager.shared.install()
+                    if dontAskAgain {
+                        MacOSSchedulerManager.shared.dismissPromptPermanently()
+                    }
+                    dismiss()
+                }
+                .buttonStyle(.borderedProminent)
+                .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(30)
+        .frame(width: 400)
     }
 }
 #endif
