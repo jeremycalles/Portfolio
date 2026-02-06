@@ -102,7 +102,7 @@ struct iOSAllHoldingsView: View {
         }
         .listStyle(.insetGrouped)
         .refreshable {
-            viewModel.refreshAll()
+            await viewModel.updateAllPrices(showCompletionDelay: false)
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {

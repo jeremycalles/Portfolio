@@ -249,6 +249,14 @@
 "tooltip.edit" = "Modifier";
 "tooltip.delete" = "Supprimer";
 
+// MARK: - Refresh Result
+"refresh.success" = "Prix mis à jour";
+"refresh.partial" = "Mise à jour partielle";
+"refresh.failed" = "Échec de l'actualisation";
+"refresh.successDetail" = "Les %d instruments ont été mis à jour";
+"refresh.resultDetail" = "%d sur %d instruments mis à jour";
+"refresh.failedInstruments" = "Instruments en échec :";
+
 // MARK: - Errors
 "error.fetchFailed" = "Échec de la récupération des données";
 "error.saveFailed" = "Échec de l'enregistrement";

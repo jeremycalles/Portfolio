@@ -85,6 +85,7 @@
 		IV14 /* iOSAllHoldingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V014 /* iOSAllHoldingsView.swift */; };
 		IV15 /* iOSInstrumentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V015 /* iOSInstrumentsView.swift */; };
 		IV16 /* iOSSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V016 /* iOSSettingsView.swift */; };
+		IV17 /* RefreshResultBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = V017 /* RefreshResultBanner.swift */; };
 		M024 /* MacOSSchedulerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = S025 /* MacOSSchedulerManager.swift */; };
 /* End PBXBuildFile section */
 
@@ -153,6 +154,7 @@
 		V014 /* iOSAllHoldingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = iOSAllHoldingsView.swift; path = iOS/Views/iOSAllHoldingsView.swift; sourceTree = SOURCE_ROOT; };
 		V015 /* iOSInstrumentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = iOSInstrumentsView.swift; path = iOS/Views/iOSInstrumentsView.swift; sourceTree = SOURCE_ROOT; };
 		V016 /* iOSSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = iOSSettingsView.swift; path = iOS/Views/iOSSettingsView.swift; sourceTree = SOURCE_ROOT; };
+		V017 /* RefreshResultBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RefreshResultBanner.swift; path = iOS/Views/Components/RefreshResultBanner.swift; sourceTree = SOURCE_ROOT; };
 		S024 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		S025 /* MacOSSchedulerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MacOSSchedulerManager.swift; path = macOS/MacOSSchedulerManager.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -265,10 +267,11 @@
 			V013 /* iOSQuadrantReportView.swift */,
 			V014 /* iOSAllHoldingsView.swift */,
 			V015 /* iOSInstrumentsView.swift */,
-			V016 /* iOSSettingsView.swift */,
-		);
-		path = iOS;
-		sourceTree = "<group>";
+		V016 /* iOSSettingsView.swift */,
+		V017 /* RefreshResultBanner.swift */,
+	);
+	path = iOS;
+	sourceTree = "<group>";
 	};
 		G004 /* Products */ = {
 			isa = PBXGroup;
@@ -538,9 +541,10 @@
 			IV13 /* iOSQuadrantReportView.swift in Sources */,
 			IV14 /* iOSAllHoldingsView.swift in Sources */,
 			IV15 /* iOSInstrumentsView.swift in Sources */,
-			IV16 /* iOSSettingsView.swift in Sources */,
-		);
-		runOnlyForDeploymentPostprocessing = 0;
+		IV16 /* iOSSettingsView.swift in Sources */,
+		IV17 /* RefreshResultBanner.swift in Sources */,
+	);
+	runOnlyForDeploymentPostprocessing = 0;
 	};
 		SP03 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;

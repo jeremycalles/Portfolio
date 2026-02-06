@@ -69,7 +69,7 @@ struct iOSQuadrantReportView: View {
         }
         .listStyle(.insetGrouped)
         .refreshable {
-            viewModel.refreshAll()
+            await viewModel.updateAllPrices(showCompletionDelay: false)
         }
     }
 }

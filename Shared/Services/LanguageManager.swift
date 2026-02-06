@@ -341,6 +341,18 @@ struct L10n {
     static var tooltipEdit: String { manager.localized("tooltip.edit") }
     static var tooltipDelete: String { manager.localized("tooltip.delete") }
     
+    // Refresh Result
+    static var refreshSuccess: String { manager.localized("refresh.success") }
+    static var refreshPartial: String { manager.localized("refresh.partial") }
+    static var refreshFailed: String { manager.localized("refresh.failed") }
+    static var refreshFailedInstruments: String { manager.localized("refresh.failedInstruments") }
+    static func refreshSuccessDetail(_ count: Int) -> String {
+        String(format: manager.localized("refresh.successDetail"), count)
+    }
+    static func refreshResultDetail(_ success: Int, _ total: Int) -> String {
+        String(format: manager.localized("refresh.resultDetail"), success, total)
+    }
+    
     // Errors
     static var errorFetchFailed: String { manager.localized("error.fetchFailed") }
     static var errorSaveFailed: String { manager.localized("error.saveFailed") }

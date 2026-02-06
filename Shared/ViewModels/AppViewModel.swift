@@ -112,6 +112,7 @@ class AppViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var statusMessage = ""
     @Published var errorMessage: String?
+    @Published var refreshResult: RefreshResult?
     
     @Published var selectedPeriod: ReportPeriod = .oneWeek {
         didSet {
@@ -410,5 +411,10 @@ class AppViewModel: ObservableObject {
     // MARK: - Dismiss Error
     func dismissError() {
         errorMessage = nil
+    }
+    
+    // MARK: - Dismiss Refresh Result
+    func dismissRefreshResult() {
+        refreshResult = nil
     }
 }

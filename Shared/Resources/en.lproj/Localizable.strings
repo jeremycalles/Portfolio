@@ -249,6 +249,14 @@
 "tooltip.edit" = "Edit";
 "tooltip.delete" = "Delete";
 
+// MARK: - Refresh Result
+"refresh.success" = "Prices Updated";
+"refresh.partial" = "Partial Update";
+"refresh.failed" = "Refresh Failed";
+"refresh.successDetail" = "All %d instruments updated successfully";
+"refresh.resultDetail" = "%d of %d instruments updated";
+"refresh.failedInstruments" = "Failed instruments:";
+
 // MARK: - Errors
 "error.fetchFailed" = "Failed to fetch data";
 "error.saveFailed" = "Failed to save";

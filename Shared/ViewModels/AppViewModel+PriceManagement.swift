@@ -1,5 +1,17 @@
 import Foundation
 
+// MARK: - Refresh Result
+struct RefreshResult: Identifiable {
+    let id = UUID()
+    let successCount: Int
+    let failureCount: Int
+    let totalCount: Int
+    let failedInstruments: [String]
+    let timestamp: Date
+    
+    var succeeded: Bool { failureCount == 0 }
+}
+
 extension AppViewModel {
     // MARK: - Manual Price Management
     func addManualPrice(isin: String, date: String, value: Double, currency: String) {
@@ -9,10 +21,12 @@ extension AppViewModel {
     }
     
     // MARK: - Update Prices
-    func updateAllPrices() async {
+    func updateAllPrices(showCompletionDelay: Bool = true) async {
         isLoading = true
         let total = instruments.count
         let batchSize = 4
+        var successCount = 0
+        var failedNames: [String] = []
         
         for batchStart in stride(from: 0, to: total, by: batchSize) {
             let batchEnd = min(batchStart + batchSize, total)
@@ -46,6 +60,9 @@ extension AppViewModel {
                         currency: result.currency
                     )
                     db.addPrice(price)
+                    successCount += 1
+                } else {
+                    failedNames.append(instrument.displayName)
                 }
             }
             
@@ -64,11 +81,20 @@ extension AppViewModel {
         statusMessage = "Update complete!"
         isLoading = false
         
+        // Store refresh result for banner display
+        refreshResult = RefreshResult(
+            successCount: successCount,
+            failureCount: failedNames.count,
+            totalCount: total,
+            failedInstruments: failedNames,
+            timestamp: Date()
+        )
+        
         // Align with Settings "Last refresh" (same key as iOS BackgroundTaskManager)
         UserDefaults.standard.set(Date(), forKey: "lastBackgroundRefresh")
         
         // Recompute cached dashboard data after price updates
-        recomputeDashboardCache()
+        refreshAll()
         
         // Fetch and store benchmarks history in background (no UI blocking)
         Task {
@@ -77,8 +103,10 @@ extension AppViewModel {
             await MainActor.run { recomputeDashboardCache() }
         }
         
-        // Clear status after delay
-        try? await Task.sleep(nanoseconds: 2_000_000_000)
+        // Clear status after delay (skip for pull-to-refresh)
+        if showCompletionDelay {
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+        }
         statusMessage = ""
     }
     

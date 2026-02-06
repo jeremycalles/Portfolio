@@ -96,6 +96,30 @@ struct iOSRootView: View {
         } message: {
             Text(viewModel.errorMessage ?? "")
         }
+        // Refresh result banner overlay (covers all tabs)
+        .overlay(alignment: .top) {
+            if let result = viewModel.refreshResult {
+                RefreshResultBanner(result: result) {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        viewModel.dismissRefreshResult()
+                    }
+                }
+                .padding(.top, 8)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .onAppear {
+                    // Auto-dismiss after 4 seconds on full success
+                    if result.succeeded {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                viewModel.dismissRefreshResult()
+                            }
+                        }
+                    }
+                }
+                .zIndex(100)
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: viewModel.refreshResult?.id)
     }
 }
 
@@ -225,7 +249,7 @@ struct iOSDashboardView: View {
         }
         .background(Color(.systemGroupedBackground))
         .refreshable {
-            viewModel.refreshAll()
+            await viewModel.updateAllPrices(showCompletionDelay: false)
         }
         .overlay {
             if viewModel.isLoading {
