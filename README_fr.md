@@ -490,10 +490,14 @@ Choisissez où stocker vos données :
 
 Activez les mises à jour automatiques des prix :
 1. Allez dans **Paramètres** → **Actualisation en Arrière-plan**
-2. Activez l'agent de lancement
-3. Les prix se mettent à jour automatiquement toutes les 3 heures
+2. Choisissez un intervalle (1 heure, 3 heures, 6 heures ou 12 heures)
+3. Cliquez sur **Activer** pour installer l'Agent de Lancement et démarrer le minuteur intégré
 
-Sur macOS, le stockage local et les scripts/logs d'actualisation en arrière-plan utilisent la racine du projet résolue comme `$HOME/github/Portfolio`. Cloner ou faire un lien symbolique du dépôt à cet endroit garde les chemins cohérents.
+Le planificateur fonctionne de deux manières complémentaires :
+- **Agent de Lancement** : Un plist `launchd` système (`~/Library/LaunchAgents/com.portfolio.app.pricerefresh.plist`) déclenche l'application via le schéma d'URL `portfolio://refresh` à l'intervalle configuré — même lorsque l'application n'est pas au premier plan.
+- **Minuteur intégré** : Un minuteur répétitif actualise les prix pendant que l'application est en cours d'exécution, assurant des mises à jour fluides sans l'Agent de Lancement.
+
+Les logs sont écrits dans `~/Library/Logs/PortfolioApp/refresh.log` et peuvent être consultés directement dans le panneau Paramètres ou ouverts dans le Finder.
 
 #### Tâches en Arrière-plan (iOS)
 
@@ -559,10 +563,12 @@ Ceci exécute la mise à jour chaque jour à 18h.
 
 ### Agent de Lancement macOS
 
-L'application peut installer un agent de lancement pour les mises à jour automatiques en arrière-plan :
+L'application gère un Agent de Lancement pour les mises à jour automatiques en arrière-plan :
 1. Ouvrez **Paramètres** → **Actualisation en Arrière-plan**
-2. Activez l'agent de lancement
-3. Les prix se mettent à jour automatiquement toutes les 3 heures
+2. Sélectionnez votre intervalle préféré (1h, 3h, 6h ou 12h)
+3. Cliquez sur **Activer** pour générer et installer le plist
+
+L'Agent de Lancement exécute `/usr/bin/open -g portfolio://refresh` à l'intervalle configuré. Cela ouvre l'application en arrière-plan (ou envoie l'URL à l'instance en cours) et déclenche une actualisation complète des prix — instruments, taux de change et indices de référence (S&P 500, Or, MSCI World). Le plist est écrit dans `~/Library/LaunchAgents/com.portfolio.app.pricerefresh.plist` et géré via `launchctl`. Modifier l'intervalle réinstalle automatiquement l'agent avec le nouveau planning.
 
 ### Actualisation en Arrière-plan iOS
 

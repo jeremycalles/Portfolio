@@ -490,10 +490,14 @@ Choose where to store your data:
 
 Enable automatic price updates:
 1. Go to **Settings** → **Background Refresh**
-2. Enable the launch agent
-3. Prices update automatically every 3 hours
+2. Choose an interval (1 hour, 3 hours, 6 hours, or 12 hours)
+3. Click **Enable** to install the Launch Agent and start the in-app timer
 
-On macOS, local storage and background refresh scripts/logs use the project root resolved as `$HOME/github/Portfolio`. Cloning or symlinking the repo there keeps paths consistent.
+The scheduler works in two complementary ways:
+- **Launch Agent**: A system-level `launchd` plist (`~/Library/LaunchAgents/com.portfolio.app.pricerefresh.plist`) triggers the app via a `portfolio://refresh` URL scheme at the configured interval — even when the app is not in the foreground.
+- **In-app Timer**: A repeating timer refreshes prices while the app is running, providing seamless updates without the Launch Agent.
+
+Logs are written to `~/Library/Logs/PortfolioApp/refresh.log` and can be viewed directly in the Settings panel or opened in Finder.
 
 #### Background Tasks (iOS)
 
@@ -559,10 +563,12 @@ This runs the update every day at 6 PM.
 
 ### macOS Launch Agent
 
-The app can install a launch agent for automatic background updates:
+The app manages a proper Launch Agent for automatic background updates:
 1. Open **Settings** → **Background Refresh**
-2. Enable the launch agent
-3. Prices update every 3 hours automatically
+2. Select your preferred interval (1h, 3h, 6h, or 12h)
+3. Click **Enable** to generate and install the plist
+
+The Launch Agent runs `/usr/bin/open -g portfolio://refresh` at the configured interval. This opens the app in the background (or sends the URL to the running instance) and triggers a full price refresh — instruments, exchange rates, and benchmarks (S&P 500, Gold, MSCI World). The plist is written to `~/Library/LaunchAgents/com.portfolio.app.pricerefresh.plist` and managed via `launchctl`. Changing the interval automatically reinstalls the agent with the new schedule.
 
 ### iOS Background Refresh
 
