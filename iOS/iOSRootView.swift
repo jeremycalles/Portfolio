@@ -109,13 +109,9 @@ struct iOSRootView: View {
                 .onAppear {
                     // Auto-dismiss after 4 seconds on full success
                     if result.succeeded {
-                        let resultID = result.id
                         DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-                            // Only dismiss if this exact result is still showing
-                            if viewModel.refreshResult?.id == resultID {
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    viewModel.dismissRefreshResult()
-                                }
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                viewModel.dismissRefreshResult()
                             }
                         }
                     }
@@ -270,4 +266,3 @@ struct iOSDashboardView: View {
         }
     }
 }
-
