@@ -96,6 +96,138 @@ actor MarketDataService {
         return (timestamps, closes, currency, result)
     }
     
+    /// Extracts price and currency from chart response meta only. Use when chart returns 200 but has no timestamp/indicators (e.g. quote API returns 401).
+    private func parseYahooChartMetaOnly(_ data: Data) -> (price: Double, currency: String)? {
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let chart = json["chart"] as? [String: Any],
+              let results = chart["result"] as? [[String: Any]],
+              let result = results.first,
+              let meta = result["meta"] as? [String: Any],
+              let currency = meta["currency"] as? String, !currency.isEmpty else {
+            return nil
+        }
+        func number(from key: String) -> Double? {
+            if let d = meta[key] as? Double { return d }
+            if let i = meta[key] as? Int { return Double(i) }
+            if let s = meta[key] as? String { return Double(s) }
+            return nil
+        }
+        guard let price = number(from: "regularMarketPrice")
+            ?? number(from: "previousClose")
+            ?? number(from: "chartPreviousClose"), price > 0 else {
+            return nil
+        }
+        return (price, currency)
+    }
+    
+    /// Parses Yahoo Finance quote API response. Use when chart API returns 200 but has no chart data (e.g. some funds).
+    /// Accepts price as Double, Int, or String; currency optional (defaults to USD). Tries multiple price keys.
+    private func parseYahooQuoteJSON(_ data: Data) -> (price: Double, currency: String, date: String)? {
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let quoteResponse = json["quoteResponse"] as? [String: Any],
+              let rawResults = quoteResponse["result"] as? [Any] else {
+            return nil
+        }
+        guard let first = rawResults.lazy.compactMap({ $0 as? [String: Any] }).first else {
+            return nil
+        }
+        func number(from key: String) -> Double? {
+            if let d = first[key] as? Double { return d }
+            if let i = first[key] as? Int { return Double(i) }
+            if let s = first[key] as? String { return Double(s) }
+            return nil
+        }
+        let price: Double? = number(from: "regularMarketPrice")
+            ?? number(from: "regularMarketPreviousClose")
+            ?? number(from: "previousClose")
+            ?? number(from: "ask")
+            ?? number(from: "bid")
+        guard let p = price, p > 0 else { return nil }
+        let currency: String = (first["currency"] as? String).flatMap { $0.isEmpty ? nil : $0 }
+            ?? (first["quoteCurrency"] as? String).flatMap { $0.isEmpty ? nil : $0 }
+            ?? "USD"
+        let today = AppDateFormatter.todayString
+        let date: String = {
+            if let time = first["regularMarketTime"] as? TimeInterval, time > 0 {
+                return AppDateFormatter.yearMonthDay.string(from: Date(timeIntervalSince1970: time))
+            }
+            if let time = first["regularMarketTime"] as? Int, time > 0 {
+                return AppDateFormatter.yearMonthDay.string(from: Date(timeIntervalSince1970: TimeInterval(time)))
+            }
+            return today
+        }()
+        return (p, currency, date)
+    }
+    
+    /// Returns a short diagnostic string for a failed quote response (status + result count / reason). No PII.
+    private func describeYahooQuoteResponse(data: Data, statusCode: Int?) -> String {
+        let status = statusCode.map { "\($0)" } ?? "no response"
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let quoteResponse = json["quoteResponse"] as? [String: Any],
+              let rawResults = quoteResponse["result"] as? [Any] else {
+            return "quote: \(status), body not quoteResponse.result"
+        }
+        let count = rawResults.count
+        guard let first = rawResults.lazy.compactMap({ $0 as? [String: Any] }).first else {
+            return "quote: \(status), result count=\(count), no valid first object"
+        }
+        let priceKeys = ["regularMarketPrice", "regularMarketPreviousClose", "previousClose", "ask", "bid"]
+        let hasPrice = priceKeys.contains { first[$0] != nil && !(first[$0] is NSNull) }
+        if hasPrice {
+            return "quote: \(status), result count=\(count), has price key but parse failed"
+        }
+        return "quote: \(status), result count=\(count), no price in first object"
+    }
+    
+    /// Returns a short diagnostic string for a failed chart response. No PII.
+    private func describeYahooChartResponse(data: Data, statusCode: Int?) -> String {
+        let status = statusCode.map { "\($0)" } ?? "no response"
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let chart = json["chart"] as? [String: Any],
+              let results = chart["result"] as? [Any] else {
+            return "chart: \(status), body not chart.result"
+        }
+        let count = results.count
+        if count == 0 { return "chart: \(status), result count=0" }
+        guard let first = results.first as? [String: Any] else {
+            return "chart: \(status), result count=\(count), first not object"
+        }
+        let hasMeta = first["meta"] != nil
+        let hasTimestamp = (first["timestamp"] as? [Int])?.isEmpty == false
+        let hasIndicators = (first["indicators"] as? [String: Any])?["quote"] != nil
+        return "chart: \(status), result count=\(count), meta=\(hasMeta), timestamp=\(hasTimestamp), indicators=\(hasIndicators)"
+    }
+    
+    /// Writes last failed Yahoo responses to a file for inspection. Call when Yahoo fetch failed.
+    private func writeYahooDebugFile(ticker: String, quoteData: Data?, quoteStatus: Int?, chartData: Data?, chartStatus: Int?) {
+        let limit = 1200
+        var lines: [String] = [
+            "ticker: \(ticker)",
+            "quote status: \(quoteStatus.map { "\($0)" } ?? "nil")",
+            "chart status: \(chartStatus.map { "\($0)" } ?? "nil")",
+            ""
+        ]
+        if let d = quoteData {
+            let snippet = String(data: d.prefix(limit), encoding: .utf8) ?? "<invalid UTF-8>"
+            lines.append("--- quote body (first \(min(d.count, limit)) bytes) ---")
+            lines.append(snippet)
+            if d.count > limit { lines.append("... [truncated]") }
+            lines.append("")
+        }
+        if let d = chartData {
+            let snippet = String(data: d.prefix(limit), encoding: .utf8) ?? "<invalid UTF-8>"
+            lines.append("--- chart body (first \(min(d.count, limit)) bytes) ---")
+            lines.append(snippet)
+            if d.count > limit { lines.append("... [truncated]") }
+        }
+        let content = lines.joined(separator: "\n")
+        let name = "yahoo_debug_last.txt"
+        if let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first {
+            let file = dir.appendingPathComponent(name)
+            try? content.write(to: file, atomically: true, encoding: .utf8)
+        }
+    }
+    
     /// When identifier is "ISIN:CURRENCY" (e.g. LU0169518387:USD), returns the 12-char ISIN for FT/search; otherwise returns the original.
     private func coreIsinForLookup(_ isin: String) -> String {
         if let colonIndex = isin.firstIndex(of: ":"), colonIndex == isin.index(isin.startIndex, offsetBy: 12) {
@@ -254,8 +386,35 @@ actor MarketDataService {
     private func fetchYahooFinance(ticker: String, isin: String) async -> MarketDataResult? {
         let today = AppDateFormatter.todayString
         let encoded = urlEncodedTicker(ticker)
+        var lastQuoteData: Data?
+        var lastQuoteStatus: Int?
         
-        // Try the Yahoo Finance quote API (ticker URL-encoded so symbols like LU0169518387:USD work)
+        // Try quote API first — many symbols (e.g. LU0169518387.SG) have quote but no chart data.
+        var quoteComponents = URLComponents(string: "https://query1.finance.yahoo.com/v7/finance/quote")
+        quoteComponents?.queryItems = [URLQueryItem(name: "symbols", value: ticker)]
+        if let quoteUrl = quoteComponents?.url {
+            do {
+                let (quoteData, quoteResponse) = try await performRequest(from: quoteUrl)
+                let qStatus = (quoteResponse as? HTTPURLResponse)?.statusCode
+                lastQuoteData = quoteData
+                lastQuoteStatus = qStatus
+                if qStatus == 200, let quoteParsed = parseYahooQuoteJSON(quoteData) {
+                    let name = await fetchYahooName(ticker: ticker)
+                    return MarketDataResult(
+                        isin: isin,
+                        ticker: ticker,
+                        name: name,
+                        value: quoteParsed.price,
+                        currency: quoteParsed.currency,
+                        date: quoteParsed.date
+                    )
+                }
+            } catch {
+                // Continue to chart API
+            }
+        }
+        
+        // Fallback: chart API (has timestamps and history; some symbols only have chart)
         guard let url = URL(string: "https://query1.finance.yahoo.com/v8/finance/chart/\(encoded)?interval=1d&range=5d") else { return nil }
         
         do {
@@ -270,52 +429,49 @@ actor MarketDataService {
                 return nil
             }
             
-            guard let parsed = parseYahooChartJSON(data) else {
-                if lastFetchError == nil { lastFetchError = "Yahoo: invalid or empty chart data" }
-                return nil
+            if let parsed = parseYahooChartJSON(data) {
+                let (timestamps, closes, currency, result) = parsed
+                var price: Double?
+                var priceDate = today
+                if let meta = result["meta"] as? [String: Any] {
+                    price = meta["regularMarketPrice"] as? Double
+                }
+                if price == nil {
+                    price = closes.compactMap { $0 }.last
+                }
+                if let lastTimestamp = timestamps.last {
+                    let date = Date(timeIntervalSince1970: TimeInterval(lastTimestamp))
+                    priceDate = AppDateFormatter.yearMonthDay.string(from: date)
+                }
+                let name = await fetchYahooName(ticker: ticker)
+                if let finalPrice = price {
+                    return MarketDataResult(
+                        isin: isin,
+                        ticker: ticker,
+                        name: name,
+                        value: finalPrice,
+                        currency: currency,
+                        date: priceDate
+                    )
+                }
             }
-            
-            let (timestamps, closes, currency, result) = parsed
-            
-            // Get price
-            var price: Double?
-            var priceDate = today
-            
-            if let meta = result["meta"] as? [String: Any] {
-                price = meta["regularMarketPrice"] as? Double
+            // Chart 200 but no time series (timestamp=false). Use meta.regularMarketPrice when quote returns 401.
+            if let metaOnly = parseYahooChartMetaOnly(data) {
+                let name = await fetchYahooName(ticker: ticker)
+                return MarketDataResult(
+                    isin: isin,
+                    ticker: ticker,
+                    name: name,
+                    value: metaOnly.price,
+                    currency: metaOnly.currency,
+                    date: today
+                )
             }
-            
-            // Fallback to indicators
-            if price == nil {
-                // Get last non-nil close
-                price = closes.compactMap { $0 }.last
-            }
-            
-            // Get timestamps for date
-            if let lastTimestamp = timestamps.last {
-                let date = Date(timeIntervalSince1970: TimeInterval(lastTimestamp))
-                priceDate = AppDateFormatter.yearMonthDay.string(from: date)
-            }
-            
-            // Get metadata
-            var name: String?
-            
-            // Try to get name from quote summary
-            name = await fetchYahooName(ticker: ticker)
-            
-            guard let finalPrice = price else {
-                if lastFetchError == nil { lastFetchError = "Yahoo: no price in response" }
-                return nil
-            }
-            
-            return MarketDataResult(
-                isin: isin,
-                ticker: ticker,
-                name: name,
-                value: finalPrice,
-                currency: currency,
-                date: priceDate
-            )
+            let quoteDiag = lastQuoteData.map { describeYahooQuoteResponse(data: $0, statusCode: lastQuoteStatus) } ?? "quote: not tried or threw"
+            let chartDiag = describeYahooChartResponse(data: data, statusCode: httpResponse.statusCode)
+            if lastFetchError == nil { lastFetchError = "Yahoo: \(quoteDiag); \(chartDiag)" }
+            writeYahooDebugFile(ticker: ticker, quoteData: lastQuoteData, quoteStatus: lastQuoteStatus, chartData: data, chartStatus: httpResponse.statusCode)
+            return nil
         } catch {
             if lastFetchError == nil { lastFetchError = error.localizedDescription }
             print("Yahoo Finance error for \(ticker): \(error)")

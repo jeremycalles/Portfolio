@@ -125,7 +125,7 @@ struct EnhancedPortfolioHeroCard: View {
                     
                     // Change Indicator Pill
                     if !privacyMode {
-                        if showGoldMode, let gold = goldTotals, let goldChg = goldChange, let goldChgPct = goldChangePercent, goldHistory.first?.value ?? 0 > 0 {
+                        if showGoldMode, goldTotals != nil, let goldChg = goldChange, let goldChgPct = goldChangePercent, goldHistory.first?.value ?? 0 > 0 {
                             HStack(spacing: 6) {
                                 Image(systemName: isGoldPositive ? "arrow.up.right" : "arrow.down.right")
                                     .font(.system(size: 11, weight: .semibold))

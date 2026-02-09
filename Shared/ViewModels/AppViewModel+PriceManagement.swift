@@ -25,6 +25,15 @@ extension AppViewModel {
     }
     
     // MARK: - Update Prices
+
+    /// Use from SwiftUI `.refreshable` so the refresh is not cancelled when the user releases.
+    /// Await the returned task; catch `CancellationError` to allow dismissal while refresh continues.
+    func startRefreshTask(showCompletionDelay: Bool = false) -> Task<Void, Never> {
+        Task.detached(priority: .userInitiated) { [self] in
+            await self.updateAllPrices(showCompletionDelay: showCompletionDelay)
+        }
+    }
+
     func updateAllPrices(showCompletionDelay: Bool = true) async {
         isLoading = true
         let total = instruments.count

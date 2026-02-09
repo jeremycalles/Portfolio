@@ -201,7 +201,7 @@ struct iOSDashboardView: View {
         }
         .background(Color(.systemGroupedBackground))
         .refreshable {
-            await viewModel.updateAllPrices(showCompletionDelay: false)
+            await viewModel.startRefreshTask(showCompletionDelay: false).value
         }
         .overlay {
             if viewModel.isLoading {
