@@ -152,3 +152,38 @@ struct RefreshResultBanner: View {
         .padding(.horizontal)
     }
 }
+
+// MARK: - Refresh Result Overlay Modifier
+extension View {
+    /// Presents a refresh-result banner overlay with auto-dismiss on full success.
+    func refreshResultOverlay(result: RefreshResult?, onDismiss: @escaping () -> Void) -> some View {
+        overlay(alignment: .top) {
+            if let result = result {
+                HStack {
+                    Spacer(minLength: 0)
+                    RefreshResultBanner(result: result) {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            onDismiss()
+                        }
+                    }
+                    .frame(maxWidth: 400)
+                    Spacer(minLength: 0)
+                }
+                .padding(.top, 8)
+                .padding(.horizontal, 16)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .onAppear {
+                    if result.succeeded {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                onDismiss()
+                            }
+                        }
+                    }
+                }
+                .zIndex(100)
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: result?.id)
+    }
+}

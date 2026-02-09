@@ -225,18 +225,6 @@ struct EditInstrumentSheet: View {
     
     private let currencies = ["EUR", "USD", "GBP", "CHF", "JPY"]
     
-    private static let numberFormatter: NumberFormatter = {
-        let f = NumberFormatter()
-        f.numberStyle = .decimal
-        f.locale = .current
-        return f
-    }()
-    
-    private func parseNumber(_ text: String) -> Double? {
-        if let number = Self.numberFormatter.number(from: text) { return number.doubleValue }
-        return Double(text.replacingOccurrences(of: ",", with: "."))
-    }
-    
     private let labelWidth: CGFloat = 72
     
     @ViewBuilder
@@ -376,7 +364,7 @@ struct EditInstrumentSheet: View {
                             currency: currency,
                             quadrantId: quadrantId
                         )
-                        if hasLatestPrice, let value = parseNumber(latestPriceText), value > 0 {
+                        if hasLatestPrice, let value = parseDecimal(latestPriceText), value > 0 {
                             let newDateStr = AppDateFormatter.yearMonthDay.string(from: latestPriceDate)
                             if let old = originalLatestPrice, old.date != newDateStr {
                                 viewModel.deletePrice(isin: instrument.isin, date: old.date)

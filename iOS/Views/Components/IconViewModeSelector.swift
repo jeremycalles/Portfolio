@@ -2,12 +2,12 @@ import SwiftUI
 
 // MARK: - Icon-Based View Mode Selector
 struct IconViewModeSelector: View {
-    @Binding var selectedMode: iOSDashboardViewMode
+    @Binding var selectedMode: DashboardViewMode
     @Namespace private var animation
     
     var body: some View {
         HStack(spacing: 4) {
-            ForEach(iOSDashboardViewMode.allCases) { mode in
+            ForEach(DashboardViewMode.allCases) { mode in
                 Button {
                     let generator = UIImpactFeedbackGenerator(style: .light)
                     generator.impactOccurred()

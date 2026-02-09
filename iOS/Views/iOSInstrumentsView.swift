@@ -343,18 +343,6 @@ struct iOSInstrumentEditSheet: View {
     private var originalLatestPrice: Price? { DatabaseService.shared.getLatestPrice(forIsin: instrument.isin) }
     private let currencies = ["EUR", "USD", "GBP", "CHF", "JPY"]
     
-    private static let numberFormatter: NumberFormatter = {
-        let f = NumberFormatter()
-        f.numberStyle = .decimal
-        f.locale = .current
-        return f
-    }()
-    
-    private func parseNumber(_ text: String) -> Double? {
-        if let number = Self.numberFormatter.number(from: text) { return number.doubleValue }
-        return Double(text.replacingOccurrences(of: ",", with: "."))
-    }
-    
     var body: some View {
         NavigationStack {
             Form {
@@ -441,7 +429,7 @@ struct iOSInstrumentEditSheet: View {
                                 currency: currency,
                                 quadrantId: quadrantId
                             )
-                            if hasLatestPrice, let value = parseNumber(latestPriceText), value > 0 {
+                            if hasLatestPrice, let value = parseDecimal(latestPriceText), value > 0 {
                                 let newDateStr = AppDateFormatter.yearMonthDay.string(from: latestPriceDate)
                                 if let old = originalLatestPrice, old.date != newDateStr {
                                     viewModel.deletePrice(isin: instrument.isin, date: old.date)
@@ -482,24 +470,6 @@ struct iOSPriceEditorSheet: View {
     
     private let currencies = ["EUR", "USD", "GBP", "CHF", "JPY"]
     
-    // Locale-aware number formatter (static to avoid re-creation)
-    private static let numberFormatter: NumberFormatter = {
-        let f = NumberFormatter()
-        f.numberStyle = .decimal
-        f.locale = .current
-        return f
-    }()
-    
-    private func parseNumber(_ text: String) -> Double? {
-        // First try with current locale (handles comma as decimal separator)
-        if let number = Self.numberFormatter.number(from: text) {
-            return number.doubleValue
-        }
-        // Fallback: try replacing comma with period
-        let normalized = text.replacingOccurrences(of: ",", with: ".")
-        return Double(normalized)
-    }
-    
     init(instrument: Instrument, existingPrice: Price?, onSave: @escaping (String, Double, String) -> Void) {
         self.instrument = instrument
         self.existingPrice = existingPrice
@@ -517,7 +487,7 @@ struct iOSPriceEditorSheet: View {
     }
     
     private var isValid: Bool {
-        guard let value = parseNumber(priceText), value > 0 else { return false }
+        guard let value = parseDecimal(priceText), value > 0 else { return false }
         return true
     }
     
@@ -557,7 +527,7 @@ struct iOSPriceEditorSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(existingPrice == nil ? "Add" : "Save") {
-                        if let value = parseNumber(priceText) {
+                        if let value = parseDecimal(priceText) {
                             let dateString = AppDateFormatter.yearMonthDay.string(from: selectedDate)
                             onSave(dateString, value, selectedCurrency)
                             dismiss()

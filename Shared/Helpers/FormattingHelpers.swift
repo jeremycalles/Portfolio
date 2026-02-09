@@ -29,3 +29,17 @@ func formatCompactCurrency(_ value: Double) -> String {
         return String(format: "%.0f", value)
     }
 }
+
+// MARK: - Decimal Parsing
+
+/// Locale-aware decimal parsing (handles comma or period as decimal separator).
+/// Tries current locale first, then fallback replacing comma with period.
+func parseDecimal(_ text: String) -> Double? {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    formatter.locale = .current
+    if let number = formatter.number(from: text) {
+        return number.doubleValue
+    }
+    return Double(text.replacingOccurrences(of: ",", with: "."))
+}

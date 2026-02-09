@@ -3,8 +3,8 @@ import SwiftUI
 #if os(macOS)
 // MARK: - Main Content View
 struct ContentView: View {
-    @StateObject private var viewModel = AppViewModel()
-    @StateObject private var languageManager = LanguageManager.shared
+    @EnvironmentObject var viewModel: AppViewModel
+    @EnvironmentObject var languageManager: LanguageManager
     @State private var selectedTab = 0
     @State private var showAutoRefreshPrompt = false
     
@@ -92,8 +92,6 @@ struct ContentView: View {
                 }
             }
         }
-        .environmentObject(viewModel)
-        .environmentObject(languageManager)
         .alert(L10n.generalError, isPresented: .constant(viewModel.errorMessage != nil)) {
             Button(L10n.generalOk) {
                 viewModel.dismissError()
@@ -136,34 +134,7 @@ struct ContentView: View {
         .sheet(isPresented: $showAutoRefreshPrompt) {
             AutoRefreshPromptView()
         }
-        .overlay(alignment: .top) {
-            if let result = viewModel.refreshResult {
-                HStack {
-                    Spacer(minLength: 0)
-                    RefreshResultBanner(result: result) {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            viewModel.dismissRefreshResult()
-                        }
-                    }
-                    .frame(maxWidth: 400)
-                    Spacer(minLength: 0)
-                }
-                .padding(.top, 8)
-                .padding(.horizontal, 16)
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .onAppear {
-                    if result.succeeded {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                viewModel.dismissRefreshResult()
-                            }
-                        }
-                    }
-                }
-                .zIndex(100)
-            }
-        }
-        .animation(.easeInOut(duration: 0.3), value: viewModel.refreshResult?.id)
+        .refreshResultOverlay(result: viewModel.refreshResult, onDismiss: { viewModel.dismissRefreshResult() })
     }
 }
 

@@ -155,7 +155,7 @@
 		V014 /* iOSAllHoldingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = iOSAllHoldingsView.swift; path = iOS/Views/iOSAllHoldingsView.swift; sourceTree = SOURCE_ROOT; };
 		V015 /* iOSInstrumentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = iOSInstrumentsView.swift; path = iOS/Views/iOSInstrumentsView.swift; sourceTree = SOURCE_ROOT; };
 		V016 /* iOSSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = iOSSettingsView.swift; path = iOS/Views/iOSSettingsView.swift; sourceTree = SOURCE_ROOT; };
-		V017 /* RefreshResultBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RefreshResultBanner.swift; path = iOS/Views/Components/RefreshResultBanner.swift; sourceTree = SOURCE_ROOT; };
+		V017 /* RefreshResultBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RefreshResultBanner.swift; path = Shared/Views/Components/RefreshResultBanner.swift; sourceTree = SOURCE_ROOT; };
 		S024 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		S025 /* MacOSSchedulerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MacOSSchedulerManager.swift; path = macOS/MacOSSchedulerManager.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -231,6 +231,7 @@
 				G013 /* ViewModels */,
 				S014 /* FormattingHelpers.swift */,
 				S015 /* ChangeLabel.swift */,
+				V017 /* RefreshResultBanner.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -269,7 +270,6 @@
 			V014 /* iOSAllHoldingsView.swift */,
 			V015 /* iOSInstrumentsView.swift */,
 		V016 /* iOSSettingsView.swift */,
-		V017 /* RefreshResultBanner.swift */,
 	);
 	path = iOS;
 	sourceTree = "<group>";

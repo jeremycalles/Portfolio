@@ -9,6 +9,14 @@ enum DashboardViewMode: String, CaseIterable, Identifiable {
     
     var id: String { rawValue }
     
+    var icon: String {
+        switch self {
+        case .quadrants: return "square.grid.2x2"
+        case .holdings: return "list.bullet"
+        case .accounts: return "building.columns"
+        }
+    }
+    
     var displayName: String {
         switch self {
         case .quadrants: return L10n.dashboardQuadrants

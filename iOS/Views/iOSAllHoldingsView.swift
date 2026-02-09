@@ -132,28 +132,10 @@ struct AddHoldingSheet: View {
     @State private var purchaseDate = Date()
     @State private var includePurchaseInfo = false
     
-    // Locale-aware number formatter (static to avoid re-creation)
-    private static let numberFormatter: NumberFormatter = {
-        let f = NumberFormatter()
-        f.numberStyle = .decimal
-        f.locale = .current
-        return f
-    }()
-    
-    private func parseNumber(_ text: String) -> Double? {
-        // First try with current locale (handles comma as decimal separator)
-        if let number = Self.numberFormatter.number(from: text) {
-            return number.doubleValue
-        }
-        // Fallback: try replacing comma with period for users who type comma on period-locale
-        let normalized = text.replacingOccurrences(of: ",", with: ".")
-        return Double(normalized)
-    }
-    
     private var isValid: Bool {
         guard let _ = selectedAccountId,
               let _ = selectedIsin,
-              let quantity = parseNumber(quantityText),
+              let quantity = parseDecimal(quantityText),
               quantity > 0 else {
             return false
         }
@@ -235,12 +217,12 @@ struct AddHoldingSheet: View {
     private func addHolding() {
         guard let accountId = selectedAccountId,
               let isin = selectedIsin,
-              let quantity = parseNumber(quantityText) else {
+              let quantity = parseDecimal(quantityText) else {
             return
         }
         
         let purchaseDateStr: String? = includePurchaseInfo ? AppDateFormatter.yearMonthDay.string(from: purchaseDate) : nil
-        let purchasePrice: Double? = includePurchaseInfo ? parseNumber(purchasePriceText) : nil
+        let purchasePrice: Double? = includePurchaseInfo ? parseDecimal(purchasePriceText) : nil
         
         viewModel.addHolding(
             accountId: accountId,

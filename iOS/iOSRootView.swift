@@ -2,31 +2,6 @@ import SwiftUI
 import Charts
 import UniformTypeIdentifiers
 
-// MARK: - Dashboard View Mode
-enum iOSDashboardViewMode: String, CaseIterable, Identifiable {
-    case quadrants
-    case holdings
-    case accounts
-    
-    var id: String { rawValue }
-     
-    var icon: String {
-        switch self {
-        case .quadrants: return "square.grid.2x2"
-        case .holdings: return "list.bullet"
-        case .accounts: return "building.columns"
-        }
-    }
-    
-    var displayName: String {
-        switch self {
-        case .quadrants: return L10n.dashboardQuadrants
-        case .holdings: return L10n.dashboardHoldings
-        case .accounts: return L10n.dashboardAccounts
-        }
-    }
-}
-
 // MARK: - iOS Root View with TabView Navigation
 struct iOSRootView: View {
     @EnvironmentObject var viewModel: AppViewModel
@@ -96,36 +71,7 @@ struct iOSRootView: View {
         } message: {
             Text(viewModel.errorMessage ?? "")
         }
-        // Refresh result banner overlay (covers all tabs)
-        .overlay(alignment: .top) {
-            if let result = viewModel.refreshResult {
-                HStack {
-                    Spacer(minLength: 0)
-                    RefreshResultBanner(result: result) {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            viewModel.dismissRefreshResult()
-                        }
-                    }
-                    .frame(maxWidth: 400)
-                    Spacer(minLength: 0)
-                }
-                .padding(.top, 8)
-                .padding(.horizontal, 16)
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .onAppear {
-                    // Auto-dismiss after 4 seconds on full success
-                    if result.succeeded {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                viewModel.dismissRefreshResult()
-                            }
-                        }
-                    }
-                }
-                .zIndex(100)
-            }
-        }
-        .animation(.easeInOut(duration: 0.3), value: viewModel.refreshResult?.id)
+        .refreshResultOverlay(result: viewModel.refreshResult, onDismiss: { viewModel.dismissRefreshResult() })
     }
 }
 
@@ -133,7 +79,7 @@ struct iOSRootView: View {
 struct iOSDashboardView: View {
     @EnvironmentObject var viewModel: AppViewModel
     let privacyMode: Bool
-    @State private var viewMode: iOSDashboardViewMode = .quadrants
+    @State private var viewMode: DashboardViewMode = .quadrants
     
     private var portfolioChange: (amount: Double, percent: Double)? {
         let totals = viewModel.cachedGrandTotalsEUR
