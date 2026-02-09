@@ -8,6 +8,10 @@ struct RefreshResult: Identifiable {
     let totalCount: Int
     let failedInstruments: [String]
     let timestamp: Date
+    /// When all instruments fail, this may contain the first network/data error (e.g. for iOS diagnostics).
+    let lastError: String?
+    /// Per-instrument failure reasons for debugging (e.g. "JPMorgan Asia...: Yahoo: HTTP 403").
+    let debugLogLines: [String]
     
     var succeeded: Bool { failureCount == 0 }
 }
@@ -27,6 +31,7 @@ extension AppViewModel {
         let batchSize = 4
         var successCount = 0
         var failedNames: [String] = []
+        var failedReasons: [String] = []
         
         for batchStart in stride(from: 0, to: total, by: batchSize) {
             let batchEnd = min(batchStart + batchSize, total)
@@ -49,7 +54,7 @@ extension AppViewModel {
                 return collected
             }
             
-            // Store results on MainActor
+            // Store results on MainActor and collect failure reasons for debug log
             for (instrument, result) in results {
                 if let value = result.value {
                     let price = Price(
@@ -63,6 +68,8 @@ extension AppViewModel {
                     successCount += 1
                 } else {
                     failedNames.append(instrument.displayName)
+                    let reason = result.failureReason ?? "unknown"
+                    failedReasons.append("\(instrument.displayName): \(reason)")
                 }
             }
             
@@ -81,13 +88,20 @@ extension AppViewModel {
         statusMessage = "Update complete!"
         isLoading = false
         
-        // Store refresh result for banner display
+        // When all failed, capture first error from MarketDataService for diagnostics (e.g. iOS network)
+        let diagnosticError: String? = (failedNames.count == total && total > 0)
+            ? await marketData.takeLastFetchError()
+            : nil
+        
+        // Store refresh result for banner display (with per-instrument debug log when there are failures)
         refreshResult = RefreshResult(
             successCount: successCount,
             failureCount: failedNames.count,
             totalCount: total,
             failedInstruments: failedNames,
-            timestamp: Date()
+            timestamp: Date(),
+            lastError: diagnosticError,
+            debugLogLines: failedReasons
         )
         
         // Align with Settings "Last refresh" (same key as iOS BackgroundTaskManager)

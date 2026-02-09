@@ -256,6 +256,7 @@
 "refresh.successDetail" = "Les %d instruments ont été mis à jour";
 "refresh.resultDetail" = "%d sur %d instruments mis à jour";
 "refresh.failedInstruments" = "Instruments en échec :";
+"refresh.debugReasons" = "Raison par instrument (debug) :";
 
 // MARK: - Errors
 "error.fetchFailed" = "Échec de la récupération des données";

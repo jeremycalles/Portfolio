@@ -99,12 +99,18 @@ struct iOSRootView: View {
         // Refresh result banner overlay (covers all tabs)
         .overlay(alignment: .top) {
             if let result = viewModel.refreshResult {
-                RefreshResultBanner(result: result) {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        viewModel.dismissRefreshResult()
+                HStack {
+                    Spacer(minLength: 0)
+                    RefreshResultBanner(result: result) {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            viewModel.dismissRefreshResult()
+                        }
                     }
+                    .frame(maxWidth: 400)
+                    Spacer(minLength: 0)
                 }
                 .padding(.top, 8)
+                .padding(.horizontal, 16)
                 .transition(.move(edge: .top).combined(with: .opacity))
                 .onAppear {
                     // Auto-dismiss after 4 seconds on full success

@@ -74,7 +74,7 @@ struct EnhancedPortfolioHeroCard: View {
     }
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 10) {
             if currentValue == 0 {
                 // Empty state
                 VStack(spacing: 8) {
@@ -88,8 +88,11 @@ struct EnhancedPortfolioHeroCard: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 40)
             } else {
-                // Top right: same "Last refresh" as Settings (relative) or fallback to latest price date
+                // Title row: "Valeur du portefeuille" left, "Mis à jour" right
                 HStack {
+                    Text(showGoldMode ? L10n.dashboardPortfolioValueGold : L10n.dashboardPortfolioValue)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                     Spacer()
                     if let lastRefresh = viewModel.getLastRefreshDate() {
                         Text("\(L10n.summaryLastUpdate) \(Self.relativeDateTimeFormatter.localizedString(for: lastRefresh, relativeTo: Date()))")
@@ -101,75 +104,67 @@ struct EnhancedPortfolioHeroCard: View {
                             .foregroundColor(.secondary)
                     }
                 }
-                HStack(alignment: .top, spacing: 16) {
-                    // Left: Value and change
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(showGoldMode ? L10n.dashboardPortfolioValueGold : L10n.dashboardPortfolioValue)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        
-                        if privacyMode {
-                            Text("••••••")
-                                .font(.system(size: 36, weight: .bold, design: .rounded))
-                        } else if showGoldMode, let gold = goldTotals {
-                            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                                Text(String(format: "%.2f", gold.current))
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .contentTransition(.numericText())
-                                Text("oz")
-                                    .font(.system(size: 20, weight: .semibold))
-                                    .foregroundColor(.yellow)
-                            }
-                        } else {
-                            Text(formatCurrency(currentValue, currency: "EUR"))
+                VStack(alignment: .leading, spacing: 8) {
+                    if privacyMode {
+                        Text("••••••")
+                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                    } else if showGoldMode, let gold = goldTotals {
+                        HStack(alignment: .firstTextBaseline, spacing: 4) {
+                            Text(String(format: "%.2f", gold.current))
                                 .font(.system(size: 36, weight: .bold, design: .rounded))
                                 .contentTransition(.numericText())
+                            Text("oz")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundColor(.yellow)
                         }
-                        
-                        // Change Indicator Pill
-                        if !privacyMode {
-                            if showGoldMode, let gold = goldTotals, let goldChg = goldChange, let goldChgPct = goldChangePercent, goldHistory.first?.value ?? 0 > 0 {
-                                HStack(spacing: 6) {
-                                    Image(systemName: isGoldPositive ? "arrow.up.right" : "arrow.down.right")
-                                        .font(.system(size: 11, weight: .semibold))
-                                    
-                                    Text(String(format: "%+.2f oz", goldChg))
-                                        .font(.system(size: 13, weight: .semibold))
-                                    
-                                    Text("(\(String(format: "%+.2f%%", goldChgPct)))")
-                                        .font(.system(size: 13, weight: .medium))
-                                }
-                                .foregroundColor(isGoldPositive ? .green : .red)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 5)
-                                .background(
-                                    Capsule()
-                                        .fill((isGoldPositive ? Color.green : Color.red).opacity(0.15))
-                                )
-                            } else if !showGoldMode, previousValue > 0 {
-                                HStack(spacing: 6) {
-                                    Image(systemName: isPositive ? "arrow.up.right" : "arrow.down.right")
-                                        .font(.system(size: 11, weight: .semibold))
-                                    
-                                    Text("\(isPositive ? "+" : "")\(formatCurrency(change, currency: "EUR"))")
-                                        .font(.system(size: 13, weight: .semibold))
-                                    
-                                    Text("(\(String(format: "%+.2f%%", changePercent)))")
-                                        .font(.system(size: 13, weight: .medium))
-                                }
-                                .foregroundColor(isPositive ? .green : .red)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 5)
-                                .background(
-                                    Capsule()
-                                        .fill((isPositive ? Color.green : Color.red).opacity(0.15))
-                                )
-                            }
-                        }
+                    } else {
+                        Text(formatCurrency(currentValue, currency: "EUR"))
+                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                            .contentTransition(.numericText())
                     }
                     
-                    Spacer()
+                    // Change Indicator Pill
+                    if !privacyMode {
+                        if showGoldMode, let gold = goldTotals, let goldChg = goldChange, let goldChgPct = goldChangePercent, goldHistory.first?.value ?? 0 > 0 {
+                            HStack(spacing: 6) {
+                                Image(systemName: isGoldPositive ? "arrow.up.right" : "arrow.down.right")
+                                    .font(.system(size: 11, weight: .semibold))
+                                
+                                Text(String(format: "%+.2f oz", goldChg))
+                                    .font(.system(size: 13, weight: .semibold))
+                                
+                                Text("(\(String(format: "%+.2f%%", goldChgPct)))")
+                                    .font(.system(size: 13, weight: .medium))
+                            }
+                            .foregroundColor(isGoldPositive ? .green : .red)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(
+                                Capsule()
+                                    .fill((isGoldPositive ? Color.green : Color.red).opacity(0.15))
+                            )
+                        } else if !showGoldMode, previousValue > 0 {
+                            HStack(spacing: 6) {
+                                Image(systemName: isPositive ? "arrow.up.right" : "arrow.down.right")
+                                    .font(.system(size: 11, weight: .semibold))
+                                
+                                Text("\(isPositive ? "+" : "")\(formatCurrency(change, currency: "EUR"))")
+                                    .font(.system(size: 13, weight: .semibold))
+                                
+                                Text("(\(String(format: "%+.2f%%", changePercent)))")
+                                    .font(.system(size: 13, weight: .medium))
+                            }
+                            .foregroundColor(isPositive ? .green : .red)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(
+                                Capsule()
+                                    .fill((isPositive ? Color.green : Color.red).opacity(0.15))
+                            )
+                        }
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
         .onTapGesture {
@@ -178,8 +173,8 @@ struct EnhancedPortfolioHeroCard: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.horizontal, 20)
-        .padding(.vertical, 24)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 16)
         .background(
             ZStack {
                 // Gradient background based on performance

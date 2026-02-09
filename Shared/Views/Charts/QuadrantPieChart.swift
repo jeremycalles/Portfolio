@@ -30,6 +30,28 @@ struct QuadrantPieChart: View {
         quadrantData.reduce(0) { $0 + $1.value }
     }
     
+    /// Integer percentages that sum to 100% (largest-remainder method).
+    private func percentagesSummingTo100(for data: [(name: String, value: Double, color: Color)], total: Double) -> [Int] {
+        guard total > 0, !data.isEmpty else { return [] }
+        let exact: [(floor: Int, remainder: Double)] = data.map { item in
+            let pct = (item.value / total) * 100
+            return (Int(pct), pct - Double(Int(pct)))
+        }
+        let sumFloors = exact.reduce(0) { $0 + $1.floor }
+        var need = 100 - sumFloors
+        let indicesByRemainder = exact.indices.sorted { exact[$0].remainder > exact[$1].remainder }
+        var result = exact.map(\.floor)
+        for i in indicesByRemainder where need > 0 {
+            result[i] += 1
+            need -= 1
+        }
+        return result
+    }
+    
+    private var legendPercentages: [Int] {
+        percentagesSummingTo100(for: quadrantData, total: totalValue)
+    }
+    
     var body: some View {
         VStack(spacing: compact ? 8 : 12) {
             if quadrantData.isEmpty {
@@ -53,7 +75,7 @@ struct QuadrantPieChart: View {
                 if compact {
                     // Compact legend - vertical list with full names
                     VStack(alignment: .leading, spacing: 6) {
-                        ForEach(quadrantData, id: \.name) { item in
+                        ForEach(Array(quadrantData.enumerated()), id: \.element.name) { index, item in
                             HStack(spacing: 8) {
                                 Circle()
                                     .fill(item.color)
@@ -62,8 +84,8 @@ struct QuadrantPieChart: View {
                                     Text(item.name)
                                         .font(.caption)
                                         .lineLimit(1)
-                                    if !privacyMode {
-                                        Text("\(Int((item.value / totalValue) * 100))%")
+                                    if !privacyMode, index < legendPercentages.count {
+                                        Text("\(legendPercentages[index])%")
                                             .font(.caption2)
                                             .foregroundColor(.secondary)
                                     }
@@ -75,7 +97,7 @@ struct QuadrantPieChart: View {
                 } else {
                     // Full legend
                     VStack(alignment: .leading, spacing: 4) {
-                        ForEach(quadrantData, id: \.name) { item in
+                        ForEach(Array(quadrantData.enumerated()), id: \.element.name) { index, item in
                             HStack(spacing: 8) {
                                 Circle()
                                     .fill(item.color)
@@ -87,9 +109,11 @@ struct QuadrantPieChart: View {
                                     Text(formatCurrency(item.value, currency: "EUR"))
                                         .font(.caption)
                                         .foregroundColor(.secondary)
-                                    Text("(\(Int((item.value / totalValue) * 100))%)")
-                                        .font(.caption)
-                                        .fontWeight(.medium)
+                                    if index < legendPercentages.count {
+                                        Text("(\(legendPercentages[index])%)")
+                                            .font(.caption)
+                                            .fontWeight(.medium)
+                                    }
                                 } else {
                                     Text("***")
                                         .font(.caption)

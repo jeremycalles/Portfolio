@@ -72,10 +72,9 @@ struct ContentView: View {
                     DashboardView()
                 }
                 
-                // Loading overlay
+                // Loading overlay (top of detail area)
                 if viewModel.isLoading {
                     VStack {
-                        Spacer()
                         HStack {
                             ProgressView()
                                 .scaleEffect(0.8)
@@ -86,8 +85,10 @@ struct ContentView: View {
                         .padding()
                         .background(.ultraThinMaterial)
                         .cornerRadius(8)
-                        .padding()
+                        .padding(.top, 8)
+                        Spacer(minLength: 0)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 }
             }
         }
@@ -121,9 +122,48 @@ struct ContentView: View {
                 }
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .updatePrices)) { _ in
+            Task {
+                await viewModel.updateAllPrices()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .backfillHistorical)) { notification in
+            let period = (notification.object as? String) ?? "1y"
+            Task {
+                await viewModel.backfillHistorical(period: period, interval: "1mo")
+            }
+        }
         .sheet(isPresented: $showAutoRefreshPrompt) {
             AutoRefreshPromptView()
         }
+        .overlay(alignment: .top) {
+            if let result = viewModel.refreshResult {
+                HStack {
+                    Spacer(minLength: 0)
+                    RefreshResultBanner(result: result) {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            viewModel.dismissRefreshResult()
+                        }
+                    }
+                    .frame(maxWidth: 400)
+                    Spacer(minLength: 0)
+                }
+                .padding(.top, 8)
+                .padding(.horizontal, 16)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .onAppear {
+                    if result.succeeded {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                viewModel.dismissRefreshResult()
+                            }
+                        }
+                    }
+                }
+                .zIndex(100)
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: viewModel.refreshResult?.id)
     }
 }
 

@@ -159,6 +159,7 @@ struct L10n {
     static var instrumentsQuadrants: String { manager.localized("instruments.quadrants") }
     static var instrumentsUnassigned: String { manager.localized("instruments.unassigned") }
     static var instrumentsAddInstrument: String { manager.localized("instruments.addInstrument") }
+    static var instrumentsEditInstrument: String { manager.localized("instruments.editInstrument") }
     static var instrumentsIsinHint: String { manager.localized("instruments.isinHint") }
     static var instrumentsRemoveFromQuadrant: String { manager.localized("instruments.removeFromQuadrant") }
     static var instrumentsAssignToQuadrant: String { manager.localized("instruments.assignToQuadrant") }
@@ -346,6 +347,7 @@ struct L10n {
     static var refreshPartial: String { manager.localized("refresh.partial") }
     static var refreshFailed: String { manager.localized("refresh.failed") }
     static var refreshFailedInstruments: String { manager.localized("refresh.failedInstruments") }
+    static var refreshDebugReasons: String { manager.localized("refresh.debugReasons") }
     static func refreshSuccessDetail(_ count: Int) -> String {
         String(format: manager.localized("refresh.successDetail"), count)
     }

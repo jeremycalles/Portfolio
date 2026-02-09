@@ -63,11 +63,17 @@ struct RefreshResultBanner: View {
                     Text(subtitleText)
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                    if result.successCount == 0, let err = result.lastError, !err.isEmpty {
+                        Text(err)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                    }
                 }
                 
                 Spacer()
                 
-                if !result.failedInstruments.isEmpty {
+                if !result.failedInstruments.isEmpty || !result.debugLogLines.isEmpty {
                     Button {
                         withAnimation(.easeInOut(duration: 0.2)) {
                             showDetails.toggle()
@@ -88,31 +94,48 @@ struct RefreshResultBanner: View {
                 .buttonStyle(.plain)
             }
             
-            // Expandable error details
-            if showDetails && !result.failedInstruments.isEmpty {
+            // Expandable error details: failed instrument names + per-instrument failure reasons (debug)
+            if showDetails && (!result.failedInstruments.isEmpty || !result.debugLogLines.isEmpty) {
                 Divider()
                 
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(L10n.refreshFailedInstruments)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                    
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 4) {
-                            ForEach(result.failedInstruments, id: \.self) { name in
-                                HStack(spacing: 6) {
-                                    Circle()
-                                        .fill(Color.red.opacity(0.7))
-                                        .frame(width: 5, height: 5)
-                                    Text(name)
-                                        .font(.caption)
-                                        .foregroundStyle(.primary)
+                VStack(alignment: .leading, spacing: 8) {
+                    if !result.failedInstruments.isEmpty {
+                        Text(L10n.refreshFailedInstruments)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 4) {
+                                ForEach(result.failedInstruments, id: \.self) { name in
+                                    HStack(spacing: 6) {
+                                        Circle()
+                                            .fill(Color.red.opacity(0.7))
+                                            .frame(width: 5, height: 5)
+                                        Text(name)
+                                            .font(.caption)
+                                            .foregroundStyle(.primary)
+                                    }
                                 }
                             }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(maxHeight: 100)
                     }
-                    .frame(maxHeight: 120)
+                    if !result.debugLogLines.isEmpty {
+                        Text(L10n.refreshDebugReasons)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 2) {
+                                ForEach(Array(result.debugLogLines.enumerated()), id: \.offset) { _, line in
+                                    Text(line)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .frame(maxHeight: 140)
+                    }
                 }
             }
         }

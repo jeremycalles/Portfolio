@@ -5,6 +5,7 @@ import SwiftUI
 struct InstrumentsView: View {
     @EnvironmentObject var viewModel: AppViewModel
     @State private var showingAddSheet = false
+    @State private var instrumentToEdit: Instrument?
     @State private var newIsin = ""
     @State private var searchText = ""
     @State private var selectedInstrumentId: Instrument.ID?
@@ -93,6 +94,14 @@ struct InstrumentsView: View {
                 
                 TableColumn("Actions") { instrument in
                     HStack {
+                        Button {
+                            instrumentToEdit = instrument
+                        } label: {
+                            Image(systemName: "pencil")
+                        }
+                        .buttonStyle(.borderless)
+                        .help(L10n.instrumentsEditInstrument)
+                        
                         Menu {
                             if viewModel.quadrants.isEmpty {
                                 Text(L10n.instrumentsNoQuadrantsAvailable)
@@ -129,6 +138,17 @@ struct InstrumentsView: View {
         .navigationTitle("\(L10n.instrumentsTitle) (\(viewModel.instruments.count))")
         .sheet(isPresented: $showingAddSheet) {
             AddInstrumentSheet(isPresented: $showingAddSheet)
+        }
+        .sheet(item: $instrumentToEdit) { instrument in
+            EditInstrumentSheet(
+                instrument: instrument,
+                onDismiss: { instrumentToEdit = nil },
+                onSave: { updated in
+                    viewModel.updateInstrument(updated)
+                    instrumentToEdit = nil
+                }
+            )
+            .environmentObject(viewModel)
         }
     }
 }
@@ -180,6 +200,209 @@ struct AddInstrumentSheet: View {
         }
         .padding(30)
         .frame(minWidth: 400)
+    }
+}
+
+// MARK: - Edit Instrument Sheet
+struct EditInstrumentSheet: View {
+    @EnvironmentObject var viewModel: AppViewModel
+    let instrument: Instrument
+    let onDismiss: () -> Void
+    let onSave: (Instrument) -> Void
+    
+    @State private var name: String = ""
+    @State private var ticker: String = ""
+    @State private var currency: String = "EUR"
+    @State private var quadrantId: Int? = nil
+    
+    @State private var latestPriceDate: Date = Date()
+    @State private var latestPriceText: String = ""
+    @State private var hasLatestPrice: Bool = false
+    @State private var isValidatingTicker: Bool = false
+    @State private var tickerValidationMessage: String? = nil
+    @State private var tickerIsValid: Bool? = nil
+    private var originalLatestPrice: Price? { DatabaseService.shared.getLatestPrice(forIsin: instrument.isin) }
+    
+    private let currencies = ["EUR", "USD", "GBP", "CHF", "JPY"]
+    
+    private static let numberFormatter: NumberFormatter = {
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        f.locale = .current
+        return f
+    }()
+    
+    private func parseNumber(_ text: String) -> Double? {
+        if let number = Self.numberFormatter.number(from: text) { return number.doubleValue }
+        return Double(text.replacingOccurrences(of: ",", with: "."))
+    }
+    
+    private let labelWidth: CGFloat = 72
+    
+    @ViewBuilder
+    private func labeledRow<Content: View>(_ label: String, @ViewBuilder content: () -> Content) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Text(label)
+                .foregroundColor(.secondary)
+                .frame(width: labelWidth, alignment: .leading)
+            content()
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Instrument")
+                        .font(.headline)
+                    
+                    labeledRow("Name") {
+                        TextField("Name", text: $name)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    labeledRow("ISIN") {
+                        Text(instrument.isin)
+                            .font(.body.monospaced())
+                            .foregroundColor(.secondary)
+                    }
+                    labeledRow("Ticker") {
+                        HStack(spacing: 8) {
+                            TextField("Ticker", text: $ticker)
+                                .textFieldStyle(.roundedBorder)
+                                .onChange(of: ticker) { _, _ in
+                                    tickerValidationMessage = nil
+                                    tickerIsValid = nil
+                                }
+                            Button {
+                                tickerValidationMessage = nil
+                                tickerIsValid = nil
+                                isValidatingTicker = true
+                                Task {
+                                    let (isValid, message) = await viewModel.validateTicker(isin: instrument.isin, ticker: ticker.isEmpty ? nil : ticker)
+                                    tickerIsValid = isValid
+                                    tickerValidationMessage = message
+                                    isValidatingTicker = false
+                                }
+                            } label: {
+                                Image(systemName: "arrow.clockwise")
+                            }
+                            .buttonStyle(.borderless)
+                            .disabled(isValidatingTicker)
+                            .help("Validate ticker")
+                            if isValidatingTicker {
+                                ProgressView()
+                                    .scaleEffect(0.6)
+                            }
+                        }
+                    }
+                    if let message = tickerValidationMessage, let valid = tickerIsValid {
+                        HStack(spacing: 12) {
+                            Spacer().frame(width: labelWidth + 12)
+                            Text(message)
+                                .font(.caption)
+                                .foregroundColor(valid ? .green : .red)
+                        }
+                    }
+                    labeledRow("Currency") {
+                        Picker("", selection: $currency) {
+                            ForEach(currencies, id: \.self) { Text($0).tag($0) }
+                        }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
+                        .frame(maxWidth: 120)
+                    }
+                    labeledRow("Quadrant") {
+                        Picker("", selection: $quadrantId) {
+                            Text(L10n.instrumentsUnassigned).tag(nil as Int?)
+                            ForEach(viewModel.quadrants) { q in
+                                Text(q.name).tag(q.id as Int?)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
+                        .frame(minWidth: 140)
+                    }
+                    
+                    Divider()
+                        .padding(.vertical, 4)
+                    
+                    Text("Latest Price")
+                        .font(.headline)
+                    
+                    if hasLatestPrice {
+                        labeledRow("Date") {
+                            DatePicker("", selection: $latestPriceDate, displayedComponents: .date)
+                                .labelsHidden()
+                        }
+                        labeledRow("Value") {
+                            TextField("Value", text: $latestPriceText)
+                                .textFieldStyle(.roundedBorder)
+                                .frame(maxWidth: 120)
+                        }
+                    } else {
+                        Text("No price")
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .padding(24)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            
+            Divider()
+            
+            HStack {
+                Button(L10n.generalCancel) {
+                    onDismiss()
+                }
+                .keyboardShortcut(.cancelAction)
+                
+                Spacer()
+                
+                Button(L10n.generalSave) {
+                    Task {
+                        isValidatingTicker = true
+                        tickerValidationMessage = nil
+                        tickerIsValid = nil
+                        let (isValid, message) = await viewModel.validateTicker(isin: instrument.isin, ticker: ticker.isEmpty ? nil : ticker)
+                        tickerIsValid = isValid
+                        tickerValidationMessage = message
+                        isValidatingTicker = false
+                        guard isValid else { return }
+                        let updated = Instrument(
+                            isin: instrument.isin,
+                            ticker: ticker.isEmpty ? nil : ticker,
+                            name: name.isEmpty ? nil : name,
+                            currency: currency,
+                            quadrantId: quadrantId
+                        )
+                        if hasLatestPrice, let value = parseNumber(latestPriceText), value > 0 {
+                            let newDateStr = AppDateFormatter.yearMonthDay.string(from: latestPriceDate)
+                            if let old = originalLatestPrice, old.date != newDateStr {
+                                viewModel.deletePrice(isin: instrument.isin, date: old.date)
+                            }
+                            viewModel.addManualPrice(isin: instrument.isin, date: newDateStr, value: value, currency: currency)
+                        }
+                        onSave(updated)
+                    }
+                }
+                .keyboardShortcut(.defaultAction)
+                .disabled(isValidatingTicker)
+            }
+            .padding()
+        }
+        .frame(minWidth: 420, minHeight: 400)
+        .onAppear {
+            name = instrument.name ?? ""
+            ticker = instrument.ticker ?? ""
+            currency = instrument.currency ?? "EUR"
+            quadrantId = instrument.quadrantId
+            if let price = originalLatestPrice {
+                hasLatestPrice = true
+                latestPriceDate = AppDateFormatter.yearMonthDay.date(from: price.date) ?? Date()
+                latestPriceText = String(format: "%.4f", price.value)
+            }
+        }
     }
 }
 

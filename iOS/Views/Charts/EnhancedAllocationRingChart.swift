@@ -42,6 +42,28 @@ struct EnhancedAllocationRingChart: View {
         chartData.reduce(0) { $0 + $1.value }
     }
     
+    /// Integer percentages that sum to 100% (largest-remainder method).
+    private func percentagesSummingTo100(for data: [(name: String, value: Double, color: Color)], total: Double) -> [Int] {
+        guard total > 0, !data.isEmpty else { return [] }
+        let exact: [(floor: Int, remainder: Double)] = data.map { item in
+            let pct = (item.value / total) * 100
+            return (Int(pct), pct - Double(Int(pct)))
+        }
+        let sumFloors = exact.reduce(0) { $0 + $1.floor }
+        var need = 100 - sumFloors
+        let indicesByRemainder = exact.indices.sorted { exact[$0].remainder > exact[$1].remainder }
+        var result = exact.map(\.floor)
+        for i in indicesByRemainder where need > 0 {
+            result[i] += 1
+            need -= 1
+        }
+        return result
+    }
+    
+    private var legendPercentages: [Int] {
+        percentagesSummingTo100(for: chartData, total: totalValue)
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(isQuadrants ? L10n.dashboardQuadrantAllocation : L10n.dashboardAccountAllocation)
@@ -84,7 +106,7 @@ struct EnhancedAllocationRingChart: View {
                     
                     // Legend
                     VStack(alignment: .leading, spacing: 6) {
-                        ForEach(chartData.prefix(5), id: \.name) { item in
+                        ForEach(Array(chartData.prefix(5).enumerated()), id: \.element.name) { index, item in
                             HStack(spacing: 8) {
                                 Circle()
                                     .fill(item.color)
@@ -93,8 +115,8 @@ struct EnhancedAllocationRingChart: View {
                                     Text(item.name)
                                         .font(.caption)
                                         .lineLimit(1)
-                                    if !privacyMode {
-                                        Text("\(Int((item.value / totalValue) * 100))%")
+                                    if !privacyMode, index < legendPercentages.count {
+                                        Text("\(legendPercentages[index])%")
                                             .font(.caption2)
                                             .foregroundColor(.secondary)
                                     }

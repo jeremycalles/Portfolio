@@ -10,6 +10,16 @@ actor MarketDataService {
     private let session: URLSession
     private let userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     
+    /// Last error from a failed fetch (for diagnostics when refresh fails for all instruments).
+    private var lastFetchError: String?
+    
+    /// Returns and clears the last stored fetch error. Call after a full refresh to show why all failed.
+    func takeLastFetchError() -> String? {
+        let err = lastFetchError
+        lastFetchError = nil
+        return err
+    }
+    
     private init() {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30
@@ -41,14 +51,25 @@ actor MarketDataService {
                 print("[HTTP] Rate limited (429), retrying in \(Int(pow(2.0, Double(attempt - 1))))s...")
                 try? await Task.sleep(nanoseconds: delay)
             }
-            let (data, response) = try await session.data(for: request)
-            if let http = response as? HTTPURLResponse, http.statusCode == 429 {
-                lastError = URLError(.resourceUnavailable)
-                continue
+            do {
+                let (data, response) = try await session.data(for: request)
+                if let http = response as? HTTPURLResponse, http.statusCode == 429 {
+                    lastError = URLError(.resourceUnavailable)
+                    continue
+                }
+                return (data, response)
+            } catch {
+                if lastFetchError == nil {
+                    lastFetchError = error.localizedDescription
+                }
+                throw error
             }
-            return (data, response)
         }
-        throw lastError ?? URLError(.unknown)
+        let err = lastError ?? URLError(.unknown)
+        if lastFetchError == nil {
+            lastFetchError = err.localizedDescription
+        }
+        throw err
     }
     
     /// Convenience: performs a GET request to a URL with automatic 429 retry.
@@ -112,7 +133,8 @@ actor MarketDataService {
                 name: "Veracash Gold Premium Gram",
                 value: value,
                 currency: "EUR",
-                date: today
+                date: today,
+                failureReason: value == nil ? (lastFetchError ?? "Veracash scrape failed") : nil
             )
         }
         
@@ -125,7 +147,8 @@ actor MarketDataService {
                 name: "Veracash Gold Spot Gram",
                 value: value,
                 currency: "EUR",
-                date: today
+                date: today,
+                failureReason: value == nil ? (lastFetchError ?? "Veracash scrape failed") : nil
             )
         }
         
@@ -138,7 +161,8 @@ actor MarketDataService {
                 name: "Veracash Silver Spot Gram",
                 value: value,
                 currency: "EUR",
-                date: today
+                date: today,
+                failureReason: value == nil ? (lastFetchError ?? "Veracash scrape failed") : nil
             )
         }
         
@@ -212,15 +236,17 @@ actor MarketDataService {
             }
         }
         
-        // Return empty result
-        print("[MarketData] ALL METHODS FAILED for \(isin)")
+        // Return empty result with last error for debugging
+        let reason = lastFetchError ?? "All sources failed"
+        print("[MarketData] ALL METHODS FAILED for \(isin): \(reason)")
         return MarketDataResult(
             isin: isin,
             ticker: resolvedTicker,
             name: nil,
             value: nil,
             currency: nil,
-            date: today
+            date: today,
+            failureReason: reason
         )
     }
     
@@ -235,11 +261,17 @@ actor MarketDataService {
         do {
             let (data, response) = try await performRequest(from: url)
             
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            guard let httpResponse = response as? HTTPURLResponse else {
+                if lastFetchError == nil { lastFetchError = "Yahoo: no HTTP response" }
+                return nil
+            }
+            guard httpResponse.statusCode == 200 else {
+                if lastFetchError == nil { lastFetchError = "Yahoo: HTTP \(httpResponse.statusCode)" }
                 return nil
             }
             
             guard let parsed = parseYahooChartJSON(data) else {
+                if lastFetchError == nil { lastFetchError = "Yahoo: invalid or empty chart data" }
                 return nil
             }
             
@@ -271,7 +303,10 @@ actor MarketDataService {
             // Try to get name from quote summary
             name = await fetchYahooName(ticker: ticker)
             
-            guard let finalPrice = price else { return nil }
+            guard let finalPrice = price else {
+                if lastFetchError == nil { lastFetchError = "Yahoo: no price in response" }
+                return nil
+            }
             
             return MarketDataResult(
                 isin: isin,
@@ -282,6 +317,7 @@ actor MarketDataService {
                 date: priceDate
             )
         } catch {
+            if lastFetchError == nil { lastFetchError = error.localizedDescription }
             print("Yahoo Finance error for \(ticker): \(error)")
             return nil
         }

@@ -104,6 +104,11 @@ struct DashboardView: View {
                                 guard let first = goldHistory.first?.value, let last = goldHistory.last?.value, first > 0 else { return nil }
                                 return ((last - first) / first) * 100
                             }()
+                            let msciHistory = viewModel.cachedMSCIWorldHistory
+                            let msciChange: Double? = {
+                                guard let first = msciHistory.first?.value, let last = msciHistory.last?.value, first > 0 else { return nil }
+                                return ((last - first) / first) * 100
+                            }()
                             
                             if totals.current == 0 {
                                 Text(L10n.dashboardNoHoldings)
@@ -178,13 +183,41 @@ struct DashboardView: View {
                                         }
                                     }
                                     
+                                    #if os(macOS)
+                                    if let firstMsci = msciHistory.first?.value, let lastMsci = msciHistory.last?.value, firstMsci > 0 {
+                                        Divider()
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                                Text(L10n.chartMsciWorldComparison)
+                                                    .font(.headline)
+                                                    .foregroundColor(.blue)
+                                                Text(formatCurrency(lastMsci, currency: "EUR"))
+                                                    .font(.title2)
+                                                    .fontWeight(.bold)
+                                            }
+                                            
+                                            HStack {
+                                                Text("\(L10n.summaryFrom) \(formatCurrency(firstMsci, currency: "EUR"))")
+                                                    .font(.caption)
+                                                    .foregroundColor(.secondary)
+                                                
+                                                Spacer()
+                                                
+                                                if let change = msciChange {
+                                                    ChangeLabel(change: change)
+                                                }
+                                            }
+                                        }
+                                    }
+                                    #endif
+                                    
                                     Spacer()
                                 }
                                 .padding()
                                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                             }
                         }
-                        .frame(minWidth: 280, maxWidth: 280, minHeight: 230, maxHeight: .infinity)
+                        .frame(minWidth: 280, maxWidth: 280, minHeight: 270, maxHeight: .infinity)
                     }
                     
                     // Portfolio Trend Chart

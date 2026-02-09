@@ -13,7 +13,6 @@ struct Instrument: Identifiable, Codable, Hashable {
     let isin: String
     var ticker: String?
     var name: String?
-    var type: String?
     var currency: String?
     var quadrantId: Int?
     
@@ -109,6 +108,8 @@ struct MarketDataResult {
     var value: Double?
     var currency: String?
     var date: String
+    /// When value is nil, optional reason for debugging (e.g. "Yahoo: HTTP 403", "The request timed out.").
+    var failureReason: String? = nil
 }
 
 // MARK: - Report Period

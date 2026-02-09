@@ -50,7 +50,6 @@ class DatabaseService: ObservableObject {
     private let isin = SQLite.Expression<String>("isin")
     private let ticker = SQLite.Expression<String?>("ticker")
     private let name = SQLite.Expression<String?>("name")
-    private let type = SQLite.Expression<String?>("type")
     private let currency = SQLite.Expression<String?>("currency")
     private let quadrantId = SQLite.Expression<Int?>("quadrant_id")
     
@@ -92,7 +91,6 @@ class DatabaseService: ObservableObject {
             isin: row[isin],
             ticker: row[ticker],
             name: row[name],
-            type: row[type],
             currency: row[currency],
             quadrantId: row[quadrantId]
         )
@@ -264,7 +262,6 @@ class DatabaseService: ObservableObject {
                 t.column(isin, primaryKey: true)
                 t.column(ticker)
                 t.column(name)
-                t.column(type)
                 t.column(currency)
                 t.column(quadrantId)
             })
@@ -344,7 +341,6 @@ class DatabaseService: ObservableObject {
                 isin <- instrument.isin,
                 ticker <- instrument.ticker,
                 name <- instrument.name,
-                type <- instrument.type,
                 currency <- instrument.currency,
                 quadrantId <- instrument.quadrantId
             ))

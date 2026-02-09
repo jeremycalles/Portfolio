@@ -296,7 +296,8 @@ class MacOSSchedulerManager: ObservableObject {
                 appendLog("\(displayName): \(String(format: "%.2f", price)) \(result.currency ?? "")")
                 successCount += 1
             } else {
-                appendLog("\(displayName): Failed to fetch price", isError: true)
+                let reason = result.failureReason ?? "unknown"
+                appendLog("\(displayName): \(reason)", isError: true)
                 failureCount += 1
             }
             

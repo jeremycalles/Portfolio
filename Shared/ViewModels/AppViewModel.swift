@@ -267,7 +267,6 @@ class AppViewModel: ObservableObject {
                 isin: result.isin,
                 ticker: result.ticker,
                 name: result.name,
-                type: "Unknown",
                 currency: result.currency,
                 quadrantId: nil
             )
@@ -317,6 +316,22 @@ class AppViewModel: ObservableObject {
     func assignQuadrant(instrumentIsin: String, quadrantId: Int?) {
         db.assignQuadrant(instrumentIsin: instrumentIsin, quadrantId: quadrantId)
         refreshInstruments()
+    }
+    
+    func updateInstrument(_ instrument: Instrument) {
+        db.addOrUpdateInstrument(instrument)
+        refreshInstruments()
+    }
+    
+    /// Validates the ticker by fetching market data for the given ISIN and optional ticker.
+    /// Returns (true, successMessage) if data was found, (false, errorMessage) otherwise.
+    func validateTicker(isin: String, ticker: String?) async -> (isValid: Bool, message: String) {
+        let result = await marketData.fetchData(isin: isin, ticker: ticker?.isEmpty == true ? nil : ticker)
+        if result.value != nil || result.name != nil {
+            let name = result.name ?? isin
+            return (true, "Valid: \(name)")
+        }
+        return (false, result.failureReason ?? "No data found for this ticker")
     }
     
     func deletePrice(isin: String, date: String) {
