@@ -5,11 +5,13 @@
 [![Platform: macOS](https://img.shields.io/badge/Platform-macOS-blue)](https://developer.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.9+-orange)](https://swift.org)
 
-**Portfolio** is a comprehensive, privacy-focused portfolio tracker for managing your financial assets. Track stocks, ETFs, mutual funds, precious metals, cryptocurrencies, and bank accounts—all in one place with beautiful native apps for iOS and macOS.
+**Portfolio** is a privacy-focused portfolio tracker for stocks, ETFs, mutual funds, precious metals, cryptocurrencies, and bank accounts—with native iOS and macOS apps built from a **single shared codebase**.
 
-### Privacy disclaimer
+### What matters most
 
-This application is designed **privacy-first**. Your portfolio data (instruments, holdings, accounts, prices history) are stored **only on your device** in a local SQLite database. There is **no backend server**; no personal or financial data is sent to any server. Optional iCloud storage uses your own Apple account to sync the same local database across your devices—you remain in control. Price updates request only public market data (e.g. tickers or ISINs) from public APIs; no account linking or personally identifiable information is ever transmitted.
+- **Your data stays on your device** — Local SQLite only; no backend, no telemetry. Optional iCloud sync uses your own Apple account.
+- **One codebase, two native apps** — Shared logic (models, services, view models, UI components) in `Shared/`; each platform adds its own layout and lifecycle.
+- **Public APIs only for prices** — Refreshes request public market data (tickers/ISINs); no account linking or PII.
 
 ---
 
@@ -19,16 +21,7 @@ This application is designed **privacy-first**. Your portfolio data (instruments
 - [Key Features](#key-features)
 - [Supported Asset Types](#supported-asset-types)
 - [Getting Started](#getting-started)
-  - [iOS & macOS App](#ios--macos-app)
-  - [Command Line Interface](#command-line-interface)
 - [User Guide](#user-guide)
-  - [Dashboard](#dashboard)
-  - [Managing Instruments](#managing-instruments)
-  - [Bank Accounts & Holdings](#bank-accounts--holdings)
-  - [Quadrants (Portfolio Organization)](#quadrants-portfolio-organization)
-  - [Reports & Analytics](#reports--analytics)
-  - [Price Management](#price-management)
-  - [Settings & Preferences](#settings--preferences)
 - [Data Sources](#data-sources)
 - [Privacy & Security](#privacy--security)
 - [Automation](#automation)
@@ -39,7 +32,7 @@ This application is designed **privacy-first**. Your portfolio data (instruments
 
 ## Overview
 
-Portfolio helps you take control of your investment portfolio by consolidating all your financial assets into a single, unified view. Whether you're tracking stocks across multiple brokers, monitoring your gold coins, or analyzing your mutual fund performance, Portfolio provides the tools you need.
+Consolidate all your financial assets into one view: track stocks, ETFs, mutual funds, gold, crypto, and bank accounts with accurate data (NAV for funds, market premiums for physical metals), multi-currency conversion, and offline access.
 
 ### Screenshots
 
@@ -56,15 +49,6 @@ Portfolio helps you take control of your investment portfolio by consolidating a
   <img src="assets/screenshots/ios-4-quadrants.png" width="200" />
   <img src="assets/screenshots/ios-5-positions.png" width="200" />
 </p>
-
-### Why Portfolio?
-
-- **All-in-One Tracking**: Stocks, ETFs, mutual funds, cryptocurrencies, precious metals, and bank accounts in one app
-- **Accurate Data**: Fetches real NAV values for mutual funds (not stale exchange prices) and includes market premiums for physical gold/silver
-- **Multi-Currency Support**: Automatic USD/EUR conversion with historical exchange rates
-- **Privacy-First**: All data stored locally on your device—no cloud accounts required
-- **Native Experience**: Beautiful SwiftUI apps optimized for both iOS and macOS
-- **Offline Access**: View your portfolio anytime, even without internet connection
 
 ---
 
@@ -86,9 +70,9 @@ Portfolio helps you take control of your investment portfolio by consolidating a
 - **Background Updates**: Automatic price updates on macOS and iOS
 
 ### User Experience
-- **Privacy Mode**: Quickly hide sensitive values while keeping the app functional
-- **Bilingual Support**: Full English and French localization
-- **Dark Mode**: Native support for system appearance preferences
+- **Privacy Mode**: Hide sensitive values on screen (eye icon); data stays local
+- **Bilingual**: Full English and French localization
+- **Native SwiftUI**: One shared codebase for iOS and macOS; platform-appropriate UI and navigation
 
 ---
 
@@ -157,34 +141,10 @@ When you first launch Portfolio:
 2. Your preferred language is detected from system settings
 3. You can start adding instruments and bank accounts immediately
 
-### Command Line Interface
-
-For advanced users and automation, Portfolio may include a Python CLI (optional; not all assets are in this repo). The following is for reference if you have or add a CLI.
-
-#### Prerequisites
-- Python 3.8 or later
-- pip (Python package manager)
-
-#### Setup
-
-```bash
-# Navigate to the project directory (after cloning)
-cd Portfolio
-
-# Create and activate virtual environment
-python3 -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Initialize the database (if CLI is available)
-python3 src/main.py init
-```
-
----
 
 ## User Guide
+
+The following describes how to use the app. All actions are done in the native iOS or macOS interface.
 
 ### Dashboard
 
@@ -227,32 +187,11 @@ Instruments are the financial assets you want to track (stocks, ETFs, funds, etc
 
 #### Adding Instruments
 
-**In the App:**
-1. Navigate to **Instruments** (macOS sidebar) or **Portfolio** tab (iOS)
-2. Click/tap the **+** button
-3. Enter the identifier:
-   - **ISIN** (12 characters): e.g., `LU0389656892` for mutual funds
-   - **Ticker**: e.g., `AAPL` for stocks, `BTC-EUR` for crypto
-   - **Special Key**: e.g., `VERACASH:GOLD_SPOT` for precious metals
-
-**Via CLI:**
-```bash
-# Stocks & ETFs
-python3 src/main.py add AAPL           # By ticker
-python3 src/main.py add US0378331005   # By ISIN
-
-# Mutual Funds
-python3 src/main.py add LU1861134382   # Amundi MSCI World
-
-# Cryptocurrencies
-python3 src/main.py add BTC-EUR        # Bitcoin in EUR
-
-# Precious Metals
-python3 src/main.py add VERACASH:GOLD_SPOT
-
-# Physical Coins
-python3 src/main.py add COIN:NAPOLEON_20F
-```
+1. Navigate to **Instruments** (macOS sidebar) or the instruments tab (iOS).
+2. Tap the **+** button and enter:
+   - **ISIN** (12 characters), e.g. `LU0389656892` for mutual funds
+   - **Ticker**, e.g. `AAPL`, `BTC-EUR`
+   - **Special key**, e.g. `VERACASH:GOLD_SPOT`, `COIN:NAPOLEON_20F`
 
 #### Viewing Instrument Details
 
@@ -278,43 +217,11 @@ Track your investments across multiple brokers and accounts.
 
 #### Adding Bank Accounts
 
-**In the App:**
-1. Navigate to **Accounts** section
-2. Click/tap the **+** button
-3. Enter:
-   - **Name**: Account name (e.g., "TradeRepublic")
-   - **Type**: Account type (e.g., "CTO", "PEA", "Checking")
-
-**Via CLI:**
-```bash
-python3 src/main.py add-account "TradeRepublic" "CTO"
-python3 src/main.py add-account "Boursorama" "PEA"
-```
+1. Open **Accounts**, tap **+**, then enter bank name and account name (e.g. "TradeRepublic", "CTO").
 
 #### Adding Holdings
 
-Holdings represent how many units of an instrument you own in each account.
-
-**In the App:**
-1. Navigate to **Holdings** section
-2. Click/tap the **+** button
-3. Select:
-   - **Account**: Which bank account
-   - **Instrument**: Which asset
-   - **Quantity**: Number of units
-   - **Purchase Date** (optional): When you bought
-   - **Purchase Price** (optional): Price per unit at purchase
-
-**Via CLI:**
-```bash
-# Basic holding
-python3 src/main.py add-holding "TradeRepublic" AAPL 10
-
-# With purchase tracking
-python3 src/main.py add-holding "TradeRepublic" BTC-EUR 0.5 \
-  --purchase-date 2024-01-15 \
-  --purchase-price 35000
-```
+1. Open **Holdings**, tap **+**, then choose account, instrument, quantity, and optionally purchase date/price.
 
 #### Viewing Holdings
 
@@ -345,28 +252,8 @@ Suggested quadrant categories:
 - **International**: Emerging markets and foreign stocks
 - **Real Estate**: REITs and real estate funds
 
-**In the App:**
-1. Navigate to **Quadrants** section
-2. Click/tap the **+** button
-3. Enter a name for the quadrant
-
-**Via CLI:**
-```bash
-python3 src/main.py add-quadrant "Technology"
-python3 src/main.py add-quadrant "Precious Metals"
-```
-
-#### Assigning Instruments to Quadrants
-
-**In the App:**
-1. Select an instrument
-2. Choose a quadrant from the dropdown/picker
-
-**Via CLI:**
-```bash
-python3 src/main.py assign-quadrant AAPL "Technology"
-python3 src/main.py assign-quadrant "VERACASH:GOLD_SPOT" "Precious Metals"
-```
+1. Open **Quadrants**, tap **+**, and enter a name (e.g. "Technology", "Precious Metals").
+2. Assign instruments via the instrument detail: choose a quadrant from the picker.
 
 #### Quadrant Reports
 
@@ -392,31 +279,11 @@ The Portfolio Report shows detailed analysis of your holdings:
 | Current Value | Quantity × price in EUR |
 | Change | Percentage change vs comparison period |
 
-**Comparison Periods:**
-- `1 Day`: Compare to yesterday
-- `1 Week`: Compare to 7 days ago
-- `1 Month`: Compare to 30 days ago
-- `1 Year`: Compare to 365 days ago
-- `YTD`: Compare to January 1st
-
-**Via CLI:**
-```bash
-python3 src/portfolio_report.py "TradeRepublic" --period 1Year
-```
+**Comparison periods:** 1 Day, 1 Week, 1 Month, 1 Year, YTD.
 
 #### Quadrant Report
 
-See your portfolio organized by category:
-- Holdings grouped under each quadrant
-- Quadrant subtotals with change percentages
-- Grand total across all quadrants
-- Unassigned instruments section
-
-**Via CLI:**
-```bash
-python3 src/quadrant_report.py --period 1Year
-python3 src/quadrant_report.py "Precious Metals" --period 1Week
-```
+Portfolio grouped by category: subtotals per quadrant, change percentages, grand total, and unassigned instruments.
 
 #### Price Graphs
 
@@ -431,32 +298,12 @@ Interactive charts for individual instruments:
 
 #### Automatic Updates
 
-Portfolio automatically fetches latest prices from data sources.
-
-**Manual Update:**
-- **In App**: Settings → Update All Prices
-- **Via CLI**: `python3 src/main.py update`
+- **Manual refresh**: Settings → Update All Prices (or toolbar on macOS).
+- **Background**: macOS Launch Agent or iOS Background Tasks (see [Automation](#automation)).
 
 #### Historical Backfilling
 
-Import historical data for trend analysis:
-
-**In App:**
-1. Go to Settings
-2. Select "Backfill Historical Data"
-3. Choose period (1Y, 2Y, 5Y, Max)
-
-**Via CLI:**
-```bash
-# Last year, monthly data
-python3 src/main.py backfill-historical
-
-# Last 5 years, weekly data
-python3 src/main.py backfill-historical --period 5y --interval 1wk
-
-# Maximum available history
-python3 src/main.py backfill-historical --period max
-```
+Settings → Backfill Historical Data; choose period (1Y, 2Y, 5Y). Menu commands on macOS also offer 1Y/2Y/5Y backfill.
 
 #### Manual Price Entry
 
@@ -479,12 +326,10 @@ Switch between English and French:
 
 The app updates immediately without restart.
 
-#### Database Location (macOS)
+#### Database & Storage
 
-Choose where to store your data:
-- **Local Storage**: Default app documents folder
-- **iCloud Drive**: Sync across devices (requires Apple Developer Program)
-- **Custom Location**: Any folder on your Mac
+- **iOS**: Local or optional iCloud (Settings → Storage). iCloud requires an Apple Developer account.
+- **macOS**: Local or iCloud; you can open the database folder from Settings.
 
 #### Background Refresh (macOS)
 
@@ -533,7 +378,7 @@ Portfolio is built so that **your data never leaves your control**:
 
 - **No server for your data**: There is no backend or cloud service that stores your portfolio. All positions, accounts, instruments, and price history live only on your device (and, if you enable it, in your own iCloud).
 - **No personal data sent**: The app does not send any personally identifiable information or portfolio contents to any third party. No telemetry, analytics, or crash reporting.
-- **Local storage only**: The app uses a single SQLite database (`stocks.db`) stored in the app’s Documents directory (iOS: `Documents/PortfolioData/`; macOS: project `data/` folder or custom path). Preferences (e.g. language, storage location, privacy mode) are stored in system `UserDefaults` on device only.
+- **Local storage only**: A single SQLite database in the app’s container (path shown in Settings). Preferences (language, storage, privacy mode) are in `UserDefaults` on device only.
 - **Optional iCloud**: If you enable iCloud, the same database file is synced via your Apple ID. No data is sent to the app developer or any other server.
 
 ### What leaves your device (market data only)
@@ -571,20 +416,23 @@ iOS uses the system's Background Tasks framework:
 
 ### Project Structure
 
+Shared logic lives in `Shared/`; iOS and macOS add their own views and lifecycle. No backend—all state is local.
+
 ```
-Portfolio/
-├── Shared/                       # Shared code
-│   ├── Models/                   # Data models
-│   ├── Services/                 # Database, API, Language
-│   ├── ViewModels/               # Business logic
-│   ├── Views/                    # SwiftUI views
-│   └── Resources/                # Localization files
-├── iOS/                          # iOS-specific code
-├── macOS/                        # macOS-specific code
-├── PortfolioTests/               # Unit & snapshot tests
+PortfolioMultiplatform/
+├── Shared/                       # Shared code (both platforms)
+│   ├── Models/
+│   ├── Services/                 # Database, MarketData, Language
+│   ├── ViewModels/
+│   ├── Views/                    # Dashboard, Reports, Settings, Charts…
+│   │   └── Components/           # ChangeLabel, RefreshResultBanner, etc.
+│   ├── Helpers/
+│   └── Resources/                # Localization (en, fr)
+├── iOS/                          # iOS-specific: root view, dashboard UI, background tasks
+├── macOS/                        # macOS-specific: scheduler, entitlements
+├── PortfolioTests/
 ├── PortfolioMultiplatform.xcodeproj/
-├── data/                         # Database storage (macOS local)
-├── requirements.txt              # Python dependencies (optional CLI)
+├── assets/screenshots/
 └── README.md
 ```
 
@@ -638,4 +486,4 @@ For questions, issues, or feature requests, please open an issue on GitHub.
 
 ---
 
-*Built with ❤️ using SwiftUI and Python*
+*Built with SwiftUI · SQLite*

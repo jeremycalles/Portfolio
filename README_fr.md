@@ -5,11 +5,13 @@
 [![Plateforme : macOS](https://img.shields.io/badge/Platform-macOS-blue)](https://developer.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.9+-orange)](https://swift.org)
 
-**Portfolio** est un outil complet de suivi de portefeuille, axé sur la confidentialité, pour gérer vos actifs financiers. Suivez vos actions, ETF, OPCVM (fonds communs de placement), métaux précieux, cryptomonnaies et comptes bancaires—le tout en un seul endroit avec de magnifiques applications natives pour iOS et macOS.
+**Portfolio** est un suivi de portefeuille axé sur la confidentialité pour actions, ETF, OPCVM, métaux précieux, cryptomonnaies et comptes bancaires—avec des applications natives iOS et macOS issues d’**un même code partagé**.
 
-### Avertissement confidentialité
+### L’essentiel
 
-Cette application est conçue **priorité confidentialité**. Les données de votre portefeuille (instruments, positions, comptes, historique des prix) sont stockées **uniquement sur votre appareil** dans une base SQLite locale. Il n’y a **aucun serveur backend** ; aucune donnée personnelle ou financière n’est envoyée vers un serveur. Le stockage iCloud optionnel utilise votre propre compte Apple pour synchroniser la même base locale entre vos appareils—vous gardez le contrôle. Les mises à jour de prix ne demandent que des données de marché publiques (ex. symboles, codes ISIN) auprès d’API publiques ; aucun lien de compte ni donnée personnelle identifiable n’est transmis.
+- **Vos données restent sur l’appareil** — SQLite local uniquement ; pas de backend ni de télémétrie. Sync iCloud optionnelle via votre compte Apple.
+- **Un code, deux apps natives** — Logique partagée (modèles, services, view models, composants UI) dans `Shared/` ; chaque plateforme ajoute sa propre interface et son cycle de vie.
+- **Données de marché publiques uniquement** — Les actualisations interrogent des API publiques (symboles/ISIN) ; aucun lien de compte ni donnée personnelle.
 
 ---
 
@@ -19,16 +21,7 @@ Cette application est conçue **priorité confidentialité**. Les données de vo
 - [Fonctionnalités Clés](#fonctionnalités-clés)
 - [Types d'Actifs Supportés](#types-dactifs-supportés)
 - [Pour Commencer](#pour-commencer)
-  - [Application iOS & macOS](#application-ios--macos)
-  - [Interface en Ligne de Commande](#interface-en-ligne-de-commande)
 - [Guide Utilisateur](#guide-utilisateur)
-  - [Tableau de Bord](#tableau-de-bord)
-  - [Gestion des Instruments](#gestion-des-instruments)
-  - [Comptes Bancaires & Positions](#comptes-bancaires--positions)
-  - [Quadrants (Organisation du Portefeuille)](#quadrants-organisation-du-portefeuille)
-  - [Rapports & Analytique](#rapports--analytique)
-  - [Gestion des Prix](#gestion-des-prix)
-  - [Paramètres & Préférences](#paramètres--préférences)
 - [Sources de Données](#sources-de-données)
 - [Confidentialité & Sécurité](#confidentialité--sécurité)
 - [Automatisation](#automatisation)
@@ -39,7 +32,7 @@ Cette application est conçue **priorité confidentialité**. Les données de vo
 
 ## Aperçu
 
-Portfolio vous aide à prendre le contrôle de votre portefeuille d'investissement en consolidant tous vos actifs financiers dans une vue unique et unifiée. Que vous suiviez des actions chez plusieurs courtiers, surveilliez vos pièces d'or ou analysiez la performance de vos OPCVM, Portfolio fournit les outils dont vous avez besoin.
+Consolidez tous vos actifs dans une seule vue : suivez actions, ETF, OPCVM, or, crypto et comptes bancaires avec des données précises (VL pour les fonds, primes de marché pour les métaux physiques), conversion multi-devises et consultation hors ligne.
 
 ### Captures d'écran
 
@@ -56,15 +49,6 @@ Portfolio vous aide à prendre le contrôle de votre portefeuille d'investisseme
   <img src="assets/screenshots/ios-4-quadrants.png" width="200" />
   <img src="assets/screenshots/ios-5-positions.png" width="200" />
 </p>
-
-### Pourquoi Portfolio ?
-
-- **Suivi Tout-en-Un** : Actions, ETF, OPCVM, cryptomonnaies, métaux précieux et comptes bancaires dans une seule application
-- **Données Précises** : Récupère les valeurs liquidatives (VL) réelles pour les OPCVM (pas de prix de bourse obsolètes) et inclut les primes de marché pour l'or/argent physique
-- **Support Multi-Devises** : Conversion automatique USD/EUR avec taux de change historiques
-- **Priorité à la Confidentialité** : Toutes les données sont stockées localement sur votre appareil—aucun compte cloud requis
-- **Expérience Native** : Belles applications SwiftUI optimisées pour iOS et macOS
-- **Accès Hors Ligne** : Consultez votre portefeuille à tout moment, même sans connexion internet
 
 ---
 
@@ -86,9 +70,9 @@ Portfolio vous aide à prendre le contrôle de votre portefeuille d'investisseme
 - **Mises à jour en Arrière-plan** : Mises à jour automatiques des prix sur macOS et iOS
 
 ### Expérience Utilisateur
-- **Mode Privé** : Masquez rapidement les valeurs sensibles tout en gardant l'application fonctionnelle
-- **Support Bilingue** : Localisation complète en anglais et français
-- **Mode Sombre** : Support natif des préférences d'apparence du système
+- **Mode Privé** : Masquez les valeurs sensibles (icône œil) ; les données restent locales
+- **Bilingue** : Anglais et français
+- **SwiftUI natif** : Un code partagé pour iOS et macOS ; interface et navigation adaptées à chaque plateforme
 
 ---
 
@@ -157,34 +141,10 @@ Lors du premier lancement de Portfolio :
 2. Votre langue préférée est détectée à partir des paramètres système
 3. Vous pouvez commencer à ajouter des instruments et des comptes bancaires immédiatement
 
-### Interface en Ligne de Commande
-
-Pour les utilisateurs avancés et l'automatisation, Portfolio peut inclure une CLI Python (optionnel ; tous les actifs ne sont pas dans ce dépôt). Ce qui suit est pour référence si vous avez ou ajoutez une CLI.
-
-#### Prérequis
-- Python 3.8 ou ultérieur
-- pip (gestionnaire de paquets Python)
-
-#### Installation
-
-```bash
-# Naviguez vers le répertoire du projet (après clonage)
-cd Portfolio
-
-# Créez et activez l'environnement virtuel
-python3 -m venv venv
-source venv/bin/activate  # Windows : venv\Scripts\activate
-
-# Installez les dépendances
-pip install -r requirements.txt
-
-# Initialisez la base de données (si CLI disponible)
-python3 src/main.py init
-```
-
----
 
 ## Guide Utilisateur
+
+Toutes les actions décrites ci-dessous se font dans l’application iOS ou macOS.
 
 ### Tableau de Bord
 
@@ -227,32 +187,8 @@ Les instruments sont les actifs financiers que vous souhaitez suivre (actions, E
 
 #### Ajouter des Instruments
 
-**Dans l'Application :**
-1. Naviguez vers l'onglet **Instruments** (barre latérale macOS) ou **Portefeuille** (iOS)
-2. Cliquez/appuyez sur le bouton **+**
-3. Entrez l'identifiant :
-   - **ISIN** (12 caractères) : ex : `LU0389656892` pour les OPCVM
-   - **Ticker** : ex : `AAPL` pour les actions, `BTC-EUR` pour les cryptos
-   - **Clé Spéciale** : ex : `VERACASH:GOLD_SPOT` pour les métaux précieux
-
-**Via CLI :**
-```bash
-# Actions & ETF
-python3 src/main.py add AAPL           # Par ticker
-python3 src/main.py add US0378331005   # Par ISIN
-
-# OPCVM
-python3 src/main.py add LU1861134382   # Amundi MSCI World
-
-# Cryptomonnaies
-python3 src/main.py add BTC-EUR        # Bitcoin en EUR
-
-# Métaux Précieux
-python3 src/main.py add VERACASH:GOLD_SPOT
-
-# Pièces Physiques
-python3 src/main.py add COIN:NAPOLEON_20F
-```
+1. Ouvrez **Instruments** (barre latérale macOS ou onglet iOS), puis **+**.
+2. Saisissez un **ISIN** (12 caractères), un **ticker** (ex. `AAPL`, `BTC-EUR`) ou une **clé spéciale** (ex. `VERACASH:GOLD_SPOT`, `COIN:NAPOLEON_20F`).
 
 #### Voir les Détails de l'Instrument
 
@@ -278,43 +214,11 @@ Suivez vos investissements sur plusieurs courtiers et comptes.
 
 #### Ajouter des Comptes Bancaires
 
-**Dans l'Application :**
-1. Naviguez vers la section **Comptes**
-2. Cliquez/appuyez sur le bouton **+**
-3. Entrez :
-   - **Nom** : Nom du compte (ex : "TradeRepublic")
-   - **Type** : Type de compte (ex : "CTO", "PEA", "Compte Courant")
-
-**Via CLI :**
-```bash
-python3 src/main.py add-account "TradeRepublic" "CTO"
-python3 src/main.py add-account "Boursorama" "PEA"
-```
+1. Ouvrez **Comptes**, **+**, puis saisissez le nom de la banque et du compte (ex. « TradeRepublic », « CTO »).
 
 #### Ajouter des Positions
 
-Les positions représentent combien d'unités d'un instrument vous possédez dans chaque compte.
-
-**Dans l'Application :**
-1. Naviguez vers la section **Positions**
-2. Cliquez/appuyez sur le bouton **+**
-3. Sélectionnez :
-   - **Compte** : Quel compte bancaire
-   - **Instrument** : Quel actif
-   - **Quantité** : Nombre d'unités
-   - **Date d'Achat** (optionnel) : Quand vous avez acheté
-   - **Prix d'Achat** (optionnel) : Prix par unité à l'achat
-
-**Via CLI :**
-```bash
-# Position simple
-python3 src/main.py add-holding "TradeRepublic" AAPL 10
-
-# Avec suivi d'achat
-python3 src/main.py add-holding "TradeRepublic" BTC-EUR 0.5 \
-  --purchase-date 2024-01-15 \
-  --purchase-price 35000
-```
+1. Ouvrez **Positions**, **+**, puis choisissez compte, instrument, quantité et éventuellement date/prix d’achat.
 
 #### Voir les Positions
 
@@ -345,28 +249,8 @@ Catégories de quadrants suggérées :
 - **International** : Marchés émergents et actions étrangères
 - **Immobilier** : REITs et fonds immobiliers
 
-**Dans l'Application :**
-1. Naviguez vers la section **Quadrants**
-2. Cliquez/appuyez sur le bouton **+**
-3. Entrez un nom pour le quadrant
-
-**Via CLI :**
-```bash
-python3 src/main.py add-quadrant "Technologie"
-python3 src/main.py add-quadrant "Métaux Précieux"
-```
-
-#### Assigner des Instruments aux Quadrants
-
-**Dans l'Application :**
-1. Sélectionnez un instrument
-2. Choisissez un quadrant depuis le menu déroulant/sélecteur
-
-**Via CLI :**
-```bash
-python3 src/main.py assign-quadrant AAPL "Technologie"
-python3 src/main.py assign-quadrant "VERACASH:GOLD_SPOT" "Métaux Précieux"
-```
+1. Ouvrez **Quadrants**, **+**, et saisissez un nom (ex. « Technologie », « Métaux précieux »).
+2. Assignez les instruments depuis la fiche instrument : choisissez un quadrant dans le sélecteur.
 
 #### Rapports par Quadrant
 
@@ -392,31 +276,11 @@ Le Rapport de Portefeuille montre une analyse détaillée de vos positions :
 | Valeur Actuelle | Quantité × prix en EUR |
 | Variation | Variation en pourcentage vs période de comparaison |
 
-**Périodes de Comparaison :**
-- `1 Jour` : Comparer à hier
-- `1 Semaine` : Comparer à il y a 7 jours
-- `1 Mois` : Comparer à il y a 30 jours
-- `1 An` : Comparer à il y a 365 jours
-- `1er Janv` : Comparer au 1er Janvier
-
-**Via CLI :**
-```bash
-python3 src/portfolio_report.py "TradeRepublic" --period 1Year
-```
+**Périodes de comparaison :** 1 Jour, 1 Semaine, 1 Mois, 1 An, 1er Janv.
 
 #### Rapport par Quadrant
 
-Voyez votre portefeuille organisé par catégorie :
-- Positions groupées sous chaque quadrant
-- Sous-totaux par quadrant avec pourcentages de variation
-- Total général sur tous les quadrants
-- Section instruments non assignés
-
-**Via CLI :**
-```bash
-python3 src/quadrant_report.py --period 1Year
-python3 src/quadrant_report.py "Métaux Précieux" --period 1Week
-```
+Portefeuille groupé par catégorie : sous-totaux par quadrant, variation en %, total général, instruments non assignés.
 
 #### Graphiques de Prix
 
@@ -429,34 +293,14 @@ Graphiques interactifs pour les instruments individuels :
 
 ### Gestion des Prix
 
-#### Mises à jour Automatiques
+#### Mises à jour
 
-Portfolio récupère automatiquement les derniers prix depuis les sources de données.
+- **Actualisation manuelle** : Paramètres → Mettre à jour tous les prix (ou barre d’outils sur macOS).
+- **En arrière-plan** : Agent Launch (macOS) ou Background Tasks (iOS), voir [Automatisation](#automatisation).
 
-**Mise à jour Manuelle :**
-- **Dans l'App** : Paramètres → Mettre à jour tous les prix
-- **Via CLI** : `python3 src/main.py update`
+#### Récupération d’historique
 
-#### Récupération d'Historique
-
-Importez des données historiques pour l'analyse de tendance :
-
-**Dans l'Application :**
-1. Allez dans Paramètres
-2. Sélectionnez "Récupérer l'historique"
-3. Choisissez la période (1A, 2A, 5A, Max)
-
-**Via CLI :**
-```bash
-# Année dernière, données mensuelles
-python3 src/main.py backfill-historical
-
-# 5 dernières années, données hebdomadaires
-python3 src/main.py backfill-historical --period 5y --interval 1wk
-
-# Historique maximum disponible
-python3 src/main.py backfill-historical --period max
-```
+Paramètres → Récupérer l’historique ; choisir la période (1A, 2A, 5A). Sur macOS, les commandes de menu proposent aussi 1A/2A/5A.
 
 #### Saisie Manuelle de Prix
 
@@ -479,12 +323,10 @@ Basculez entre Anglais et Français :
 
 L'application se met à jour immédiatement sans redémarrage.
 
-#### Emplacement de la Base de Données (macOS)
+#### Base de données et stockage
 
-Choisissez où stocker vos données :
-- **Stockage Local** : Dossier documents de l'application par défaut
-- **iCloud Drive** : Synchronisation entre appareils (nécessite le Programme Développeur Apple)
-- **Emplacement Personnalisé** : N'importe quel dossier sur votre Mac
+- **iOS** : Local ou iCloud optionnel (Paramètres → Stockage). iCloud nécessite un compte Apple Developer.
+- **macOS** : Local ou iCloud ; vous pouvez ouvrir le dossier de la base depuis Paramètres.
 
 #### Actualisation en Arrière-plan (macOS)
 
@@ -533,7 +375,7 @@ Portfolio est conçu pour que **vos données ne quittent jamais votre contrôle*
 
 - **Aucun serveur pour vos données** : Il n’existe pas de backend ni de service cloud hébergeant votre portefeuille. Positions, comptes, instruments et historique des prix restent uniquement sur votre appareil (et, si vous l’activez, dans votre iCloud).
 - **Aucune donnée personnelle envoyée** : L’application n’envoie aucune donnée personnelle identifiable ni contenu du portefeuille à un tiers. Pas de télémétrie, analytique ou rapport de plantage.
-- **Stockage local uniquement** : L’application utilise une base SQLite unique (`stocks.db`) dans le dossier Documents de l’app (iOS : `Documents/PortfolioData/` ; macOS : dossier `data/` du projet ou chemin personnalisé). Les préférences (langue, emplacement de stockage, mode privé) sont stockées dans les `UserDefaults` du système, sur l’appareil uniquement.
+- **Stockage local uniquement** : Une base SQLite unique dans le conteneur de l’app (chemin affiché dans Paramètres). Les préférences (langue, stockage, mode privé) sont dans les `UserDefaults` sur l’appareil uniquement.
 - **iCloud optionnel** : Si vous activez iCloud, le même fichier de base est synchronisé via votre compte Apple. Aucune donnée n’est envoyée au développeur de l’app ni à un autre serveur.
 
 ### Ce qui quitte votre appareil (données de marché uniquement)
@@ -569,22 +411,25 @@ iOS utilise le framework Background Tasks du système :
 
 ## Développement
 
-### Structure du Projet
+### Structure du projet
+
+La logique partagée est dans `Shared/` ; iOS et macOS ajoutent leurs vues et leur cycle de vie. Aucun backend — tout l’état est local.
 
 ```
-Portfolio/
-├── Shared/                       # Code partagé
-│   ├── Models/                   # Modèles de données
-│   ├── Services/                 # Base de données, API, Langue
-│   ├── ViewModels/               # Logique métier
-│   ├── Views/                    # Vues SwiftUI
-│   └── Resources/                # Fichiers de localisation
-├── iOS/                          # Code spécifique iOS
-├── macOS/                        # Code spécifique macOS
-├── PortfolioTests/               # Tests unitaires & snapshot
+PortfolioMultiplatform/
+├── Shared/                       # Code partagé (les deux plateformes)
+│   ├── Models/
+│   ├── Services/                 # Base de données, MarketData, Langue
+│   ├── ViewModels/
+│   ├── Views/                    # Dashboard, Rapports, Paramètres, Graphiques…
+│   │   └── Components/           # ChangeLabel, RefreshResultBanner, etc.
+│   ├── Helpers/
+│   └── Resources/                # Localisation (en, fr)
+├── iOS/                          # Spécifique iOS : vue racine, UI dashboard, tâches en arrière-plan
+├── macOS/                        # Spécifique macOS : planificateur, entitlements
+├── PortfolioTests/
 ├── PortfolioMultiplatform.xcodeproj/
-├── data/                         # Stockage base de données (macOS local)
-├── requirements.txt              # Dépendances Python (CLI optionnel)
+├── assets/screenshots/
 └── README.md
 ```
 
@@ -638,4 +483,4 @@ Pour des questions, problèmes, ou demandes de fonctionnalités, veuillez ouvrir
 
 ---
 
-*Fait avec ❤️ en utilisant SwiftUI et Python*
+*Fait avec SwiftUI · SQLite*
