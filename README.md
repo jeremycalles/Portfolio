@@ -71,6 +71,7 @@ Consolidate all your financial assets into one view: track stocks, ETFs, mutual 
 
 ### User Experience
 - **Privacy Mode**: Hide sensitive values on screen (eye icon); data stays local
+- **Face ID / Touch ID protection (iOS and macOS)**: Optionally require Face ID, Touch ID, or device password to access the dashboard. On iOS the app also locks when you leave the app; on both platforms it locks after 5 minutes of inactivity. Toggle in Settings.
 - **Bilingual**: Full English and French localization
 - **Native SwiftUI**: One shared codebase for iOS and macOS; platform-appropriate UI and navigation
 
@@ -317,6 +318,10 @@ For instruments without automatic data sources:
 
 ### Settings & Preferences
 
+#### Face ID / Touch ID Protection (iOS and macOS)
+
+In **Settings** → **Touch ID Protection**, enable or disable requiring Face ID (iPhone/iPad), Touch ID, or device password to view the dashboard. When enabled, the app shows a lock screen on launch. On iOS it also locks when you switch to another app; on both platforms it locks again after 5 minutes of inactivity.
+
 #### Language
 
 Switch between English and French:
@@ -384,6 +389,10 @@ Portfolio is built so that **your data never leaves your control**:
 ### What leaves your device (market data only)
 
 When you refresh prices, the app requests **public market data** from public APIs (Yahoo Finance, Financial Times, Veracash, AuCOFFRE). Only instrument identifiers (e.g. ticker symbols, ISINs) are sent to fetch prices; no portfolio structure, holdings quantities, or personal details are included. This is the same as opening a financial website in a browser.
+
+### Access protection (iOS and macOS)
+
+On **iOS** and **macOS** you can enable **Touch ID Protection** (Face ID on iPhone/iPad) in Settings so that the dashboard is hidden until you authenticate. On iOS the app also locks when you leave it (e.g. switch app or go home); on both platforms it locks again after 5 minutes of inactivity. Turn this on or off in **Settings** → **Touch ID Protection**.
 
 ### Data you control
 

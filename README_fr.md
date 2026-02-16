@@ -71,6 +71,7 @@ Consolidez tous vos actifs dans une seule vue : suivez actions, ETF, OPCVM, or, 
 
 ### Expérience Utilisateur
 - **Mode Privé** : Masquez les valeurs sensibles (icône œil) ; les données restent locales
+- **Protection Face ID / Touch ID (iOS et macOS)** : Exiger optionnellement Face ID, Touch ID ou mot de passe de l’appareil pour accéder au tableau de bord. Sur iOS l’app se verrouille aussi à la sortie ; sur les deux plateformes après 5 minutes d’inactivité. Réglage dans Paramètres.
 - **Bilingue** : Anglais et français
 - **SwiftUI natif** : Un code partagé pour iOS et macOS ; interface et navigation adaptées à chaque plateforme
 
@@ -314,6 +315,10 @@ Pour les instruments sans sources de données automatiques :
 
 ### Paramètres & Préférences
 
+#### Protection Face ID / Touch ID (iOS et macOS)
+
+Dans **Paramètres** → **Protection Touch ID**, activez ou désactivez l’exigence de Face ID (iPhone/iPad), Touch ID ou mot de passe de l’appareil pour afficher le tableau de bord. Lorsqu’elle est activée, l’app affiche un écran de verrouillage au lancement. Sur iOS elle se verrouille aussi lorsque vous passez à une autre app ; sur les deux plateformes après 5 minutes d’inactivité.
+
 #### Langue
 
 Basculez entre Anglais et Français :
@@ -381,6 +386,10 @@ Portfolio est conçu pour que **vos données ne quittent jamais votre contrôle*
 ### Ce qui quitte votre appareil (données de marché uniquement)
 
 Lors d’une actualisation des prix, l’app demande des **données de marché publiques** à des API publiques (Yahoo Finance, Financial Times, Veracash, AuCOFFRE). Seuls les identifiants d’instruments (symboles, codes ISIN) sont envoyés pour récupérer les prix ; ni structure du portefeuille, ni quantités détenues, ni informations personnelles. C’est équivalent à consulter un site financier dans un navigateur.
+
+### Protection d’accès (iOS et macOS)
+
+Sur **iOS** et **macOS**, vous pouvez activer la **Protection Touch ID** (Face ID sur iPhone/iPad) dans Paramètres pour que le tableau de bord reste masqué jusqu’à authentification. Sur iOS l’app se verrouille aussi lorsque vous la quittez ; sur les deux plateformes après 5 minutes d’inactivité. Activez ou désactivez dans **Paramètres** → **Protection Touch ID**.
 
 ### Données sous votre contrôle
 

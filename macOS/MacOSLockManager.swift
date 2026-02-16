@@ -1,6 +1,5 @@
 #if os(macOS)
 import SwiftUI
-import LocalAuthentication
 import AppKit
 
 private let touchIDProtectionEnabledKey = "macos_touch_id_protection_enabled"
@@ -38,29 +37,15 @@ final class MacOSLockManager: ObservableObject {
     /// Unlock via Touch ID or device password. On success, sets isUnlocked and starts activity monitoring.
     func unlock(reason: String) async {
         unlockErrorMessage = nil
-        let context = LAContext()
-        var authError: NSError?
-        
-        let policy: LAPolicy = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &authError)
-            ? .deviceOwnerAuthenticationWithBiometrics
-            : (context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &authError) ? .deviceOwnerAuthentication : .deviceOwnerAuthenticationWithBiometrics)
-        
-        guard context.canEvaluatePolicy(policy, error: &authError) else {
-            unlockErrorMessage = L10n.lockUnavailable
-            return
-        }
-        
         do {
-            let success = try await context.evaluatePolicy(policy, localizedReason: reason)
+            let success = try await BiometricAuth.evaluate(localizedReason: reason)
             if success {
                 isUnlocked = true
                 recordActivity()
                 startInactivityMonitoring()
             }
         } catch {
-            if (error as NSError).code != LAError.userCancel.rawValue {
-                unlockErrorMessage = error.localizedDescription
-            }
+            unlockErrorMessage = error.localizedDescription
         }
     }
     

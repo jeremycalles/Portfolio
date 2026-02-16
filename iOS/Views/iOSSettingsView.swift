@@ -5,6 +5,7 @@ import UniformTypeIdentifiers
 struct iOSSettingsView: View {
     @EnvironmentObject var viewModel: AppViewModel
     @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var lockManager: IOSLockManager
     @StateObject private var demoMode = DemoModeManager.shared
     @Binding var privacyMode: Bool
     @State private var showingImportPicker = false
@@ -63,6 +64,16 @@ struct iOSSettingsView: View {
                 Text("Display")
             } footer: {
                 Text(L10n.settingsDemoModeDescription)
+            }
+            
+            Section {
+                Toggle(isOn: $lockManager.isTouchIDProtectionEnabled) {
+                    Label(L10n.settingsTouchIDProtectionEnable, systemImage: "faceid")
+                }
+            } header: {
+                Text(L10n.settingsTouchIDProtection)
+            } footer: {
+                Text(L10n.settingsTouchIDProtectionDescription)
             }
             
             Section {

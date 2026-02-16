@@ -16,14 +16,18 @@ struct PortfolioApp: App {
     var body: some Scene {
         #if os(iOS)
         WindowGroup {
-            iOSRootView()
+            IOSLockGateView()
                 .environmentObject(viewModel)
                 .environmentObject(languageManager)
+                .environmentObject(IOSLockManager.shared)
                 .id(languageManager.refreshID)  // Force view refresh on language change
         }
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .background:
+                if IOSLockManager.shared.isTouchIDProtectionEnabled {
+                    IOSLockManager.shared.lock()
+                }
                 BackgroundTaskManager.shared.appDidEnterBackground()
             case .active:
                 BackgroundTaskManager.shared.appDidBecomeActive()
