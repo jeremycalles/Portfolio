@@ -24,6 +24,14 @@
 "general.na" = "N/A";
 "general.build" = "Build";
 
+// MARK: - Lock (macOS)
+"lock.unlockButton" = "Unlock with Touch ID";
+"lock.reason" = "Unlock to view your portfolio.";
+"lock.unavailable" = "Touch ID is not available.";
+"settings.touchIDProtection" = "Touch ID Protection";
+"settings.touchIDProtectionDescription" = "Require Touch ID to access the dashboard. Locks after 5 minutes of inactivity.";
+"settings.touchIDProtectionEnable" = "Enable Touch ID Protection";
+
 // MARK: - Navigation
 "nav.dashboard" = "Dashboard";
 "nav.instruments" = "Instruments";

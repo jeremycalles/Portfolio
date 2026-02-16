@@ -33,9 +33,10 @@ struct PortfolioApp: App {
         }
         #else
         WindowGroup {
-            ContentView()
+            MacOSLockGateView()
                 .environmentObject(viewModel)
                 .environmentObject(languageManager)
+                .environmentObject(MacOSLockManager.shared)
                 .id(languageManager.refreshID)  // Force view refresh on language change
                 .onOpenURL { url in
                     guard url.scheme == "portfolio", url.host == "refresh" else { return }
@@ -100,8 +101,25 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 }
 #endif
 
-// MARK: - macOS System Settings View (Preferences Window)
+// MARK: - macOS Lock Gate and System Settings
 #if os(macOS)
+struct MacOSLockGateView: View {
+    @EnvironmentObject var viewModel: AppViewModel
+    @EnvironmentObject var languageManager: LanguageManager
+    @EnvironmentObject var lockManager: MacOSLockManager
+    
+    var body: some View {
+        Group {
+            if !lockManager.isTouchIDProtectionEnabled || lockManager.isUnlocked {
+                ContentView()
+            } else {
+                MacOSLockScreenView(lockManager: lockManager)
+            }
+        }
+    }
+}
+
+// MARK: - macOS System Settings View (Preferences Window)
 struct MacOSSystemSettingsView: View {
     @EnvironmentObject var languageManager: LanguageManager
     

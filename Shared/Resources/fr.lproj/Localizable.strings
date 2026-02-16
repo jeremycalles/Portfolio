@@ -24,6 +24,14 @@
 "general.na" = "N/D";
 "general.build" = "Build";
 
+// MARK: - Lock (macOS)
+"lock.unlockButton" = "Déverrouiller avec Touch ID";
+"lock.reason" = "Déverrouillez pour afficher votre portefeuille.";
+"lock.unavailable" = "Touch ID n'est pas disponible.";
+"settings.touchIDProtection" = "Protection Touch ID";
+"settings.touchIDProtectionDescription" = "Exiger Touch ID pour accéder au tableau de bord. Verrouillage après 5 minutes d'inactivité.";
+"settings.touchIDProtectionEnable" = "Activer la protection Touch ID";
+
 // MARK: - Navigation
 "nav.dashboard" = "Tableau de bord";
 "nav.instruments" = "Instruments";

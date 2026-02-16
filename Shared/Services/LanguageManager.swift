@@ -355,6 +355,14 @@ struct L10n {
         String(format: manager.localized("refresh.resultDetail"), success, total)
     }
     
+    // Lock (macOS)
+    static var lockUnlockButton: String { manager.localized("lock.unlockButton") }
+    static var lockReason: String { manager.localized("lock.reason") }
+    static var lockUnavailable: String { manager.localized("lock.unavailable") }
+    static var settingsTouchIDProtection: String { manager.localized("settings.touchIDProtection") }
+    static var settingsTouchIDProtectionDescription: String { manager.localized("settings.touchIDProtectionDescription") }
+    static var settingsTouchIDProtectionEnable: String { manager.localized("settings.touchIDProtectionEnable") }
+    
     // Errors
     static var errorFetchFailed: String { manager.localized("error.fetchFailed") }
     static var errorSaveFailed: String { manager.localized("error.saveFailed") }

@@ -147,6 +147,11 @@ struct SettingsView: View {
                     Text(L10n.settingsDataManagement)
                 }
                 
+                #if os(macOS)
+                // Touch ID Protection
+                MacOSTouchIDSettingSection()
+                #endif
+                
                 // About
                 GroupBox {
                     VStack(alignment: .leading, spacing: 12) {

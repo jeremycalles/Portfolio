@@ -88,6 +88,7 @@
 		IV17 /* RefreshResultBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = V017 /* RefreshResultBanner.swift */; };
 		M024 /* MacOSSchedulerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = S025 /* MacOSSchedulerManager.swift */; };
 		M025 /* RefreshResultBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = V017 /* RefreshResultBanner.swift */; };
+		M026 /* MacOSLockManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = S026 /* MacOSLockManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -158,6 +159,7 @@
 		V017 /* RefreshResultBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RefreshResultBanner.swift; path = Shared/Views/Components/RefreshResultBanner.swift; sourceTree = SOURCE_ROOT; };
 		S024 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		S025 /* MacOSSchedulerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MacOSSchedulerManager.swift; path = macOS/MacOSSchedulerManager.swift; sourceTree = SOURCE_ROOT; };
+		S026 /* MacOSLockManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MacOSLockManager.swift; path = macOS/MacOSLockManager.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -242,6 +244,7 @@
 				E001 /* macOS.entitlements */,
 				S024 /* Info.plist */,
 				S025 /* MacOSSchedulerManager.swift */,
+				S026 /* MacOSLockManager.swift */,
 			);
 			path = macOS;
 			sourceTree = "<group>";
@@ -497,6 +500,7 @@
 				M023 /* AccountsPieChart.swift in Sources */,
 				M024 /* MacOSSchedulerManager.swift in Sources */,
 				M025 /* RefreshResultBanner.swift in Sources */,
+				M026 /* MacOSLockManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
