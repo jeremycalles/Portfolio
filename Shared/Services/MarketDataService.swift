@@ -769,12 +769,13 @@ actor MarketDataService {
             ticker: "VERAMAX_GOLD",
             quantity: 1.0
         ),
+        // Gecko no longer in AuCOFFRE inventory; use Vera Silver 1 once as estimation
         "COIN:GECKO_SILVER_1OZ": (
-            url: "https://www.aucoffre.com/precommandes/voir-845",
-            searchText: "Prix unitaire",
+            url: "https://www.aucoffre.com/cours/categorie-supertype/graphique-cotation-197",
+            searchText: "Vera Silver 1 once",
             name: "Vera Silver Gecko 1 oz",
             ticker: "GECKO_SILVER",
-            quantity: 10.0
+            quantity: 1.0
         ),
         // Note: COIN:GOLD_BAR_1OZ uses Veracash gold spot price - handled separately below
     ]

@@ -17,7 +17,12 @@ struct Instrument: Identifiable, Codable, Hashable {
     var quadrantId: Int?
     
     var displayName: String {
-        name ?? ticker ?? isin
+        let base = name ?? ticker ?? isin
+        // Gecko no longer in AuCOFFRE; price is estimated from Vera Silver 1 once
+        if isin == "COIN:GECKO_SILVER_1OZ" {
+            return "\(base) (est. Vera Silver 1 oz)"
+        }
+        return base
     }
 }
 
