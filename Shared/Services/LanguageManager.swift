@@ -275,6 +275,22 @@ struct L10n {
     static var settingsICloudRequirement: String { manager.localized("settings.iCloudRequirement") }
     static var settingsImportDatabase: String { manager.localized("settings.importDatabase") }
     static var settingsExportDatabase: String { manager.localized("settings.exportDatabase") }
+    static var settingsExportDatabaseToDevice: String { manager.localized("settings.exportDatabaseToDevice") }
+    static var settingsDatabaseImportExport: String { manager.localized("settings.databaseImportExport") }
+    static var settingsExportToDeviceTitle: String { manager.localized("settings.exportToDeviceTitle") }
+    static var settingsExportToDeviceHint: String { manager.localized("settings.exportToDeviceHint") }
+    static var settingsNoPeersFound: String { manager.localized("settings.noPeersFound") }
+    static var settingsDatabaseReceivedTitle: String { manager.localized("settings.databaseReceivedTitle") }
+    static var settingsDatabaseReceivedMessage: String { manager.localized("settings.databaseReceivedMessage") }
+    static var settingsExportSuccess: String { manager.localized("settings.exportSuccess") }
+    static var settingsExportFailed: String { manager.localized("settings.exportFailed") }
+    static var settingsReplace: String { manager.localized("settings.replace") }
+    static var settingsIncomingInvitationTitle: String { manager.localized("settings.incomingInvitationTitle") }
+    static func settingsIncomingInvitationMessage(_ peerName: String) -> String {
+        String(format: manager.localized("settings.incomingInvitationMessage"), peerName)
+    }
+    static var settingsAccept: String { manager.localized("settings.accept") }
+    static var settingsDecline: String { manager.localized("settings.decline") }
     static var settingsOpenInFinder: String { manager.localized("settings.openInFinder") }
     static var settingsMoveData: String { manager.localized("settings.moveData") }
     static var settingsStartFresh: String { manager.localized("settings.startFresh") }

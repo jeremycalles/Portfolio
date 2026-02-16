@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import MultipeerConnectivity
 
 // MARK: - iOS Settings View
 struct iOSSettingsView: View {
@@ -17,6 +18,10 @@ struct iOSSettingsView: View {
     @State private var showingBackgroundLogs = false
     @State private var showingAddAccountSheet = false
     @State private var showingAddQuadrantSheet = false
+    @State private var showingExportToDeviceSheet = false
+    @State private var showingReceivedDatabaseAlert = false
+    @State private var showingIncomingInvitationAlert = false
+    @StateObject private var peerTransfer = PeerDatabaseTransferService.shared
     
     var body: some View {
         List {
@@ -189,13 +194,19 @@ struct iOSSettingsView: View {
                 Button {
                     showingImportPicker = true
                 } label: {
-                    Label("Import Database from File", systemImage: "square.and.arrow.down")
+                    Label(L10n.settingsImportDatabase, systemImage: "square.and.arrow.down")
                 }
                 
                 Button {
                     showingExportShare = true
                 } label: {
-                    Label("Export Database", systemImage: "square.and.arrow.up")
+                    Label(L10n.settingsExportDatabase, systemImage: "square.and.arrow.up")
+                }
+                
+                Button {
+                    showingExportToDeviceSheet = true
+                } label: {
+                    Label(L10n.settingsExportDatabaseToDevice, systemImage: "antenna.radiowaves.left.and.right")
                 }
             }
             
@@ -341,6 +352,53 @@ struct iOSSettingsView: View {
         .sheet(isPresented: $showingAddQuadrantSheet) {
             AddQuadrantSheet()
         }
+        .sheet(isPresented: $showingExportToDeviceSheet) {
+            ExportToDeviceSheet(peerTransfer: peerTransfer)
+        }
+        .onAppear {
+            peerTransfer.startAdvertising()
+        }
+        .onDisappear {
+            peerTransfer.stopBrowsing()
+            peerTransfer.stopAdvertising()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .peerTransferDidImportDatabase)) { _ in
+            viewModel.refreshAll()
+        }
+        .onChange(of: peerTransfer.didReceiveDatabase) { _, newValue in
+            if newValue { showingReceivedDatabaseAlert = true }
+        }
+        .onChange(of: peerTransfer.pendingIncomingInvitation?.peerID) { _, newValue in
+            if newValue != nil { showingIncomingInvitationAlert = true }
+        }
+        .alert(L10n.settingsIncomingInvitationTitle, isPresented: $showingIncomingInvitationAlert) {
+            Button(L10n.settingsDecline, role: .cancel) {
+                peerTransfer.rejectPendingInvitation()
+            }
+            Button(L10n.settingsAccept) {
+                peerTransfer.acceptPendingInvitation()
+            }
+        } message: {
+            if let peerName = peerTransfer.pendingIncomingInvitation?.peerID.displayName {
+                Text(L10n.settingsIncomingInvitationMessage(peerName))
+            }
+        }
+        .alert(L10n.settingsDatabaseReceivedTitle, isPresented: $showingReceivedDatabaseAlert) {
+            Button(L10n.generalCancel, role: .cancel) {
+                if let url = peerTransfer.consumeReceivedDatabaseURL() {
+                    try? FileManager.default.removeItem(at: url)
+                }
+                peerTransfer.clearReceiveState()
+            }
+            Button(L10n.settingsReplace) {
+                if let url = peerTransfer.consumeReceivedDatabaseURL() {
+                    peerTransfer.applyReceivedDatabase(from: url)
+                }
+                peerTransfer.clearReceiveState()
+            }
+        } message: {
+            Text(L10n.settingsDatabaseReceivedMessage)
+        }
     }
     
     private func importDatabase(from url: URL) {
@@ -379,6 +437,97 @@ struct iOSSettingsView: View {
         } catch {
             importMessage = "Import failed: \(error.localizedDescription)"
             showingAlert = true
+        }
+    }
+}
+
+// MARK: - Export to Device Sheet
+struct ExportToDeviceSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var peerTransfer: PeerDatabaseTransferService
+    @State private var showingSuccessAlert = false
+    @State private var showingErrorAlert = false
+    @State private var errorMessage: String?
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Text(L10n.settingsExportToDeviceHint)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+
+                if peerTransfer.isSending {
+                    HStack {
+                        ProgressView()
+                        Text("Sending…")
+                            .foregroundColor(.secondary)
+                    }
+                    .listRowBackground(Color.clear)
+                } else if peerTransfer.discoveredPeers.isEmpty {
+                    Text(L10n.settingsNoPeersFound)
+                        .foregroundColor(.secondary)
+                        .listRowBackground(Color.clear)
+                } else {
+                    ForEach(Array(peerTransfer.discoveredPeers.enumerated()), id: \.element.displayName) { _, peer in
+                        Button {
+                            sendToPeer(peer)
+                        } label: {
+                            Label(peer.displayName, systemImage: "laptopcomputer.and.iphone")
+                        }
+                        .disabled(peerTransfer.isSending)
+                    }
+                }
+            }
+            .navigationTitle(L10n.settingsExportToDeviceTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(L10n.generalCancel) {
+                        peerTransfer.stopBrowsing()
+                        peerTransfer.clearSendState()
+                        dismiss()
+                    }
+                }
+            }
+            .alert(L10n.settingsExportSuccess, isPresented: $showingSuccessAlert) {
+                Button("OK") {
+                    dismiss()
+                }
+            } message: {
+                Text(L10n.settingsExportSuccess)
+            }
+            .alert(L10n.settingsExportFailed, isPresented: $showingErrorAlert) {
+                Button("OK") { }
+            } message: {
+                Text(errorMessage ?? "")
+            }
+            .onAppear {
+                peerTransfer.startBrowsing()
+                peerTransfer.clearSendState()
+            }
+            .onDisappear {
+                peerTransfer.stopBrowsing()
+            }
+        }
+    }
+
+    private func sendToPeer(_ peer: MCPeerID) {
+        peerTransfer.invitePeer(peer) { success in
+            guard success else {
+                errorMessage = "Could not connect to \(peer.displayName)."
+                showingErrorAlert = true
+                return
+            }
+            peerTransfer.sendDatabase(to: peer) { error in
+                if let error = error {
+                    errorMessage = error.localizedDescription
+                    showingErrorAlert = true
+                } else {
+                    showingSuccessAlert = true
+                }
+            }
         }
     }
 }

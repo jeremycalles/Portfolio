@@ -223,13 +223,13 @@ Track your investments across multiple brokers and accounts.
 
 #### Adding Holdings
 
-1. Open **Holdings** (macOS sidebar or iOS **Positions** tab), tap **+**, then choose account, instrument, quantity, and optionally purchase date/price.
+1. Open **Holdings** (macOS sidebar or iOS tab), tap **+**, then choose account, instrument, quantity, and optionally purchase date/price.
 
 #### Editing Holdings
 
-Update quantity or purchase details for any position:
-- **iOS**: Tap a position row on the **Positions** screen. The full row is tappable; the edit screen opens with quantity and optional purchase info. Save or Cancel.
-- **macOS**: Click a position row in **Holdings** or **All Holdings**. The row shows a pencil icon next to the units to indicate it is editable. An Edit Position sheet opens (title bar shows “Edit Position”); change quantity and optionally include purchase date/price, then Save (⌘↵) or Cancel (Esc).
+Update quantity or purchase details for any holding:
+- **iOS**: Tap a holding row on the **Holdings** screen. The full row is tappable; the edit screen opens with quantity and optional purchase info. Save or Cancel.
+- **macOS**: Click a holding row in **Holdings** or **All Holdings**. The row shows a pencil icon next to the units to indicate it is editable. An Edit Holding sheet opens; change quantity and optionally include purchase date/price, then Save (⌘↵) or Cancel (Esc).
 
 #### Viewing Holdings
 
@@ -244,7 +244,7 @@ Access the consolidated view to see:
 - All holdings across all accounts
 - Total portfolio value
 - Expandable account sections  
-- **Edit**: Click (macOS) or tap (iOS) any holding row to open the same Edit Position flow as above.
+- **Edit**: Click (macOS) or tap (iOS) any holding row to open the same Edit Holding flow as above.
 
 ---
 

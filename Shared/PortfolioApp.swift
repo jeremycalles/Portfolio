@@ -1,6 +1,11 @@
 import SwiftUI
+import UniformTypeIdentifiers
 #if os(iOS)
 import UIKit
+#endif
+#if os(macOS)
+import AppKit
+import MultipeerConnectivity
 #endif
 
 @main
@@ -90,6 +95,7 @@ struct PortfolioApp: App {
 extension Notification.Name {
     static let updatePrices = Notification.Name("updatePrices")
     static let backfillHistorical = Notification.Name("backfillHistorical")
+    static let databaseDidImport = Notification.Name("databaseDidImport")
 }
 
 // MARK: - iOS App Delegate
@@ -119,6 +125,12 @@ struct MacOSLockGateView: View {
             } else {
                 MacOSLockScreenView(lockManager: lockManager)
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .databaseDidImport)) { _ in
+            viewModel.refreshAll()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .peerTransferDidImportDatabase)) { _ in
+            viewModel.refreshAll()
         }
     }
 }
@@ -220,9 +232,35 @@ struct LanguageSettingsView: View {
 struct DatabaseSettingsView: View {
     @State private var selectedStorage: StorageLocation = DatabaseService.shared.currentStorageLocation
     @State private var showingStorageChangeAlert = false
+    @State private var showingImportPicker = false
+    @State private var showingImportAlert = false
+    @State private var importMessage: String?
+    @State private var showingExportToDeviceSheet = false
+    @State private var showingIncomingInvitationAlert = false
+    @StateObject private var peerTransfer = PeerDatabaseTransferService.shared
     
     var body: some View {
         Form {
+            Section(L10n.settingsDatabaseImportExport) {
+                Button {
+                    showingImportPicker = true
+                } label: {
+                    Label(L10n.settingsImportDatabase, systemImage: "square.and.arrow.down")
+                }
+                
+                Button {
+                    exportDatabaseToFile()
+                } label: {
+                    Label(L10n.settingsExportDatabase, systemImage: "square.and.arrow.up")
+                }
+                
+                Button {
+                    showingExportToDeviceSheet = true
+                } label: {
+                    Label(L10n.settingsExportDatabaseToDevice, systemImage: "antenna.radiowaves.left.and.right")
+                }
+            }
+            
             Section(L10n.settingsStorage) {
                 if DatabaseService.shared.iCloudAvailable {
                     Picker("Storage", selection: $selectedStorage) {
@@ -286,7 +324,22 @@ struct DatabaseSettingsView: View {
             }
         }
         .padding()
-        .frame(width: 450, height: 250)
+        .frame(minWidth: 450, minHeight: 320)
+        .fileImporter(
+            isPresented: $showingImportPicker,
+            allowedContentTypes: [.database, .data],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                if let url = urls.first {
+                    importDatabase(from: url)
+                }
+            case .failure(let error):
+                importMessage = "Import failed: \(error.localizedDescription)"
+                showingImportAlert = true
+            }
+        }
         .alert(L10n.settingsStorage, isPresented: $showingStorageChangeAlert) {
             Button(L10n.settingsMoveData) {
                 DatabaseService.shared.switchStorageLocation(to: selectedStorage, copyData: true)
@@ -299,6 +352,198 @@ struct DatabaseSettingsView: View {
             }
         } message: {
             Text(L10n.settingsMoveDataConfirmation(selectedStorage.displayName))
+        }
+        .alert("Database Import", isPresented: $showingImportAlert) {
+            Button("OK") { }
+        } message: {
+            Text(importMessage ?? "")
+        }
+        .sheet(isPresented: $showingExportToDeviceSheet) {
+            MacExportToDeviceSheet(peerTransfer: peerTransfer)
+        }
+        .onAppear {
+            peerTransfer.startAdvertising()
+        }
+        .onDisappear {
+            peerTransfer.stopBrowsing()
+            peerTransfer.stopAdvertising()
+        }
+        .onChange(of: peerTransfer.pendingIncomingInvitation?.peerID) { _, newValue in
+            if newValue != nil { showingIncomingInvitationAlert = true }
+        }
+        .alert(L10n.settingsIncomingInvitationTitle, isPresented: $showingIncomingInvitationAlert) {
+            Button(L10n.settingsDecline, role: .cancel) {
+                peerTransfer.rejectPendingInvitation()
+            }
+            Button(L10n.settingsAccept) {
+                peerTransfer.acceptPendingInvitation()
+            }
+        } message: {
+            if let peerName = peerTransfer.pendingIncomingInvitation?.peerID.displayName {
+                Text(L10n.settingsIncomingInvitationMessage(peerName))
+            }
+        }
+    }
+    
+    private func importDatabase(from url: URL) {
+        let destPath = DatabaseService.shared.getDatabasePath()
+        let destURL = URL(fileURLWithPath: destPath)
+        let destDir = destURL.deletingLastPathComponent()
+        
+        do {
+            guard url.startAccessingSecurityScopedResource() else {
+                importMessage = "Cannot access the selected file"
+                showingImportAlert = true
+                return
+            }
+            defer { url.stopAccessingSecurityScopedResource() }
+            
+            try FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
+            if FileManager.default.fileExists(atPath: destPath) {
+                let backupPath = destPath + ".backup"
+                try? FileManager.default.removeItem(atPath: backupPath)
+                try FileManager.default.moveItem(atPath: destPath, toPath: backupPath)
+            }
+            try FileManager.default.copyItem(at: url, to: destURL)
+            importMessage = "Database imported successfully. Restart the app or switch views to load the new data."
+            showingImportAlert = true
+            NotificationCenter.default.post(name: .databaseDidImport, object: nil)
+        } catch {
+            importMessage = "Import failed: \(error.localizedDescription)"
+            showingImportAlert = true
+        }
+    }
+    
+    private func exportDatabaseToFile() {
+        let path = DatabaseService.shared.getDatabasePath()
+        guard FileManager.default.fileExists(atPath: path) else {
+            importMessage = "Database file not found."
+            showingImportAlert = true
+            return
+        }
+        let sourceURL = URL(fileURLWithPath: path)
+        
+        let savePanel = NSSavePanel()
+        savePanel.allowedContentTypes = [.database, .data]
+        savePanel.nameFieldStringValue = "stocks.db"
+        savePanel.canCreateDirectories = true
+        savePanel.begin { response in
+            guard response == .OK, let destURL = savePanel.url else { return }
+            do {
+                if FileManager.default.fileExists(atPath: destURL.path) {
+                    try FileManager.default.removeItem(at: destURL)
+                }
+                try FileManager.default.copyItem(at: sourceURL, to: destURL)
+            } catch {
+                DispatchQueue.main.async {
+                    importMessage = "Export failed: \(error.localizedDescription)"
+                    showingImportAlert = true
+                }
+            }
+        }
+    }
+}
+
+// MARK: - macOS Export to Device Sheet
+struct MacExportToDeviceSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var peerTransfer: PeerDatabaseTransferService
+    @State private var showingSuccessAlert = false
+    @State private var showingErrorAlert = false
+    @State private var errorMessage: String?
+    @State private var showingReceivedAlert = false
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            Text(L10n.settingsExportToDeviceHint)
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+            
+            if peerTransfer.isSending {
+                ProgressView()
+                Text("Sending…")
+                    .foregroundColor(.secondary)
+            } else if peerTransfer.discoveredPeers.isEmpty {
+                Text(L10n.settingsNoPeersFound)
+                    .foregroundColor(.secondary)
+            } else {
+                List(peerTransfer.discoveredPeers, id: \.displayName) { peer in
+                    Button(peer.displayName) {
+                        sendToPeer(peer)
+                    }
+                    .disabled(peerTransfer.isSending)
+                }
+            }
+            
+            Spacer()
+            
+            HStack {
+                Button(L10n.generalCancel) {
+                    peerTransfer.stopBrowsing()
+                    peerTransfer.clearSendState()
+                    dismiss()
+                }
+                .keyboardShortcut(.cancelAction)
+            }
+            .padding()
+        }
+        .frame(width: 320, height: 280)
+        .padding()
+        .alert(L10n.settingsExportSuccess, isPresented: $showingSuccessAlert) {
+            Button("OK") { dismiss() }
+        } message: {
+            Text(L10n.settingsExportSuccess)
+        }
+        .alert(L10n.settingsExportFailed, isPresented: $showingErrorAlert) {
+            Button("OK") { }
+        } message: {
+            Text(errorMessage ?? "")
+        }
+        .alert(L10n.settingsDatabaseReceivedTitle, isPresented: $showingReceivedAlert) {
+            Button(L10n.generalCancel, role: .cancel) {
+                if let url = peerTransfer.consumeReceivedDatabaseURL() {
+                    try? FileManager.default.removeItem(at: url)
+                }
+                peerTransfer.clearReceiveState()
+            }
+            Button(L10n.settingsReplace) {
+                if let url = peerTransfer.consumeReceivedDatabaseURL() {
+                    peerTransfer.applyReceivedDatabase(from: url)
+                }
+                peerTransfer.clearReceiveState()
+            }
+        } message: {
+            Text(L10n.settingsDatabaseReceivedMessage)
+        }
+        .onAppear {
+            peerTransfer.startBrowsing()
+            peerTransfer.clearSendState()
+        }
+        .onDisappear {
+            peerTransfer.stopBrowsing()
+        }
+        .onChange(of: peerTransfer.didReceiveDatabase) { _, newValue in
+            if newValue { showingReceivedAlert = true }
+        }
+    }
+    
+    private func sendToPeer(_ peer: MCPeerID) {
+        peerTransfer.invitePeer(peer) { success in
+            guard success else {
+                errorMessage = "Could not connect to \(peer.displayName)."
+                showingErrorAlert = true
+                return
+            }
+            peerTransfer.sendDatabase(to: peer) { error in
+                if let error = error {
+                    errorMessage = error.localizedDescription
+                    showingErrorAlert = true
+                } else {
+                    showingSuccessAlert = true
+                }
+            }
         }
     }
 }
