@@ -37,6 +37,7 @@
 		I020 /* AppViewModel+Reports.swift in Sources */ = {isa = PBXBuildFile; fileRef = S018 /* AppViewModel+Reports.swift */; };
 		I021 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S019 /* DashboardView.swift */; };
 		I022 /* AllHoldingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S020 /* AllHoldingsView.swift */; };
+		I026 /* EditHoldingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S028 /* EditHoldingView.swift */; };
 		I023 /* PortfolioTrendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = S021 /* PortfolioTrendChart.swift */; };
 		I024 /* QuadrantPieChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = S022 /* QuadrantPieChart.swift */; };
 		I025 /* AccountsPieChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = S023 /* AccountsPieChart.swift */; };
@@ -60,6 +61,7 @@
 		M018 /* AppViewModel+Reports.swift in Sources */ = {isa = PBXBuildFile; fileRef = S018 /* AppViewModel+Reports.swift */; };
 		M019 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S019 /* DashboardView.swift */; };
 		M020 /* AllHoldingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S020 /* AllHoldingsView.swift */; };
+		M028 /* EditHoldingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S028 /* EditHoldingView.swift */; };
 		M021 /* PortfolioTrendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = S021 /* PortfolioTrendChart.swift */; };
 		M022 /* QuadrantPieChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = S022 /* QuadrantPieChart.swift */; };
 		M023 /* AccountsPieChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = S023 /* AccountsPieChart.swift */; };
@@ -134,6 +136,7 @@
 		S018 /* AppViewModel+Reports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppViewModel+Reports.swift"; sourceTree = "<group>"; };
 		S019 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		S020 /* AllHoldingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllHoldingsView.swift; sourceTree = "<group>"; };
+		S028 /* EditHoldingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditHoldingView.swift; sourceTree = "<group>"; };
 		S021 /* PortfolioTrendChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PortfolioTrendChart.swift; path = Shared/Views/Charts/PortfolioTrendChart.swift; sourceTree = SOURCE_ROOT; };
 		S022 /* QuadrantPieChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QuadrantPieChart.swift; path = Shared/Views/Charts/QuadrantPieChart.swift; sourceTree = SOURCE_ROOT; };
 		S023 /* AccountsPieChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AccountsPieChart.swift; path = Shared/Views/Charts/AccountsPieChart.swift; sourceTree = SOURCE_ROOT; };
@@ -329,6 +332,7 @@
 				S005 /* ReportsView.swift */,
 				S019 /* DashboardView.swift */,
 				S020 /* AllHoldingsView.swift */,
+				S028 /* EditHoldingView.swift */,
 				S021 /* PortfolioTrendChart.swift */,
 				S022 /* QuadrantPieChart.swift */,
 				S023 /* AccountsPieChart.swift */,
@@ -502,6 +506,7 @@
 				M018 /* AppViewModel+Reports.swift in Sources */,
 				M019 /* DashboardView.swift in Sources */,
 				M020 /* AllHoldingsView.swift in Sources */,
+				M028 /* EditHoldingView.swift in Sources */,
 				M021 /* PortfolioTrendChart.swift in Sources */,
 				M022 /* QuadrantPieChart.swift in Sources */,
 				M023 /* AccountsPieChart.swift in Sources */,
@@ -537,6 +542,7 @@
 			I020 /* AppViewModel+Reports.swift in Sources */,
 			I021 /* DashboardView.swift in Sources */,
 			I022 /* AllHoldingsView.swift in Sources */,
+			I026 /* EditHoldingView.swift in Sources */,
 			I023 /* PortfolioTrendChart.swift in Sources */,
 			I024 /* QuadrantPieChart.swift in Sources */,
 			I025 /* AccountsPieChart.swift in Sources */,

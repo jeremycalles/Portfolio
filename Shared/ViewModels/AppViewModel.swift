@@ -384,6 +384,11 @@ class AppViewModel: ObservableObject {
         refreshHoldings()
     }
     
+    func updateHolding(accountId: Int, isin: String, quantity: Double, purchaseDate: String?, purchasePrice: Double?) {
+        db.updateHolding(accountIdValue: accountId, instrumentIsin: isin, quantity: quantity, purchaseDate: purchaseDate, purchasePrice: purchasePrice)
+        refreshHoldings()
+    }
+    
     func deleteHolding(accountId: Int, isin: String) {
         db.deleteHolding(accountIdValue: accountId, instrumentIsin: isin)
         refreshHoldings()

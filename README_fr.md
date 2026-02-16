@@ -101,7 +101,7 @@ Suivez les prix spot pour l'or et l'argent par gramme en EUR :
 Les pièces physiques incluent des primes de marché qui varient selon la demande :
 - `COIN:NAPOLEON_20F` - Napoléon 20F Marianne Coq (~5.8g or pur)
 - `COIN:VERAMAX_GOLD_1/10OZ` - Vera Max 1/10 oz or
-- `COIN:GECKO_SILVER_1OZ` - Vera Silver Gecko 1 oz
+- `COIN:GECKO_SILVER_1OZ` - Vera Silver Gecko 1 oz (n’est plus au catalogue AuCOFFRE ; l’app utilise le prix **Vera Silver 1 once** comme estimation et affiche « (est. Vera Silver 1 oz) » dans l’interface)
 - `COIN:GOLD_BAR_1OZ` - Lingot d'or 1 oz (estimation spot)
 
 ---
@@ -193,11 +193,12 @@ Les instruments sont les actifs financiers que vous souhaitez suivre (actions, E
 
 #### Voir les Détails de l'Instrument
 
-Cliquez/appuyez sur n'importe quel instrument pour voir :
+Cliquez (macOS) ou appuyez (iOS) sur une ligne d’instrument pour ouvrir sa fiche. Sur iOS toute la ligne est cliquable. Vous pouvez ensuite voir :
 - **Prix Actuel** : Dernier prix récupéré avec la devise
 - **Historique des Prix** : Prix historiques en format tableau ou graphique
 - **Quadrant Assigné** : Groupement par catégorie
 - **Positions** : Quels comptes détiennent cet instrument
+- **Modifier** : Utilisez le bouton Modifier (barre d’outils sur iOS, feuille sur macOS) pour changer le nom, le ticker ou la devise
 
 #### Supprimer des Instruments
 
@@ -219,7 +220,13 @@ Suivez vos investissements sur plusieurs courtiers et comptes.
 
 #### Ajouter des Positions
 
-1. Ouvrez **Positions**, **+**, puis choisissez compte, instrument, quantité et éventuellement date/prix d’achat.
+1. Ouvrez **Positions** (barre latérale macOS ou onglet **Positions** sur iOS), **+**, puis choisissez compte, instrument, quantité et éventuellement date/prix d’achat.
+
+#### Modifier les Positions
+
+Modifiez la quantité ou les infos d’achat d’une position :
+- **iOS** : Appuyez sur une ligne de position dans l’écran **Positions**. Toute la ligne est cliquable ; l’écran d’édition s’ouvre (quantité et infos d’achat optionnelles). Enregistrer ou Annuler.
+- **macOS** : Cliquez sur une ligne dans **Positions** ou **Toutes les Positions**. Un crayon à côté des unités indique que la ligne est modifiable. Une feuille « Modifier la position » s’ouvre ; modifiez la quantité et éventuellement la date/prix d’achat, puis Enregistrer (⌘↵) ou Annuler (Échap).
 
 #### Voir les Positions
 
@@ -233,7 +240,8 @@ La vue Positions montre :
 Accédez à la vue consolidée pour voir :
 - Toutes les positions sur tous les comptes
 - La valeur totale du portefeuille
-- Sections de compte extensibles
+- Sections de compte extensibles  
+- **Modifier** : Cliquez (macOS) ou appuyez (iOS) sur une ligne pour ouvrir la même fenêtre d’édition de position que ci-dessus.
 
 ---
 

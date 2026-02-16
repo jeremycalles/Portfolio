@@ -23,31 +23,37 @@ struct iOSAllHoldingsView: View {
                 if !details.isEmpty {
                     Section(account.displayName) {
                         ForEach(details) { holding in
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack {
-                                    Text(holding.instrumentName)
-                                        .font(.headline)
-                                    Spacer()
-                                    if let change = holding.changePercentEUR {
-                                        ChangeLabel(change: change)
+                            NavigationLink {
+                                EditHoldingView(accountId: account.id, isin: holding.isin)
+                            } label: {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Text(holding.instrumentName)
+                                            .font(.headline)
+                                        Spacer()
+                                        if let change = holding.changePercentEUR {
+                                            ChangeLabel(change: change)
+                                        }
                                     }
-                                }
-                                
-                                HStack {
-                                    Text("\(holding.quantity, specifier: "%.4f") units")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                    Spacer()
-                                    if !privacyMode, let value = holding.currentValueEUR {
-                                        Text(formatCurrency(value, currency: "EUR"))
-                                            .fontWeight(.medium)
-                                    } else if privacyMode {
-                                        Text("***")
+                                    
+                                    HStack {
+                                        Text("\(holding.quantity, specifier: "%.4f") units")
+                                            .font(.caption)
                                             .foregroundColor(.secondary)
+                                        Spacer()
+                                        if !privacyMode, let value = holding.currentValueEUR {
+                                            Text(formatCurrency(value, currency: "EUR"))
+                                                .fontWeight(.medium)
+                                        } else if privacyMode {
+                                            Text("***")
+                                                .foregroundColor(.secondary)
+                                        }
                                     }
                                 }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
+                                .padding(.vertical, 4)
                             }
-                            .padding(.vertical, 4)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 Button(role: .destructive) {
                                     viewModel.deleteHolding(accountId: account.id, isin: holding.isin)

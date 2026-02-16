@@ -4,6 +4,7 @@ import SwiftUI
 struct AllHoldingsView: View {
     @EnvironmentObject var viewModel: AppViewModel
     @State private var expandedAccounts: Set<Int> = []
+    @State private var holdingToEdit: HoldingEditItem?
     
     var body: some View {
         ScrollView {
@@ -106,42 +107,49 @@ struct AllHoldingsView: View {
                                     
                                     // Holdings
                                     ForEach(details) { detail in
-                                        HStack {
-                                            VStack(alignment: .leading, spacing: 2) {
-                                                Text(detail.instrumentName)
+                                        Button {
+                                            holdingToEdit = HoldingEditItem(accountId: account.id, isin: detail.isin)
+                                        } label: {
+                                            HStack {
+                                                VStack(alignment: .leading, spacing: 2) {
+                                                    Text(detail.instrumentName)
+                                                        .font(.body)
+                                                        .lineLimit(1)
+                                                    if let ticker = detail.ticker {
+                                                        Text(ticker)
+                                                            .font(.caption)
+                                                            .foregroundColor(.secondary)
+                                                    }
+                                                }
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                                
+                                                Text(formatQuantity(detail.quantity))
                                                     .font(.body)
-                                                    .lineLimit(1)
-                                                if let ticker = detail.ticker {
-                                                    Text(ticker)
-                                                        .font(.caption)
+                                                    .frame(width: 80, alignment: .trailing)
+                                                
+                                                if let value = detail.currentValueEUR {
+                                                    Text(formatCurrency(value, currency: "EUR"))
+                                                        .font(.body)
+                                                        .frame(width: 120, alignment: .trailing)
+                                                } else {
+                                                    Text(L10n.generalNa)
                                                         .foregroundColor(.secondary)
+                                                        .frame(width: 120, alignment: .trailing)
+                                                }
+                                                
+                                                if let change = detail.changePercentEUR {
+                                                    ChangeLabel(change: change)
+                                                        .frame(width: 80, alignment: .trailing)
+                                                } else {
+                                                    Text("—")
+                                                        .foregroundColor(.secondary)
+                                                        .frame(width: 80, alignment: .trailing)
                                                 }
                                             }
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            
-                                            Text(formatQuantity(detail.quantity))
-                                                .font(.body)
-                                                .frame(width: 80, alignment: .trailing)
-                                            
-                                            if let value = detail.currentValueEUR {
-                                                Text(formatCurrency(value, currency: "EUR"))
-                                                    .font(.body)
-                                                    .frame(width: 120, alignment: .trailing)
-                                            } else {
-                                                Text(L10n.generalNa)
-                                                    .foregroundColor(.secondary)
-                                                    .frame(width: 120, alignment: .trailing)
-                                            }
-                                            
-                                            if let change = detail.changePercentEUR {
-                                                ChangeLabel(change: change)
-                                                    .frame(width: 80, alignment: .trailing)
-                                            } else {
-                                                Text("—")
-                                                    .foregroundColor(.secondary)
-                                                    .frame(width: 80, alignment: .trailing)
-                                            }
                                         }
+                                        .buttonStyle(.plain)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .contentShape(Rectangle())
                                         .padding(.vertical, 6)
                                         
                                         if detail.id != details.last?.id {
@@ -182,6 +190,13 @@ struct AllHoldingsView: View {
             .padding(.vertical)
         }
         .navigationTitle(L10n.navAllHoldings)
+        .sheet(item: $holdingToEdit) { item in
+            NavigationStack {
+                EditHoldingView(accountId: item.accountId, isin: item.isin)
+                    .environmentObject(viewModel)
+            }
+            .frame(minWidth: 420, minHeight: 380)
+        }
         .onAppear {
             // Expand all accounts by default
             expandedAccounts = Set(viewModel.bankAccounts.map { $0.id })

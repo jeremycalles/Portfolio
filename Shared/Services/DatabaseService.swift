@@ -617,6 +617,21 @@ class DatabaseService: ObservableObject {
         }
     }
     
+    func updateHolding(accountIdValue: Int, instrumentIsin: String, quantity newQuantity: Double, purchaseDate newPurchaseDate: String?, purchasePrice newPurchasePrice: Double?) {
+        guard let db = db else { return }
+        let now = AppDateFormatter.iso8601.string(from: Date())
+        do {
+            try db.run(holdings.filter(holdingAccountId == accountIdValue && holdingIsin == instrumentIsin).update(
+                quantity <- newQuantity,
+                purchaseDate <- newPurchaseDate,
+                purchasePrice <- newPurchasePrice,
+                lastUpdated <- now
+            ))
+        } catch {
+            print("Failed to update holding: \(error)")
+        }
+    }
+    
     func deleteHolding(accountIdValue: Int, instrumentIsin: String) {
         guard let db = db else { return }
         
@@ -681,6 +696,7 @@ class DatabaseService: ObservableObject {
     func getHoldings(forAccount accountIdValue: Int) -> [Holding] { [] }
     func getAllHoldings() -> [Holding] { [] }
     func addOrUpdateHolding(_ holding: Holding) {}
+    func updateHolding(accountIdValue: Int, instrumentIsin: String, quantity newQuantity: Double, purchaseDate newPurchaseDate: String?, purchasePrice newPurchasePrice: Double?) {}
     func deleteHolding(accountIdValue: Int, instrumentIsin: String) {}
     func getTotalQuantity(forIsin instrumentIsin: String) -> Double { 0 }
     

@@ -101,7 +101,7 @@ Track spot prices for gold and silver per gram in EUR:
 Physical coins include market premiums that vary based on demand:
 - `COIN:NAPOLEON_20F` - Napoléon 20F Marianne Coq (~5.8g pure gold)
 - `COIN:VERAMAX_GOLD_1/10OZ` - Vera Max 1/10 oz gold
-- `COIN:GECKO_SILVER_1OZ` - Vera Silver Gecko 1 oz
+- `COIN:GECKO_SILVER_1OZ` - Vera Silver Gecko 1 oz (no longer in AuCOFFRE catalog; app uses **Vera Silver 1 once** price as an estimate and shows “(est. Vera Silver 1 oz)” in the UI)
 - `COIN:GOLD_BAR_1OZ` - Gold bar 1 oz (spot estimate)
 
 ---
@@ -196,11 +196,12 @@ Instruments are the financial assets you want to track (stocks, ETFs, funds, etc
 
 #### Viewing Instrument Details
 
-Click/tap on any instrument to view:
+Click (macOS) or tap (iOS) on any instrument row to open its detail view. On iOS the full row is tappable. You can then view:
 - **Current Price**: Latest fetched price with currency
 - **Price History**: Historical prices in table or chart format
 - **Assigned Quadrant**: Category grouping
 - **Holdings**: Which accounts hold this instrument
+- **Edit**: Use the Edit button (toolbar on iOS, sheet on macOS) to change name, ticker, or currency
 
 #### Deleting Instruments
 
@@ -222,7 +223,13 @@ Track your investments across multiple brokers and accounts.
 
 #### Adding Holdings
 
-1. Open **Holdings**, tap **+**, then choose account, instrument, quantity, and optionally purchase date/price.
+1. Open **Holdings** (macOS sidebar or iOS **Positions** tab), tap **+**, then choose account, instrument, quantity, and optionally purchase date/price.
+
+#### Editing Holdings
+
+Update quantity or purchase details for any position:
+- **iOS**: Tap a position row on the **Positions** screen. The full row is tappable; the edit screen opens with quantity and optional purchase info. Save or Cancel.
+- **macOS**: Click a position row in **Holdings** or **All Holdings**. The row shows a pencil icon next to the units to indicate it is editable. An Edit Position sheet opens (title bar shows “Edit Position”); change quantity and optionally include purchase date/price, then Save (⌘↵) or Cancel (Esc).
 
 #### Viewing Holdings
 
@@ -236,7 +243,8 @@ The Holdings view shows:
 Access the consolidated view to see:
 - All holdings across all accounts
 - Total portfolio value
-- Expandable account sections
+- Expandable account sections  
+- **Edit**: Click (macOS) or tap (iOS) any holding row to open the same Edit Position flow as above.
 
 ---
 

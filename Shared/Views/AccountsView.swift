@@ -105,6 +105,7 @@ struct BankAccountsView: View {
 struct HoldingsView: View {
     @EnvironmentObject var viewModel: AppViewModel
     @State private var showingAddSheet = false
+    @State private var holdingToEdit: HoldingEditItem?
     @State private var selectedAccount: BankAccount?
     @State private var selectedInstrument: Instrument?
     @State private var quantity: String = ""
@@ -150,35 +151,45 @@ struct HoldingsView: View {
                             } else {
                                 ForEach(accountHoldings, id: \.isin) { holding in
                                     if let instrument = viewModel.instruments.first(where: { $0.isin == holding.isin }) {
-                                        HStack {
-                                            VStack(alignment: .leading) {
-                                                Text(instrument.displayName)
-                                                    .lineLimit(1)
-                                                Text(holding.isin)
-                                                    .font(.caption)
-                                                    .foregroundColor(.secondary)
-                                            }
-                                            
-                                            Spacer()
-                                            
-                                            VStack(alignment: .trailing) {
-                                                Text("× \(formatQuantity(holding.quantity))")
-                                                    .font(.headline)
-                                                if let price = holding.purchasePrice {
-                                                    Text("@ \(formatQuantity(price))")
+                                        Button {
+                                            holdingToEdit = HoldingEditItem(accountId: account.id, isin: holding.isin)
+                                        } label: {
+                                            HStack {
+                                                VStack(alignment: .leading) {
+                                                    Text(instrument.displayName)
+                                                        .lineLimit(1)
+                                                    Text(holding.isin)
                                                         .font(.caption)
                                                         .foregroundColor(.secondary)
                                                 }
+                                                
+                                                Spacer()
+                                                
+                                                VStack(alignment: .trailing) {
+                                                    HStack(spacing: 4) {
+                                                        Image(systemName: "pencil")
+                                                            .font(.body)
+                                                            .foregroundColor(.secondary)
+                                                        Text(formatQuantity(holding.quantity))
+                                                            .font(.headline)
+                                                    }
+                                                    if let price = holding.purchasePrice {
+                                                        Text("@ \(formatQuantity(price))")
+                                                            .font(.caption)
+                                                            .foregroundColor(.secondary)
+                                                    }
+                                                }
+                                                
+                                                Button {
+                                                    viewModel.deleteHolding(accountId: account.id, isin: holding.isin)
+                                                } label: {
+                                                    Image(systemName: "trash")
+                                                        .foregroundColor(.red)
+                                                }
+                                                .buttonStyle(.borderless)
                                             }
-                                            
-                                            Button {
-                                                viewModel.deleteHolding(accountId: account.id, isin: holding.isin)
-                                            } label: {
-                                                Image(systemName: "trash")
-                                                    .foregroundColor(.red)
-                                            }
-                                            .buttonStyle(.borderless)
                                         }
+                                        .buttonStyle(.plain)
                                         .padding(.vertical, 2)
                                     }
                                 }
@@ -197,6 +208,13 @@ struct HoldingsView: View {
                 quantity: $quantity,
                 purchasePrice: $purchasePrice
             )
+        }
+        .sheet(item: $holdingToEdit) { item in
+            NavigationStack {
+                EditHoldingView(accountId: item.accountId, isin: item.isin)
+                    .environmentObject(viewModel)
+            }
+            .frame(minWidth: 420, minHeight: 380)
         }
     }
 }
