@@ -323,6 +323,9 @@ Pour les instruments sans sources de données automatiques :
 
 ### Paramètres & Préférences
 
+- **iOS** : Ouvrez l’onglet **Paramètres** dans la barre d’onglets.
+- **macOS** : Utilisez le menu de l’application **Portfolio** → **Paramètres** (ou ⌘,). Toutes les préférences (Général, Langue, Base de données, Arrière-plan) se trouvent dans cette fenêtre ; il n’y a pas d’entrée Paramètres dans la barre latérale de la fenêtre principale.
+
 #### Protection Face ID / Touch ID (iOS et macOS)
 
 Dans **Paramètres** → **Protection Touch ID**, activez ou désactivez l’exigence de Face ID (iPhone/iPad), Touch ID ou mot de passe de l’appareil pour afficher le tableau de bord. Lorsqu’elle est activée, l’app affiche un écran de verrouillage au lancement. Sur iOS elle se verrouille aussi lorsque vous passez à une autre app ; sur les deux plateformes après 5 minutes d’inactivité.

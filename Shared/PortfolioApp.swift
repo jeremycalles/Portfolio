@@ -5,7 +5,6 @@ import UIKit
 #endif
 #if os(macOS)
 import AppKit
-import MultipeerConnectivity
 #endif
 
 @main
@@ -84,7 +83,9 @@ struct PortfolioApp: App {
         
         Settings {
             MacOSSystemSettingsView()
+                .environmentObject(viewModel)
                 .environmentObject(languageManager)
+                .environmentObject(MacOSLockManager.shared)
                 .id(languageManager.refreshID)  // Force view refresh on language change
         }
         #endif
@@ -129,9 +130,6 @@ struct MacOSLockGateView: View {
         .onReceive(NotificationCenter.default.publisher(for: .databaseDidImport)) { _ in
             viewModel.refreshAll()
         }
-        .onReceive(NotificationCenter.default.publisher(for: .peerTransferDidImportDatabase)) { _ in
-            viewModel.refreshAll()
-        }
     }
 }
 
@@ -161,31 +159,150 @@ struct MacOSSystemSettingsView: View {
                     Label(L10n.settingsBackground, systemImage: "arrow.clockwise")
                 }
         }
-        .frame(width: 550, height: 400)
+        .frame(width: 560, height: 520)
     }
 }
 
 struct GeneralSettingsView: View {
+    @EnvironmentObject var viewModel: AppViewModel
+    @EnvironmentObject var lockManager: MacOSLockManager
+    @StateObject private var demoMode = DemoModeManager.shared
+
+    private let sectionSpacing: CGFloat = 20
+    private let footerTopPadding: CGFloat = 8
+
     var body: some View {
         Form {
-            Section(L10n.settingsAbout) {
-                HStack {
-                    Text(L10n.appName)
-                        .font(.headline)
-                    Spacer()
-                    Text(L10n.appTagline)
-                        .foregroundColor(.secondary)
+                Section {
+                    Toggle(L10n.settingsDemoModeEnable, isOn: $demoMode.isDemoModeEnabled)
+                        .toggleStyle(.switch)
+                    if demoMode.isDemoModeEnabled {
+                        HStack {
+                            Text(L10n.settingsDemoModeActive)
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.orange.opacity(0.2))
+                                .cornerRadius(4)
+                            Spacer()
+                            Button {
+                                demoMode.regenerateSeed()
+                                viewModel.refreshAll()
+                            } label: {
+                                Label(L10n.settingsDemoModeRandomize, systemImage: "arrow.clockwise")
+                                    .font(.caption)
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                    }
+                } header: {
+                    sectionHeader(L10n.settingsDemoMode, isFirst: true)
+                } footer: {
+                    Text(L10n.settingsDemoModeDescription)
+                        .padding(.top, footerTopPadding)
                 }
-                
-                HStack {
-                    Text(L10n.settingsVersion)
-                    Spacer()
-                    Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
-                        .foregroundColor(.secondary)
+
+                Section {
+                    HStack(spacing: 14) {
+                        Button {
+                            Task {
+                                await viewModel.updateAllPrices()
+                            }
+                        } label: {
+                            Label(L10n.actionUpdatePrices, systemImage: "arrow.clockwise")
+                        }
+                        .disabled(viewModel.isLoading)
+
+                        Menu {
+                            Button(L10n.actionBackfill1Year) {
+                                Task {
+                                    await viewModel.backfillHistorical(period: "1y", interval: "1mo")
+                                }
+                            }
+                            Button(L10n.actionBackfill2Years) {
+                                Task {
+                                    await viewModel.backfillHistorical(period: "2y", interval: "1mo")
+                                }
+                            }
+                            Button(L10n.actionBackfill5Years) {
+                                Task {
+                                    await viewModel.backfillHistorical(period: "5y", interval: "1mo")
+                                }
+                            }
+                            Divider()
+                            Button(L10n.actionBackfill1Month) {
+                                Task {
+                                    await viewModel.backfillHistorical(period: "1mo", interval: "1d")
+                                }
+                            }
+                        } label: {
+                            Label(L10n.settingsBackfillData, systemImage: "clock.arrow.circlepath")
+                        }
+                        .disabled(viewModel.isLoading)
+                    }
+                    .padding(.vertical, 4)
+                } header: {
+                    sectionHeader(L10n.settingsDataManagement, isFirst: false)
+                } footer: {
+                    Text(L10n.settingsUpdatePricesDescription)
+                        .padding(.top, footerTopPadding)
                 }
-            }
+
+                Section {
+                    HStack {
+                        Text(L10n.settingsTouchIDProtectionEnable)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 16)
+                        Toggle("", isOn: $lockManager.isTouchIDProtectionEnabled)
+                            .toggleStyle(.switch)
+                            .labelsHidden()
+                    }
+                } header: {
+                    sectionHeader(L10n.settingsTouchIDProtection, isFirst: false)
+                } footer: {
+                    Text(L10n.settingsTouchIDProtectionDescription)
+                        .padding(.top, footerTopPadding)
+                }
+
+                Section {
+                    HStack {
+                        Text(L10n.appName)
+                            .font(.headline)
+                        Spacer()
+                        Text(L10n.appTagline)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 2)
+
+                    HStack {
+                        Text(L10n.settingsVersion)
+                        Spacer()
+                        Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 2)
+
+                    HStack {
+                        Text(L10n.generalBuild)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1")
+                    }
+                    .padding(.vertical, 2)
+                } header: {
+                    sectionHeader(L10n.settingsAbout, isFirst: false)
+                }
         }
-        .padding()
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .padding(.bottom, 28)
+    }
+
+    private func sectionHeader(_ title: String, isFirst: Bool) -> some View {
+        Text(title)
+            .padding(.top, isFirst ? 0 : sectionSpacing)
+            .textCase(nil)
     }
 }
 
@@ -235,10 +352,6 @@ struct DatabaseSettingsView: View {
     @State private var showingImportPicker = false
     @State private var showingImportAlert = false
     @State private var importMessage: String?
-    @State private var showingExportToDeviceSheet = false
-    @State private var showingIncomingInvitationAlert = false
-    @StateObject private var peerTransfer = PeerDatabaseTransferService.shared
-    
     var body: some View {
         Form {
             Section(L10n.settingsDatabaseImportExport) {
@@ -252,12 +365,6 @@ struct DatabaseSettingsView: View {
                     exportDatabaseToFile()
                 } label: {
                     Label(L10n.settingsExportDatabase, systemImage: "square.and.arrow.up")
-                }
-                
-                Button {
-                    showingExportToDeviceSheet = true
-                } label: {
-                    Label(L10n.settingsExportDatabaseToDevice, systemImage: "antenna.radiowaves.left.and.right")
                 }
             }
             
@@ -358,31 +465,6 @@ struct DatabaseSettingsView: View {
         } message: {
             Text(importMessage ?? "")
         }
-        .sheet(isPresented: $showingExportToDeviceSheet) {
-            MacExportToDeviceSheet(peerTransfer: peerTransfer)
-        }
-        .onAppear {
-            peerTransfer.startAdvertising()
-        }
-        .onDisappear {
-            peerTransfer.stopBrowsing()
-            peerTransfer.stopAdvertising()
-        }
-        .onChange(of: peerTransfer.pendingIncomingInvitation?.peerID) { _, newValue in
-            if newValue != nil { showingIncomingInvitationAlert = true }
-        }
-        .alert(L10n.settingsIncomingInvitationTitle, isPresented: $showingIncomingInvitationAlert) {
-            Button(L10n.settingsDecline, role: .cancel) {
-                peerTransfer.rejectPendingInvitation()
-            }
-            Button(L10n.settingsAccept) {
-                peerTransfer.acceptPendingInvitation()
-            }
-        } message: {
-            if let peerName = peerTransfer.pendingIncomingInvitation?.peerID.displayName {
-                Text(L10n.settingsIncomingInvitationMessage(peerName))
-            }
-        }
     }
     
     private func importDatabase(from url: URL) {
@@ -438,110 +520,6 @@ struct DatabaseSettingsView: View {
                 DispatchQueue.main.async {
                     importMessage = "Export failed: \(error.localizedDescription)"
                     showingImportAlert = true
-                }
-            }
-        }
-    }
-}
-
-// MARK: - macOS Export to Device Sheet
-struct MacExportToDeviceSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    @ObservedObject var peerTransfer: PeerDatabaseTransferService
-    @State private var showingSuccessAlert = false
-    @State private var showingErrorAlert = false
-    @State private var errorMessage: String?
-    @State private var showingReceivedAlert = false
-    
-    var body: some View {
-        VStack(spacing: 16) {
-            Text(L10n.settingsExportToDeviceHint)
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-            
-            if peerTransfer.isSending {
-                ProgressView()
-                Text("Sending…")
-                    .foregroundColor(.secondary)
-            } else if peerTransfer.discoveredPeers.isEmpty {
-                Text(L10n.settingsNoPeersFound)
-                    .foregroundColor(.secondary)
-            } else {
-                List(peerTransfer.discoveredPeers, id: \.displayName) { peer in
-                    Button(peer.displayName) {
-                        sendToPeer(peer)
-                    }
-                    .disabled(peerTransfer.isSending)
-                }
-            }
-            
-            Spacer()
-            
-            HStack {
-                Button(L10n.generalCancel) {
-                    peerTransfer.stopBrowsing()
-                    peerTransfer.clearSendState()
-                    dismiss()
-                }
-                .keyboardShortcut(.cancelAction)
-            }
-            .padding()
-        }
-        .frame(width: 320, height: 280)
-        .padding()
-        .alert(L10n.settingsExportSuccess, isPresented: $showingSuccessAlert) {
-            Button("OK") { dismiss() }
-        } message: {
-            Text(L10n.settingsExportSuccess)
-        }
-        .alert(L10n.settingsExportFailed, isPresented: $showingErrorAlert) {
-            Button("OK") { }
-        } message: {
-            Text(errorMessage ?? "")
-        }
-        .alert(L10n.settingsDatabaseReceivedTitle, isPresented: $showingReceivedAlert) {
-            Button(L10n.generalCancel, role: .cancel) {
-                if let url = peerTransfer.consumeReceivedDatabaseURL() {
-                    try? FileManager.default.removeItem(at: url)
-                }
-                peerTransfer.clearReceiveState()
-            }
-            Button(L10n.settingsReplace) {
-                if let url = peerTransfer.consumeReceivedDatabaseURL() {
-                    peerTransfer.applyReceivedDatabase(from: url)
-                }
-                peerTransfer.clearReceiveState()
-            }
-        } message: {
-            Text(L10n.settingsDatabaseReceivedMessage)
-        }
-        .onAppear {
-            peerTransfer.startBrowsing()
-            peerTransfer.clearSendState()
-        }
-        .onDisappear {
-            peerTransfer.stopBrowsing()
-        }
-        .onChange(of: peerTransfer.didReceiveDatabase) { _, newValue in
-            if newValue { showingReceivedAlert = true }
-        }
-    }
-    
-    private func sendToPeer(_ peer: MCPeerID) {
-        peerTransfer.invitePeer(peer) { success in
-            guard success else {
-                errorMessage = "Could not connect to \(peer.displayName)."
-                showingErrorAlert = true
-                return
-            }
-            peerTransfer.sendDatabase(to: peer) { error in
-                if let error = error {
-                    errorMessage = error.localizedDescription
-                    showingErrorAlert = true
-                } else {
-                    showingSuccessAlert = true
                 }
             }
         }

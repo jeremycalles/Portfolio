@@ -1,6 +1,8 @@
 import SwiftUI
 
-// MARK: - Settings View (macOS)
+// MARK: - Settings View (in-window)
+// On macOS, settings are consolidated in the application menu (Portfolio → Settings).
+// This view is no longer used by the macOS sidebar; it remains for possible reuse (e.g. iOS or other entry points).
 struct SettingsView: View {
     @EnvironmentObject var viewModel: AppViewModel
     @EnvironmentObject var languageManager: LanguageManager

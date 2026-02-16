@@ -37,11 +37,6 @@ struct ContentView: View {
                     Label(L10n.navPriceGraph, systemImage: "chart.xyaxis.line")
                         .tag(8)
                 }
-                
-                Section {
-                    Label(L10n.navSettings, systemImage: "gear")
-                        .tag(9)
-                }
             }
             .listStyle(.sidebar)
             .navigationTitle(L10n.appName)
@@ -66,8 +61,6 @@ struct ContentView: View {
                     AllHoldingsView()
                 case 8:
                     PriceGraphView()
-                case 9:
-                    SettingsView()
                 default:
                     DashboardView()
                 }

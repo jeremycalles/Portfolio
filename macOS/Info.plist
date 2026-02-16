@@ -2,12 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>Portfolio uses the local network to find and send the database to other devices running Portfolio.</string>
-	<key>NSBonjourServices</key>
-	<array>
-		<string>_portfolio-db._tcp</string>
-	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

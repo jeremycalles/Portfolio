@@ -326,6 +326,9 @@ For instruments without automatic data sources:
 
 ### Settings & Preferences
 
+- **iOS**: Open the **Settings** tab in the tab bar.
+- **macOS**: Use the application menu **Portfolio** → **Settings** (or press ⌘,). All preferences (General, Language, Database, Background Refresh) are in this window; there is no Settings item in the main window sidebar.
+
 #### Face ID / Touch ID Protection (iOS and macOS)
 
 In **Settings** → **Touch ID Protection**, enable or disable requiring Face ID (iPhone/iPad), Touch ID, or device password to view the dashboard. When enabled, the app shows a lock screen on launch. On iOS it also locks when you switch to another app; on both platforms it locks again after 5 minutes of inactivity.

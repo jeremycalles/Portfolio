@@ -93,9 +93,7 @@
 		M026 /* MacOSLockManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = S026 /* MacOSLockManager.swift */; };
 		M027 /* BiometricAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = S027 /* BiometricAuth.swift */; };
 		I027 /* BiometricAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = S027 /* BiometricAuth.swift */; };
-		I029 /* PeerDatabaseTransferService.swift in Sources */ = {isa = PBXBuildFile; fileRef = S029 /* PeerDatabaseTransferService.swift */; };
 		IV18 /* IOSLockManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = V018 /* IOSLockManager.swift */; };
-		M029 /* PeerDatabaseTransferService.swift in Sources */ = {isa = PBXBuildFile; fileRef = S029 /* PeerDatabaseTransferService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -127,7 +125,6 @@
 		S006 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		S007 /* DatabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseService.swift; sourceTree = "<group>"; };
 		S008 /* MarketDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketDataService.swift; sourceTree = "<group>"; };
-		S029 /* PeerDatabaseTransferService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerDatabaseTransferService.swift; sourceTree = "<group>"; };
 		S009 /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
 		S010 /* iOSRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSRootView.swift; sourceTree = "<group>"; };
 		S011 /* BackgroundTaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundTaskManager.swift; sourceTree = "<group>"; };
@@ -356,7 +353,6 @@
 			children = (
 				S007 /* DatabaseService.swift */,
 				S008 /* MarketDataService.swift */,
-				S029 /* PeerDatabaseTransferService.swift */,
 				S013 /* DateFormatters.swift */,
 				S027 /* BiometricAuth.swift */,
 				F0C1E7C12F3003410066E539 /* LanguageManager.swift */,
@@ -518,7 +514,6 @@
 				M025 /* RefreshResultBanner.swift in Sources */,
 				M026 /* MacOSLockManager.swift in Sources */,
 				M027 /* BiometricAuth.swift in Sources */,
-				M029 /* PeerDatabaseTransferService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -569,7 +564,6 @@
 		IV16 /* iOSSettingsView.swift in Sources */,
 		IV17 /* RefreshResultBanner.swift in Sources */,
 			I027 /* BiometricAuth.swift in Sources */,
-			I029 /* PeerDatabaseTransferService.swift in Sources */,
 			IV18 /* IOSLockManager.swift in Sources */,
 	);
 	runOnlyForDeploymentPostprocessing = 0;
