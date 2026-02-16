@@ -101,11 +101,6 @@ struct HoldingDetail: Identifiable {
         return quantity * price
     }
     
-    var changePercent: Double? {
-        guard let current = currentPrice, let previous = previousPrice, previous > 0 else { return nil }
-        return ((current - previous) / previous) * 100
-    }
-    
     var changePercentEUR: Double? {
         guard let current = currentValueEUR, let previous = previousValueEUR, previous > 0 else { return nil }
         return ((current - previous) / previous) * 100
@@ -188,13 +183,6 @@ struct QuadrantReportItem: Identifiable {
             }
         }
         return totals
-    }
-    
-    func changePercent(for currency: String) -> Double? {
-        guard let current = totalValue[currency], let previous = totalPreviousValue[currency], previous > 0 else {
-            return nil
-        }
-        return ((current - previous) / previous) * 100
     }
     
     // EUR totals (all values converted to EUR)

@@ -9,8 +9,7 @@ struct IconViewModeSelector: View {
         HStack(spacing: 4) {
             ForEach(DashboardViewMode.allCases) { mode in
                 Button {
-                    let generator = UIImpactFeedbackGenerator(style: .light)
-                    generator.impactOccurred()
+                    HapticService.impact(.light)
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                         selectedMode = mode
                     }

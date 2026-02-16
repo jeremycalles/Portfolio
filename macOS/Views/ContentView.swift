@@ -1,6 +1,5 @@
 import SwiftUI
 
-#if os(macOS)
 // MARK: - Main Content View
 struct ContentView: View {
     @EnvironmentObject var viewModel: AppViewModel
@@ -197,4 +196,3 @@ struct AutoRefreshPromptView: View {
         .frame(width: 400)
     }
 }
-#endif

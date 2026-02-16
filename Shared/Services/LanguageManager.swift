@@ -165,6 +165,9 @@ struct L10n {
     static var instrumentsAssignToQuadrant: String { manager.localized("instruments.assignToQuadrant") }
     static var instrumentsDeleteInstrument: String { manager.localized("instruments.deleteInstrument") }
     static var instrumentsNoQuadrantsAvailable: String { manager.localized("instruments.noQuadrantsAvailable") }
+    static var instrumentsPriceDetails: String { manager.localized("instruments.priceDetails") }
+    static var instrumentsCurrentPrice: String { manager.localized("instruments.currentPrice") }
+    static var instrumentsCurrency: String { manager.localized("instruments.currency") }
     static func instrumentsCount(_ count: Int) -> String {
         String(format: manager.localized("instruments.count"), count)
     }
@@ -194,6 +197,7 @@ struct L10n {
     
     // Holdings
     static var holdingsAddHolding: String { manager.localized("holdings.addHolding") }
+    static var holdingsEditHolding: String { manager.localized("holdings.editHolding") }
     static var holdingsSelectInstrument: String { manager.localized("holdings.selectInstrument") }
     static var holdingsSelectAnInstrument: String { manager.localized("holdings.selectAnInstrument") }
     static var holdingsSelectAnInstrumentGraph: String { manager.localized("holdings.selectAnInstrumentGraph") }
@@ -221,6 +225,7 @@ struct L10n {
     }
     
     // Reports
+    static var reportsDate: String { manager.localized("reports.date") }
     static var reportsQuadrantReport: String { manager.localized("reports.quadrantReport") }
     static var reportsComparisonPeriod: String { manager.localized("reports.comparisonPeriod") }
     static var reportsNoHoldingsToDisplay: String { manager.localized("reports.noHoldingsToDisplay") }
@@ -243,10 +248,6 @@ struct L10n {
     static var statsWorstPerformer: String { manager.localized("stats.worstPerformer") }
     static var statsLargestPosition: String { manager.localized("stats.largestPosition") }
     static var statsTotalHoldings: String { manager.localized("stats.totalHoldings") }
-    static func statsMoreItems(_ count: Int) -> String {
-        String(format: manager.localized("stats.moreItems"), count)
-    }
-    
     // Settings
     static var settingsTitle: String { manager.localized("settings.title") }
     static var settingsDemoMode: String { manager.localized("settings.demoMode") }
@@ -327,10 +328,6 @@ struct L10n {
     static var chartSp500Comparison: String { manager.localized("chart.sp500Comparison") }
     static var chartGoldComparison: String { manager.localized("chart.goldComparison") }
     static var chartMsciWorldComparison: String { manager.localized("chart.msciWorldComparison") }
-    static func chartDataPoints(_ count: Int) -> String {
-        String(format: manager.localized("chart.dataPoints"), count)
-    }
-    
     // Privacy
     static var privacyHidden: String { manager.localized("privacy.hidden") }
     static var privacyHiddenLong: String { manager.localized("privacy.hiddenLong") }

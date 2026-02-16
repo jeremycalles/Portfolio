@@ -1,6 +1,5 @@
 import SwiftUI
 
-#if os(macOS)
 // MARK: - Bank Accounts View
 struct BankAccountsView: View {
     @EnvironmentObject var viewModel: AppViewModel
@@ -106,10 +105,6 @@ struct HoldingsView: View {
     @EnvironmentObject var viewModel: AppViewModel
     @State private var showingAddSheet = false
     @State private var holdingToEdit: HoldingEditItem?
-    @State private var selectedAccount: BankAccount?
-    @State private var selectedInstrument: Instrument?
-    @State private var quantity: String = ""
-    @State private var purchasePrice: String = ""
     
     var body: some View {
         VStack(spacing: 0) {
@@ -201,13 +196,7 @@ struct HoldingsView: View {
         }
         .navigationTitle(L10n.accountsHoldingsCountTitle(viewModel.holdings.count))
         .sheet(isPresented: $showingAddSheet) {
-            AddHoldingSheet(
-                isPresented: $showingAddSheet,
-                selectedAccount: $selectedAccount,
-                selectedInstrument: $selectedInstrument,
-                quantity: $quantity,
-                purchasePrice: $purchasePrice
-            )
+            AddHoldingSheet()
         }
         .sheet(item: $holdingToEdit) { item in
             NavigationStack {
@@ -219,79 +208,3 @@ struct HoldingsView: View {
     }
 }
 
-// MARK: - Add Holding Sheet
-struct AddHoldingSheet: View {
-    @EnvironmentObject var viewModel: AppViewModel
-    @Binding var isPresented: Bool
-    @Binding var selectedAccount: BankAccount?
-    @Binding var selectedInstrument: Instrument?
-    @Binding var quantity: String
-    @Binding var purchasePrice: String
-    
-    var body: some View {
-        VStack(spacing: 20) {
-            Text(L10n.holdingsAddHolding)
-                .font(.headline)
-            
-            Form {
-                Picker("Bank Account", selection: $selectedAccount) {
-                    Text(L10n.accountsSelectAccount).tag(nil as BankAccount?)
-                    ForEach(viewModel.bankAccounts) { account in
-                        Text(account.displayName).tag(account as BankAccount?)
-                    }
-                }
-                
-                Picker("Instrument", selection: $selectedInstrument) {
-                    Text(L10n.holdingsSelectInstrument).tag(nil as Instrument?)
-                    ForEach(viewModel.instruments) { instrument in
-                        Text(instrument.displayName).tag(instrument as Instrument?)
-                    }
-                }
-                
-                TextField("Quantity", text: $quantity)
-                
-                TextField("Purchase Price (optional)", text: $purchasePrice)
-            }
-            .frame(width: 350)
-            
-            HStack {
-                Button(L10n.generalCancel) {
-                    resetAndClose()
-                }
-                .keyboardShortcut(.cancelAction)
-                
-                Button(L10n.generalAdd) {
-                    if let account = selectedAccount,
-                       let instrument = selectedInstrument,
-                       let qty = Double(quantity) {
-                        viewModel.addHolding(
-                            accountId: account.id,
-                            isin: instrument.isin,
-                            quantity: qty,
-                            purchaseDate: nil,
-                            purchasePrice: Double(purchasePrice)
-                        )
-                        resetAndClose()
-                    }
-                }
-                .keyboardShortcut(.defaultAction)
-                .disabled(
-                    selectedAccount == nil ||
-                    selectedInstrument == nil ||
-                    Double(quantity) == nil
-                )
-            }
-        }
-        .padding(30)
-        .frame(minWidth: 400)
-    }
-    
-    private func resetAndClose() {
-        isPresented = false
-        selectedAccount = nil
-        selectedInstrument = nil
-        quantity = ""
-        purchasePrice = ""
-    }
-}
-#endif

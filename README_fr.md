@@ -438,20 +438,54 @@ La logique partagée est dans `Shared/` ; iOS et macOS ajoutent leurs vues et le
 ```
 PortfolioMultiplatform/
 ├── Shared/                       # Code partagé (les deux plateformes)
-│   ├── Models/
-│   ├── Services/                 # Base de données, MarketData, Langue
-│   ├── ViewModels/
-│   ├── Views/                    # Dashboard, Rapports, Paramètres, Graphiques…
-│   │   └── Components/           # ChangeLabel, RefreshResultBanner, etc.
-│   ├── Helpers/
+│   ├── Models/                   # Modèles de données (Instrument, Holding, etc.)
+│   ├── Services/                 # Services principaux
+│   │   ├── DatabaseService.swift
+│   │   ├── MarketDataService.swift
+│   │   ├── LanguageManager.swift
+│   │   ├── PriceRefreshService.swift   # Logique de rafraîchissement partagée
+│   │   ├── DemoModeManager.swift       # Mode démo/confidentialité
+│   │   └── HapticService.swift         # Retour haptique multiplateforme
+│   ├── ViewModels/               # AppViewModel et extensions
+│   ├── Views/
+│   │   ├── Charts/               # EnhancedTrendCard, AllocationRingChart, etc.
+│   │   ├── Dashboard/            # Sections du tableau de bord (Quadrants, Positions, Comptes)
+│   │   ├── Components/           # Composants UI partagés
+│   │   │   ├── AddHoldingSheet.swift
+│   │   │   ├── PriceEditorSheet.swift
+│   │   │   ├── BackfillLogsSheet.swift
+│   │   │   └── ChangeLabel.swift
+│   │   ├── DashboardView.swift
+│   │   ├── ReportsView.swift
+│   │   └── EditHoldingView.swift
+│   ├── Helpers/                  # Formatage, utilitaires de date
 │   └── Resources/                # Localisation (en, fr)
-├── iOS/                          # Spécifique iOS : vue racine, UI dashboard, tâches en arrière-plan
-├── macOS/                        # Spécifique macOS : planificateur, entitlements
+├── iOS/                          # Code spécifique iOS
+│   ├── iOSRootView.swift         # Point d'entrée iOS principal
+│   ├── BackgroundTaskManager.swift
+│   ├── IOSLockManager.swift
+│   └── Views/                    # Vues spécifiques iOS
+│       └── Components/           # Sélecteur de période, sélecteur de mode
+├── macOS/                        # Code spécifique macOS
+│   ├── MacOSSchedulerManager.swift
+│   ├── MacOSLockManager.swift
+│   └── Views/                    # Vues spécifiques macOS
+│       ├── ContentView.swift     # Navigation principale macOS
+│       ├── AccountsView.swift
+│       ├── InstrumentsView.swift
+│       └── MacOSSettingsViews.swift
 ├── PortfolioTests/
 ├── PortfolioMultiplatform.xcodeproj/
 ├── assets/screenshots/
 └── README.md
 ```
+
+### Points forts de l'architecture
+
+- **Partage maximal du code** : Graphiques, composants du tableau de bord, feuilles et services sont partagés entre les plateformes
+- **UI spécifique par plateforme** : Chaque plateforme a sa propre navigation et ses vues de paramètres optimisées pour l'expérience
+- **Séparation claire** : Le code spécifique à chaque plateforme est clairement isolé dans les dossiers `iOS/` et `macOS/`
+- **Services unifiés** : `PriceRefreshService`, `HapticService` et `DemoModeManager` assurent un comportement cohérent sur toutes les plateformes
 
 ### Exécution des Tests
 

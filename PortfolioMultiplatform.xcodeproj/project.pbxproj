@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F0C1E7B52F3002500066E539 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C1E7B42F3002500066E539 /* SettingsView.swift */; };
-		F0C1E7B62F3002500066E539 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C1E7B42F3002500066E539 /* SettingsView.swift */; };
 		F0C1E7BD2F3002810066E539 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F0C1E7BB2F3002810066E539 /* Localizable.strings */; };
 		F0C1E7BE2F3002810066E539 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F0C1E7B82F3002810066E539 /* Localizable.strings */; };
 		F0C1E7BF2F3002810066E539 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F0C1E7BB2F3002810066E539 /* Localizable.strings */; };
@@ -71,16 +69,20 @@
 		TS04 /* MockDatabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ST04 /* MockDatabaseService.swift */; };
 		TS05 /* TestFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = ST05 /* TestFixtures.swift */; };
 		TS06 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = P005 /* SnapshotTesting */; };
-		IV01 /* MiniSparkline.swift in Sources */ = {isa = PBXBuildFile; fileRef = V001 /* MiniSparkline.swift */; };
 		IV02 /* EnhancedTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = V002 /* EnhancedTrendCard.swift */; };
-		IV03 /* InteractivePortfolioChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = V003 /* InteractivePortfolioChart.swift */; };
-		IV04 /* ChartTooltipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V004 /* ChartTooltipView.swift */; };
 		IV05 /* EnhancedAllocationRingChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = V005 /* EnhancedAllocationRingChart.swift */; };
 		IV06 /* EnhancedPortfolioHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = V006 /* EnhancedPortfolioHeroCard.swift */; };
 		IV07 /* QuickStatsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = V007 /* QuickStatsRow.swift */; };
 		IV08 /* DashboardQuadrantsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = V008 /* DashboardQuadrantsSection.swift */; };
 		IV09 /* DashboardHoldingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = V009 /* DashboardHoldingsSection.swift */; };
 		IV10 /* DashboardAccountsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = V010 /* DashboardAccountsSection.swift */; };
+		MV02 /* EnhancedTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = V002 /* EnhancedTrendCard.swift */; };
+		MV05 /* EnhancedAllocationRingChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = V005 /* EnhancedAllocationRingChart.swift */; };
+		MV06 /* EnhancedPortfolioHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = V006 /* EnhancedPortfolioHeroCard.swift */; };
+		MV07 /* QuickStatsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = V007 /* QuickStatsRow.swift */; };
+		MV08 /* DashboardQuadrantsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = V008 /* DashboardQuadrantsSection.swift */; };
+		MV09 /* DashboardHoldingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = V009 /* DashboardHoldingsSection.swift */; };
+		MV10 /* DashboardAccountsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = V010 /* DashboardAccountsSection.swift */; };
 		IV11 /* ModernPeriodSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = V011 /* ModernPeriodSelector.swift */; };
 		IV12 /* IconViewModeSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = V012 /* IconViewModeSelector.swift */; };
 		IV13 /* iOSQuadrantReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V013 /* iOSQuadrantReportView.swift */; };
@@ -92,7 +94,20 @@
 		M025 /* RefreshResultBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = V017 /* RefreshResultBanner.swift */; };
 		M026 /* MacOSLockManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = S026 /* MacOSLockManager.swift */; };
 		M027 /* BiometricAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = S027 /* BiometricAuth.swift */; };
+		M029 /* MacOSSettingsViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = S029 /* MacOSSettingsViews.swift */; };
 		I027 /* BiometricAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = S027 /* BiometricAuth.swift */; };
+		S030 /* PriceRefreshService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F030 /* PriceRefreshService.swift */; };
+		S031 /* PriceRefreshService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F030 /* PriceRefreshService.swift */; };
+		S032 /* BackfillLogsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F032 /* BackfillLogsSheet.swift */; };
+		S033 /* BackfillLogsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F032 /* BackfillLogsSheet.swift */; };
+		S034 /* AddHoldingSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F034 /* AddHoldingSheet.swift */; };
+		S035 /* AddHoldingSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F034 /* AddHoldingSheet.swift */; };
+		S036 /* PriceEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F036 /* PriceEditorSheet.swift */; };
+		S037 /* PriceEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F036 /* PriceEditorSheet.swift */; };
+		S038 /* DemoModeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F038 /* DemoModeManager.swift */; };
+		S039 /* DemoModeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F038 /* DemoModeManager.swift */; };
+		S040 /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F040 /* HapticService.swift */; };
+		S041 /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F040 /* HapticService.swift */; };
 		IV18 /* IOSLockManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = V018 /* IOSLockManager.swift */; };
 /* End PBXBuildFile section */
 
@@ -110,7 +125,6 @@
 		A001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E001 /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
 		E002 /* iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iOS.entitlements; sourceTree = "<group>"; };
-		F0C1E7B42F3002500066E539 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsView.swift; path = Shared/Views/SettingsView.swift; sourceTree = SOURCE_ROOT; };
 		F0C1E7B72F3002810066E539 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Localizable.strings; sourceTree = "<group>"; };
 		F0C1E7BA2F3002810066E539 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = Localizable.strings; sourceTree = "<group>"; };
 		F0C1E7C12F3003410066E539 /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
@@ -118,9 +132,10 @@
 		PR02 /* Portfolio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Portfolio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		PR03 /* PortfolioTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PortfolioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		S001 /* PortfolioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioApp.swift; sourceTree = "<group>"; };
-		S002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		S003 /* InstrumentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentsView.swift; sourceTree = "<group>"; };
-		S004 /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
+		S002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContentView.swift; path = macOS/Views/ContentView.swift; sourceTree = SOURCE_ROOT; };
+		S003 /* InstrumentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InstrumentsView.swift; path = macOS/Views/InstrumentsView.swift; sourceTree = SOURCE_ROOT; };
+		S004 /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AccountsView.swift; path = macOS/Views/AccountsView.swift; sourceTree = SOURCE_ROOT; };
+		S029 /* MacOSSettingsViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MacOSSettingsViews.swift; path = macOS/Views/MacOSSettingsViews.swift; sourceTree = SOURCE_ROOT; };
 		S005 /* ReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsView.swift; sourceTree = "<group>"; };
 		S006 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		S007 /* DatabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseService.swift; sourceTree = "<group>"; };
@@ -146,16 +161,13 @@
 		ST03 /* DashboardSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardSnapshotTests.swift; sourceTree = "<group>"; };
 		ST04 /* MockDatabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDatabaseService.swift; sourceTree = "<group>"; };
 		ST05 /* TestFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestFixtures.swift; sourceTree = "<group>"; };
-		V001 /* MiniSparkline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MiniSparkline.swift; path = iOS/Views/Charts/MiniSparkline.swift; sourceTree = SOURCE_ROOT; };
-		V002 /* EnhancedTrendCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EnhancedTrendCard.swift; path = iOS/Views/Charts/EnhancedTrendCard.swift; sourceTree = SOURCE_ROOT; };
-		V003 /* InteractivePortfolioChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InteractivePortfolioChart.swift; path = iOS/Views/Charts/InteractivePortfolioChart.swift; sourceTree = SOURCE_ROOT; };
-		V004 /* ChartTooltipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChartTooltipView.swift; path = iOS/Views/Charts/ChartTooltipView.swift; sourceTree = SOURCE_ROOT; };
-		V005 /* EnhancedAllocationRingChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EnhancedAllocationRingChart.swift; path = iOS/Views/Charts/EnhancedAllocationRingChart.swift; sourceTree = SOURCE_ROOT; };
-		V006 /* EnhancedPortfolioHeroCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EnhancedPortfolioHeroCard.swift; path = iOS/Views/Dashboard/EnhancedPortfolioHeroCard.swift; sourceTree = SOURCE_ROOT; };
-		V007 /* QuickStatsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QuickStatsRow.swift; path = iOS/Views/Dashboard/QuickStatsRow.swift; sourceTree = SOURCE_ROOT; };
-		V008 /* DashboardQuadrantsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DashboardQuadrantsSection.swift; path = iOS/Views/Dashboard/DashboardQuadrantsSection.swift; sourceTree = SOURCE_ROOT; };
-		V009 /* DashboardHoldingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DashboardHoldingsSection.swift; path = iOS/Views/Dashboard/DashboardHoldingsSection.swift; sourceTree = SOURCE_ROOT; };
-		V010 /* DashboardAccountsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DashboardAccountsSection.swift; path = iOS/Views/Dashboard/DashboardAccountsSection.swift; sourceTree = SOURCE_ROOT; };
+		V002 /* EnhancedTrendCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EnhancedTrendCard.swift; path = Shared/Views/Charts/EnhancedTrendCard.swift; sourceTree = SOURCE_ROOT; };
+		V005 /* EnhancedAllocationRingChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EnhancedAllocationRingChart.swift; path = Shared/Views/Charts/EnhancedAllocationRingChart.swift; sourceTree = SOURCE_ROOT; };
+		V006 /* EnhancedPortfolioHeroCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EnhancedPortfolioHeroCard.swift; path = Shared/Views/Dashboard/EnhancedPortfolioHeroCard.swift; sourceTree = SOURCE_ROOT; };
+		V007 /* QuickStatsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QuickStatsRow.swift; path = Shared/Views/Dashboard/QuickStatsRow.swift; sourceTree = SOURCE_ROOT; };
+		V008 /* DashboardQuadrantsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DashboardQuadrantsSection.swift; path = Shared/Views/Dashboard/DashboardQuadrantsSection.swift; sourceTree = SOURCE_ROOT; };
+		V009 /* DashboardHoldingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DashboardHoldingsSection.swift; path = Shared/Views/Dashboard/DashboardHoldingsSection.swift; sourceTree = SOURCE_ROOT; };
+		V010 /* DashboardAccountsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DashboardAccountsSection.swift; path = Shared/Views/Dashboard/DashboardAccountsSection.swift; sourceTree = SOURCE_ROOT; };
 		V011 /* ModernPeriodSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ModernPeriodSelector.swift; path = iOS/Views/Components/ModernPeriodSelector.swift; sourceTree = SOURCE_ROOT; };
 		V012 /* IconViewModeSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = IconViewModeSelector.swift; path = iOS/Views/Components/IconViewModeSelector.swift; sourceTree = SOURCE_ROOT; };
 		V013 /* iOSQuadrantReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = iOSQuadrantReportView.swift; path = iOS/Views/iOSQuadrantReportView.swift; sourceTree = SOURCE_ROOT; };
@@ -168,6 +180,12 @@
 		S026 /* MacOSLockManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MacOSLockManager.swift; path = macOS/MacOSLockManager.swift; sourceTree = SOURCE_ROOT; };
 		S027 /* BiometricAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricAuth.swift; sourceTree = "<group>"; };
 		V018 /* IOSLockManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = IOSLockManager.swift; path = iOS/IOSLockManager.swift; sourceTree = SOURCE_ROOT; };
+		F030 /* PriceRefreshService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceRefreshService.swift; sourceTree = "<group>"; };
+		F032 /* BackfillLogsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BackfillLogsSheet.swift; path = Shared/Views/Components/BackfillLogsSheet.swift; sourceTree = SOURCE_ROOT; };
+		F034 /* AddHoldingSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AddHoldingSheet.swift; path = Shared/Views/Components/AddHoldingSheet.swift; sourceTree = SOURCE_ROOT; };
+		F036 /* PriceEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PriceEditorSheet.swift; path = Shared/Views/Components/PriceEditorSheet.swift; sourceTree = SOURCE_ROOT; };
+		F038 /* DemoModeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DemoModeManager.swift; path = Shared/Services/DemoModeManager.swift; sourceTree = SOURCE_ROOT; };
+		F040 /* HapticService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HapticService.swift; path = Shared/Services/HapticService.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -239,9 +257,21 @@
 				G011 /* Models */,
 				G012 /* Services */,
 				G013 /* ViewModels */,
-				S014 /* FormattingHelpers.swift */,
-				S015 /* ChangeLabel.swift */,
-				V017 /* RefreshResultBanner.swift */,
+			S014 /* FormattingHelpers.swift */,
+			S015 /* ChangeLabel.swift */,
+			V017 /* RefreshResultBanner.swift */,
+			F032 /* BackfillLogsSheet.swift */,
+			F034 /* AddHoldingSheet.swift */,
+			F036 /* PriceEditorSheet.swift */,
+			F038 /* DemoModeManager.swift */,
+			F040 /* HapticService.swift */,
+			V002 /* EnhancedTrendCard.swift */,
+			V005 /* EnhancedAllocationRingChart.swift */,
+			V006 /* EnhancedPortfolioHeroCard.swift */,
+			V007 /* QuickStatsRow.swift */,
+			V008 /* DashboardQuadrantsSection.swift */,
+			V009 /* DashboardHoldingsSection.swift */,
+			V010 /* DashboardAccountsSection.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -253,6 +283,10 @@
 				S024 /* Info.plist */,
 				S025 /* MacOSSchedulerManager.swift */,
 				S026 /* MacOSLockManager.swift */,
+				S002 /* ContentView.swift */,
+				S003 /* InstrumentsView.swift */,
+				S004 /* AccountsView.swift */,
+				S029 /* MacOSSettingsViews.swift */,
 			);
 			path = macOS;
 			sourceTree = "<group>";
@@ -260,21 +294,10 @@
 	G003 /* iOS */ = {
 		isa = PBXGroup;
 		children = (
-			F0C1E7B42F3002500066E539 /* SettingsView.swift */,
 			S010 /* iOSRootView.swift */,
 			S011 /* BackgroundTaskManager.swift */,
 			S012 /* Info.plist */,
 			E002 /* iOS.entitlements */,
-			V001 /* MiniSparkline.swift */,
-			V002 /* EnhancedTrendCard.swift */,
-			V003 /* InteractivePortfolioChart.swift */,
-			V004 /* ChartTooltipView.swift */,
-			V005 /* EnhancedAllocationRingChart.swift */,
-			V006 /* EnhancedPortfolioHeroCard.swift */,
-			V007 /* QuickStatsRow.swift */,
-			V008 /* DashboardQuadrantsSection.swift */,
-			V009 /* DashboardHoldingsSection.swift */,
-			V010 /* DashboardAccountsSection.swift */,
 			V011 /* ModernPeriodSelector.swift */,
 			V012 /* IconViewModeSelector.swift */,
 			V013 /* iOSQuadrantReportView.swift */,
@@ -326,9 +349,6 @@
 		G010 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				S002 /* ContentView.swift */,
-				S003 /* InstrumentsView.swift */,
-				S004 /* AccountsView.swift */,
 				S005 /* ReportsView.swift */,
 				S019 /* DashboardView.swift */,
 				S020 /* AllHoldingsView.swift */,
@@ -356,6 +376,7 @@
 				S013 /* DateFormatters.swift */,
 				S027 /* BiometricAuth.swift */,
 				F0C1E7C12F3003410066E539 /* LanguageManager.swift */,
+				F030 /* PriceRefreshService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -492,7 +513,6 @@
 				M003 /* InstrumentsView.swift in Sources */,
 				M004 /* AccountsView.swift in Sources */,
 				M005 /* ReportsView.swift in Sources */,
-				F0C1E7B52F3002500066E539 /* SettingsView.swift in Sources */,
 				M006 /* Models.swift in Sources */,
 				F0C1E7C22F3003410066E539 /* LanguageManager.swift in Sources */,
 				M007 /* DatabaseService.swift in Sources */,
@@ -514,6 +534,20 @@
 				M025 /* RefreshResultBanner.swift in Sources */,
 				M026 /* MacOSLockManager.swift in Sources */,
 				M027 /* BiometricAuth.swift in Sources */,
+				M029 /* MacOSSettingsViews.swift in Sources */,
+				S030 /* PriceRefreshService.swift in Sources */,
+				S032 /* BackfillLogsSheet.swift in Sources */,
+				S034 /* AddHoldingSheet.swift in Sources */,
+				S036 /* PriceEditorSheet.swift in Sources */,
+				S038 /* DemoModeManager.swift in Sources */,
+				S040 /* HapticService.swift in Sources */,
+				MV02 /* EnhancedTrendCard.swift in Sources */,
+				MV05 /* EnhancedAllocationRingChart.swift in Sources */,
+				MV06 /* EnhancedPortfolioHeroCard.swift in Sources */,
+				MV07 /* QuickStatsRow.swift in Sources */,
+				MV08 /* DashboardQuadrantsSection.swift in Sources */,
+				MV09 /* DashboardHoldingsSection.swift in Sources */,
+				MV10 /* DashboardAccountsSection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -523,15 +557,11 @@
 		files = (
 			I001 /* PortfolioApp.swift in Sources */,
 			F0C1E7C32F3003410066E539 /* LanguageManager.swift in Sources */,
-			I002 /* ContentView.swift in Sources */,
-			I003 /* InstrumentsView.swift in Sources */,
-			I004 /* AccountsView.swift in Sources */,
 			I005 /* ReportsView.swift in Sources */,
 			I006 /* Models.swift in Sources */,
 			I007 /* DatabaseService.swift in Sources */,
 			I008 /* MarketDataService.swift in Sources */,
 			I009 /* AppViewModel.swift in Sources */,
-			F0C1E7B62F3002500066E539 /* SettingsView.swift in Sources */,
 			I010 /* iOSRootView.swift in Sources */,
 			I013 /* BackgroundTaskManager.swift in Sources */,
 			I015 /* DateFormatters.swift in Sources */,
@@ -546,10 +576,7 @@
 			I023 /* PortfolioTrendChart.swift in Sources */,
 			I024 /* QuadrantPieChart.swift in Sources */,
 			I025 /* AccountsPieChart.swift in Sources */,
-			IV01 /* MiniSparkline.swift in Sources */,
 			IV02 /* EnhancedTrendCard.swift in Sources */,
-			IV03 /* InteractivePortfolioChart.swift in Sources */,
-			IV04 /* ChartTooltipView.swift in Sources */,
 			IV05 /* EnhancedAllocationRingChart.swift in Sources */,
 			IV06 /* EnhancedPortfolioHeroCard.swift in Sources */,
 			IV07 /* QuickStatsRow.swift in Sources */,
@@ -565,6 +592,12 @@
 		IV17 /* RefreshResultBanner.swift in Sources */,
 			I027 /* BiometricAuth.swift in Sources */,
 			IV18 /* IOSLockManager.swift in Sources */,
+			S031 /* PriceRefreshService.swift in Sources */,
+			S033 /* BackfillLogsSheet.swift in Sources */,
+			S035 /* AddHoldingSheet.swift in Sources */,
+			S037 /* PriceEditorSheet.swift in Sources */,
+			S039 /* DemoModeManager.swift in Sources */,
+			S041 /* HapticService.swift in Sources */,
 	);
 	runOnlyForDeploymentPostprocessing = 0;
 };

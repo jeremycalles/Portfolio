@@ -1,7 +1,6 @@
 import SwiftUI
 
 // MARK: - Instruments View
-#if os(macOS)
 struct InstrumentsView: View {
     @EnvironmentObject var viewModel: AppViewModel
     @State private var showingAddSheet = false
@@ -495,4 +494,3 @@ struct QuadrantsView: View {
         }
     }
 }
-#endif

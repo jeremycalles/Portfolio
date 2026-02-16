@@ -99,6 +99,9 @@
 "instruments.assignToQuadrant" = "Assigner au quadrant";
 "instruments.deleteInstrument" = "Supprimer l'instrument";
 "instruments.noQuadrantsAvailable" = "Aucun quadrant disponible";
+"instruments.priceDetails" = "Détails du prix";
+"instruments.currentPrice" = "Prix";
+"instruments.currency" = "Devise";
 "instruments.count" = "%d instruments";
 
 // MARK: - Accounts
@@ -124,6 +127,7 @@
 
 // MARK: - Holdings
 "holdings.addHolding" = "Ajouter une position";
+"holdings.editHolding" = "Modifier une position";
 "holdings.selectInstrument" = "Sélectionner un instrument";
 "holdings.selectAnInstrument" = "Sélectionnez un instrument pour voir l'historique des prix";
 "holdings.selectAnInstrumentGraph" = "Sélectionnez un instrument pour voir le graphique";
@@ -149,6 +153,7 @@
 
 // MARK: - Reports
 "reports.quadrantReport" = "Rapport par quadrant";
+"reports.date" = "Date";
 "reports.comparisonPeriod" = "Période de comparaison :";
 "reports.vs" = "vs %@";
 "reports.noHoldingsToDisplay" = "Aucune position à afficher";

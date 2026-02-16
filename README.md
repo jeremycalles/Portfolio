@@ -441,20 +441,54 @@ Shared logic lives in `Shared/`; iOS and macOS add their own views and lifecycle
 ```
 PortfolioMultiplatform/
 ├── Shared/                       # Shared code (both platforms)
-│   ├── Models/
-│   ├── Services/                 # Database, MarketData, Language
-│   ├── ViewModels/
-│   ├── Views/                    # Dashboard, Reports, Settings, Charts…
-│   │   └── Components/           # ChangeLabel, RefreshResultBanner, etc.
-│   ├── Helpers/
+│   ├── Models/                   # Data models (Instrument, Holding, etc.)
+│   ├── Services/                 # Core services
+│   │   ├── DatabaseService.swift
+│   │   ├── MarketDataService.swift
+│   │   ├── LanguageManager.swift
+│   │   ├── PriceRefreshService.swift   # Shared refresh logic
+│   │   ├── DemoModeManager.swift       # Privacy/demo mode
+│   │   └── HapticService.swift         # Cross-platform haptics
+│   ├── ViewModels/               # AppViewModel and extensions
+│   ├── Views/
+│   │   ├── Charts/               # EnhancedTrendCard, AllocationRingChart, etc.
+│   │   ├── Dashboard/            # Dashboard sections (Quadrants, Holdings, Accounts)
+│   │   ├── Components/           # Shared UI components
+│   │   │   ├── AddHoldingSheet.swift
+│   │   │   ├── PriceEditorSheet.swift
+│   │   │   ├── BackfillLogsSheet.swift
+│   │   │   └── ChangeLabel.swift
+│   │   ├── DashboardView.swift
+│   │   ├── ReportsView.swift
+│   │   └── EditHoldingView.swift
+│   ├── Helpers/                  # Formatting, date utilities
 │   └── Resources/                # Localization (en, fr)
-├── iOS/                          # iOS-specific: root view, dashboard UI, background tasks
-├── macOS/                        # macOS-specific: scheduler, entitlements
+├── iOS/                          # iOS-specific code
+│   ├── iOSRootView.swift         # Main iOS entry point
+│   ├── BackgroundTaskManager.swift
+│   ├── IOSLockManager.swift
+│   └── Views/                    # iOS-specific views
+│       └── Components/           # Period selector, view mode selector
+├── macOS/                        # macOS-specific code
+│   ├── MacOSSchedulerManager.swift
+│   ├── MacOSLockManager.swift
+│   └── Views/                    # macOS-specific views
+│       ├── ContentView.swift     # Main macOS navigation
+│       ├── AccountsView.swift
+│       ├── InstrumentsView.swift
+│       └── MacOSSettingsViews.swift
 ├── PortfolioTests/
 ├── PortfolioMultiplatform.xcodeproj/
 ├── assets/screenshots/
 └── README.md
 ```
+
+### Architecture Highlights
+
+- **Maximum Code Sharing**: Charts, dashboard components, sheets, and services are shared between platforms
+- **Platform-Specific UI**: Each platform has its own navigation and settings views optimized for the experience
+- **Clean Separation**: Platform-specific code is clearly isolated in `iOS/` and `macOS/` folders
+- **Unified Services**: `PriceRefreshService`, `HapticService`, and `DemoModeManager` provide consistent behavior across platforms
 
 ### Running Tests
 

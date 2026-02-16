@@ -240,7 +240,7 @@ struct iOSInstrumentDetailView: View {
             .environmentObject(viewModel)
         }
         .sheet(isPresented: $showingAddPriceSheet) {
-            iOSPriceEditorSheet(
+            PriceEditorSheet(
                 instrument: instrument,
                 existingPrice: nil,
                 onSave: { date, value, currency in
@@ -251,7 +251,7 @@ struct iOSInstrumentDetailView: View {
         }
         .sheet(isPresented: $showingEditPriceSheet) {
             if let price = priceToEdit {
-                iOSPriceEditorSheet(
+                PriceEditorSheet(
                     instrument: instrument,
                     existingPrice: price,
                     onSave: { date, value, currency in
@@ -266,60 +266,12 @@ struct iOSInstrumentDetailView: View {
             }
         }
         .sheet(isPresented: $showingBackfillLogs) {
-            iOSBackfillLogsSheet(logs: viewModel.backfillLogs)
+            BackfillLogsSheet(logs: viewModel.backfillLogs)
         }
     }
     
     private func refreshPriceHistory() {
         priceHistory = viewModel.getPriceHistory(forIsin: instrument.isin)
-    }
-}
-
-// MARK: - iOS Backfill Logs Sheet
-struct iOSBackfillLogsSheet: View {
-    let logs: [String]
-    @Environment(\.dismiss) private var dismiss
-    
-    var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 6) {
-                    ForEach(Array(logs.enumerated()), id: \.offset) { _, log in
-                        if log.isEmpty {
-                            Spacer().frame(height: 12)
-                        } else {
-                            Text(log)
-                                .font(.system(.footnote, design: .monospaced))
-                                .foregroundColor(logColor(for: log))
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
-            }
-            .navigationTitle("Backfill Logs")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-    
-    private func logColor(for log: String) -> Color {
-        if log.contains("✓") || log.contains("complete") {
-            return .green
-        } else if log.contains("⚠️") || log.contains("Skipped") || log.contains("No data returned") {
-            return .orange
-        } else if log.contains("Error") || log.contains("error") {
-            return .red
-        } else if log.starts(with: "  •") {
-            return .secondary
-        }
-        return .primary
     }
 }
 
@@ -459,85 +411,3 @@ struct iOSInstrumentEditSheet: View {
     }
 }
 
-// MARK: - iOS Price Editor Sheet
-struct iOSPriceEditorSheet: View {
-    let instrument: Instrument
-    let existingPrice: Price?
-    let onSave: (String, Double, String) -> Void
-    
-    @Environment(\.dismiss) private var dismiss
-    @State private var selectedDate: Date
-    @State private var priceText: String
-    @State private var selectedCurrency: String
-    
-    private let currencies = ["EUR", "USD", "GBP", "CHF", "JPY"]
-    
-    init(instrument: Instrument, existingPrice: Price?, onSave: @escaping (String, Double, String) -> Void) {
-        self.instrument = instrument
-        self.existingPrice = existingPrice
-        self.onSave = onSave
-        
-        if let price = existingPrice {
-            _selectedDate = State(initialValue: AppDateFormatter.yearMonthDay.date(from: price.date) ?? Date())
-            _priceText = State(initialValue: String(format: "%.4f", price.value))
-            _selectedCurrency = State(initialValue: price.currency ?? instrument.currency ?? "EUR")
-        } else {
-            _selectedDate = State(initialValue: Date())
-            _priceText = State(initialValue: "")
-            _selectedCurrency = State(initialValue: instrument.currency ?? "EUR")
-        }
-    }
-    
-    private var isValid: Bool {
-        guard let value = parseDecimal(priceText), value > 0 else { return false }
-        return true
-    }
-    
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section("Price Details") {
-                    DatePicker("Date", selection: $selectedDate, displayedComponents: .date)
-                    
-                    TextField("Price", text: $priceText)
-                        .keyboardType(.decimalPad)
-                    
-                    Picker("Currency", selection: $selectedCurrency) {
-                        ForEach(currencies, id: \.self) { currency in
-                            Text(currency).tag(currency)
-                        }
-                    }
-                }
-                
-                Section {
-                    HStack {
-                        Text("Instrument")
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text(instrument.displayName)
-                            .lineLimit(1)
-                    }
-                }
-            }
-            .navigationTitle(existingPrice == nil ? "Add Price" : "Edit Price")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(existingPrice == nil ? "Add" : "Save") {
-                        if let value = parseDecimal(priceText) {
-                            let dateString = AppDateFormatter.yearMonthDay.string(from: selectedDate)
-                            onSave(dateString, value, selectedCurrency)
-                            dismiss()
-                        }
-                    }
-                    .disabled(!isValid)
-                }
-            }
-        }
-    }
-}

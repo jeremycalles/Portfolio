@@ -32,51 +32,51 @@ struct EditHoldingView: View {
         Form {
             #if os(macOS)
             Section {
-                LabeledContent("Account", value: accountName)
-                LabeledContent("Instrument", value: instrumentName)
+                LabeledContent(L10n.accountsTitle, value: accountName)
+                LabeledContent(L10n.holdingsInstrument, value: instrumentName)
             }
             #else
-            Section("Account") {
+            Section(L10n.accountsTitle) {
                 Text(accountName)
                     .foregroundColor(.secondary)
             }
-            Section("Instrument") {
+            Section(L10n.holdingsInstrument) {
                 Text(instrumentName)
                     .foregroundColor(.secondary)
             }
             #endif
-            Section("Quantity") {
-                TextField("Number of units", text: $quantityText)
+            Section(L10n.holdingsQty) {
+                TextField(L10n.holdingsQty, text: $quantityText)
                     #if os(iOS)
                     .keyboardType(.decimalPad)
                     #endif
             }
             Section {
-                Toggle("Include Purchase Info", isOn: $includePurchaseInfo)
+                Toggle(L10n.holdingsPurchaseDetailsHint, isOn: $includePurchaseInfo)
                 if includePurchaseInfo {
-                    DatePicker("Purchase Date", selection: $purchaseDate, displayedComponents: .date)
-                    TextField("Purchase Price (per unit)", text: $purchasePriceText)
+                    DatePicker(L10n.holdingsPurchaseDetails, selection: $purchaseDate, displayedComponents: .date)
+                    TextField(L10n.holdingsPurchaseDetails, text: $purchasePriceText)
                         #if os(iOS)
                         .keyboardType(.decimalPad)
                         #endif
                 }
             } header: {
-                Text("Purchase Details")
+                Text(L10n.holdingsPurchaseDetails)
             } footer: {
-                Text("Optional: Track your cost basis for performance calculation")
+                Text(L10n.holdingsPurchaseDetailsHint)
             }
         }
         #if os(macOS)
         .formStyle(.grouped)
         .frame(minWidth: 400)
         #endif
-        .navigationTitle("Edit Position")
+        .navigationTitle(L10n.holdingsEditHolding)
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") {
+                Button(L10n.generalCancel) {
                     dismiss()
                 }
                 #if os(macOS)
@@ -84,7 +84,7 @@ struct EditHoldingView: View {
                 #endif
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button("Save") {
+                Button(L10n.generalSave) {
                     save()
                 }
                 .disabled(!isValid)

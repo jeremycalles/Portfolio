@@ -1,6 +1,5 @@
 import SwiftUI
 import Charts
-import UniformTypeIdentifiers
 
 // MARK: - iOS Root View with TabView Navigation
 struct iOSRootView: View {
