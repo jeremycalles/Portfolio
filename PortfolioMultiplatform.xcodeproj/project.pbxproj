@@ -633,10 +633,11 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/build_number_stamp",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Auto-increment build number - disabled for CI/command-line builds\n# Enable in Xcode: Edit Scheme > Build > Pre-actions\nexit 0\n";
+			shellScript = "# No-op: stamp file for dependency analysis (avoids \"run every build\" warning)\ntouch \"${DERIVED_FILE_DIR}/build_number_stamp\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
