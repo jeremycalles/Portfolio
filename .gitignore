@@ -14,3 +14,27 @@ data/*.db
 data/*.db-journal
 data/*.db-wal
 data/*.db-shm
+
+# Secrets and local config (do not commit)
+.git-secret-replace.txt
+ExportOptions.plist
+build/ExportOptions.plist
+Configuration.xcconfig
+*.xcconfig
+!*.xcconfig.example
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.key
+id_rsa*
+credentials/
+secrets/
+*.mobileprovision
+*.provisionprofile
+**/Auth*.swift
+**/Secrets*.swift
+**/APIKeys*.swift
+*.keystore
+*.jks

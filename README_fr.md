@@ -26,6 +26,8 @@
 - [Confidentialité & Sécurité](#confidentialité--sécurité)
 - [Automatisation](#automatisation)
 - [Développement](#développement)
+- [Secrets et config locale](#secrets-et-config-locale)
+- [Publication sur l’App Store](#publication-sur-lapp-store)
 - [Licence](#licence)
 
 ---
@@ -517,6 +519,48 @@ xcodebuild test \
 | `DashboardSnapshotTests.swift` | Tests snapshot UI |
 | `TestFixtures.swift` | Données de test |
 | `MockDatabaseService.swift` | Services simulés (mock) |
+
+---
+
+## Secrets et config locale
+
+Ne commitez pas de secrets ni de configuration de signature locale. Le dépôt utilise la **signature automatique** sans identifiant d’équipe dans le code ; définissez votre **Équipe** dans Xcode (**Signing & Capabilities**) pour chaque cible d’app. Les autres chemins sensibles (p. ex. `ExportOptions.plist`, `.env`, `*.xcconfig`, identifiants) sont listés dans [.gitignore](.gitignore). Ne commitez jamais de clés API, jetons ou profils de provisioning.
+
+## Publication sur l’App Store
+
+### Prérequis
+
+- **Abonnement Apple Developer Program** (99 €/an) — [developer.apple.com/programs](https://developer.apple.com/programs/)
+- Votre Apple ID ajouté dans **Xcode → Réglages → Comptes**. Dans le projet, définissez votre **Équipe** sous **Signing & Capabilities** pour la cible iOS et/ou macOS (identifiants de bundle : **com.portfolio.app.ios**, **com.portfolio.app.macos**).
+
+### 1. Créer l’app (ou les apps) dans App Store Connect
+
+- **iOS :** [App Store Connect](https://appstoreconnect.apple.com) → **Mes apps** → **+** → **Nouvelle app** → iOS, identifiant de bundle **com.portfolio.app.ios**, SKU (p. ex. `portfolio-ios`).
+- **macOS :** Idem, Nouvelle app → macOS, identifiant de bundle **com.portfolio.app.macos**, SKU (p. ex. `portfolio-macos`).
+
+### 2. Archiver et envoyer
+
+1. Dans Xcode, sélectionnez le schéma **Portfolio iOS** (ou **Portfolio macOS**) et la destination **Any iOS Device (arm64)** ou **My Mac**.
+2. **Product → Archive**. Attendez la fin de l’archive.
+3. Dans l’**Organizer**, sélectionnez la nouvelle archive → **Distribute App** → **App Store Connect** → **Upload** (gardez les options par défaut : signature automatique, envoi des symboles).
+4. Attendez quelques minutes pour que le build apparaisse dans App Store Connect sous l’onglet **TestFlight** / **App Store** de l’app.
+
+### 3. Compléter la fiche App Store
+
+Dans App Store Connect, pour chaque app :
+
+- **Informations sur l’app :** Catégorie (p. ex. **Finance**), sous-catégorie si besoin.
+- **Tarification et disponibilité :** Gratuit ou payant ; pays/régions.
+- **Confidentialité de l’app :** URL de la politique de confidentialité (obligatoire) ; indiquez quelles données vous collectez (ou aucune).
+- **Informations de version :** Captures d’écran (tailles requises), description, mots-clés, URL d’assistance, **Build** (sélectionnez le build envoyé), **Nouveautés**.
+
+### 4. Soumettre pour examen
+
+1. Dans l’onglet **App Store** de la version, complétez les champs obligatoires manquants.
+2. **Informations pour l’examen :** ajoutez un contact et des notes.
+3. **Ajouter pour examen** → acceptez la conformité à l’exportation et les déclarations → **Soumettre**.
+
+**Conseil :** Le numéro de build est incrémenté automatiquement à chaque compilation. Si le build n’apparaît pas sous la version, attendez un peu ou consultez **TestFlight** pour les erreurs de traitement.
 
 ---
 

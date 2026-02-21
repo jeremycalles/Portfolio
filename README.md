@@ -26,6 +26,8 @@
 - [Privacy & Security](#privacy--security)
 - [Automation](#automation)
 - [Development](#development)
+- [Secrets and local config](#secrets-and-local-config)
+- [Publishing to the App Store](#publishing-to-the-app-store)
 - [License](#license)
 
 ---
@@ -520,6 +522,48 @@ xcodebuild test \
 | `DashboardSnapshotTests.swift` | UI snapshot tests |
 | `TestFixtures.swift` | Test data fixtures |
 | `MockDatabaseService.swift` | Mock services |
+
+---
+
+## Secrets and local config
+
+Do not commit secrets or local signing config. The repo uses **automatic signing** with no team ID in source; set your **Team** in Xcode (**Signing & Capabilities**) for each app target. Other sensitive paths (e.g. `ExportOptions.plist`, `.env`, `*.xcconfig`, credentials) are listed in [.gitignore](.gitignore). Never commit API keys, tokens, or provisioning profiles.
+
+## Publishing to the App Store
+
+### Prerequisites
+
+- **Apple Developer Program** membership ($99/year) — [developer.apple.com/programs](https://developer.apple.com/programs/)
+- Your Apple ID added in **Xcode → Settings → Accounts**. In the project, set your **Team** under **Signing & Capabilities** for the iOS and/or macOS target (bundle IDs: **com.portfolio.app.ios**, **com.portfolio.app.macos**).
+
+### 1. Create the app(s) in App Store Connect
+
+- **iOS:** [App Store Connect](https://appstoreconnect.apple.com) → **My Apps** → **+** → **New App** → iOS, bundle ID **com.portfolio.app.ios**, SKU (e.g. `portfolio-ios`).
+- **macOS:** Same, New App → macOS, bundle ID **com.portfolio.app.macos**, SKU (e.g. `portfolio-macos`).
+
+### 2. Archive and upload
+
+1. In Xcode, select the **Portfolio iOS** (or **Portfolio macOS**) scheme and destination **Any iOS Device (arm64)** or **My Mac**.
+2. **Product → Archive**. Wait for the archive to finish.
+3. In the **Organizer**, select the new archive → **Distribute App** → **App Store Connect** → **Upload** (keep defaults: automatic signing, upload symbols).
+4. Wait a few minutes for the build to appear in App Store Connect under the app’s **TestFlight** / **App Store** tab.
+
+### 3. Complete the App Store listing
+
+In App Store Connect, for each app:
+
+- **App Information:** Category (e.g. **Finance**), subcategory if needed.
+- **Pricing and Availability:** Free or paid; countries/regions.
+- **App Privacy:** Privacy policy URL (required); state what data you collect (or that you don’t).
+- **Version Information:** Screenshots (required sizes), description, keywords, support URL, **Build** (select the uploaded build), **What’s New**.
+
+### 4. Submit for review
+
+1. In the version’s **App Store** tab, complete any missing required fields.
+2. **App Review Information:** add contact and notes.
+3. **Add for Review** → accept export compliance and declarations → **Submit**.
+
+**Tip:** Build number increments automatically at each build. If the build doesn’t appear under the version, wait a bit or check **TestFlight** for processing/errors.
 
 ---
 
