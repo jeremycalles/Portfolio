@@ -122,6 +122,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		XCFG /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
 		A001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E001 /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
 		E002 /* iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iOS.entitlements; sourceTree = "<group>"; };
@@ -239,6 +240,7 @@
 		G000 = {
 			isa = PBXGroup;
 			children = (
+				XCFG /* Local.xcconfig */,
 				G001 /* Shared */,
 				G002 /* macOS */,
 				G003 /* iOS */,
@@ -668,6 +670,7 @@
 /* Begin XCBuildConfiguration section */
 		BC01 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = XCFG /* Local.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -730,6 +733,7 @@
 		};
 		BC02 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = XCFG /* Local.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
