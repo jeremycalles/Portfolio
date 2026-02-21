@@ -6,10 +6,10 @@
 
 | Device | Size (Portrait) | Notes |
 |--------|-----------------|-------|
-| **6.9" (iPhone 16 Pro Max)** | 1290 x 2796 | Required - highest res scales down |
-| 6.5" (iPhone 14 Plus) | 1284 x 2778 | Optional - auto-scaled from 6.9" |
-| 6.1" (iPhone 16) | 1170 x 2532 | Optional |
-| 5.5" (iPhone 8 Plus) | 1242 x 2208 | Optional |
+| **6.5" (iPhone 14 Plus, XS Max)** | 1242 x 2688 | **Current screenshots** |
+| 6.9" (iPhone 16 Pro Max) | 1290 x 2796 | Auto-scales from 6.5" |
+| 6.1" (iPhone 16) | 1170 x 2532 | Auto-scales |
+| 5.5" (iPhone 8 Plus) | 1242 x 2208 | Different aspect ratio |
 
 ### iPad Screenshots (if supporting iPad)
 
