@@ -9,7 +9,7 @@
 
 ### What matters most
 
-- **Your data stays on your device** — Local SQLite only; no backend, no telemetry. Optional iCloud sync uses your own Apple account.
+- **Your data stays on your device** — Local SQLite only; no backend, no telemetry. You can back up the database to your iCloud; the app always uses local storage.
 - **One codebase, two native apps** — Shared logic (models, services, view models, UI components) in `Shared/`; each platform adds its own layout and lifecycle.
 - **Public APIs only for prices** — Refreshes request public market data (tickers/ISINs); no account linking or PII.
 
@@ -344,10 +344,11 @@ Switch between English and French:
 
 The app updates immediately without restart.
 
-#### Database & Storage
+#### Database & Backup
 
-- **iOS**: Local or optional iCloud (Settings → Storage). iCloud requires an Apple Developer account.
-- **macOS**: Local or iCloud; you can open the database folder from Settings.
+- The database is stored **locally** only (no option to store it in iCloud). You can use **Backup to iCloud now** in Settings to copy the database file to your iCloud container; the app never opens the database from iCloud.
+- **iOS**: Database path is shown in Settings; use Import/Export to transfer between devices.
+- **macOS**: You can open the database folder from Settings (Database → Open in Finder).
 
 #### Background Refresh (macOS)
 
@@ -394,10 +395,10 @@ Portfolio uses multiple data sources to ensure accurate pricing:
 
 Portfolio is built so that **your data never leaves your control**:
 
-- **No server for your data**: There is no backend or cloud service that stores your portfolio. All positions, accounts, instruments, and price history live only on your device (and, if you enable it, in your own iCloud).
+- **No server for your data**: There is no backend or cloud service that stores your portfolio. All positions, accounts, instruments, and price history live only on your device.
 - **No personal data sent**: The app does not send any personally identifiable information or portfolio contents to any third party. No telemetry, analytics, or crash reporting.
-- **Local storage only**: A single SQLite database in the app’s container (path shown in Settings). Preferences (language, storage, privacy mode) are in `UserDefaults` on device only.
-- **Optional iCloud**: If you enable iCloud, the same database file is synced via your Apple ID. No data is sent to the app developer or any other server.
+- **Local storage only**: A single SQLite database in the app’s container (path shown in Settings). Preferences (language, privacy mode) are in `UserDefaults` on device only.
+- **iCloud backup**: You can back up the database to your iCloud (Settings → Backup to iCloud now). The app copies the local file to your iCloud container; it never opens or runs the database from iCloud. No data is sent to the app developer or any other server.
 
 ### What leaves your device (market data only)
 

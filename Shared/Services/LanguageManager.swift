@@ -267,19 +267,11 @@ struct L10n {
     static var settingsGeneral: String { manager.localized("settings.general") }
     static var settingsDatabase: String { manager.localized("settings.database") }
     static var settingsBackground: String { manager.localized("settings.background") }
-    static var settingsStorage: String { manager.localized("settings.storage") }
-    static var settingsStorageDescription: String { manager.localized("settings.storageDescription") }
     static var settingsImportExportHint: String { manager.localized("settings.importExportHint") }
-    static var settingsLocalStorage: String { manager.localized("settings.localStorage") }
-    static var settingsLocalStorageOnly: String { manager.localized("settings.localStorageOnly") }
-    static var settingsSyncingWithICloud: String { manager.localized("settings.syncingWithICloud") }
-    static var settingsICloudRequirement: String { manager.localized("settings.iCloudRequirement") }
     static var settingsImportDatabase: String { manager.localized("settings.importDatabase") }
     static var settingsExportDatabase: String { manager.localized("settings.exportDatabase") }
     static var settingsDatabaseImportExport: String { manager.localized("settings.databaseImportExport") }
     static var settingsOpenInFinder: String { manager.localized("settings.openInFinder") }
-    static var settingsMoveData: String { manager.localized("settings.moveData") }
-    static var settingsStartFresh: String { manager.localized("settings.startFresh") }
     static var settingsPrivacyMode: String { manager.localized("settings.privacyMode") }
     static var settingsBackgroundRefresh: String { manager.localized("settings.backgroundRefresh") }
     static var settingsBackgroundRefreshInterval: String { manager.localized("settings.backgroundRefreshInterval") }
@@ -303,20 +295,10 @@ struct L10n {
     static var settingsAccountDetails: String { manager.localized("settings.accountDetails") }
     static var settingsAccountDetailsHint: String { manager.localized("settings.accountDetailsHint") }
     static var settingsUpdatePricesDescription: String { manager.localized("settings.updatePricesDescription") }
-    static var settingsICloudFallbackTitle: String { manager.localized("settings.iCloudFallbackTitle") }
-    static var settingsICloudFallbackMessage: String { manager.localized("settings.iCloudFallbackMessage") }
-    static var settingsICloudFallbackReason: String { manager.localized("settings.iCloudFallbackReason") }
     static var settingsStorageLogs: String { manager.localized("settings.storageLogs") }
     static var settingsStorageLogsDescription: String { manager.localized("settings.storageLogsDescription") }
-    static var settingsMovingDatabaseToICloud: String { manager.localized("settings.movingDatabaseToICloud") }
-    static func settingsMovingDatabaseTo(_ destination: String) -> String {
-        String(format: manager.localized("settings.movingDatabaseTo"), destination)
-    }
-    static var settingsStorageMoveFailedTitle: String { manager.localized("settings.storageMoveFailedTitle") }
-    static var settingsStorageMoveFailedFileNotFound: String { manager.localized("settings.storageMoveFailedFileNotFound") }
-    static func settingsMoveDataConfirmation(_ storage: String) -> String {
-        String(format: manager.localized("settings.moveDataConfirmation"), storage)
-    }
+    static var settingsDatabaseStoredLocally: String { manager.localized("settings.databaseStoredLocally") }
+    static var settingsBackupToICloudNow: String { manager.localized("settings.backupToICloudNow") }
     
     // Actions
     static var actionUpdatePrices: String { manager.localized("action.updatePrices") }

@@ -239,15 +239,13 @@ struct LanguageSettingsView: View {
 
 // MARK: - Database Settings View
 struct DatabaseSettingsView: View {
-    @State private var selectedStorage: StorageLocation = DatabaseService.shared.currentStorageLocation
-    @State private var showingStorageChangeAlert = false
-    @State private var isMovingToStorage = false
-    @State private var storageMoveError: String?
-    @State private var showingStorageMoveError = false
     @State private var showingStorageLogs = false
     @State private var showingImportPicker = false
     @State private var showingImportAlert = false
     @State private var importMessage: String?
+    @State private var showingBackupAlert = false
+    @State private var backupAlertMessage: String?
+    @State private var isBackingUp = false
     var body: some View {
         Form {
             Section(L10n.settingsDatabaseImportExport) {
@@ -270,50 +268,29 @@ struct DatabaseSettingsView: View {
                 }
             }
             
-            Section(L10n.settingsStorage) {
-                if DatabaseService.shared.iCloudAvailable {
-                    Picker("Storage", selection: $selectedStorage) {
-                        ForEach(StorageLocation.allCases, id: \.self) { location in
-                            Text(location.displayName).tag(location)
+            Section(L10n.settingsDatabase) {
+                HStack {
+                    Image(systemName: "internaldrive")
+                        .foregroundColor(.blue)
+                    Text(L10n.settingsDatabaseStoredLocally)
+                }
+                if DatabaseService.shared.iCloudBackupAvailable {
+                    Button {
+                        isBackingUp = true
+                        DatabaseService.shared.backupDatabaseToICloud { result in
+                            isBackingUp = false
+                            switch result {
+                            case .success:
+                                backupAlertMessage = "Backup completed."
+                            case .failure(let error):
+                                backupAlertMessage = error.localizedDescription
+                            }
+                            showingBackupAlert = true
                         }
+                    } label: {
+                        Label(L10n.settingsBackupToICloudNow, systemImage: "icloud.and.arrow.up")
                     }
-                    .pickerStyle(.segmented)
-                    .onChange(of: selectedStorage) { _, newValue in
-                        if newValue != DatabaseService.shared.currentStorageLocation {
-                            showingStorageChangeAlert = true
-                        }
-                    }
-                    
-                    HStack {
-                        if DatabaseService.shared.currentStorageLocation == .iCloud {
-                            Image(systemName: "checkmark.icloud.fill")
-                                .foregroundColor(.blue)
-                            Text(L10n.settingsSyncingWithICloud)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        } else {
-                            Image(systemName: "internaldrive")
-                                .foregroundColor(.gray)
-                            Text(L10n.settingsLocalStorageOnly)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                } else {
-                    HStack {
-                        Image(systemName: "internaldrive")
-                            .foregroundColor(.blue)
-                        Text(L10n.settingsLocalStorage)
-                        Spacer()
-                    }
-                    
-                    HStack {
-                        Image(systemName: "info.circle")
-                            .foregroundColor(.secondary)
-                        Text(L10n.settingsICloudRequirement)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
+                    .disabled(isBackingUp)
                 }
             }
             
@@ -349,53 +326,10 @@ struct DatabaseSettingsView: View {
                 showingImportAlert = true
             }
         }
-        .alert(L10n.settingsStorage, isPresented: $showingStorageChangeAlert) {
-            Button(L10n.settingsMoveData) {
-                showingStorageChangeAlert = false
-                isMovingToStorage = true
-                DatabaseService.shared.switchStorageLocation(to: selectedStorage, copyData: true) { result in
-                    isMovingToStorage = false
-                    selectedStorage = DatabaseService.shared.currentStorageLocation
-                    switch result {
-                    case .success:
-                        NotificationCenter.default.post(name: .databaseDidImport, object: nil)
-                    case .failure(let error):
-                        storageMoveError = error.localizedDescription
-                        showingStorageMoveError = true
-                    }
-                }
-            }
-            Button(L10n.settingsStartFresh) {
-                DatabaseService.shared.switchStorageLocation(to: selectedStorage, copyData: false)
-                selectedStorage = DatabaseService.shared.currentStorageLocation
-                NotificationCenter.default.post(name: .databaseDidImport, object: nil)
-            }
-            Button(L10n.generalCancel, role: .cancel) {
-                selectedStorage = DatabaseService.shared.currentStorageLocation
-            }
-        } message: {
-            Text(L10n.settingsMoveDataConfirmation(selectedStorage.displayName))
-        }
-        .overlay {
-            if isMovingToStorage {
-                Color.black.opacity(0.3)
-                    .ignoresSafeArea()
-                VStack(spacing: 16) {
-                    ProgressView()
-                        .scaleEffect(1.2)
-                    Text(L10n.settingsMovingDatabaseTo(selectedStorage.displayName))
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                .padding(32)
-                .background(.regularMaterial)
-                .cornerRadius(12)
-            }
-        }
-        .alert(L10n.settingsStorageMoveFailedTitle, isPresented: $showingStorageMoveError) {
+        .alert("Backup", isPresented: $showingBackupAlert) {
             Button(L10n.generalOk) { }
         } message: {
-            Text(storageMoveError ?? "")
+            Text(backupAlertMessage ?? "")
         }
         .sheet(isPresented: $showingStorageLogs) {
             StorageLogsView()
@@ -420,6 +354,7 @@ struct DatabaseSettingsView: View {
             }
             defer { url.stopAccessingSecurityScopedResource() }
             
+            DatabaseService.shared.closeConnection()
             try FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
             if FileManager.default.fileExists(atPath: destPath) {
                 let backupPath = destPath + ".backup"
@@ -427,10 +362,12 @@ struct DatabaseSettingsView: View {
                 try FileManager.default.moveItem(atPath: destPath, toPath: backupPath)
             }
             try FileManager.default.copyItem(at: url, to: destURL)
+            DatabaseService.shared.reconnectToDatabase()
             importMessage = "Database imported successfully. Restart the app or switch views to load the new data."
             showingImportAlert = true
             NotificationCenter.default.post(name: .databaseDidImport, object: nil)
         } catch {
+            DatabaseService.shared.reconnectToDatabase()
             importMessage = "Import failed: \(error.localizedDescription)"
             showingImportAlert = true
         }

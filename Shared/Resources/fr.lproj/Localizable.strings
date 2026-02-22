@@ -190,13 +190,7 @@
 "settings.general" = "Général";
 "settings.database" = "Base de données";
 "settings.background" = "Arrière-plan";
-"settings.storage" = "Stockage";
-"settings.storageDescription" = "Le stockage iCloud synchronise votre base de données sur tous vos appareils Apple.";
 "settings.importExportHint" = "Utilisez Import/Export pour transférer manuellement votre base de données entre appareils.";
-"settings.localStorage" = "Stockage local";
-"settings.localStorageOnly" = "Stockage local uniquement";
-"settings.syncingWithICloud" = "Synchronisation avec iCloud";
-"settings.iCloudRequirement" = "La synchronisation iCloud nécessite l'Apple Developer Program (99$/an)";
 "settings.importDatabase" = "Importer la base de données";
 "settings.exportDatabase" = "Exporter la base de données";
 "settings.exportDatabaseToDevice" = "Exporter la base vers un autre appareil";
@@ -214,9 +208,6 @@
 "settings.accept" = "Accepter";
 "settings.decline" = "Refuser";
 "settings.openInFinder" = "Ouvrir dans le Finder";
-"settings.moveData" = "Déplacer les données";
-"settings.startFresh" = "Recommencer à zéro";
-"settings.moveDataConfirmation" = "Voulez-vous déplacer vos données existantes vers %@, ou recommencer avec une base de données vierge ?";
 "settings.privacyMode" = "Mode privé";
 "settings.backgroundRefresh" = "Actualisation en arrière-plan";
 "settings.backgroundRefreshInterval" = "Toutes les 3 heures";
@@ -240,15 +231,10 @@
 "settings.accountDetails" = "Détails du compte";
 "settings.accountDetailsHint" = "Exemple : Banque = 'Degiro', Compte = 'CTO' ou 'PEA'";
 "settings.updatePricesDescription" = "Mettre à jour les prix et récupérer l'historique";
-"settings.iCloudFallbackTitle" = "Utilisation du stockage local";
-"settings.iCloudFallbackMessage" = "Le stockage est réglé sur iCloud mais le fichier de base de données n'est pas disponible sur cet appareil. La synchronisation peut être en cours, ou le fichier a pu être retiré pour libérer de l'espace. L'app utilise le stockage local pour préserver vos données. Vous pouvez repasser à iCloud dans Paramètres une fois la synchronisation terminée.";
-"settings.iCloudFallbackReason" = "Fichier iCloud indisponible (synchronisation, libération d'espace ou premier lancement sur cet appareil)";
 "settings.storageLogs" = "Logs de stockage";
-"settings.storageLogsDescription" = "Logs des connexions à la base et des changements de stockage.";
-"settings.movingDatabaseToICloud" = "Déplacement de la base vers iCloud…";
-"settings.movingDatabaseTo" = "Déplacement de la base vers %@…";
-"settings.storageMoveFailedTitle" = "Échec du déplacement";
-"settings.storageMoveFailedFileNotFound" = "Le fichier de base de données est introuvable. Utilisez « Recommencer à zéro » pour créer une nouvelle base à l'emplacement choisi, ou vérifiez que l'app a accès au chemin actuel.";
+"settings.storageLogsDescription" = "Logs des connexions à la base et des sauvegardes.";
+"settings.databaseStoredLocally" = "Stocké localement";
+"settings.backupToICloudNow" = "Sauvegarder sur iCloud maintenant";
 
 // MARK: - Actions
 "action.updatePrices" = "Mettre à jour les prix";

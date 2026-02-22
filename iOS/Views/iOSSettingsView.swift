@@ -12,11 +12,9 @@ struct iOSSettingsView: View {
     @State private var showingExportShare = false
     @State private var importMessage: String?
     @State private var showingAlert = false
-    @State private var selectedStorage: StorageLocation = DatabaseService.shared.currentStorageLocation
-    @State private var showingStorageChangeAlert = false
-    @State private var isMovingToStorage = false
-    @State private var storageMoveError: String?
-    @State private var showingStorageMoveError = false
+    @State private var showingBackupAlert = false
+    @State private var backupAlertMessage: String?
+    @State private var isBackingUp = false
     @State private var showingBackgroundLogs = false
     @State private var showingStorageLogs = false
     @State private var showingAddAccountSheet = false
@@ -79,50 +77,29 @@ struct iOSSettingsView: View {
                 Text(L10n.settingsTouchIDProtectionDescription)
             }
             
-            Section {
-                if DatabaseService.shared.iCloudAvailable {
-                    Picker("Storage Location", selection: $selectedStorage) {
-                        ForEach(StorageLocation.allCases, id: \.self) { location in
-                            Text(location.displayName).tag(location)
-                        }
-                    }
-                    .onChange(of: selectedStorage) { _, newValue in
-                        if newValue != DatabaseService.shared.currentStorageLocation {
-                            showingStorageChangeAlert = true
-                        }
-                    }
-                    
-                    if DatabaseService.shared.currentStorageLocation == .iCloud {
-                        HStack {
-                            Image(systemName: "checkmark.icloud.fill")
-                                .foregroundColor(.blue)
-                            Text("Syncing with iCloud")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                } else {
-                    HStack {
-                        Image(systemName: "internaldrive")
-                            .foregroundColor(.blue)
-                        Text("Local Storage")
-                    }
-                    
-                    HStack {
-                        Image(systemName: "info.circle")
-                            .foregroundColor(.secondary)
-                        Text("iCloud sync requires Apple Developer Program ($99/year)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
+            Section(L10n.settingsDatabase) {
+                HStack {
+                    Image(systemName: "internaldrive")
+                        .foregroundColor(.blue)
+                    Text(L10n.settingsDatabaseStoredLocally)
                 }
-            } header: {
-                Text("Storage")
-            } footer: {
-                if DatabaseService.shared.iCloudAvailable {
-                    Text("iCloud storage syncs your database across all your Apple devices.")
-                } else {
-                    Text("Use Import/Export to manually transfer your database between devices.")
+                if DatabaseService.shared.iCloudBackupAvailable {
+                    Button {
+                        isBackingUp = true
+                        DatabaseService.shared.backupDatabaseToICloud { result in
+                            isBackingUp = false
+                            switch result {
+                            case .success:
+                                backupAlertMessage = "Backup completed."
+                            case .failure(let error):
+                                backupAlertMessage = error.localizedDescription
+                            }
+                            showingBackupAlert = true
+                        }
+                    } label: {
+                        Label(L10n.settingsBackupToICloudNow, systemImage: "icloud.and.arrow.up")
+                    }
+                    .disabled(isBackingUp)
                 }
             }
             
@@ -208,7 +185,7 @@ struct iOSSettingsView: View {
                 }
             }
             
-            Section("Database") {
+            Section("Database Path") {
                 LabeledContent("Path") {
                     Text(DatabaseService.shared.getDatabasePath().components(separatedBy: "/").suffix(2).joined(separator: "/"))
                         .font(.caption)
@@ -326,53 +303,10 @@ struct iOSSettingsView: View {
         } message: {
             Text(importMessage ?? "")
         }
-        .alert("Change Storage Location", isPresented: $showingStorageChangeAlert) {
-            Button(L10n.settingsMoveData) {
-                showingStorageChangeAlert = false
-                isMovingToStorage = true
-                DatabaseService.shared.switchStorageLocation(to: selectedStorage, copyData: true) { result in
-                    isMovingToStorage = false
-                    selectedStorage = DatabaseService.shared.currentStorageLocation
-                    switch result {
-                    case .success:
-                        viewModel.refreshAll()
-                    case .failure(let error):
-                        storageMoveError = error.localizedDescription
-                        showingStorageMoveError = true
-                    }
-                }
-            }
-            Button(L10n.settingsStartFresh) {
-                DatabaseService.shared.switchStorageLocation(to: selectedStorage, copyData: false)
-                viewModel.refreshAll()
-                selectedStorage = DatabaseService.shared.currentStorageLocation
-            }
-            Button(L10n.generalCancel, role: .cancel) {
-                selectedStorage = DatabaseService.shared.currentStorageLocation
-            }
-        } message: {
-            Text(L10n.settingsMoveDataConfirmation(selectedStorage.displayName))
-        }
-        .overlay {
-            if isMovingToStorage {
-                Color.black.opacity(0.3)
-                    .ignoresSafeArea()
-                VStack(spacing: 16) {
-                    ProgressView()
-                        .scaleEffect(1.2)
-                    Text(L10n.settingsMovingDatabaseTo(selectedStorage.displayName))
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                .padding(32)
-                .background(.regularMaterial)
-                .cornerRadius(12)
-            }
-        }
-        .alert(L10n.settingsStorageMoveFailedTitle, isPresented: $showingStorageMoveError) {
+        .alert("Backup", isPresented: $showingBackupAlert) {
             Button(L10n.generalOk) { }
         } message: {
-            Text(storageMoveError ?? "")
+            Text(backupAlertMessage ?? "")
         }
         .sheet(isPresented: $showingStorageLogs) {
             StorageLogsView()
@@ -402,26 +336,21 @@ struct iOSSettingsView: View {
             }
             defer { url.stopAccessingSecurityScopedResource() }
             
-            // Create directory if needed
+            DatabaseService.shared.closeConnection()
             try FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
-            
-            // Backup existing database
             if FileManager.default.fileExists(atPath: destPath) {
                 let backupPath = destPath + ".backup"
                 try? FileManager.default.removeItem(atPath: backupPath)
                 try FileManager.default.moveItem(atPath: destPath, toPath: backupPath)
             }
-            
-            // Copy new database
             try FileManager.default.copyItem(at: url, to: destURL)
-            
+            DatabaseService.shared.reconnectToDatabase()
             importMessage = "Database imported successfully! Please restart the app to load the new data."
             showingAlert = true
-            
-            // Refresh data
             viewModel.refreshAll()
             
         } catch {
+            DatabaseService.shared.reconnectToDatabase()
             importMessage = "Import failed: \(error.localizedDescription)"
             showingAlert = true
         }

@@ -4,18 +4,12 @@ import Foundation
 import SQLite
 #endif
 
-// MARK: - Storage Location
-enum StorageLocation: String, CaseIterable {
-    case local = "local"
-    case iCloud = "icloud"
-    
-    var displayName: String {
-        switch self {
-        case .local: return "Local"
-        case .iCloud: return "iCloud Drive"
-        }
-    }
-}
+#if os(iOS)
+import UIKit
+#endif
+#if os(macOS)
+import AppKit
+#endif
 
 // MARK: - Storage Log Entry
 struct StorageLogEntry: Codable, Identifiable {
@@ -52,10 +46,13 @@ class DatabaseService: ObservableObject {
     private var db: Connection?
     private var dbPath: String
     
-    @Published var currentStorageLocation: StorageLocation = .local
-    @Published var iCloudAvailable: Bool = false
-    @Published var storageFallbackMessage: String?
     @Published private(set) var storageLogEntries: [StorageLogEntry] = []
+    
+    /// True when the user's iCloud container is available (for backup only; database is always local).
+    var iCloudBackupAvailable: Bool { iCloudBackupContainerURL != nil }
+    private var iCloudBackupContainerURL: URL? {
+        FileManager.default.url(forUbiquityContainerIdentifier: "iCloud.com.portfolio.app")
+    }
     
     private static let storageLogsKey = "storageLogEntries"
     private static let storageLogsMaxCount = 50
@@ -179,59 +176,101 @@ class DatabaseService: ObservableObject {
         return result
     }
     
+    private static let lastBackupTimeKey = "databaseLastICloudBackupTime"
+    private static let backupThrottleInterval: TimeInterval = 300 // 5 minutes
+    
     private init() {
-        // Check saved storage preference
-        let savedLocation = UserDefaults.standard.string(forKey: "storageLocation") ?? "local"
-        let storageLocation = StorageLocation(rawValue: savedLocation) ?? .local
-        
-        // Check iCloud availability
-        let iCloudIsAvailable = FileManager.default.ubiquityIdentityToken != nil
-        
-        // Initialize all stored properties first
-        self.currentStorageLocation = storageLocation
-        self.iCloudAvailable = iCloudIsAvailable
-        var pathToUse = Self.getDatabasePath(for: storageLocation, iCloudAvailable: iCloudIsAvailable)
+        self.dbPath = Self.localDatabasePath()
         
         #if os(macOS)
-        // One-time migration: if local path is new (Application Support) and empty, copy from legacy project path if it exists
-        if storageLocation == .local {
-            let fm = FileManager.default
-            if !fm.fileExists(atPath: pathToUse) {
-                let legacyPath = (Self.projectRootPath() as NSString).appendingPathComponent("data/stocks.db")
-                if fm.fileExists(atPath: legacyPath) {
-                    let destDir = URL(fileURLWithPath: pathToUse).deletingLastPathComponent()
-                    try? fm.createDirectory(at: destDir, withIntermediateDirectories: true)
-                    try? fm.copyItem(atPath: legacyPath, toPath: pathToUse)
-                }
+        // One-time migration: if local path is empty, copy from legacy project path if it exists
+        let fm = FileManager.default
+        if !fm.fileExists(atPath: dbPath) {
+            let legacyPath = (Self.projectRootPath() as NSString).appendingPathComponent("data/stocks.db")
+            if fm.fileExists(atPath: legacyPath) {
+                let destDir = URL(fileURLWithPath: dbPath).deletingLastPathComponent()
+                try? fm.createDirectory(at: destDir, withIntermediateDirectories: true)
+                try? fm.copyItem(atPath: legacyPath, toPath: dbPath)
             }
         }
         #endif
         
-        // When using iCloud, ensure the DB file is present before opening (otherwise SQLite creates an empty DB and data appears "gone")
-        if storageLocation == .iCloud && iCloudIsAvailable {
-            if !Self.ensureICloudDatabaseAvailable(path: pathToUse) {
-                // iCloud file not available (not synced yet or evicted); use local so we don't create an empty DB
-                pathToUse = Self.getDatabasePath(for: .local, iCloudAvailable: false)
-                self.currentStorageLocation = .local
-                UserDefaults.standard.set(StorageLocation.local.rawValue, forKey: "storageLocation")
-            }
-        }
-        self.dbPath = pathToUse
         self.storageLogEntries = Self.loadStorageLogsFromDefaults()
-        
-        // Connect to database (now safe to use self)
         connectToDatabase()
-        appendStorageLog(message: "Connected to database (\(currentStorageLocation == .iCloud ? "iCloud" : "local")).", isWarning: false, isError: false)
+        appendStorageLog(message: "Connected to database (local).", isWarning: false, isError: false)
         
-        let localPath = Self.getDatabasePath(for: .local, iCloudAvailable: false)
-        if storageLocation == .iCloud && pathToUse == localPath {
-            storageFallbackMessage = L10n.settingsICloudFallbackMessage
-            appendStorageLog(message: "iCloud database not available. Using local storage.", isWarning: true, isError: false)
-        }
+        registerBackupOnBackground()
     }
     
-    func clearStorageFallbackMessage() {
-        storageFallbackMessage = nil
+    private static func localDatabasePath() -> String {
+        #if os(iOS)
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let dataDir = documentsURL.appendingPathComponent("PortfolioData", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dataDir, withIntermediateDirectories: true)
+        return dataDir.appendingPathComponent("stocks.db").path
+        #else
+        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let dataDir = appSupport.appendingPathComponent("Portfolio", isDirectory: true).appendingPathComponent("data", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dataDir, withIntermediateDirectories: true)
+        return dataDir.appendingPathComponent("stocks.db").path
+        #endif
+    }
+    
+    private func registerBackupOnBackground() {
+        #if os(iOS)
+        NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { [weak self] _ in
+            Task { @MainActor in self?.backupDatabaseToICloudIfThrottled() }
+        }
+        #elseif os(macOS)
+        NotificationCenter.default.addObserver(forName: NSApplication.didResignActiveNotification, object: nil, queue: .main) { [weak self] _ in
+            Task { @MainActor in self?.backupDatabaseToICloudIfThrottled() }
+        }
+        #endif
+    }
+    
+    private func backupDatabaseToICloudIfThrottled() {
+        let last = UserDefaults.standard.double(forKey: Self.lastBackupTimeKey)
+        let lastDate = last > 0 ? Date(timeIntervalSince1970: last) : .distantPast
+        guard Date().timeIntervalSince(lastDate) >= Self.backupThrottleInterval else { return }
+        backupDatabaseToICloud(completion: nil)
+    }
+    
+    /// Copies the local database file to the user's iCloud container for backup. App always uses the local file only.
+    func backupDatabaseToICloud(completion: ((Swift.Result<Void, Error>) -> Void)? = nil) {
+        let path = dbPath
+        guard FileManager.default.fileExists(atPath: path) else {
+            let err = NSError(domain: "DatabaseService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Database file not found."])
+            completion?(.failure(err))
+            return
+        }
+        guard let containerURL = iCloudBackupContainerURL else {
+            let err = NSError(domain: "DatabaseService", code: -2, userInfo: [NSLocalizedDescriptionKey: "iCloud is not available."])
+            completion?(.failure(err))
+            return
+        }
+        let backupDir = containerURL.appendingPathComponent("Documents", isDirectory: true).appendingPathComponent("PortfolioBackup", isDirectory: true)
+        let backupURL = backupDir.appendingPathComponent("stocks.db")
+        
+        let lastBackupKey = Self.lastBackupTimeKey
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            let fm = FileManager.default
+            do {
+                try fm.createDirectory(at: backupDir, withIntermediateDirectories: true)
+                if fm.fileExists(atPath: backupURL.path) {
+                    try fm.removeItem(at: backupURL)
+                }
+                try fm.copyItem(atPath: path, toPath: backupURL.path)
+                UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: lastBackupKey)
+                Task { @MainActor in
+                    self?.appendStorageLog(message: "Backed up to iCloud.", isWarning: false, isError: false)
+                    completion?(.success(()))
+                }
+            } catch {
+                Task { @MainActor in
+                    completion?(.failure(error))
+                }
+            }
+        }
     }
     
     private static func loadStorageLogsFromDefaults() -> [StorageLogEntry] {
@@ -252,28 +291,6 @@ class DatabaseService: ObservableObject {
         print("[Database] \(message)")
     }
     
-    /// Ensures the iCloud database file exists at the given path (triggers download if needed). Returns true if the file is available, false otherwise.
-    private static func ensureICloudDatabaseAvailable(path: String) -> Bool {
-        let fm = FileManager.default
-        if fm.fileExists(atPath: path) {
-            return true
-        }
-        let dbURL = URL(fileURLWithPath: path)
-        // Ensure parent directory exists so the container is created
-        try? fm.createDirectory(at: dbURL.deletingLastPathComponent(), withIntermediateDirectories: true)
-        // Request download of the ubiquitous item (file may be placeholder until synced)
-        try? fm.startDownloadingUbiquitousItem(at: dbURL)
-        // Wait briefly for download to complete (avoids opening a non-existent path and creating an empty DB)
-        let timeout = Date().addingTimeInterval(5)
-        while Date() < timeout {
-            if fm.fileExists(atPath: path) {
-                return true
-            }
-            Thread.sleep(forTimeInterval: 0.25)
-        }
-        return fm.fileExists(atPath: path)
-    }
-    
     private func connectToDatabase() {
         do {
             db = try Connection(dbPath)
@@ -284,156 +301,15 @@ class DatabaseService: ObservableObject {
         }
     }
     
-    // MARK: - Storage Location Management
-    
-    static func getDatabasePath(for location: StorageLocation, iCloudAvailable: Bool) -> String {
-        switch location {
-        case .iCloud:
-            if iCloudAvailable, let iCloudURL = FileManager.default.url(forUbiquityContainerIdentifier: "iCloud.com.portfolio.app") {
-                let dataDir = iCloudURL.appendingPathComponent("Documents", isDirectory: true)
-                try? FileManager.default.createDirectory(at: dataDir, withIntermediateDirectories: true)
-                return dataDir.appendingPathComponent("stocks.db").path
-            }
-            // Fall back to local if iCloud not available
-            fallthrough
-            
-        case .local:
-            #if os(iOS)
-            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-            let dataDir = documentsURL.appendingPathComponent("PortfolioData", isDirectory: true)
-            try? FileManager.default.createDirectory(at: dataDir, withIntermediateDirectories: true)
-            return dataDir.appendingPathComponent("stocks.db").path
-            #else
-            let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-            let dataDir = appSupport.appendingPathComponent("Portfolio", isDirectory: true).appendingPathComponent("data", isDirectory: true)
-            try? FileManager.default.createDirectory(at: dataDir, withIntermediateDirectories: true)
-            return dataDir.appendingPathComponent("stocks.db").path
-            #endif
-        }
+    /// Closes the database connection so the file can be safely replaced (e.g. before import). Call `reconnectToDatabase()` after replacing the file.
+    func closeConnection() {
+        db = nil
     }
     
-    func switchStorageLocation(to newLocation: StorageLocation, copyData: Bool = true) {
-        guard newLocation != currentStorageLocation else { return }
-        guard newLocation != .iCloud || iCloudAvailable else {
-            print("[Database] iCloud is not available")
-            return
-        }
-        
-        let oldPath = dbPath
-        let newPath = Self.getDatabasePath(for: newLocation, iCloudAvailable: iCloudAvailable)
-        
-        // Close current connection
+    /// Reopens the database connection to the current path. Call after replacing the database file (e.g. after import) to avoid disk I/O errors from using a stale connection.
+    func reconnectToDatabase() {
         db = nil
-        
-        var copySucceeded = true
-        if copyData {
-            if !FileManager.default.fileExists(atPath: oldPath) {
-                copySucceeded = false
-                print("[Database] Copy failed: source database file not found.")
-                dbPath = oldPath
-                connectToDatabase()
-                return
-            }
-            do {
-                let fm = FileManager.default
-                if fm.fileExists(atPath: newPath) {
-                    try fm.removeItem(atPath: newPath)
-                }
-                try fm.copyItem(atPath: oldPath, toPath: newPath)
-            } catch {
-                copySucceeded = false
-                print("[Database] Copy failed: \(error)")
-                dbPath = oldPath
-                connectToDatabase()
-                return
-            }
-        }
-        
-        currentStorageLocation = newLocation
-        UserDefaults.standard.set(newLocation.rawValue, forKey: "storageLocation")
-        dbPath = newPath
         connectToDatabase()
-        if newLocation == .iCloud && copyData {
-            appendStorageLog(message: "Switched to iCloud. Database copied.", isWarning: false, isError: false)
-        } else if newLocation == .local {
-            appendStorageLog(message: "Switched to local.", isWarning: false, isError: false)
-        }
-    }
-    
-    /// Runs the copy on a background queue and calls completion on the main actor. Use for "Move Data" so UI can show progress.
-    func switchStorageLocation(to newLocation: StorageLocation, copyData: Bool, completion: @escaping (Swift.Result<Void, Error>) -> Void) {
-        guard newLocation != currentStorageLocation else {
-            completion(.success(()))
-            return
-        }
-        guard newLocation != .iCloud || iCloudAvailable else {
-            completion(.failure(NSError(domain: "DatabaseService", code: -1, userInfo: [NSLocalizedDescriptionKey: "iCloud is not available"])))
-            return
-        }
-        
-        let oldPath = dbPath
-        let newPath = Self.getDatabasePath(for: newLocation, iCloudAvailable: iCloudAvailable)
-        db = nil
-        
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self = self else { return }
-            var copyError: Error?
-            if copyData {
-                if !FileManager.default.fileExists(atPath: oldPath) {
-                    copyError = NSError(domain: "DatabaseService", code: -2, userInfo: [NSLocalizedDescriptionKey: "Source database file not found. Nothing to move."])
-                } else {
-                    do {
-                        let fm = FileManager.default
-                        if fm.fileExists(atPath: newPath) {
-                            try fm.removeItem(atPath: newPath)
-                        }
-                        try fm.copyItem(atPath: oldPath, toPath: newPath)
-                    } catch {
-                        copyError = error
-                    }
-                }
-            }
-            Task { @MainActor in
-                if let error = copyError {
-                    self.dbPath = oldPath
-                    self.connectToDatabase()
-                    self.appendStorageLog(message: "Copy to iCloud failed. Using local.", isWarning: true, isError: true)
-                    print("[Database] Copy failed: \(error)")
-                    let userMessage = Self.userFacingMessage(forStorageMove: error)
-                    completion(.failure(NSError(domain: "DatabaseService", code: -3, userInfo: [NSLocalizedDescriptionKey: userMessage])))
-                    return
-                }
-                self.currentStorageLocation = newLocation
-                UserDefaults.standard.set(newLocation.rawValue, forKey: "storageLocation")
-                self.dbPath = newPath
-                self.connectToDatabase()
-                if newLocation == .iCloud && copyData {
-                    self.appendStorageLog(message: "Switched to iCloud. Database copied.", isWarning: false, isError: false)
-                } else if newLocation == .local {
-                    self.appendStorageLog(message: "Switched to local.", isWarning: false, isError: false)
-                }
-                completion(.success(()))
-            }
-        }
-    }
-    
-    /// Returns a user-facing message for storage move failures (e.g. file not found).
-    private static func userFacingMessage(forStorageMove error: Error) -> String {
-        let ns = error as NSError
-        if ns.domain == "DatabaseService" {
-            return ns.localizedDescription
-        }
-        if ns.domain == NSCocoaErrorDomain && ns.code == 260 { return L10n.settingsStorageMoveFailedFileNotFound }
-        if ns.domain == NSPOSIXErrorDomain && ns.code == 2 { return L10n.settingsStorageMoveFailedFileNotFound }
-        let desc = ns.localizedDescription
-        if desc.contains("no such file") || desc.contains("couldn't be opened") || desc.contains("doesn't exist") {
-            return L10n.settingsStorageMoveFailedFileNotFound
-        }
-        return desc
-    }
-    
-    func getICloudContainerURL() -> URL? {
-        return FileManager.default.url(forUbiquityContainerIdentifier: "iCloud.com.portfolio.app")
     }
     
     private func initializeDatabase() {
@@ -846,17 +722,15 @@ class DatabaseService: ObservableObject {
 @MainActor
 class DatabaseService: ObservableObject {
     static let shared = DatabaseService()
-    @Published var currentStorageLocation: StorageLocation = .local
-    @Published var iCloudAvailable: Bool = false
-    @Published var storageFallbackMessage: String?
     @Published private(set) var storageLogEntries: [StorageLogEntry] = []
+    var iCloudBackupAvailable: Bool { false }
     
     private init() {}
     
-    func clearStorageFallbackMessage() { storageFallbackMessage = nil }
-    func switchStorageLocation(to newLocation: StorageLocation, copyData: Bool = true) {}
-    func switchStorageLocation(to newLocation: StorageLocation, copyData: Bool, completion: @escaping (Swift.Result<Void, Error>) -> Void) {
-        completion(.failure(NSError(domain: "DatabaseService", code: -1, userInfo: [NSLocalizedDescriptionKey: "SQLite not available"])))
+    func closeConnection() {}
+    func reconnectToDatabase() {}
+    func backupDatabaseToICloud(completion: ((Swift.Result<Void, Error>) -> Void)? = nil) {
+        completion?(.failure(NSError(domain: "DatabaseService", code: -1, userInfo: [NSLocalizedDescriptionKey: "SQLite not available"])))
     }
     
     func getAllInstruments() -> [Instrument] { [] }

@@ -9,7 +9,7 @@
 
 ### L’essentiel
 
-- **Vos données restent sur l’appareil** — SQLite local uniquement ; pas de backend ni de télémétrie. Sync iCloud optionnelle via votre compte Apple.
+- **Vos données restent sur l’appareil** — SQLite local uniquement ; pas de backend ni de télémétrie. Vous pouvez sauvegarder la base dans votre iCloud ; l’app utilise toujours le stockage local.
 - **Un code, deux apps natives** — Logique partagée (modèles, services, view models, composants UI) dans `Shared/` ; chaque plateforme ajoute sa propre interface et son cycle de vie.
 - **Données de marché publiques uniquement** — Les actualisations interrogent des API publiques (symboles/ISIN) ; aucun lien de compte ni donnée personnelle.
 
@@ -74,7 +74,7 @@ Consolidez tous vos actifs dans une seule vue : suivez actions, ETF, OPCVM, or, 
 ### Expérience Utilisateur
 - **Mode Privé** : Masquez les valeurs sensibles (icône œil) ; les données restent locales
 - **Protection Face ID / Touch ID (iOS et macOS)** : Exiger optionnellement Face ID, Touch ID ou mot de passe de l’appareil pour accéder au tableau de bord. Sur iOS l’app se verrouille aussi à la sortie ; sur les deux plateformes après 5 minutes d’inactivité. Réglage dans Paramètres.
-- **Bilingue** : Anglais et français
+- **Bilingue** : Localisation complète en anglais et français
 - **SwiftUI natif** : Un code partagé pour iOS et macOS ; interface et navigation adaptées à chaque plateforme
 
 ---
@@ -147,7 +147,7 @@ Lors du premier lancement de Portfolio :
 
 ## Guide Utilisateur
 
-Toutes les actions décrites ci-dessous se font dans l’application iOS ou macOS.
+Ce qui suit décrit comment utiliser l’app. Toutes les actions se font dans l’interface native iOS ou macOS.
 
 ### Tableau de Bord
 
@@ -165,7 +165,7 @@ Utilisez le sélecteur de période pour comparer votre portefeuille par rapport 
 - **1 Semaine** : Valeurs d'il y a 7 jours
 - **1 Mois** : Valeurs d'il y a 30 jours
 - **1 An** : Valeurs d'il y a 365 jours
-- **1er Janvier** : Valeurs depuis le début de l'année
+- **YTD (depuis le début de l’année)** : Valeurs au 1er janvier
 
 #### Graphique du Portefeuille
 Le graphique interactif montre la valeur de votre portefeuille dans le temps :
@@ -190,8 +190,11 @@ Les instruments sont les actifs financiers que vous souhaitez suivre (actions, E
 
 #### Ajouter des Instruments
 
-1. Ouvrez **Instruments** (barre latérale macOS ou onglet iOS), puis **+**.
-2. Saisissez un **ISIN** (12 caractères), un **ticker** (ex. `AAPL`, `BTC-EUR`) ou une **clé spéciale** (ex. `VERACASH:GOLD_SPOT`, `COIN:NAPOLEON_20F`).
+1. Allez dans **Instruments** (barre latérale macOS ou onglet iOS).
+2. Appuyez sur **+** et saisissez :
+   - **ISIN** (12 caractères), ex. `LU0389656892` pour les OPCVM
+   - **Ticker**, ex. `AAPL`, `BTC-EUR`
+   - **Clé spéciale**, ex. `VERACASH:GOLD_SPOT`, `COIN:NAPOLEON_20F`
 
 #### Voir les Détails de l'Instrument
 
@@ -341,10 +344,11 @@ Basculez entre Anglais et Français :
 
 L'application se met à jour immédiatement sans redémarrage.
 
-#### Base de données et stockage
+#### Base de données et sauvegarde
 
-- **iOS** : Local ou iCloud optionnel (Paramètres → Stockage). iCloud nécessite un compte Apple Developer.
-- **macOS** : Local ou iCloud ; vous pouvez ouvrir le dossier de la base depuis Paramètres.
+- La base est stockée **uniquement en local** (pas d’option de stockage dans iCloud). Vous pouvez utiliser **Sauvegarder dans iCloud maintenant** dans Paramètres pour copier le fichier de base vers votre conteneur iCloud ; l’app n’ouvre jamais la base depuis iCloud.
+- **iOS** : Le chemin de la base est affiché dans Paramètres ; utilisez Importer/Exporter pour transférer entre appareils.
+- **macOS** : Vous pouvez ouvrir le dossier de la base depuis Paramètres (Base de données → Ouvrir dans le Finder).
 
 #### Actualisation en Arrière-plan (macOS)
 
@@ -391,10 +395,10 @@ Portfolio utilise plusieurs sources de données pour assurer une tarification pr
 
 Portfolio est conçu pour que **vos données ne quittent jamais votre contrôle** :
 
-- **Aucun serveur pour vos données** : Il n’existe pas de backend ni de service cloud hébergeant votre portefeuille. Positions, comptes, instruments et historique des prix restent uniquement sur votre appareil (et, si vous l’activez, dans votre iCloud).
+- **Aucun serveur pour vos données** : Il n’existe pas de backend ni de service cloud qui stocke votre portefeuille. Positions, comptes, instruments et historique des prix ne vivent que sur votre appareil.
 - **Aucune donnée personnelle envoyée** : L’application n’envoie aucune donnée personnelle identifiable ni contenu du portefeuille à un tiers. Pas de télémétrie, analytique ou rapport de plantage.
-- **Stockage local uniquement** : Une base SQLite unique dans le conteneur de l’app (chemin affiché dans Paramètres). Les préférences (langue, stockage, mode privé) sont dans les `UserDefaults` sur l’appareil uniquement.
-- **iCloud optionnel** : Si vous activez iCloud, le même fichier de base est synchronisé via votre compte Apple. Aucune donnée n’est envoyée au développeur de l’app ni à un autre serveur.
+- **Stockage local uniquement** : Une base SQLite unique dans le conteneur de l’app (chemin affiché dans Paramètres). Les préférences (langue, mode privé) sont dans les `UserDefaults` sur l’appareil uniquement.
+- **Sauvegarde iCloud** : Vous pouvez sauvegarder la base dans votre iCloud (Paramètres → Sauvegarder dans iCloud maintenant). L’app copie le fichier local vers votre conteneur iCloud ; elle n’ouvre ni n’exécute jamais la base depuis iCloud. Aucune donnée n’est envoyée au développeur ni à un autre serveur.
 
 ### Ce qui quitte votre appareil (données de marché uniquement)
 

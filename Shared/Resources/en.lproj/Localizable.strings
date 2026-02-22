@@ -190,13 +190,7 @@
 "settings.general" = "General";
 "settings.database" = "Database";
 "settings.background" = "Background";
-"settings.storage" = "Storage";
-"settings.storageDescription" = "iCloud storage syncs your database across all your Apple devices.";
 "settings.importExportHint" = "Use Import/Export to manually transfer your database between devices.";
-"settings.localStorage" = "Local Storage";
-"settings.localStorageOnly" = "Local storage only";
-"settings.syncingWithICloud" = "Syncing with iCloud";
-"settings.iCloudRequirement" = "iCloud sync requires Apple Developer Program ($99/year)";
 "settings.importDatabase" = "Import Database from File";
 "settings.exportDatabase" = "Export Database";
 "settings.exportDatabaseToDevice" = "Export Database to another device";
@@ -214,9 +208,6 @@
 "settings.accept" = "Accept";
 "settings.decline" = "Decline";
 "settings.openInFinder" = "Open in Finder";
-"settings.moveData" = "Move Data";
-"settings.startFresh" = "Start Fresh";
-"settings.moveDataConfirmation" = "Would you like to move your existing data to %@, or start with a fresh database?";
 "settings.privacyMode" = "Privacy Mode";
 "settings.backgroundRefresh" = "Background Refresh";
 "settings.backgroundRefreshInterval" = "Every 3 hours";
@@ -240,15 +231,10 @@
 "settings.accountDetails" = "Account Details";
 "settings.accountDetailsHint" = "Example: Bank = 'Degiro', Account = 'CTO' or 'PEA'";
 "settings.updatePricesDescription" = "Update prices and backfill historical data";
-"settings.iCloudFallbackTitle" = "Using Local Storage";
-"settings.iCloudFallbackMessage" = "Storage is set to iCloud but the database file is not available on this device. It may still be syncing, or it may have been removed to free space. The app is using local storage so your data is safe. You can switch back to iCloud in Settings once sync has finished.";
-"settings.iCloudFallbackReason" = "iCloud file not available (syncing, evicted, or first launch on this device)";
 "settings.storageLogs" = "Storage Logs";
-"settings.storageLogsDescription" = "Logs for database connection and storage location changes.";
-"settings.movingDatabaseToICloud" = "Moving database to iCloud…";
-"settings.movingDatabaseTo" = "Moving database to %@…";
-"settings.storageMoveFailedTitle" = "Storage Move Failed";
-"settings.storageMoveFailedFileNotFound" = "The database file was not found. Use \"Start Fresh\" to create a new database in the chosen location, or ensure the app has access to the current database path.";
+"settings.storageLogsDescription" = "Logs for database connection and backup events.";
+"settings.databaseStoredLocally" = "Stored locally";
+"settings.backupToICloudNow" = "Backup to iCloud now";
 
 // MARK: - Actions
 "action.updatePrices" = "Update Prices";
