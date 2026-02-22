@@ -312,6 +312,8 @@ struct L10n {
     static func settingsMovingDatabaseTo(_ destination: String) -> String {
         String(format: manager.localized("settings.movingDatabaseTo"), destination)
     }
+    static var settingsStorageMoveFailedTitle: String { manager.localized("settings.storageMoveFailedTitle") }
+    static var settingsStorageMoveFailedFileNotFound: String { manager.localized("settings.storageMoveFailedFileNotFound") }
     static func settingsMoveDataConfirmation(_ storage: String) -> String {
         String(format: manager.localized("settings.moveDataConfirmation"), storage)
     }

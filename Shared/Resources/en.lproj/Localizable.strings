@@ -247,6 +247,8 @@
 "settings.storageLogsDescription" = "Logs for database connection and storage location changes.";
 "settings.movingDatabaseToICloud" = "Moving database to iCloud…";
 "settings.movingDatabaseTo" = "Moving database to %@…";
+"settings.storageMoveFailedTitle" = "Storage Move Failed";
+"settings.storageMoveFailedFileNotFound" = "The database file was not found. Use \"Start Fresh\" to create a new database in the chosen location, or ensure the app has access to the current database path.";
 
 // MARK: - Actions
 "action.updatePrices" = "Update Prices";

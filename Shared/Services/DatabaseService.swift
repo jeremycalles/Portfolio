@@ -192,6 +192,21 @@ class DatabaseService: ObservableObject {
         self.iCloudAvailable = iCloudIsAvailable
         var pathToUse = Self.getDatabasePath(for: storageLocation, iCloudAvailable: iCloudIsAvailable)
         
+        #if os(macOS)
+        // One-time migration: if local path is new (Application Support) and empty, copy from legacy project path if it exists
+        if storageLocation == .local {
+            let fm = FileManager.default
+            if !fm.fileExists(atPath: pathToUse) {
+                let legacyPath = (Self.projectRootPath() as NSString).appendingPathComponent("data/stocks.db")
+                if fm.fileExists(atPath: legacyPath) {
+                    let destDir = URL(fileURLWithPath: pathToUse).deletingLastPathComponent()
+                    try? fm.createDirectory(at: destDir, withIntermediateDirectories: true)
+                    try? fm.copyItem(atPath: legacyPath, toPath: pathToUse)
+                }
+            }
+        }
+        #endif
+        
         // When using iCloud, ensure the DB file is present before opening (otherwise SQLite creates an empty DB and data appears "gone")
         if storageLocation == .iCloud && iCloudIsAvailable {
             if !Self.ensureICloudDatabaseAvailable(path: pathToUse) {
@@ -289,8 +304,8 @@ class DatabaseService: ObservableObject {
             try? FileManager.default.createDirectory(at: dataDir, withIntermediateDirectories: true)
             return dataDir.appendingPathComponent("stocks.db").path
             #else
-            let projectPath = Self.projectRootPath()
-            let dataDir = URL(fileURLWithPath: projectPath).appendingPathComponent("data", isDirectory: true)
+            let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            let dataDir = appSupport.appendingPathComponent("Portfolio", isDirectory: true).appendingPathComponent("data", isDirectory: true)
             try? FileManager.default.createDirectory(at: dataDir, withIntermediateDirectories: true)
             return dataDir.appendingPathComponent("stocks.db").path
             #endif
@@ -384,7 +399,8 @@ class DatabaseService: ObservableObject {
                     self.connectToDatabase()
                     self.appendStorageLog(message: "Copy to iCloud failed. Using local.", isWarning: true, isError: true)
                     print("[Database] Copy failed: \(error)")
-                    completion(.failure(error))
+                    let userMessage = Self.userFacingMessage(forStorageMove: error)
+                    completion(.failure(NSError(domain: "DatabaseService", code: -3, userInfo: [NSLocalizedDescriptionKey: userMessage])))
                     return
                 }
                 self.currentStorageLocation = newLocation
@@ -399,6 +415,21 @@ class DatabaseService: ObservableObject {
                 completion(.success(()))
             }
         }
+    }
+    
+    /// Returns a user-facing message for storage move failures (e.g. file not found).
+    private static func userFacingMessage(forStorageMove error: Error) -> String {
+        let ns = error as NSError
+        if ns.domain == "DatabaseService" {
+            return ns.localizedDescription
+        }
+        if ns.domain == NSCocoaErrorDomain && ns.code == 260 { return L10n.settingsStorageMoveFailedFileNotFound }
+        if ns.domain == NSPOSIXErrorDomain && ns.code == 2 { return L10n.settingsStorageMoveFailedFileNotFound }
+        let desc = ns.localizedDescription
+        if desc.contains("no such file") || desc.contains("couldn't be opened") || desc.contains("doesn't exist") {
+            return L10n.settingsStorageMoveFailedFileNotFound
+        }
+        return desc
     }
     
     func getICloudContainerURL() -> URL? {

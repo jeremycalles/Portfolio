@@ -247,6 +247,8 @@
 "settings.storageLogsDescription" = "Logs des connexions à la base et des changements de stockage.";
 "settings.movingDatabaseToICloud" = "Déplacement de la base vers iCloud…";
 "settings.movingDatabaseTo" = "Déplacement de la base vers %@…";
+"settings.storageMoveFailedTitle" = "Échec du déplacement";
+"settings.storageMoveFailedFileNotFound" = "Le fichier de base de données est introuvable. Utilisez « Recommencer à zéro » pour créer une nouvelle base à l'emplacement choisi, ou vérifiez que l'app a accès au chemin actuel.";
 
 // MARK: - Actions
 "action.updatePrices" = "Mettre à jour les prix";

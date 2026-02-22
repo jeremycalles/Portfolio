@@ -392,7 +392,7 @@ struct DatabaseSettingsView: View {
                 .cornerRadius(12)
             }
         }
-        .alert("Storage Move Failed", isPresented: $showingStorageMoveError) {
+        .alert(L10n.settingsStorageMoveFailedTitle, isPresented: $showingStorageMoveError) {
             Button(L10n.generalOk) { }
         } message: {
             Text(storageMoveError ?? "")
