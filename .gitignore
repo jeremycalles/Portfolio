@@ -41,3 +41,9 @@ secrets/
 
 # Icon generator (Node)
 scripts/icon_gen/node_modules/
+
+# Generated App Store screenshots (keep local; upload to App Store Connect)
+assets/screenshots/ipad-13-*.png
+assets/screenshots/appstore/
+
+scripts/resize_ipad_screenshot.sh
