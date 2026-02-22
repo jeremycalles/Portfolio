@@ -6,6 +6,20 @@
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES"
       buildArchitectures = "Automatic">
+      <PreActions>
+         <ExecutionAction
+            ActionType="Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
+            <ActionContent
+               title="Increment build number"
+               scriptText="cd &quot;${PROJECT_DIR}&quot; &amp;&amp; agvtool next-version -all"/>
+            <EnvironmentBuildable
+               BuildableIdentifier="primary"
+               BlueprintIdentifier="T002"
+               BuildableName="PortfolioMultiplatform.app"
+               BlueprintName="Portfolio iOS"
+               ReferencedContainer="container:PortfolioMultiplatform.xcodeproj"/>
+         </ExecutionAction>
+      </PreActions>
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
