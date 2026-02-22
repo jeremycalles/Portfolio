@@ -14,7 +14,11 @@ struct iOSSettingsView: View {
     @State private var showingAlert = false
     @State private var selectedStorage: StorageLocation = DatabaseService.shared.currentStorageLocation
     @State private var showingStorageChangeAlert = false
+    @State private var isMovingToStorage = false
+    @State private var storageMoveError: String?
+    @State private var showingStorageMoveError = false
     @State private var showingBackgroundLogs = false
+    @State private var showingStorageLogs = false
     @State private var showingAddAccountSheet = false
     @State private var showingAddQuadrantSheet = false
     var body: some View {
@@ -196,6 +200,12 @@ struct iOSSettingsView: View {
                 } label: {
                     Label(L10n.settingsExportDatabase, systemImage: "square.and.arrow.up")
                 }
+                
+                Button {
+                    showingStorageLogs = true
+                } label: {
+                    Label(L10n.settingsStorageLogs, systemImage: "doc.text.magnifyingglass")
+                }
             }
             
             Section("Database") {
@@ -317,19 +327,55 @@ struct iOSSettingsView: View {
             Text(importMessage ?? "")
         }
         .alert("Change Storage Location", isPresented: $showingStorageChangeAlert) {
-            Button("Move Data") {
-                DatabaseService.shared.switchStorageLocation(to: selectedStorage, copyData: true)
-                viewModel.refreshAll()
+            Button(L10n.settingsMoveData) {
+                showingStorageChangeAlert = false
+                isMovingToStorage = true
+                DatabaseService.shared.switchStorageLocation(to: selectedStorage, copyData: true) { result in
+                    isMovingToStorage = false
+                    selectedStorage = DatabaseService.shared.currentStorageLocation
+                    switch result {
+                    case .success:
+                        viewModel.refreshAll()
+                    case .failure(let error):
+                        storageMoveError = error.localizedDescription
+                        showingStorageMoveError = true
+                    }
+                }
             }
-            Button("Start Fresh") {
+            Button(L10n.settingsStartFresh) {
                 DatabaseService.shared.switchStorageLocation(to: selectedStorage, copyData: false)
                 viewModel.refreshAll()
+                selectedStorage = DatabaseService.shared.currentStorageLocation
             }
-            Button("Cancel", role: .cancel) {
+            Button(L10n.generalCancel, role: .cancel) {
                 selectedStorage = DatabaseService.shared.currentStorageLocation
             }
         } message: {
-            Text("Would you like to move your existing data to \(selectedStorage.displayName), or start with a fresh database?")
+            Text(L10n.settingsMoveDataConfirmation(selectedStorage.displayName))
+        }
+        .overlay {
+            if isMovingToStorage {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .scaleEffect(1.2)
+                    Text(L10n.settingsMovingDatabaseTo(selectedStorage.displayName))
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                .padding(32)
+                .background(.regularMaterial)
+                .cornerRadius(12)
+            }
+        }
+        .alert("Storage Move Failed", isPresented: $showingStorageMoveError) {
+            Button(L10n.generalOk) { }
+        } message: {
+            Text(storageMoveError ?? "")
+        }
+        .sheet(isPresented: $showingStorageLogs) {
+            StorageLogsView()
         }
         .sheet(isPresented: $showingBackgroundLogs) {
             BackgroundLogsView()

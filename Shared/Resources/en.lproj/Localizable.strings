@@ -240,6 +240,13 @@
 "settings.accountDetails" = "Account Details";
 "settings.accountDetailsHint" = "Example: Bank = 'Degiro', Account = 'CTO' or 'PEA'";
 "settings.updatePricesDescription" = "Update prices and backfill historical data";
+"settings.iCloudFallbackTitle" = "Using Local Storage";
+"settings.iCloudFallbackMessage" = "Storage is set to iCloud but the database file is not available on this device. It may still be syncing, or it may have been removed to free space. The app is using local storage so your data is safe. You can switch back to iCloud in Settings once sync has finished.";
+"settings.iCloudFallbackReason" = "iCloud file not available (syncing, evicted, or first launch on this device)";
+"settings.storageLogs" = "Storage Logs";
+"settings.storageLogsDescription" = "Logs for database connection and storage location changes.";
+"settings.movingDatabaseToICloud" = "Moving database to iCloud…";
+"settings.movingDatabaseTo" = "Moving database to %@…";
 
 // MARK: - Actions
 "action.updatePrices" = "Update Prices";

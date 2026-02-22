@@ -4,6 +4,7 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var viewModel: AppViewModel
     @EnvironmentObject var languageManager: LanguageManager
+    @ObservedObject private var dbService = DatabaseService.shared
     @State private var selectedTab = 0
     @State private var showAutoRefreshPrompt = false
     
@@ -90,6 +91,16 @@ struct ContentView: View {
             }
         } message: {
             Text(viewModel.errorMessage ?? "")
+        }
+        .alert(L10n.settingsICloudFallbackTitle, isPresented: Binding(
+            get: { dbService.storageFallbackMessage != nil },
+            set: { if !$0 { dbService.clearStorageFallbackMessage() } }
+        )) {
+            Button(L10n.generalOk) {
+                dbService.clearStorageFallbackMessage()
+            }
+        } message: {
+            Text(dbService.storageFallbackMessage ?? "")
         }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {

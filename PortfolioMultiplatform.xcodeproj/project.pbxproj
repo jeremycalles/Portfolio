@@ -108,6 +108,8 @@
 		S039 /* DemoModeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F038 /* DemoModeManager.swift */; };
 		S040 /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F040 /* HapticService.swift */; };
 		S041 /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F040 /* HapticService.swift */; };
+		S042 /* StorageLogsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F042 /* StorageLogsView.swift */; };
+		S043 /* StorageLogsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F042 /* StorageLogsView.swift */; };
 		IV18 /* IOSLockManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = V018 /* IOSLockManager.swift */; };
 /* End PBXBuildFile section */
 
@@ -187,6 +189,7 @@
 		F036 /* PriceEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PriceEditorSheet.swift; path = Shared/Views/Components/PriceEditorSheet.swift; sourceTree = SOURCE_ROOT; };
 		F038 /* DemoModeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DemoModeManager.swift; path = Shared/Services/DemoModeManager.swift; sourceTree = SOURCE_ROOT; };
 		F040 /* HapticService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HapticService.swift; path = Shared/Services/HapticService.swift; sourceTree = SOURCE_ROOT; };
+		F042 /* StorageLogsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StorageLogsView.swift; path = Shared/Views/Components/StorageLogsView.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -263,6 +266,7 @@
 			S015 /* ChangeLabel.swift */,
 			V017 /* RefreshResultBanner.swift */,
 			F032 /* BackfillLogsSheet.swift */,
+			F042 /* StorageLogsView.swift */,
 			F034 /* AddHoldingSheet.swift */,
 			F036 /* PriceEditorSheet.swift */,
 			F038 /* DemoModeManager.swift */,
@@ -541,6 +545,7 @@
 				M029 /* MacOSSettingsViews.swift in Sources */,
 				S030 /* PriceRefreshService.swift in Sources */,
 				S032 /* BackfillLogsSheet.swift in Sources */,
+				S042 /* StorageLogsView.swift in Sources */,
 				S034 /* AddHoldingSheet.swift in Sources */,
 				S036 /* PriceEditorSheet.swift in Sources */,
 				S038 /* DemoModeManager.swift in Sources */,
@@ -598,6 +603,7 @@
 			IV18 /* IOSLockManager.swift in Sources */,
 			S031 /* PriceRefreshService.swift in Sources */,
 			S033 /* BackfillLogsSheet.swift in Sources */,
+			S043 /* StorageLogsView.swift in Sources */,
 			S035 /* AddHoldingSheet.swift in Sources */,
 			S037 /* PriceEditorSheet.swift in Sources */,
 			S039 /* DemoModeManager.swift in Sources */,

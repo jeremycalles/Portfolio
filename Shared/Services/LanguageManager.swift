@@ -303,6 +303,15 @@ struct L10n {
     static var settingsAccountDetails: String { manager.localized("settings.accountDetails") }
     static var settingsAccountDetailsHint: String { manager.localized("settings.accountDetailsHint") }
     static var settingsUpdatePricesDescription: String { manager.localized("settings.updatePricesDescription") }
+    static var settingsICloudFallbackTitle: String { manager.localized("settings.iCloudFallbackTitle") }
+    static var settingsICloudFallbackMessage: String { manager.localized("settings.iCloudFallbackMessage") }
+    static var settingsICloudFallbackReason: String { manager.localized("settings.iCloudFallbackReason") }
+    static var settingsStorageLogs: String { manager.localized("settings.storageLogs") }
+    static var settingsStorageLogsDescription: String { manager.localized("settings.storageLogsDescription") }
+    static var settingsMovingDatabaseToICloud: String { manager.localized("settings.movingDatabaseToICloud") }
+    static func settingsMovingDatabaseTo(_ destination: String) -> String {
+        String(format: manager.localized("settings.movingDatabaseTo"), destination)
+    }
     static func settingsMoveDataConfirmation(_ storage: String) -> String {
         String(format: manager.localized("settings.moveDataConfirmation"), storage)
     }

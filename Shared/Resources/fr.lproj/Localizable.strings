@@ -240,6 +240,13 @@
 "settings.accountDetails" = "Détails du compte";
 "settings.accountDetailsHint" = "Exemple : Banque = 'Degiro', Compte = 'CTO' ou 'PEA'";
 "settings.updatePricesDescription" = "Mettre à jour les prix et récupérer l'historique";
+"settings.iCloudFallbackTitle" = "Utilisation du stockage local";
+"settings.iCloudFallbackMessage" = "Le stockage est réglé sur iCloud mais le fichier de base de données n'est pas disponible sur cet appareil. La synchronisation peut être en cours, ou le fichier a pu être retiré pour libérer de l'espace. L'app utilise le stockage local pour préserver vos données. Vous pouvez repasser à iCloud dans Paramètres une fois la synchronisation terminée.";
+"settings.iCloudFallbackReason" = "Fichier iCloud indisponible (synchronisation, libération d'espace ou premier lancement sur cet appareil)";
+"settings.storageLogs" = "Logs de stockage";
+"settings.storageLogsDescription" = "Logs des connexions à la base et des changements de stockage.";
+"settings.movingDatabaseToICloud" = "Déplacement de la base vers iCloud…";
+"settings.movingDatabaseTo" = "Déplacement de la base vers %@…";
 
 // MARK: - Actions
 "action.updatePrices" = "Mettre à jour les prix";

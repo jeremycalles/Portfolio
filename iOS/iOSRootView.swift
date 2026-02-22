@@ -4,6 +4,7 @@ import Charts
 // MARK: - iOS Root View with TabView Navigation
 struct iOSRootView: View {
     @EnvironmentObject var viewModel: AppViewModel
+    @ObservedObject private var dbService = DatabaseService.shared
     @State private var selectedTab = 0
     @AppStorage("privacyMode") private var privacyMode = false
     
@@ -69,6 +70,16 @@ struct iOSRootView: View {
             }
         } message: {
             Text(viewModel.errorMessage ?? "")
+        }
+        .alert(L10n.settingsICloudFallbackTitle, isPresented: Binding(
+            get: { dbService.storageFallbackMessage != nil },
+            set: { if !$0 { dbService.clearStorageFallbackMessage() } }
+        )) {
+            Button(L10n.generalOk) {
+                dbService.clearStorageFallbackMessage()
+            }
+        } message: {
+            Text(dbService.storageFallbackMessage ?? "")
         }
         .refreshResultOverlay(result: viewModel.refreshResult, onDismiss: { viewModel.dismissRefreshResult() })
     }

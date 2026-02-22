@@ -241,6 +241,10 @@ struct LanguageSettingsView: View {
 struct DatabaseSettingsView: View {
     @State private var selectedStorage: StorageLocation = DatabaseService.shared.currentStorageLocation
     @State private var showingStorageChangeAlert = false
+    @State private var isMovingToStorage = false
+    @State private var storageMoveError: String?
+    @State private var showingStorageMoveError = false
+    @State private var showingStorageLogs = false
     @State private var showingImportPicker = false
     @State private var showingImportAlert = false
     @State private var importMessage: String?
@@ -257,6 +261,12 @@ struct DatabaseSettingsView: View {
                     exportDatabaseToFile()
                 } label: {
                     Label(L10n.settingsExportDatabase, systemImage: "square.and.arrow.up")
+                }
+                
+                Button {
+                    showingStorageLogs = true
+                } label: {
+                    Label(L10n.settingsStorageLogs, systemImage: "doc.text.magnifyingglass")
                 }
             }
             
@@ -341,16 +351,54 @@ struct DatabaseSettingsView: View {
         }
         .alert(L10n.settingsStorage, isPresented: $showingStorageChangeAlert) {
             Button(L10n.settingsMoveData) {
-                DatabaseService.shared.switchStorageLocation(to: selectedStorage, copyData: true)
+                showingStorageChangeAlert = false
+                isMovingToStorage = true
+                DatabaseService.shared.switchStorageLocation(to: selectedStorage, copyData: true) { result in
+                    isMovingToStorage = false
+                    selectedStorage = DatabaseService.shared.currentStorageLocation
+                    switch result {
+                    case .success:
+                        NotificationCenter.default.post(name: .databaseDidImport, object: nil)
+                    case .failure(let error):
+                        storageMoveError = error.localizedDescription
+                        showingStorageMoveError = true
+                    }
+                }
             }
             Button(L10n.settingsStartFresh) {
                 DatabaseService.shared.switchStorageLocation(to: selectedStorage, copyData: false)
+                selectedStorage = DatabaseService.shared.currentStorageLocation
+                NotificationCenter.default.post(name: .databaseDidImport, object: nil)
             }
             Button(L10n.generalCancel, role: .cancel) {
                 selectedStorage = DatabaseService.shared.currentStorageLocation
             }
         } message: {
             Text(L10n.settingsMoveDataConfirmation(selectedStorage.displayName))
+        }
+        .overlay {
+            if isMovingToStorage {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .scaleEffect(1.2)
+                    Text(L10n.settingsMovingDatabaseTo(selectedStorage.displayName))
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                .padding(32)
+                .background(.regularMaterial)
+                .cornerRadius(12)
+            }
+        }
+        .alert("Storage Move Failed", isPresented: $showingStorageMoveError) {
+            Button(L10n.generalOk) { }
+        } message: {
+            Text(storageMoveError ?? "")
+        }
+        .sheet(isPresented: $showingStorageLogs) {
+            StorageLogsView()
         }
         .alert("Database Import", isPresented: $showingImportAlert) {
             Button("OK") { }
