@@ -633,11 +633,10 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/build_number_stamp",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# No-op: stamp file for dependency analysis (avoids \"run every build\" warning)\ntouch \"${DERIVED_FILE_DIR}/build_number_stamp\"\n";
+			shellScript = "cd \"${PROJECT_DIR}\" && agvtool next-version -all >/dev/null 2>&1 || true\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -805,7 +804,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = macOS/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Portfolio Tracker";
+				INFOPLIST_KEY_CFBundleDisplayName = PortfolioMultiplatform;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -815,7 +814,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.macos;
-				PRODUCT_NAME = Portfolio;
+				PRODUCT_NAME = PortfolioMultiplatform;
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -840,7 +839,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = macOS/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Portfolio Tracker";
+				INFOPLIST_KEY_CFBundleDisplayName = PortfolioMultiplatform;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -850,7 +849,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.macos;
-				PRODUCT_NAME = Portfolio;
+				PRODUCT_NAME = PortfolioMultiplatform;
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -871,7 +870,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iOS/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Portfolio Tracker";
+				INFOPLIST_KEY_CFBundleDisplayName = PortfolioMultiplatform;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -885,7 +884,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.ios;
-				PRODUCT_NAME = Portfolio;
+				PRODUCT_NAME = PortfolioMultiplatform;
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -907,7 +906,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iOS/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Portfolio Tracker";
+				INFOPLIST_KEY_CFBundleDisplayName = PortfolioMultiplatform;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -921,7 +920,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.ios;
-				PRODUCT_NAME = Portfolio;
+				PRODUCT_NAME = PortfolioMultiplatform;
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

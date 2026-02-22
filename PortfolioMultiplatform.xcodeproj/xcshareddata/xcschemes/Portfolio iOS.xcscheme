@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "T002"
-               BuildableName = "Portfolio.app"
+               BuildableName = "PortfolioMultiplatform.app"
                BlueprintName = "Portfolio iOS"
                ReferencedContainer = "container:PortfolioMultiplatform.xcodeproj">
             </BuildableReference>
@@ -58,7 +58,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "T002"
-            BuildableName = "Portfolio.app"
+            BuildableName = "PortfolioMultiplatform.app"
             BlueprintName = "Portfolio iOS"
             ReferencedContainer = "container:PortfolioMultiplatform.xcodeproj">
          </BuildableReference>
@@ -79,7 +79,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "T002"
-            BuildableName = "Portfolio.app"
+            BuildableName = "PortfolioMultiplatform.app"
             BlueprintName = "Portfolio iOS"
             ReferencedContainer = "container:PortfolioMultiplatform.xcodeproj">
          </BuildableReference>
