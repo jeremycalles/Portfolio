@@ -1,11 +1,11 @@
-# Portfolio - Portfolio Tracker
+# PortfolioMultiplatform - Portfolio Tracker
 
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue.svg)](LICENSE)
 [![Platform: iOS](https://img.shields.io/badge/Platform-iOS-blue)](https://developer.apple.com/ios/)
 [![Platform: macOS](https://img.shields.io/badge/Platform-macOS-blue)](https://developer.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.9+-orange)](https://swift.org)
 
-**Portfolio** is a privacy-focused portfolio tracker for stocks, ETFs, mutual funds, precious metals, cryptocurrencies, and bank accounts—with native iOS and macOS apps built from a **single shared codebase**.
+**PortfolioMultiplatform** is a privacy-focused portfolio tracker for stocks, ETFs, mutual funds, precious metals, cryptocurrencies, and bank accounts—with native iOS and macOS apps built from a **single shared codebase**.
 
 ### What matters most
 
@@ -139,7 +139,7 @@ The native SwiftUI application provides the best experience for tracking your po
 
 #### First Launch
 
-When you first launch Portfolio:
+When you first launch PortfolioMultiplatform:
 1. The app creates a local SQLite database for your data
 2. Your preferred language is detected from system settings
 3. You can start adding instruments and bank accounts immediately
@@ -329,7 +329,7 @@ For instruments without automatic data sources:
 ### Settings & Preferences
 
 - **iOS**: Open the **Settings** tab in the tab bar.
-- **macOS**: Use the application menu **Portfolio** → **Settings** (or press ⌘,). All preferences (General, Language, Database, Background Refresh) are in this window; there is no Settings item in the main window sidebar.
+- **macOS**: Use the application menu **PortfolioMultiplatform** → **Settings** (or press ⌘,). All preferences (General, Language, Database, Background Refresh) are in this window; there is no Settings item in the main window sidebar.
 
 #### Face ID / Touch ID Protection (iOS and macOS)
 
@@ -373,7 +373,7 @@ iOS automatically refreshes prices in the background when the system allows. Vie
 
 ## Data Sources
 
-Portfolio uses multiple data sources to ensure accurate pricing:
+PortfolioMultiplatform uses multiple data sources to ensure accurate pricing:
 
 | Source | Assets | Data Type |
 |--------|--------|-----------|
@@ -393,7 +393,7 @@ Portfolio uses multiple data sources to ensure accurate pricing:
 
 ### Privacy-first design
 
-Portfolio is built so that **your data never leaves your control**:
+PortfolioMultiplatform is built so that **your data never leaves your control**:
 
 - **No server for your data**: There is no backend or cloud service that stores your portfolio. All positions, accounts, instruments, and price history live only on your device.
 - **No personal data sent**: The app does not send any personally identifiable information or portfolio contents to any third party. No telemetry, analytics, or crash reporting.
@@ -449,7 +449,6 @@ PortfolioMultiplatform/
 │   │   ├── DatabaseService.swift
 │   │   ├── MarketDataService.swift
 │   │   ├── LanguageManager.swift
-│   │   ├── PriceRefreshService.swift   # Shared refresh logic
 │   │   ├── DemoModeManager.swift       # Privacy/demo mode
 │   │   └── HapticService.swift         # Cross-platform haptics
 │   ├── ViewModels/               # AppViewModel and extensions
@@ -491,7 +490,7 @@ PortfolioMultiplatform/
 - **Maximum Code Sharing**: Charts, dashboard components, sheets, and services are shared between platforms
 - **Platform-Specific UI**: Each platform has its own navigation and settings views optimized for the experience
 - **Clean Separation**: Platform-specific code is clearly isolated in `iOS/` and `macOS/` folders
-- **Unified Services**: `PriceRefreshService`, `HapticService`, and `DemoModeManager` provide consistent behavior across platforms
+- **Unified Services**: `HapticService` and `DemoModeManager` provide consistent behavior across platforms
 
 ### Running Tests
 

@@ -38,3 +38,6 @@ secrets/
 **/APIKeys*.swift
 *.keystore
 *.jks
+
+# Icon generator (Node)
+scripts/icon_gen/node_modules/

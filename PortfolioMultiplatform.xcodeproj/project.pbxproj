@@ -96,8 +96,6 @@
 		M027 /* BiometricAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = S027 /* BiometricAuth.swift */; };
 		M029 /* MacOSSettingsViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = S029 /* MacOSSettingsViews.swift */; };
 		I027 /* BiometricAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = S027 /* BiometricAuth.swift */; };
-		S030 /* PriceRefreshService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F030 /* PriceRefreshService.swift */; };
-		S031 /* PriceRefreshService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F030 /* PriceRefreshService.swift */; };
 		S032 /* BackfillLogsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F032 /* BackfillLogsSheet.swift */; };
 		S033 /* BackfillLogsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F032 /* BackfillLogsSheet.swift */; };
 		S034 /* AddHoldingSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F034 /* AddHoldingSheet.swift */; };
@@ -183,7 +181,6 @@
 		S026 /* MacOSLockManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MacOSLockManager.swift; path = macOS/MacOSLockManager.swift; sourceTree = SOURCE_ROOT; };
 		S027 /* BiometricAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricAuth.swift; sourceTree = "<group>"; };
 		V018 /* IOSLockManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = IOSLockManager.swift; path = iOS/IOSLockManager.swift; sourceTree = SOURCE_ROOT; };
-		F030 /* PriceRefreshService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceRefreshService.swift; sourceTree = "<group>"; };
 		F032 /* BackfillLogsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BackfillLogsSheet.swift; path = Shared/Views/Components/BackfillLogsSheet.swift; sourceTree = SOURCE_ROOT; };
 		F034 /* AddHoldingSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AddHoldingSheet.swift; path = Shared/Views/Components/AddHoldingSheet.swift; sourceTree = SOURCE_ROOT; };
 		F036 /* PriceEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PriceEditorSheet.swift; path = Shared/Views/Components/PriceEditorSheet.swift; sourceTree = SOURCE_ROOT; };
@@ -382,7 +379,6 @@
 				S013 /* DateFormatters.swift */,
 				S027 /* BiometricAuth.swift */,
 				F0C1E7C12F3003410066E539 /* LanguageManager.swift */,
-				F030 /* PriceRefreshService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -543,7 +539,6 @@
 				M026 /* MacOSLockManager.swift in Sources */,
 				M027 /* BiometricAuth.swift in Sources */,
 				M029 /* MacOSSettingsViews.swift in Sources */,
-				S030 /* PriceRefreshService.swift in Sources */,
 				S032 /* BackfillLogsSheet.swift in Sources */,
 				S042 /* StorageLogsView.swift in Sources */,
 				S034 /* AddHoldingSheet.swift in Sources */,
@@ -601,7 +596,6 @@
 		IV17 /* RefreshResultBanner.swift in Sources */,
 			I027 /* BiometricAuth.swift in Sources */,
 			IV18 /* IOSLockManager.swift in Sources */,
-			S031 /* PriceRefreshService.swift in Sources */,
 			S033 /* BackfillLogsSheet.swift in Sources */,
 			S043 /* StorageLogsView.swift in Sources */,
 			S035 /* AddHoldingSheet.swift in Sources */,
@@ -811,6 +805,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = macOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PortfolioMultiplatform;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -845,6 +840,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = macOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PortfolioMultiplatform;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -875,7 +871,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iOS/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Portfolio;
+				INFOPLIST_KEY_CFBundleDisplayName = PortfolioMultiplatform;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -911,7 +907,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iOS/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Portfolio;
+				INFOPLIST_KEY_CFBundleDisplayName = PortfolioMultiplatform;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

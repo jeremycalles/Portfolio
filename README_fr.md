@@ -1,11 +1,11 @@
-# Portfolio - Suivi de Portefeuille
+# PortfolioMultiplatform - Suivi de Portefeuille
 
 [![Licence : PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue.svg)](LICENSE)
 [![Plateforme : iOS](https://img.shields.io/badge/Platform-iOS-blue)](https://developer.apple.com/ios/)
 [![Plateforme : macOS](https://img.shields.io/badge/Platform-macOS-blue)](https://developer.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.9+-orange)](https://swift.org)
 
-**Portfolio** est un suivi de portefeuille axé sur la confidentialité pour actions, ETF, OPCVM, métaux précieux, cryptomonnaies et comptes bancaires—avec des applications natives iOS et macOS issues d’**un même code partagé**.
+**PortfolioMultiplatform** est un suivi de portefeuille axé sur la confidentialité pour actions, ETF, OPCVM, métaux précieux, cryptomonnaies et comptes bancaires—avec des applications natives iOS et macOS issues d’**un même code partagé**.
 
 ### L’essentiel
 
@@ -139,7 +139,7 @@ L'application native SwiftUI offre la meilleure expérience pour suivre votre po
 
 #### Premier Lancement
 
-Lors du premier lancement de Portfolio :
+Lors du premier lancement de PortfolioMultiplatform :
 1. L'application crée une base de données SQLite locale pour vos données
 2. Votre langue préférée est détectée à partir des paramètres système
 3. Vous pouvez commencer à ajouter des instruments et des comptes bancaires immédiatement
@@ -329,7 +329,7 @@ Pour les instruments sans sources de données automatiques :
 ### Paramètres & Préférences
 
 - **iOS** : Ouvrez l’onglet **Paramètres** dans la barre d’onglets.
-- **macOS** : Utilisez le menu de l’application **Portfolio** → **Paramètres** (ou ⌘,). Toutes les préférences (Général, Langue, Base de données, Arrière-plan) se trouvent dans cette fenêtre ; il n’y a pas d’entrée Paramètres dans la barre latérale de la fenêtre principale.
+- **macOS** : Utilisez le menu de l’application **PortfolioMultiplatform** → **Paramètres** (ou ⌘,). Toutes les préférences (Général, Langue, Base de données, Arrière-plan) se trouvent dans cette fenêtre ; il n’y a pas d’entrée Paramètres dans la barre latérale de la fenêtre principale.
 
 #### Protection Face ID / Touch ID (iOS et macOS)
 
@@ -373,7 +373,7 @@ iOS actualise automatiquement les prix en arrière-plan quand le système le per
 
 ## Sources de Données
 
-Portfolio utilise plusieurs sources de données pour assurer une tarification précise :
+PortfolioMultiplatform utilise plusieurs sources de données pour assurer une tarification précise :
 
 | Source | Actifs | Type de Données |
 |--------|--------|-----------|
@@ -393,7 +393,7 @@ Portfolio utilise plusieurs sources de données pour assurer une tarification pr
 
 ### Conception priorité confidentialité
 
-Portfolio est conçu pour que **vos données ne quittent jamais votre contrôle** :
+PortfolioMultiplatform est conçu pour que **vos données ne quittent jamais votre contrôle** :
 
 - **Aucun serveur pour vos données** : Il n’existe pas de backend ni de service cloud qui stocke votre portefeuille. Positions, comptes, instruments et historique des prix ne vivent que sur votre appareil.
 - **Aucune donnée personnelle envoyée** : L’application n’envoie aucune donnée personnelle identifiable ni contenu du portefeuille à un tiers. Pas de télémétrie, analytique ou rapport de plantage.
@@ -449,7 +449,6 @@ PortfolioMultiplatform/
 │   │   ├── DatabaseService.swift
 │   │   ├── MarketDataService.swift
 │   │   ├── LanguageManager.swift
-│   │   ├── PriceRefreshService.swift   # Logique de rafraîchissement partagée
 │   │   ├── DemoModeManager.swift       # Mode démo/confidentialité
 │   │   └── HapticService.swift         # Retour haptique multiplateforme
 │   ├── ViewModels/               # AppViewModel et extensions
@@ -491,7 +490,7 @@ PortfolioMultiplatform/
 - **Partage maximal du code** : Graphiques, composants du tableau de bord, feuilles et services sont partagés entre les plateformes
 - **UI spécifique par plateforme** : Chaque plateforme a sa propre navigation et ses vues de paramètres optimisées pour l'expérience
 - **Séparation claire** : Le code spécifique à chaque plateforme est clairement isolé dans les dossiers `iOS/` et `macOS/`
-- **Services unifiés** : `PriceRefreshService`, `HapticService` et `DemoModeManager` assurent un comportement cohérent sur toutes les plateformes
+- **Services unifiés** : `HapticService` et `DemoModeManager` assurent un comportement cohérent sur toutes les plateformes
 
 ### Exécution des Tests
 

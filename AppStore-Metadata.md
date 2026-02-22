@@ -1,6 +1,6 @@
 # App Store Metadata
 
-Use this copy in App Store Connect for **Promotional Text**, **Description**, and **Keywords**. App name: **Portfolio**. Use for both **Portfolio iOS** and **Portfolio macOS** (adjust wording if you use separate listings).
+Use this copy in App Store Connect for **Promotional Text**, **Description**, and **Keywords**. App name: **PortfolioMultiplatform**. Use for both iOS and macOS app listings (adjust wording if you use separate listings).
 
 ---
 
@@ -18,7 +18,7 @@ Privacy-first portfolio tracker. Stocks, ETFs, funds, gold, crypto, bank account
 **Limit: 4,000 characters** • First ~255 characters appear in search results—make them count.
 
 ```
-Portfolio is a privacy-focused tracker for stocks, ETFs, mutual funds, precious metals, cryptocurrencies, and bank accounts. All data stays on your device. No account linking, no backend—optional iCloud sync uses your own Apple ID. Native apps for iOS and macOS from one codebase.
+PortfolioMultiplatform is a privacy-focused tracker for stocks, ETFs, mutual funds, precious metals, cryptocurrencies, and bank accounts. All data stays on your device. No account linking, no backend—optional iCloud sync uses your own Apple ID. Native apps for iOS and macOS from one codebase.
 
 WHAT YOU CAN TRACK
 

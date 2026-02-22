@@ -33,8 +33,10 @@ async function generateIcons() {
 
             console.log(`Generating ${filename} (${pixelSize}x${pixelSize})...`);
 
+            // Flatten onto opaque background so PNGs have no alpha channel (App Store requirement)
             await sharp(sourceSvgPath)
                 .resize(pixelSize, pixelSize)
+                .flatten({ background: '#1C1C1E' })
                 .png()
                 .toFile(path.join(appIconSetPath, filename));
         }

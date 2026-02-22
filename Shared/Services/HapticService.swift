@@ -45,12 +45,4 @@ enum HapticService {
         // For now, no-op on macOS
         #endif
     }
-    
-    /// Triggers a selection change haptic
-    static func selectionChanged() {
-        #if os(iOS)
-        let generator = UISelectionFeedbackGenerator()
-        generator.selectionChanged()
-        #endif
-    }
 }

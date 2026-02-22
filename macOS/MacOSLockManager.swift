@@ -143,35 +143,4 @@ struct MacOSLockScreenView: View {
         }
     }
 }
-
-// MARK: - Touch ID Setting Section (Settings screen)
-struct MacOSTouchIDSettingSection: View {
-    @EnvironmentObject var lockManager: MacOSLockManager
-    
-    var body: some View {
-        GroupBox {
-            VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    Image(systemName: "touchid")
-                        .font(.title2)
-                        .foregroundColor(.accentColor)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(L10n.settingsTouchIDProtection)
-                            .font(.headline)
-                        Text(L10n.settingsTouchIDProtectionDescription)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    Spacer()
-                }
-                
-                Toggle(L10n.settingsTouchIDProtectionEnable, isOn: $lockManager.isTouchIDProtectionEnabled)
-                    .toggleStyle(.switch)
-            }
-            .padding()
-        } label: {
-            Text(L10n.settingsTouchIDProtection)
-        }
-    }
-}
 #endif

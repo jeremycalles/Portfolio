@@ -315,14 +315,6 @@ class AppViewModel: ObservableObject {
         return nil
     }
     
-    /// Convert EUR value to gold ounces using current spot price
-    func convertToGoldOunces(_ eurValue: Double) -> Double? {
-        guard let goldOuncePrice = getCurrentGoldOuncePrice(), goldOuncePrice > 0 else {
-            return nil
-        }
-        return eurValue / goldOuncePrice
-    }
-    
     // MARK: - Price History
     func getPriceHistory(forIsin isin: String) -> [Price] {
         return db.getPriceHistory(forIsin: isin)

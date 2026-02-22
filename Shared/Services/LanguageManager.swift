@@ -74,10 +74,6 @@ class LanguageManager: ObservableObject {
     func localized(_ key: String) -> String {
         return bundle.localizedString(forKey: key, value: nil, table: nil)
     }
-    
-    func setLanguage(_ language: AppLanguage) {
-        currentLanguage = language
-    }
 }
 
 // MARK: - Localization Helper using LanguageManager
@@ -209,9 +205,6 @@ struct L10n {
     static var holdingsQty: String { manager.localized("holdings.qty") }
     static var holdingsNoHoldings: String { manager.localized("holdings.noHoldings") }
     static var holdingsNoChartData: String { manager.localized("holdings.noChartData") }
-    static func holdingsQuantityUnits(_ quantity: String) -> String {
-        String(format: manager.localized("holdings.quantityUnits"), quantity)
-    }
     
     // Quadrants
     static var quadrantsAddQuadrant: String { manager.localized("quadrants.addQuadrant") }
