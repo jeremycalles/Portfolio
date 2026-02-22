@@ -182,9 +182,10 @@ class DatabaseService: ObservableObject {
     private init() {
         self.dbPath = Self.localDatabasePath()
         
+        let fm = FileManager.default
+        
         #if os(macOS)
         // One-time migration: if local path is empty, copy from legacy project path if it exists
-        let fm = FileManager.default
         if !fm.fileExists(atPath: dbPath) {
             let legacyPath = (Self.projectRootPath() as NSString).appendingPathComponent("data/stocks.db")
             if fm.fileExists(atPath: legacyPath) {
@@ -195,8 +196,25 @@ class DatabaseService: ObservableObject {
         }
         #endif
         
+        // If still no local database, try to restore from iCloud backup (same path used by backupDatabaseToICloud)
+        var restoredFromICloud = false
+        if !fm.fileExists(atPath: dbPath), let containerURL = iCloudBackupContainerURL {
+            let backupDir = containerURL.appendingPathComponent("Documents", isDirectory: true).appendingPathComponent("PortfolioBackup", isDirectory: true)
+            let backupURL = backupDir.appendingPathComponent("stocks.db")
+            if fm.fileExists(atPath: backupURL.path) {
+                let destDir = URL(fileURLWithPath: dbPath).deletingLastPathComponent()
+                if (try? fm.createDirectory(at: destDir, withIntermediateDirectories: true)) != nil,
+                   (try? fm.copyItem(at: backupURL, to: URL(fileURLWithPath: dbPath))) != nil {
+                    restoredFromICloud = true
+                }
+            }
+        }
+        
         self.storageLogEntries = Self.loadStorageLogsFromDefaults()
         connectToDatabase()
+        if restoredFromICloud {
+            appendStorageLog(message: "Restored database from iCloud backup.", isWarning: false, isError: false)
+        }
         appendStorageLog(message: "Connected to database (local).", isWarning: false, isError: false)
         
         registerBackupOnBackground()
