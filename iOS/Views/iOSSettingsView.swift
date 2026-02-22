@@ -77,7 +77,7 @@ struct iOSSettingsView: View {
                 Text(L10n.settingsTouchIDProtectionDescription)
             }
             
-            Section(L10n.settingsDatabase) {
+            Section {
                 HStack {
                     Image(systemName: "internaldrive")
                         .foregroundColor(.blue)
@@ -101,6 +101,30 @@ struct iOSSettingsView: View {
                     }
                     .disabled(isBackingUp)
                 }
+                Button {
+                    showingImportPicker = true
+                } label: {
+                    Label(L10n.settingsImportDatabase, systemImage: "square.and.arrow.down")
+                }
+                Button {
+                    showingExportShare = true
+                } label: {
+                    Label(L10n.settingsExportDatabase, systemImage: "square.and.arrow.up")
+                }
+                Button {
+                    showingStorageLogs = true
+                } label: {
+                    Label(L10n.settingsStorageLogs, systemImage: "doc.text.magnifyingglass")
+                }
+                LabeledContent("Path") {
+                    Text(DatabaseService.shared.getDatabasePath().components(separatedBy: "/").suffix(2).joined(separator: "/"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            } header: {
+                Text(L10n.settingsDatabase)
+            } footer: {
+                Text("Import/Export to transfer data between devices. Path shows the database location.")
             }
             
             Section("Data Management") {
@@ -163,34 +187,6 @@ struct iOSSettingsView: View {
                 Text("Background Updates")
             } footer: {
                 Text("Prices are automatically updated in the background when the app is not in use. Long-press to view logs.")
-            }
-            
-            Section("Database Import/Export") {
-                Button {
-                    showingImportPicker = true
-                } label: {
-                    Label(L10n.settingsImportDatabase, systemImage: "square.and.arrow.down")
-                }
-                
-                Button {
-                    showingExportShare = true
-                } label: {
-                    Label(L10n.settingsExportDatabase, systemImage: "square.and.arrow.up")
-                }
-                
-                Button {
-                    showingStorageLogs = true
-                } label: {
-                    Label(L10n.settingsStorageLogs, systemImage: "doc.text.magnifyingglass")
-                }
-            }
-            
-            Section("Database Path") {
-                LabeledContent("Path") {
-                    Text(DatabaseService.shared.getDatabasePath().components(separatedBy: "/").suffix(2).joined(separator: "/"))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
             }
             
             Section {
