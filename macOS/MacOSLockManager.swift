@@ -31,7 +31,7 @@ final class MacOSLockManager: ObservableObject {
     private var activityMonitor: Any?
     
     private init() {
-        self.isTouchIDProtectionEnabled = UserDefaults.standard.object(forKey: touchIDProtectionEnabledKey) as? Bool ?? true
+        self.isTouchIDProtectionEnabled = UserDefaults.standard.object(forKey: touchIDProtectionEnabledKey) as? Bool ?? false
     }
     
     /// Unlock via Touch ID or device password. On success, sets isUnlocked and starts activity monitoring.

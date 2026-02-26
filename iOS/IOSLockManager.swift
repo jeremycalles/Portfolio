@@ -29,7 +29,7 @@ final class IOSLockManager: ObservableObject {
     private var inactivityTimer: Timer?
 
     private init() {
-        self.isTouchIDProtectionEnabled = UserDefaults.standard.object(forKey: iosBiometricProtectionEnabledKey) as? Bool ?? true
+        self.isTouchIDProtectionEnabled = UserDefaults.standard.object(forKey: iosBiometricProtectionEnabledKey) as? Bool ?? false
     }
 
     func unlock(reason: String) async {
