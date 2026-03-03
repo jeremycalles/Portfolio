@@ -185,19 +185,21 @@ extension AppViewModel {
     }
     
     // MARK: - Backfill Single Instrument
-    func backfillSingleInstrument(_ instrument: Instrument, period: String = "1y", interval: String = "1mo") async {
-        isLoading = true
-        backfillLogs = []
-        
-        let timestamp = AppDateFormatter.yearMonthDayTime.string(from: Date())
-        
-        backfillLogs.append("[\(timestamp)] Starting backfill for \(instrument.displayName)")
-        backfillLogs.append("[\(timestamp)] ISIN: \(instrument.isin)")
-        backfillLogs.append("[\(timestamp)] Ticker: \(instrument.ticker ?? "N/A")")
-        backfillLogs.append("[\(timestamp)] Period: \(period), Interval: \(interval)")
-        backfillLogs.append("")
-        
-        statusMessage = "Backfilling: \(instrument.displayName)"
+    func backfillSingleInstrument(_ instrument: Instrument, period: String = "1y", interval: String = "1mo", silent: Bool = false) async {
+        if !silent {
+            isLoading = true
+            backfillLogs = []
+            
+            let timestamp = AppDateFormatter.yearMonthDayTime.string(from: Date())
+            
+            backfillLogs.append("[\(timestamp)] Starting backfill for \(instrument.displayName)")
+            backfillLogs.append("[\(timestamp)] ISIN: \(instrument.isin)")
+            backfillLogs.append("[\(timestamp)] Ticker: \(instrument.ticker ?? "N/A")")
+            backfillLogs.append("[\(timestamp)] Period: \(period), Interval: \(interval)")
+            backfillLogs.append("")
+            
+            statusMessage = "Backfilling: \(instrument.displayName)"
+        }
         
         // Build list of tickers to try (primary, then "ISIN:CURRENCY" if applicable, then core ISIN)
         let coreIsin: String = {
@@ -223,29 +225,31 @@ extension AppViewModel {
         var prices: [Price] = []
         for ticker in tickersToTry {
             let ts = AppDateFormatter.yearMonthDayTime.string(from: Date())
-            backfillLogs.append("[\(ts)] Trying ticker: \(ticker)")
+            if !silent { backfillLogs.append("[\(ts)] Trying ticker: \(ticker)") }
             let result = await marketData.fetchHistoricalDataForTicker(isin: instrument.isin, ticker: ticker, period: period, interval: interval)
             let ts2 = AppDateFormatter.yearMonthDayTime.string(from: Date())
             if result.isEmpty {
-                backfillLogs.append("[\(ts2)]   → No data")
+                if !silent { backfillLogs.append("[\(ts2)]   → No data") }
             } else {
-                backfillLogs.append("[\(ts2)]   → ✓ \(result.count) price records")
+                if !silent { backfillLogs.append("[\(ts2)]   → ✓ \(result.count) price records") }
                 prices = result
                 break
             }
         }
         
         let fetchTimestamp = AppDateFormatter.yearMonthDayTime.string(from: Date())
-        if prices.isEmpty {
-            backfillLogs.append("")
-            backfillLogs.append("[\(fetchTimestamp)] ⚠️ No data returned from Yahoo Finance (tried \(tickersToTry.count) ticker(s))")
-            backfillLogs.append("[\(fetchTimestamp)] This may happen if:")
-            backfillLogs.append("  • The fund/instrument has no historical chart data on Yahoo Finance")
-            backfillLogs.append("  • Yahoo Finance API rate limit was hit")
-            backfillLogs.append("")
-        } else {
-            backfillLogs.append("")
-            backfillLogs.append("[\(fetchTimestamp)] ✓ Fetched \(prices.count) price records")
+        if !silent {
+            if prices.isEmpty {
+                backfillLogs.append("")
+                backfillLogs.append("[\(fetchTimestamp)] ⚠️ No data returned from Yahoo Finance (tried \(tickersToTry.count) ticker(s))")
+                backfillLogs.append("[\(fetchTimestamp)] This may happen if:")
+                backfillLogs.append("  • The fund/instrument has no historical chart data on Yahoo Finance")
+                backfillLogs.append("  • Yahoo Finance API rate limit was hit")
+                backfillLogs.append("")
+            } else {
+                backfillLogs.append("")
+                backfillLogs.append("[\(fetchTimestamp)] ✓ Fetched \(prices.count) price records")
+            }
         }
         
         var addedCount = 0
@@ -263,38 +267,44 @@ extension AppViewModel {
         }
         
         let saveTimestamp = AppDateFormatter.yearMonthDayTime.string(from: Date())
-        if addedCount > 0 {
-            backfillLogs.append("[\(saveTimestamp)] ✓ Added \(addedCount) new prices")
-        } else if !prices.isEmpty {
-            backfillLogs.append("[\(saveTimestamp)] No new prices to add (all already exist)")
-        }
-        if skippedCount > 0 {
-            backfillLogs.append("[\(saveTimestamp)] Skipped \(skippedCount) existing prices")
+        if !silent {
+            if addedCount > 0 {
+                backfillLogs.append("[\(saveTimestamp)] ✓ Added \(addedCount) new prices")
+            } else if !prices.isEmpty {
+                backfillLogs.append("[\(saveTimestamp)] No new prices to add (all already exist)")
+            }
+            if skippedCount > 0 {
+                backfillLogs.append("[\(saveTimestamp)] Skipped \(skippedCount) existing prices")
+            }
         }
         
         // Backfill exchange rates if instrument is not EUR
         if let currency = instrument.currency, currency != "EUR" {
-            backfillLogs.append("")
-            backfillLogs.append("[\(saveTimestamp)] Backfilling \(currency)/EUR exchange rates...")
+            if !silent {
+                backfillLogs.append("")
+                backfillLogs.append("[\(saveTimestamp)] Backfilling \(currency)/EUR exchange rates...")
+            }
             
             let rates = await marketData.fetchHistoricalRates(from: currency, to: "EUR", period: period, interval: interval)
             
-            var ratesAdded = 0
             for rate in rates {
                 db.addExchangeRate(rate)
-                ratesAdded += 1
             }
             
-            let rateTimestamp = AppDateFormatter.yearMonthDayTime.string(from: Date())
-            backfillLogs.append("[\(rateTimestamp)] Fetched \(rates.count) exchange rates")
+            if !silent {
+                let rateTimestamp = AppDateFormatter.yearMonthDayTime.string(from: Date())
+                backfillLogs.append("[\(rateTimestamp)] Fetched \(rates.count) exchange rates")
+            }
         }
         
-        let endTimestamp = AppDateFormatter.yearMonthDayTime.string(from: Date())
-        backfillLogs.append("")
-        backfillLogs.append("[\(endTimestamp)] Backfill complete!")
-        
-        statusMessage = ""
-        isLoading = false
-        showBackfillLogs = true
+        if !silent {
+            let endTimestamp = AppDateFormatter.yearMonthDayTime.string(from: Date())
+            backfillLogs.append("")
+            backfillLogs.append("[\(endTimestamp)] Backfill complete!")
+            
+            statusMessage = ""
+            isLoading = false
+            showBackfillLogs = true
+        }
     }
 }

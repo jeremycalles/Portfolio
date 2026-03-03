@@ -282,6 +282,11 @@ class AppViewModel: ObservableObject {
         )
         db.addOrUpdateHolding(holding)
         refreshHoldings()
+        if let instrument = db.getInstrument(byIsin: isin) {
+            Task {
+                await backfillSingleInstrument(instrument, period: "1mo", interval: "1d", silent: true)
+            }
+        }
     }
     
     func updateHolding(accountId: Int, isin: String, quantity: Double, purchaseDate: String?, purchasePrice: Double?) {
