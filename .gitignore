@@ -50,6 +50,7 @@ scripts/resize_ipad_screenshot.sh
 
 # Swift Package Manager (Packages/* and any local SPM)
 .build/
+**/.build/
 .swiftpm/
 
 # Xcode test and tooling
