@@ -1,0 +1,4 @@
+# Test and coverage output (also covered by root .gitignore)
+*.xcresult
+*.xcresult bundle
+coverage/

@@ -47,3 +47,16 @@ assets/screenshots/ipad-13-*.png
 assets/screenshots/appstore/
 
 scripts/resize_ipad_screenshot.sh
+
+# Swift Package Manager (Packages/* and any local SPM)
+.build/
+.swiftpm/
+
+# Xcode test and tooling
+*.xcresult
+*.xcresult bundle
+
+# Coverage / test output (optional)
+coverage/
+*.gcno
+*.gcda
