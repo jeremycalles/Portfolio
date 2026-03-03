@@ -149,8 +149,8 @@ struct AllHoldingsView: View {
                                         }
                                         .buttonStyle(.plain)
                                         .frame(maxWidth: .infinity, alignment: .leading)
-                                        .contentShape(Rectangle())
                                         .padding(.vertical, 6)
+                                        .contentShape(Rectangle())
                                         
                                         if detail.id != details.last?.id {
                                             Divider()

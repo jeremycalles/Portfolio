@@ -97,7 +97,7 @@ public struct BankAccount: Identifiable, Codable, Hashable {
 }
 
 /// Identifiable selection for opening the edit-holding sheet (macOS) or destination (iOS).
-public struct HoldingEditItem: Identifiable {
+public struct HoldingEditItem: Identifiable, Hashable {
     public let accountId: Int
     public let isin: String
     public var id: String { "\(accountId)-\(isin)" }

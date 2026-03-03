@@ -5,32 +5,40 @@ struct iOSInstrumentsView: View {
     @EnvironmentObject var viewModel: AppViewModel
     @State private var showingAddSheet = false
     @State private var newIsin = ""
+    @State private var selectedInstrument: Instrument?
     
     var body: some View {
         List {
             ForEach(viewModel.instruments) { instrument in
-                NavigationLink {
-                    iOSInstrumentDetailView(instrument: instrument)
+                Button {
+                    selectedInstrument = instrument
                 } label: {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(instrument.displayName)
-                            .font(.headline)
-                        HStack {
-                            Text(instrument.isin)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Spacer()
-                            if let ticker = instrument.ticker, ticker != "N/A" {
-                                Text(ticker)
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(instrument.displayName)
+                                .font(.headline)
+                            HStack {
+                                Text(instrument.isin)
                                     .font(.caption)
-                                    .foregroundColor(.blue)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                if let ticker = instrument.ticker, ticker != "N/A" {
+                                    Text(ticker)
+                                        .font(.caption)
+                                        .foregroundColor(.blue)
+                                }
                             }
                         }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     .padding(.vertical, 4)
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
             }
             .onDelete { indexSet in
                 for index in indexSet {
@@ -39,6 +47,9 @@ struct iOSInstrumentsView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .navigationDestination(item: $selectedInstrument) { instrument in
+            iOSInstrumentDetailView(instrument: instrument)
+        }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -87,6 +98,7 @@ struct iOSInstrumentsView: View {
                     .padding()
                     .background(.ultraThinMaterial)
                     .cornerRadius(8)
+                    .allowsHitTesting(false)
             }
         }
     }
