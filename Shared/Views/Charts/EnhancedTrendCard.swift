@@ -1,8 +1,5 @@
 import SwiftUI
 import Charts
-#if os(macOS)
-import AppKit
-#endif
 
 // MARK: - Enhanced Trend Card
 struct EnhancedTrendCard: View {
@@ -131,14 +128,6 @@ struct EnhancedTrendCard: View {
             }
         }
         .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                #if os(iOS)
-                .fill(Color(.systemBackground))
-                #else
-                .fill(Color(NSColor.windowBackgroundColor))
-                #endif
-        )
-        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 4)
+        .glassEffect(.regular, in: .rect(cornerRadius: 16))
     }
 }

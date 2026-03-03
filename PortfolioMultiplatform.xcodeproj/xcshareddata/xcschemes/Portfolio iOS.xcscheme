@@ -45,8 +45,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "T003"
-               BuildableName = "PortfolioTests.xctest"
-               BlueprintName = "PortfolioTests"
+               BuildableName = "PortfolioCoreTests.xctest"
+               BlueprintName = "PortfolioCoreTests"
                ReferencedContainer = "container:PortfolioMultiplatform.xcodeproj">
             </BuildableReference>
          </TestableReference>

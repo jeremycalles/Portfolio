@@ -9,7 +9,7 @@ struct iOSSettingsView: View {
     @StateObject private var demoMode = DemoModeManager.shared
     @Binding var privacyMode: Bool
     @State private var showingImportPicker = false
-    @State private var showingExportShare = false
+    
     @State private var importMessage: String?
     @State private var showingAlert = false
     @State private var showingBackupAlert = false
@@ -106,9 +106,7 @@ struct iOSSettingsView: View {
                 } label: {
                     Label(L10n.settingsImportDatabase, systemImage: "square.and.arrow.down")
                 }
-                Button {
-                    showingExportShare = true
-                } label: {
+                ShareLink(item: URL(fileURLWithPath: DatabaseService.shared.getDatabasePath())) {
                     Label(L10n.settingsExportDatabase, systemImage: "square.and.arrow.up")
                 }
                 Button {
@@ -289,11 +287,7 @@ struct iOSSettingsView: View {
                 showingAlert = true
             }
         }
-        .sheet(isPresented: $showingExportShare) {
-            if let dbURL = URL(fileURLWithPath: DatabaseService.shared.getDatabasePath()) as URL? {
-                ShareSheet(items: [dbURL])
-            }
-        }
+        
         .alert("Database Import", isPresented: $showingAlert) {
             Button("OK") { }
         } message: {
@@ -502,17 +496,6 @@ struct BackgroundLogsView: View {
             }
         }
     }
-}
-
-// MARK: - Share Sheet
-struct ShareSheet: UIViewControllerRepresentable {
-    let items: [Any]
-    
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: items, applicationActivities: nil)
-    }
-    
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 // MARK: - iOS Change Label

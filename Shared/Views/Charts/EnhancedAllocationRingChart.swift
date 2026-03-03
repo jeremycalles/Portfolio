@@ -1,8 +1,5 @@
 import SwiftUI
 import Charts
-#if os(macOS)
-import AppKit
-#endif
 
 // MARK: - Enhanced Allocation Ring Chart
 struct EnhancedAllocationRingChart: View {
@@ -139,15 +136,7 @@ struct EnhancedAllocationRingChart: View {
             }
         }
         .padding(.vertical, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                #if os(iOS)
-                .fill(Color(.systemBackground))
-                #else
-                .fill(Color(NSColor.windowBackgroundColor))
-                #endif
-                .shadow(color: .black.opacity(0.06), radius: 12, x: 0, y: 4)
-        )
+        .glassEffect(.regular, in: .rect(cornerRadius: 20))
         .padding(.horizontal)
     }
 }

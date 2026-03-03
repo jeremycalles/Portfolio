@@ -175,28 +175,7 @@ struct EnhancedPortfolioHeroCard: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 16)
         .padding(.vertical, 16)
-        .background(
-            ZStack {
-                // Gradient background based on performance
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: gradientColors,
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                
-                // Glass material effect
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(.ultraThinMaterial)
-            }
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Color.primary.opacity(0.06), lineWidth: 1)
-        )
-        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 6)
+        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 24))
         .padding(.horizontal)
     }
 }

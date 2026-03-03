@@ -100,6 +100,9 @@
 		S041 /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F040 /* HapticService.swift */; };
 		S042 /* StorageLogsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F042 /* StorageLogsView.swift */; };
 		S043 /* StorageLogsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F042 /* StorageLogsView.swift */; };
+		TS01 /* ModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF01 /* ModelsTests.swift */; };
+		TS02 /* FormattingHelpersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF02 /* FormattingHelpersTests.swift */; };
+		TS03 /* DateFormattersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF03 /* DateFormattersTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -162,7 +165,29 @@
 		V017 /* RefreshResultBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RefreshResultBanner.swift; path = Shared/Views/Components/RefreshResultBanner.swift; sourceTree = SOURCE_ROOT; };
 		V018 /* IOSLockManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = IOSLockManager.swift; path = iOS/IOSLockManager.swift; sourceTree = SOURCE_ROOT; };
 		XCFG /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
+		TF01 /* ModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ModelsTests.swift; path = Tests/PortfolioCoreTests/ModelsTests.swift; sourceTree = SOURCE_ROOT; };
+		TF02 /* FormattingHelpersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FormattingHelpersTests.swift; path = Tests/PortfolioCoreTests/FormattingHelpersTests.swift; sourceTree = SOURCE_ROOT; };
+		TF03 /* DateFormattersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DateFormattersTests.swift; path = Tests/PortfolioCoreTests/DateFormattersTests.swift; sourceTree = SOURCE_ROOT; };
+		PR03 /* PortfolioCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PortfolioCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXContainerItemProxy section */
+		CIP01 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = PJ01 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = T002;
+			remoteInfo = "Portfolio iOS";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		TD01 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = T002 /* Portfolio iOS */;
+			targetProxy = CIP01 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		FM01 /* Frameworks */ = {
@@ -180,6 +205,13 @@
 			files = (
 				I012 /* SwiftSoup in Frameworks */,
 				I011 /* SQLite in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FM03 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -211,6 +243,7 @@
 				G001 /* Shared */,
 				G002 /* macOS */,
 				G003 /* iOS */,
+				G005 /* Tests */,
 				G004 /* Products */,
 				F0C1E7B92F3002810066E539 /* en.lproj */,
 				F0C1E7BC2F3002810066E539 /* fr.lproj */,
@@ -284,9 +317,21 @@
 			children = (
 				PR01 /* PortfolioMultiplatform.app */,
 				PR02 /* PortfolioMultiplatform.app */,
+				PR03 /* PortfolioCoreTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
+		};
+		G005 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				TF01 /* ModelsTests.swift */,
+				TF02 /* FormattingHelpersTests.swift */,
+				TF03 /* DateFormattersTests.swift */,
+			);
+			name = Tests;
+			path = Tests/PortfolioCoreTests;
+			sourceTree = SOURCE_ROOT;
 		};
 		G010 /* Views */ = {
 			isa = PBXGroup;
@@ -378,6 +423,23 @@
 			productReference = PR02 /* PortfolioMultiplatform.app */;
 			productType = "com.apple.product-type.application";
 		};
+		T003 /* PortfolioCoreTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CL04 /* Build configuration list for PBXNativeTarget "PortfolioCoreTests" */;
+			buildPhases = (
+				SP03 /* Sources */,
+				FM03 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				TD01 /* PBXTargetDependency */,
+			);
+			name = PortfolioCoreTests;
+			productName = PortfolioCoreTests;
+			productReference = PR03 /* PortfolioCoreTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -393,6 +455,10 @@
 					};
 					T002 = {
 						CreatedOnToolsVersion = 15.0;
+					};
+					T003 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = T002;
 					};
 				};
 			};
@@ -417,6 +483,7 @@
 			targets = (
 				T001 /* Portfolio macOS */,
 				T002 /* Portfolio iOS */,
+				T003 /* PortfolioCoreTests */,
 			);
 		};
 /* End PBXProject section */
@@ -539,6 +606,16 @@
 				S037 /* PriceEditorSheet.swift in Sources */,
 				S039 /* DemoModeManager.swift in Sources */,
 				S041 /* HapticService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		SP03 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				TS01 /* ModelsTests.swift in Sources */,
+				TS02 /* FormattingHelpersTests.swift in Sources */,
+				TS03 /* DateFormattersTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -830,6 +907,44 @@
 			};
 			name = Release;
 		};
+		BC07 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PortfolioMultiplatform.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PortfolioMultiplatform";
+			};
+			name = Debug;
+		};
+		BC08 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PortfolioMultiplatform.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PortfolioMultiplatform";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -856,6 +971,15 @@
 			buildConfigurations = (
 				BC01 /* Debug */,
 				BC02 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CL04 /* Build configuration list for PBXNativeTarget "PortfolioCoreTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC07 /* Debug */,
+				BC08 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
