@@ -60,3 +60,6 @@ scripts/resize_ipad_screenshot.sh
 coverage/
 *.gcno
 *.gcda
+
+# Internal docs / plans
+docs/Phase4-XcodeCloud-CI.md
