@@ -75,6 +75,7 @@ Consolidate all your financial assets into one view: track stocks, ETFs, mutual 
 - **Privacy Mode**: Hide sensitive values on screen (eye icon); data stays local
 - **Face ID / Touch ID protection (iOS and macOS)**: Optionally require Face ID, Touch ID, or device password to access the dashboard. On iOS the app also locks when you leave the app; on both platforms it locks after 5 minutes of inactivity. Toggle in Settings.
 - **Bilingual**: Full English and French localization
+- **Demo Mode**: Toggle in Settings to use sample data; optional "Randomize" to regenerate demo portfolio.
 - **Native SwiftUI**: One shared codebase for iOS and macOS; platform-appropriate UI and navigation
 
 ---
@@ -266,6 +267,8 @@ Suggested quadrant categories:
 1. Open **Quadrants**, tap **+**, and enter a name (e.g. "Technology", "Precious Metals").
 2. Assign instruments via the instrument detail: choose a quadrant from the picker.
 
+On iOS you can also add or remove bank accounts and quadrants from the **Settings** tab (swipe to delete).
+
 #### Quadrant Reports
 
 View your portfolio grouped by quadrant:
@@ -314,7 +317,8 @@ Interactive charts for individual instruments:
 
 #### Historical Backfilling
 
-Settings → Backfill Historical Data; choose period (1Y, 2Y, 5Y). Menu commands on macOS also offer 1Y/2Y/5Y backfill.
+- **iOS**: Settings → Data Management offers **Update All Prices**, **Backfill Historical (1 Year)** (monthly data), and **Backfill 1 Month (Daily)**.
+- **macOS**: Settings → General offers the same, plus a Backfill menu with 1Y, 2Y, 5Y (monthly) and 1 Month (daily).
 
 #### Manual Price Entry
 
@@ -328,7 +332,7 @@ For instruments without automatic data sources:
 
 ### Settings & Preferences
 
-- **iOS**: Open the **Settings** tab in the tab bar.
+- **iOS**: Open the **Settings** tab in the tab bar. Settings includes a **Statistics** section (counts of instruments, holdings, quadrants, accounts).
 - **macOS**: Use the application menu **PortfolioMultiplatform** → **Settings** (or press ⌘,). All preferences (General, Language, Database, Background Refresh) are in this window; there is no Settings item in the main window sidebar.
 
 #### Face ID / Touch ID Protection (iOS and macOS)
@@ -344,9 +348,14 @@ Switch between English and French:
 
 The app updates immediately without restart.
 
+#### Demo Mode
+
+Enable in **Settings** (Display on iOS, General on macOS) to use sample data. When enabled, use **Randomize** to regenerate the demo portfolio.
+
 #### Database & Backup
 
 - The database is stored **locally** only (no option to store it in iCloud). You can use **Backup to iCloud now** in Settings to copy the database file to your iCloud container; the app never opens the database from iCloud.
+- **Storage Logs**: Use **Storage Logs** in the Database section to view database/storage logs (iOS and macOS).
 - **iOS**: Database path is shown in Settings; use Import/Export to transfer between devices.
 - **macOS**: You can open the database folder from Settings (Database → Open in Finder).
 
@@ -367,7 +376,7 @@ Logs are written to `~/Library/Logs/PortfolioApp/refresh.log` and can be viewed 
 
 #### Background Tasks (iOS)
 
-iOS automatically refreshes prices in the background when the system allows. View refresh logs in Settings to monitor update status.
+iOS automatically refreshes prices in the background when the system allows. Long-press the **Background Updates** row in Settings to open **Background Refresh Logs** and monitor update status.
 
 ---
 
@@ -431,7 +440,7 @@ The Launch Agent runs `/usr/bin/open -g portfolio://refresh` at the configured i
 iOS uses the system's Background Tasks framework:
 - Minimum 3-hour interval between updates
 - System determines actual timing based on usage patterns
-- View refresh history in Settings
+- Long-press the Background Updates row in Settings to view refresh logs
 
 ---
 
@@ -479,7 +488,13 @@ PortfolioMultiplatform/
 │       ├── AccountsView.swift
 │       ├── InstrumentsView.swift
 │       └── MacOSSettingsViews.swift
-├── PortfolioTests/
+├── Tests/                         # Tests (PortfolioCoreTests)
+│   └── PortfolioCoreTests/
+│       ├── ModelsTests.swift
+│       ├── FormattingHelpersTests.swift
+│       └── DateFormattersTests.swift
+├── Packages/                      # Swift packages
+│   └── PortfolioCore/
 ├── PortfolioMultiplatform.xcodeproj/
 ├── assets/screenshots/
 └── README.md
@@ -517,11 +532,9 @@ xcodebuild test \
 
 | File | Purpose |
 |------|---------|
-| `PortfolioTests.swift` | Basic test setup |
-| `CurrencyConversionTests.swift` | Currency conversion logic |
-| `DashboardSnapshotTests.swift` | UI snapshot tests |
-| `TestFixtures.swift` | Test data fixtures |
-| `MockDatabaseService.swift` | Mock services |
+| `Tests/PortfolioCoreTests/ModelsTests.swift` | Models tests |
+| `Tests/PortfolioCoreTests/FormattingHelpersTests.swift` | Formatting helpers |
+| `Tests/PortfolioCoreTests/DateFormattersTests.swift` | Date formatters |
 
 ---
 

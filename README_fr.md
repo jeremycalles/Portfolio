@@ -75,6 +75,7 @@ Consolidez tous vos actifs dans une seule vue : suivez actions, ETF, OPCVM, or, 
 - **Mode Privé** : Masquez les valeurs sensibles (icône œil) ; les données restent locales
 - **Protection Face ID / Touch ID (iOS et macOS)** : Exiger optionnellement Face ID, Touch ID ou mot de passe de l’appareil pour accéder au tableau de bord. Sur iOS l’app se verrouille aussi à la sortie ; sur les deux plateformes après 5 minutes d’inactivité. Réglage dans Paramètres.
 - **Bilingue** : Localisation complète en anglais et français
+- **Mode démo** : Activez dans Paramètres pour utiliser des données d’exemple ; option « Randomiser » pour régénérer le portefeuille démo.
 - **SwiftUI natif** : Un code partagé pour iOS et macOS ; interface et navigation adaptées à chaque plateforme
 
 ---
@@ -266,6 +267,8 @@ Catégories de quadrants suggérées :
 1. Ouvrez **Quadrants**, **+**, et saisissez un nom (ex. « Technologie », « Métaux précieux »).
 2. Assignez les instruments depuis la fiche instrument : choisissez un quadrant dans le sélecteur.
 
+Sur iOS vous pouvez aussi ajouter ou supprimer des comptes bancaires et des quadrants depuis l’onglet **Paramètres** (glisser pour supprimer).
+
 #### Rapports par Quadrant
 
 Voyez votre portefeuille groupé par quadrant :
@@ -314,7 +317,8 @@ Graphiques interactifs pour les instruments individuels :
 
 #### Récupération d’historique
 
-Paramètres → Récupérer l’historique ; choisir la période (1A, 2A, 5A). Sur macOS, les commandes de menu proposent aussi 1A/2A/5A.
+- **iOS** : Paramètres → Gestion des données propose **Mettre à jour tous les prix**, **Récupérer l’historique (1 an)** (données mensuelles) et **Récupérer 1 mois (quotidien)**.
+- **macOS** : Paramètres → Général propose les mêmes options, plus un menu Récupération avec 1 an, 2 ans, 5 ans (mensuel) et 1 mois (quotidien).
 
 #### Saisie Manuelle de Prix
 
@@ -328,7 +332,7 @@ Pour les instruments sans sources de données automatiques :
 
 ### Paramètres & Préférences
 
-- **iOS** : Ouvrez l’onglet **Paramètres** dans la barre d’onglets.
+- **iOS** : Ouvrez l’onglet **Paramètres** dans la barre d’onglets. Les Paramètres incluent une section **Statistiques** (nombre d’instruments, positions, quadrants, comptes).
 - **macOS** : Utilisez le menu de l’application **PortfolioMultiplatform** → **Paramètres** (ou ⌘,). Toutes les préférences (Général, Langue, Base de données, Arrière-plan) se trouvent dans cette fenêtre ; il n’y a pas d’entrée Paramètres dans la barre latérale de la fenêtre principale.
 
 #### Protection Face ID / Touch ID (iOS et macOS)
@@ -344,9 +348,14 @@ Basculez entre Anglais et Français :
 
 L'application se met à jour immédiatement sans redémarrage.
 
+#### Mode démo
+
+Activez dans **Paramètres** (Affichage sur iOS, Général sur macOS) pour utiliser des données d’exemple. Quand il est activé, utilisez **Randomiser** pour régénérer le portefeuille démo.
+
 #### Base de données et sauvegarde
 
 - La base est stockée **uniquement en local** (pas d’option de stockage dans iCloud). Vous pouvez utiliser **Sauvegarder dans iCloud maintenant** dans Paramètres pour copier le fichier de base vers votre conteneur iCloud ; l’app n’ouvre jamais la base depuis iCloud.
+- **Journaux de stockage** : Utilisez **Journaux de stockage** dans la section Base de données pour consulter les journaux de la base (iOS et macOS).
 - **iOS** : Le chemin de la base est affiché dans Paramètres ; utilisez Importer/Exporter pour transférer entre appareils.
 - **macOS** : Vous pouvez ouvrir le dossier de la base depuis Paramètres (Base de données → Ouvrir dans le Finder).
 
@@ -367,7 +376,7 @@ Les logs sont écrits dans `~/Library/Logs/PortfolioApp/refresh.log` et peuvent 
 
 #### Tâches en Arrière-plan (iOS)
 
-iOS actualise automatiquement les prix en arrière-plan quand le système le permet. Voir l'historique d'actualisation dans les Paramètres pour surveiller le statut des mises à jour.
+iOS actualise automatiquement les prix en arrière-plan quand le système le permet. Maintenez appuyée la ligne **Mises à jour en arrière-plan** dans Paramètres pour ouvrir les **Journaux d’actualisation** et suivre le statut des mises à jour.
 
 ---
 
@@ -431,7 +440,7 @@ L'Agent de Lancement exécute `/usr/bin/open -g portfolio://refresh` à l'interv
 iOS utilise le framework Background Tasks du système :
 - Intervalle minimum de 3 heures entre les mises à jour
 - Le système détermine le moment réel basé sur les habitudes d'utilisation
-- Voir l'historique d'actualisation dans les Paramètres
+- Maintenir appuyée la ligne Mises à jour en arrière-plan dans Paramètres pour voir les journaux d'actualisation
 
 ---
 
@@ -479,7 +488,13 @@ PortfolioMultiplatform/
 │       ├── AccountsView.swift
 │       ├── InstrumentsView.swift
 │       └── MacOSSettingsViews.swift
-├── PortfolioTests/
+├── Tests/                         # Tests (PortfolioCoreTests)
+│   └── PortfolioCoreTests/
+│       ├── ModelsTests.swift
+│       ├── FormattingHelpersTests.swift
+│       └── DateFormattersTests.swift
+├── Packages/                      # Packages Swift
+│   └── PortfolioCore/
 ├── PortfolioMultiplatform.xcodeproj/
 ├── assets/screenshots/
 └── README.md
@@ -517,11 +532,9 @@ xcodebuild test \
 
 | Fichier | Objectif |
 |------|---------|
-| `PortfolioTests.swift` | Configuration de test basique |
-| `CurrencyConversionTests.swift` | Logique de conversion de devises |
-| `DashboardSnapshotTests.swift` | Tests snapshot UI |
-| `TestFixtures.swift` | Données de test |
-| `MockDatabaseService.swift` | Services simulés (mock) |
+| `Tests/PortfolioCoreTests/ModelsTests.swift` | Tests des modèles |
+| `Tests/PortfolioCoreTests/FormattingHelpersTests.swift` | Helpers de formatage |
+| `Tests/PortfolioCoreTests/DateFormattersTests.swift` | Formateurs de date |
 
 ---
 
