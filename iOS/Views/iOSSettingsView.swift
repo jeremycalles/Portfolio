@@ -58,7 +58,9 @@ struct iOSSettingsView: View {
                         } label: {
                             Label(L10n.settingsDemoModeRandomize, systemImage: "arrow.clockwise")
                                 .font(.caption)
+                                .contentShape(Rectangle())
                         }
+                        .buttonStyle(.plain)
                     }
                 }
             } header: {
@@ -98,14 +100,18 @@ struct iOSSettingsView: View {
                         }
                     } label: {
                         Label(L10n.settingsBackupToICloudNow, systemImage: "icloud.and.arrow.up")
+                            .contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
                     .disabled(isBackingUp)
                 }
                 Button {
                     showingImportPicker = true
                 } label: {
                     Label(L10n.settingsImportDatabase, systemImage: "square.and.arrow.down")
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
                 ShareLink(item: URL(fileURLWithPath: DatabaseService.shared.getDatabasePath())) {
                     Label(L10n.settingsExportDatabase, systemImage: "square.and.arrow.up")
                 }
@@ -113,7 +119,9 @@ struct iOSSettingsView: View {
                     showingStorageLogs = true
                 } label: {
                     Label(L10n.settingsStorageLogs, systemImage: "doc.text.magnifyingglass")
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
                 LabeledContent("Path") {
                     Text(DatabaseService.shared.getDatabasePath().components(separatedBy: "/").suffix(2).joined(separator: "/"))
                         .font(.caption)
@@ -138,7 +146,9 @@ struct iOSSettingsView: View {
                             ProgressView()
                         }
                     }
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
                 .disabled(viewModel.isLoading)
                 
                 Button {
@@ -147,7 +157,9 @@ struct iOSSettingsView: View {
                     }
                 } label: {
                     Label(L10n.actionBackfillHistorical1Year, systemImage: "clock.arrow.circlepath")
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
                 .disabled(viewModel.isLoading)
                 
                 Button {
@@ -156,7 +168,9 @@ struct iOSSettingsView: View {
                     }
                 } label: {
                     Label("Backfill 1 Month (Daily)", systemImage: "clock.arrow.circlepath")
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
                 .disabled(viewModel.isLoading)
             }
             
@@ -216,7 +230,9 @@ struct iOSSettingsView: View {
                     showingAddAccountSheet = true
                 } label: {
                     Label("Add Account", systemImage: "plus.circle")
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
             } header: {
                 Text(L10n.navBankAccounts)
             } footer: {
@@ -246,7 +262,9 @@ struct iOSSettingsView: View {
                     showingAddQuadrantSheet = true
                 } label: {
                     Label("Add Quadrant", systemImage: "plus.circle")
+                        .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
             } header: {
                 Text(L10n.navQuadrants)
             } footer: {
