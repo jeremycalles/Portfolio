@@ -17,7 +17,10 @@ class AppViewModel: ObservableObject {
     @Published var selectedPeriod: ReportPeriod = .oneWeek {
         didSet {
             if oldValue != selectedPeriod {
-                recomputeDashboardCache()
+                // Defer to avoid "Publishing changes from within view updates" when Picker writes during body
+                DispatchQueue.main.async { [weak self] in
+                    self?.recomputeDashboardCache()
+                }
             }
         }
     }

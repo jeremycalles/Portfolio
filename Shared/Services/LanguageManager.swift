@@ -175,6 +175,7 @@ struct L10n {
     static var accountsOtherAccounts: String { manager.localized("accounts.otherAccounts") }
     static var accountsNoBankAccounts: String { manager.localized("accounts.noBankAccounts") }
     static var accountsAddBankAccountFirst: String { manager.localized("accounts.addBankAccountFirst") }
+    static var accountsAddInstrumentFirst: String { manager.localized("accounts.addInstrumentFirst") }
     static var accountsSelectAccount: String { manager.localized("accounts.selectAccount") }
     static var accountsSelectAnAccount: String { manager.localized("accounts.selectAnAccount") }
     static var accountsNoHoldingsInAccount: String { manager.localized("accounts.noHoldingsInAccount") }

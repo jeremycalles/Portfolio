@@ -18,6 +18,26 @@ struct iOSAllHoldingsView: View {
                 }
             }
             
+            // Hint when Add is disabled (no instruments or no bank accounts)
+            if viewModel.instruments.isEmpty || viewModel.bankAccounts.isEmpty {
+                Section {
+                    VStack(alignment: .leading, spacing: 8) {
+                        if viewModel.instruments.isEmpty {
+                            Text(L10n.accountsAddInstrumentFirst)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        if viewModel.bankAccounts.isEmpty {
+                            Text(L10n.accountsAddBankAccountFirst)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 8)
+                }
+            }
+            
             // Holdings grouped by account
             ForEach(viewModel.bankAccounts) { account in
                 let details = viewModel.getHoldingDetails(forAccount: account.id)

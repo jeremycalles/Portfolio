@@ -115,6 +115,7 @@
 "accounts.otherAccounts" = "Autres comptes";
 "accounts.noBankAccounts" = "Aucun compte bancaire configuré";
 "accounts.addBankAccountFirst" = "Ajoutez un compte bancaire pour commencer à suivre vos positions";
+"accounts.addInstrumentFirst" = "Ajoutez d'abord un instrument pour ajouter des positions.";
 "accounts.selectAccount" = "Sélectionner un compte";
 "accounts.selectAnAccount" = "Sélectionnez un compte";
 "accounts.holdingsCount" = "%d positions";

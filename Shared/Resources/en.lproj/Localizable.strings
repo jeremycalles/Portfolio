@@ -115,6 +115,7 @@
 "accounts.otherAccounts" = "Other Accounts";
 "accounts.noBankAccounts" = "No bank accounts configured";
 "accounts.addBankAccountFirst" = "Add a bank account first to start tracking holdings";
+"accounts.addInstrumentFirst" = "Add an Instrument first to add holdings.";
 "accounts.selectAccount" = "Select Account";
 "accounts.selectAnAccount" = "Select an account";
 "accounts.holdingsCount" = "%d holdings";
