@@ -19,16 +19,25 @@ struct iOSSettingsView: View {
     @State private var showingStorageLogs = false
     @State private var showingAddAccountSheet = false
     @State private var showingAddQuadrantSheet = false
+    @State private var showingLanguagePicker = false
     var body: some View {
         List {
             Section {
-                Picker(selection: $languageManager.currentLanguage) {
-                    ForEach(AppLanguage.allCases) { language in
-                        Text(language.displayName).tag(language)
-                    }
+                Button {
+                    showingLanguagePicker = true
                 } label: {
-                    Label(L10n.settingsLanguage, systemImage: "globe")
+                    HStack {
+                        Label(L10n.settingsLanguage, systemImage: "globe")
+                        Spacer()
+                        Text(languageManager.currentLanguage.displayName)
+                            .foregroundColor(.secondary)
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
             } header: {
                 Text(L10n.settingsLanguage)
             } footer: {
@@ -328,6 +337,14 @@ struct iOSSettingsView: View {
         .sheet(isPresented: $showingAddQuadrantSheet) {
             AddQuadrantSheet()
         }
+        .sheet(isPresented: $showingLanguagePicker) {
+            LanguagePickerSheet(
+                selectedLanguage: Binding(
+                    get: { languageManager.currentLanguage },
+                    set: { languageManager.currentLanguage = $0 }
+                )
+            )
+        }
     }
     
     private func importDatabase(from url: URL) {
@@ -361,6 +378,45 @@ struct iOSSettingsView: View {
             DatabaseService.shared.reconnectToDatabase()
             importMessage = "Import failed: \(error.localizedDescription)"
             showingAlert = true
+        }
+    }
+}
+
+// MARK: - Language Picker Sheet
+struct LanguagePickerSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var selectedLanguage: AppLanguage
+    
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(AppLanguage.allCases) { language in
+                    Button {
+                        selectedLanguage = language
+                        dismiss()
+                    } label: {
+                        HStack {
+                            Text(language.displayName)
+                            Spacer()
+                            if language == selectedLanguage {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.accentColor)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .navigationTitle(L10n.settingsLanguage)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 }
