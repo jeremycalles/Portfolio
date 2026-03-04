@@ -175,7 +175,7 @@ struct EnhancedPortfolioHeroCard: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 16)
         .padding(.vertical, 16)
-        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 24))
+        .modifier(GlassEffectFallback(cornerRadius: 24, interactive: true))
         .padding(.horizontal)
     }
 }

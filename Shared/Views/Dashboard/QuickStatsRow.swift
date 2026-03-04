@@ -118,6 +118,6 @@ struct QuickStatCard: View {
         }
         .frame(width: 140)
         .padding(12)
-        .glassEffect(.regular, in: .rect(cornerRadius: 16))
+        .modifier(GlassEffectFallback(cornerRadius: 16, interactive: false))
     }
 }

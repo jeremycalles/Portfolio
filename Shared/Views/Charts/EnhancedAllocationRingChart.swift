@@ -136,7 +136,7 @@ struct EnhancedAllocationRingChart: View {
             }
         }
         .padding(.vertical, 16)
-        .glassEffect(.regular, in: .rect(cornerRadius: 20))
+        .modifier(GlassEffectFallback(cornerRadius: 20, interactive: false))
         .padding(.horizontal)
     }
 }

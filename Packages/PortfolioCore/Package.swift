@@ -5,7 +5,7 @@ let package = Package(
     name: "PortfolioCore",
     platforms: [
         .iOS(.v26),
-        .macOS(.v26)
+        .macOS(.v15)
     ],
     products: [
         .library(name: "PortfolioCore", targets: ["PortfolioCore"])

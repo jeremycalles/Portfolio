@@ -128,6 +128,32 @@ struct EnhancedTrendCard: View {
             }
         }
         .padding(16)
-        .glassEffect(.regular, in: .rect(cornerRadius: 16))
+        .modifier(GlassEffectFallback(cornerRadius: 16, interactive: false))
+    }
+}
+
+// MARK: - Glass effect with fallback for macOS < 26 (e.g. Sequoia)
+struct GlassEffectFallback: ViewModifier {
+    var cornerRadius: CGFloat
+    var interactive: Bool
+
+    func body(content: Content) -> some View {
+        #if os(macOS)
+        if #available(macOS 26.0, *) {
+            if interactive {
+                content.glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
+            } else {
+                content.glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+            }
+        } else {
+            content
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        }
+        #else
+        content
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        #endif
     }
 }
