@@ -1,6 +1,6 @@
-// Local Development Configuration
-// Copy this file to Local.xcconfig and set your Team ID
-// Local.xcconfig is gitignored - your Team ID stays local
+// Local Development Configuration (optional override)
+// Copy this file to Local.xcconfig to override DEVELOPMENT_TEAM locally.
+// Local.xcconfig is gitignored. The project uses Default.xcconfig for CI and default team.
 
 // Your Apple Developer Team ID
 // Find it at: https://developer.apple.com/account → Membership → Team ID

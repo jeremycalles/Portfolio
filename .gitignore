@@ -22,6 +22,7 @@ build/ExportOptions.plist
 Configuration.xcconfig
 *.xcconfig
 !*.xcconfig.example
+!Default.xcconfig
 .env
 .env.*
 !.env.example

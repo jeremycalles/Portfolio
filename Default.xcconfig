@@ -1,0 +1,5 @@
+// Base configuration (committed). Used by Xcode Cloud and local builds.
+// DEVELOPMENT_TEAM is resolved from (in priority order):
+//   1. Xcode Cloud command-line override (CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=...)
+//   2. Local.xcconfig (gitignored, for local dev)
+//   3. project.pbxproj build settings
