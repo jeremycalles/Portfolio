@@ -11,7 +11,7 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Increment build number"
-               scriptText = "cd &quot;${PROJECT_DIR}&quot; &amp;&amp; agvtool next-version -all || true">
+               scriptText = "if [ -z &quot;$CI_XCODEBUILD_ACTION&quot; ]; then&#10;cd &quot;${PROJECT_DIR}&quot; &amp;&amp; agvtool next-version -all || true&#10;fi">
             </ActionContent>
          </ExecutionAction>
       </PreActions>
