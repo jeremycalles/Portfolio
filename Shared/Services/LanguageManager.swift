@@ -97,7 +97,6 @@ struct L10n {
     static var generalOverview: String { manager.localized("general.overview") }
     static var generalManage: String { manager.localized("general.manage") }
     static var generalData: String { manager.localized("general.data") }
-    static var generalTotal: String { manager.localized("general.total") }
     static var generalSubtotal: String { manager.localized("general.subtotal") }
     static var generalGrandTotal: String { manager.localized("general.grandTotal") }
     static var generalPerformance: String { manager.localized("general.performance") }
@@ -205,15 +204,11 @@ struct L10n {
     static var holdingsChange: String { manager.localized("holdings.change") }
     static var holdingsQty: String { manager.localized("holdings.qty") }
     static var holdingsNoHoldings: String { manager.localized("holdings.noHoldings") }
-    static var holdingsNoChartData: String { manager.localized("holdings.noChartData") }
     
     // Quadrants
     static var quadrantsAddQuadrant: String { manager.localized("quadrants.addQuadrant") }
     static var quadrantsQuadrantDetails: String { manager.localized("quadrants.quadrantDetails") }
-    static var quadrantsQuadrantDetailsHint: String { manager.localized("quadrants.quadrantDetailsHint") }
     static var quadrantsQuadrantAssignment: String { manager.localized("quadrants.quadrantAssignment") }
-    static var quadrantsQuadrantAssignmentHint: String { manager.localized("quadrants.quadrantAssignmentHint") }
-    static var quadrantsCategorizeHint: String { manager.localized("quadrants.categorizeHint") }
     static func quadrantsCount(_ count: Int) -> String {
         String(format: manager.localized("quadrants.quadrantsCount"), count)
     }
@@ -285,9 +280,6 @@ struct L10n {
     static var settingsOpenLogsFolder: String { manager.localized("settings.openLogsFolder") }
     static var settingsNoLogsAvailable: String { manager.localized("settings.noLogsAvailable") }
     static var settingsLogsDescription: String { manager.localized("settings.logsDescription") }
-    static var settingsBackgroundRefreshLogs: String { manager.localized("settings.backgroundRefreshLogs") }
-    static var settingsAccountDetails: String { manager.localized("settings.accountDetails") }
-    static var settingsAccountDetailsHint: String { manager.localized("settings.accountDetailsHint") }
     static var settingsUpdatePricesDescription: String { manager.localized("settings.updatePricesDescription") }
     static var settingsStorageLogs: String { manager.localized("settings.storageLogs") }
     static var settingsStorageLogsDescription: String { manager.localized("settings.storageLogsDescription") }
@@ -317,12 +309,9 @@ struct L10n {
     static var chartMsciWorldComparison: String { manager.localized("chart.msciWorldComparison") }
     // Privacy
     static var privacyHidden: String { manager.localized("privacy.hidden") }
-    static var privacyHiddenLong: String { manager.localized("privacy.hiddenLong") }
-    static var privacyHiddenStars: String { manager.localized("privacy.hiddenStars") }
     
     // Tooltips
     static var tooltipUpdateAllPrices: String { manager.localized("tooltip.updateAllPrices") }
-    static var tooltipBackfillHistoricalData: String { manager.localized("tooltip.backfillHistoricalData") }
     static var tooltipAddPrice: String { manager.localized("tooltip.addPrice") }
     static var tooltipEdit: String { manager.localized("tooltip.edit") }
     static var tooltipDelete: String { manager.localized("tooltip.delete") }

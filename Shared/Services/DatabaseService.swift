@@ -521,7 +521,7 @@ class DatabaseService: ObservableObject {
         return fetchAll(query: prices.filter(priceIsin == instrumentIsin).order(date.desc), mapper: priceFromRow)
     }
     
-    func getPriceOnOrBefore(forIsin instrumentIsin: String, date targetDate: String, windowDays: Int = 30) -> Price? {
+    func getPriceOnOrBefore(forIsin instrumentIsin: String, date targetDate: String) -> Price? {
         guard let db = db else { return nil }
         
         do {
@@ -763,7 +763,7 @@ class DatabaseService: ObservableObject {
     func getLastInstrumentUpdateDate() -> String? { nil }
     func getPrice(forIsin instrumentIsin: String, date targetDate: String) -> Price? { nil }
     func getPriceHistory(forIsin instrumentIsin: String) -> [Price] { [] }
-    func getPriceOnOrBefore(forIsin instrumentIsin: String, date targetDate: String, windowDays: Int = 30) -> Price? { nil }
+    func getPriceOnOrBefore(forIsin instrumentIsin: String, date targetDate: String) -> Price? { nil }
     func getPriceBefore(forIsin instrumentIsin: String, date targetDate: String) -> Price? { nil }
     
     func addExchangeRate(_ exchangeRate: ExchangeRate) {}

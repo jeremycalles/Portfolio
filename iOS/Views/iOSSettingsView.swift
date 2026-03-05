@@ -571,6 +571,3 @@ struct BackgroundLogsView: View {
         }
     }
 }
-
-// MARK: - iOS Change Label
-// iOSChangeLabel consolidated into shared ChangeLabel

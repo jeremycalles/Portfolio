@@ -175,16 +175,6 @@ struct QuadrantReportItem: Identifiable {
         return totals
     }
     
-    var totalPreviousValue: [String: Double] {
-        var totals: [String: Double] = [:]
-        for holding in holdings {
-            if let price = holding.previousPrice, let currency = holding.instrumentCurrency {
-                totals[currency, default: 0] += holding.quantity * price
-            }
-        }
-        return totals
-    }
-    
     // EUR totals (all values converted to EUR)
     var totalValueEUR: Double {
         holdings.compactMap { $0.currentValueEUR }.reduce(0, +)

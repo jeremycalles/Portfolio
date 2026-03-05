@@ -5,7 +5,6 @@ import AppKit
 // MARK: - macOS Lock Gate View
 struct MacOSLockGateView: View {
     @EnvironmentObject var viewModel: AppViewModel
-    @EnvironmentObject var languageManager: LanguageManager
     @EnvironmentObject var lockManager: MacOSLockManager
     
     var body: some View {

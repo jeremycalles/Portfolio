@@ -8,6 +8,7 @@
 xcuserdata/
 *.xcuserstate
 DerivedData/
+build/
 
 # Database (privacy; do not commit user data)
 data/*.db

@@ -148,24 +148,6 @@ extension AppViewModel {
         return items
     }
     
-    // Legacy: returns totals grouped by currency
-    func getGrandTotals() -> (current: [String: Double], previous: [String: Double]) {
-        let report = getQuadrantReport()
-        var currentTotals: [String: Double] = [:]
-        var previousTotals: [String: Double] = [:]
-        
-        for item in report {
-            for (currency, value) in item.totalValue {
-                currentTotals[currency, default: 0] += value
-            }
-            for (currency, value) in item.totalPreviousValue {
-                previousTotals[currency, default: 0] += value
-            }
-        }
-        
-        return (currentTotals, previousTotals)
-    }
-    
     /// Returns grand totals in EUR (all currencies converted)
     func getGrandTotalsEUR() -> (current: Double, previous: Double) {
         let report = getQuadrantReport()

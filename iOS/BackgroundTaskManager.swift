@@ -59,17 +59,6 @@ class BackgroundTaskManager: ObservableObject {
         }
     }
     
-    func getLogsText() -> String {
-        if lastRefreshLogs.isEmpty {
-            return "No background refresh logs available yet.\n\nLogs will appear here after the first background refresh occurs."
-        }
-        
-        return lastRefreshLogs.map { entry in
-            let prefix = entry.isError ? "❌" : "✓"
-            return "\(prefix) [\(AppDateFormatter.yearMonthDayTime.string(from: entry.timestamp))] \(entry.message)"
-        }.joined(separator: "\n")
-    }
-    
     // MARK: - Task Registration
     
     /// Call this in application didFinishLaunching
@@ -99,12 +88,6 @@ class BackgroundTaskManager: ObservableObject {
         } catch {
             print("[BackgroundTask] Failed to schedule refresh: \(error.localizedDescription)")
         }
-    }
-    
-    /// Cancel any pending background refresh tasks
-    func cancelPendingRefresh() {
-        BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: Self.refreshTaskIdentifier)
-        print("[BackgroundTask] Cancelled pending refresh tasks")
     }
     
     // MARK: - Task Handling
@@ -219,17 +202,6 @@ class BackgroundTaskManager: ObservableObject {
         log("Refresh complete: \(successCount) success, \(failureCount) failed")
         
         return failureCount == 0
-    }
-    
-    // MARK: - Manual Refresh (for testing)
-    
-    @MainActor
-    func performManualRefresh() async {
-        clearLogs()
-        log("Starting manual refresh")
-        let success = await performPriceRefresh()
-        log("Manual refresh completed with success: \(success)")
-        saveLogs()
     }
 }
 

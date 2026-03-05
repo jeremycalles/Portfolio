@@ -3,7 +3,6 @@ import SwiftUI
 // MARK: - Main Content View
 struct ContentView: View {
     @EnvironmentObject var viewModel: AppViewModel
-    @EnvironmentObject var languageManager: LanguageManager
     @State private var selectedTab = 0
     @State private var showAutoRefreshPrompt = false
     
