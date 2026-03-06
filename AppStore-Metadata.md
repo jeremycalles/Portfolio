@@ -40,7 +40,7 @@ FEATURES
 • Privacy mode — Hide sensitive values on screen; Face ID / Touch ID / device lock optional
 • Bilingual — Full English and French
 
-Your data never leaves your device except for optional iCloud sync and public market data requests (tickers, NAVs). No analytics, no ads.
+Your data never leaves your device except public market data requests (tickers, NAVs). No analytics, no ads.
 ```
 
 **Character count: ~1,450** (under 4,000; extend with testimonials or more detail if needed)
