@@ -8,7 +8,7 @@ Use this copy in App Store Connect for **Promotional Text**, **Description**, an
 **Limit: 170 characters** • Shown at the top of your listing • Can be updated anytime without a new version.
 
 ```
-Privacy-first portfolio tracker. Stocks, ETFs, funds, gold, crypto, bank accounts—all in one view. Your data stays on your device. Optional iCloud sync. iOS & macOS.
+Privacy-first portfolio tracker. Stocks, ETFs, funds, gold, crypto, bank accounts—all in one view. Your data stays on your device. iOS & macOS.
 ```
 **Character count: 119**
 
@@ -18,7 +18,7 @@ Privacy-first portfolio tracker. Stocks, ETFs, funds, gold, crypto, bank account
 **Limit: 4,000 characters** • First ~255 characters appear in search results—make them count.
 
 ```
-PortfolioMultiplatform is a privacy-focused tracker for stocks, ETFs, mutual funds, precious metals, cryptocurrencies, and bank accounts. All data stays on your device. No account linking, no backend—optional iCloud sync uses your own Apple ID. Native apps for iOS and macOS from one codebase.
+PortfolioMultiplatform is a privacy-focused tracker for stocks, ETFs, mutual funds, precious metals, cryptocurrencies, and bank accounts. All data stays on your device. No account linking, no backend. Native apps for iOS and macOS from one codebase.
 
 WHAT YOU CAN TRACK
 
