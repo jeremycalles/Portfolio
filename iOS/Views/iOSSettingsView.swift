@@ -35,6 +35,7 @@ struct iOSSettingsView: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -65,9 +66,12 @@ struct iOSSettingsView: View {
                             demoMode.regenerateSeed()
                             viewModel.refreshAll()
                         } label: {
-                            Label(L10n.settingsDemoModeRandomize, systemImage: "arrow.clockwise")
-                                .font(.caption)
-                                .contentShape(Rectangle())
+                            HStack {
+                                Label(L10n.settingsDemoModeRandomize, systemImage: "arrow.clockwise")
+                                    .font(.caption)
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                     }
@@ -109,6 +113,7 @@ struct iOSSettingsView: View {
                         }
                     } label: {
                         Label(L10n.settingsBackupToICloudNow, systemImage: "icloud.and.arrow.up")
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
@@ -118,16 +123,20 @@ struct iOSSettingsView: View {
                     showingImportPicker = true
                 } label: {
                     Label(L10n.settingsImportDatabase, systemImage: "square.and.arrow.down")
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 ShareLink(item: URL(fileURLWithPath: DatabaseService.shared.getDatabasePath())) {
                     Label(L10n.settingsExportDatabase, systemImage: "square.and.arrow.up")
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .contentShape(Rectangle())
                 }
                 Button {
                     showingStorageLogs = true
                 } label: {
                     Label(L10n.settingsStorageLogs, systemImage: "doc.text.magnifyingglass")
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -155,6 +164,7 @@ struct iOSSettingsView: View {
                             ProgressView()
                         }
                     }
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -166,6 +176,7 @@ struct iOSSettingsView: View {
                     }
                 } label: {
                     Label(L10n.actionBackfillHistorical1Year, systemImage: "clock.arrow.circlepath")
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -177,6 +188,7 @@ struct iOSSettingsView: View {
                     }
                 } label: {
                     Label("Backfill 1 Month (Daily)", systemImage: "clock.arrow.circlepath")
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -191,6 +203,7 @@ struct iOSSettingsView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                 .contentShape(Rectangle())
                 .onLongPressGesture {
                     showingBackgroundLogs = true
@@ -239,6 +252,7 @@ struct iOSSettingsView: View {
                     showingAddAccountSheet = true
                 } label: {
                     Label("Add Account", systemImage: "plus.circle")
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -271,6 +285,7 @@ struct iOSSettingsView: View {
                     showingAddQuadrantSheet = true
                 } label: {
                     Label("Add Quadrant", systemImage: "plus.circle")
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -288,7 +303,7 @@ struct iOSSettingsView: View {
             }
             
             Section("About") {
-                LabeledContent("Version", value: "1.0.0")
+                LabeledContent("Version", value: Bundle.appShortVersion)
                 HStack {
                     Text(L10n.appName)
                     Spacer()
@@ -403,6 +418,7 @@ struct LanguagePickerSheet: View {
                                     .foregroundColor(.accentColor)
                             }
                         }
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)

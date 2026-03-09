@@ -167,7 +167,7 @@ struct GeneralSettingsView: View {
                     HStack {
                         Text(L10n.settingsVersion)
                         Spacer()
-                        Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
+                        Text(Bundle.appShortVersion)
                             .foregroundColor(.secondary)
                     }
                     .padding(.vertical, 2)
@@ -176,7 +176,7 @@ struct GeneralSettingsView: View {
                         Text(L10n.generalBuild)
                             .foregroundColor(.secondary)
                         Spacer()
-                        Text(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1")
+                        Text(Bundle.appBuildNumber)
                     }
                     .padding(.vertical, 2)
                 } header: {
