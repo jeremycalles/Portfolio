@@ -4,12 +4,12 @@ extension AppViewModel {
     // MARK: - Price Index Helpers
     
     /// Builds an ascending-sorted price index for each ISIN, loading all data from DB once.
-    private func buildPriceIndex(for isins: [String]) -> [String: [(date: String, value: Double)]] {
+    private func buildPriceIndex(for isins: [String]) async -> [String: [(date: String, value: Double)]] {
         var index: [String: [(date: String, value: Double)]] = [:]
         index.reserveCapacity(isins.count)
         for isin in isins {
-            let history = db.getPriceHistory(forIsin: isin) // sorted desc
-            index[isin] = history.map { ($0.date, $0.value) }.reversed() // ascending
+            let history = await db.getPriceHistory(forIsin: isin)
+            index[isin] = history.map { ($0.date, $0.value) }.reversed()
         }
         return index
     }
@@ -53,25 +53,23 @@ extension AppViewModel {
     }
     
     // MARK: - Portfolio History
-    func getPortfolioValueHistory() -> [(date: Date, value: Double)] {
+    func getPortfolioValueHistory() async -> [(date: Date, value: Double)] {
         clearRateCache()
         let cutoffDate = selectedPeriod.comparisonDate
         let cutoffStr = AppDateFormatter.yearMonthDay.string(from: cutoffDate)
         
-        // Collect holdings
         var holdingQuantities: [(isin: String, quantity: Double)] = []
         for instrument in instruments {
-            let latestPrice = db.getLatestPrice(forIsin: instrument.isin)
-            let totalQuantity = effectiveTotalQuantity(forIsin: instrument.isin, currentPrice: latestPrice?.value)
+            let latestPrice = await db.getLatestPrice(forIsin: instrument.isin)
+            let totalQuantity = await effectiveTotalQuantity(forIsin: instrument.isin, currentPrice: latestPrice?.value)
             if totalQuantity > 0 {
                 holdingQuantities.append((isin: instrument.isin, quantity: totalQuantity))
             }
         }
         
         let isins = holdingQuantities.map { $0.isin }
-        let priceIndex = buildPriceIndex(for: isins)
+        let priceIndex = await buildPriceIndex(for: isins)
         
-        // Find effective start date
         let earliestPerInstrument = earliestDates(from: priceIndex, isins: isins)
         let effectiveStartDate = earliestPerInstrument.max() ?? cutoffStr
         let actualStartDate = max(cutoffStr, effectiveStartDate)
@@ -89,7 +87,7 @@ extension AppViewModel {
                 if let priceValue = priceLookup(index: priceIndex[holding.isin] ?? [], onOrBefore: dateStr) {
                     let holdingValue = holding.quantity * priceValue
                     let currency = getInstrumentCurrency(forIsin: holding.isin)
-                    let valueInEUR = convertToEUR(value: holdingValue, fromCurrency: currency, onDate: dateStr)
+                    let valueInEUR = await convertToEUR(value: holdingValue, fromCurrency: currency, onDate: dateStr)
                     totalValueEUR += valueInEUR
                 } else {
                     allHaveData = false
@@ -106,11 +104,11 @@ extension AppViewModel {
     }
     
     /// Get portfolio value history in gold ounces (converts EUR history using gold prices at each date)
-    func getGoldOzHistory() -> [(date: Date, value: Double)] {
-        let eurHistory = getPortfolioValueHistory()
+    func getGoldOzHistory() async -> [(date: Date, value: Double)] {
+        let eurHistory = await getPortfolioValueHistory()
         if eurHistory.isEmpty { return [] }
         
-        let goldIndex = buildPriceIndex(for: ["VERACASH:GOLD_SPOT"])["VERACASH:GOLD_SPOT"] ?? []
+        let goldIndex = (await buildPriceIndex(for: ["VERACASH:GOLD_SPOT"]))["VERACASH:GOLD_SPOT"] ?? []
         
         var goldHistory: [(date: Date, value: Double)] = []
         goldHistory.reserveCapacity(eurHistory.count)
@@ -126,13 +124,13 @@ extension AppViewModel {
     }
     
     /// Benchmark comparison helper: scales initial portfolio value by benchmark performance.
-    private func benchmarkComparisonHistory(benchmarkIsin: String) -> [(date: Date, value: Double)] {
-        let portfolioHistory = getPortfolioValueHistory()
+    private func benchmarkComparisonHistory(benchmarkIsin: String) async -> [(date: Date, value: Double)] {
+        let portfolioHistory = await getPortfolioValueHistory()
         guard let first = portfolioHistory.first, first.value > 0 else { return [] }
         let (date0, value0) = (first.date, first.value)
         let date0Str = AppDateFormatter.yearMonthDay.string(from: date0)
         
-        let benchIndex = buildPriceIndex(for: [benchmarkIsin])[benchmarkIsin] ?? []
+        let benchIndex = (await buildPriceIndex(for: [benchmarkIsin]))[benchmarkIsin] ?? []
         guard let benchAtStart = priceLookup(index: benchIndex, onOrBefore: date0Str), benchAtStart > 0 else { return [] }
         
         var result: [(date: Date, value: Double)] = []
@@ -147,21 +145,21 @@ extension AppViewModel {
     }
     
     /// S&P 500 comparison: same-date series as portfolio history, values = initial portfolio value scaled by S&P performance.
-    func getSP500ComparisonHistory() -> [(date: Date, value: Double)] {
-        benchmarkComparisonHistory(benchmarkIsin: SP500IndexIsin)
+    func getSP500ComparisonHistory() async -> [(date: Date, value: Double)] {
+        await benchmarkComparisonHistory(benchmarkIsin: SP500IndexIsin)
     }
 
     /// Gold comparison: same-date series as portfolio history, values = initial portfolio value scaled by Gold performance.
-    func getGoldComparisonHistory() -> [(date: Date, value: Double)] {
-        benchmarkComparisonHistory(benchmarkIsin: GoldIndexIsin)
+    func getGoldComparisonHistory() async -> [(date: Date, value: Double)] {
+        await benchmarkComparisonHistory(benchmarkIsin: GoldIndexIsin)
     }
 
     /// MSCI World comparison: same-date series as portfolio history, values = initial portfolio value scaled by MSCI World performance.
-    func getMSCIWorldComparisonHistory() -> [(date: Date, value: Double)] {
-        benchmarkComparisonHistory(benchmarkIsin: MSCIWorldIndexIsin)
+    func getMSCIWorldComparisonHistory() async -> [(date: Date, value: Double)] {
+        await benchmarkComparisonHistory(benchmarkIsin: MSCIWorldIndexIsin)
     }
     
-    func getQuadrantValueHistory(quadrantId: Int?) -> [(date: Date, value: Double)] {
+    func getQuadrantValueHistory(quadrantId: Int?) async -> [(date: Date, value: Double)] {
         clearRateCache()
         let cutoffDate = selectedPeriod.comparisonDate
         let cutoffStr = AppDateFormatter.yearMonthDay.string(from: cutoffDate)
@@ -170,8 +168,8 @@ extension AppViewModel {
         
         var holdingQuantities: [(isin: String, quantity: Double)] = []
         for instrument in quadrantInstruments {
-            let latestPrice = db.getLatestPrice(forIsin: instrument.isin)
-            let totalQuantity = effectiveTotalQuantity(forIsin: instrument.isin, currentPrice: latestPrice?.value)
+            let latestPrice = await db.getLatestPrice(forIsin: instrument.isin)
+            let totalQuantity = await effectiveTotalQuantity(forIsin: instrument.isin, currentPrice: latestPrice?.value)
             if totalQuantity > 0 {
                 holdingQuantities.append((isin: instrument.isin, quantity: totalQuantity))
             }
@@ -180,7 +178,7 @@ extension AppViewModel {
         if holdingQuantities.isEmpty { return [] }
         
         let isins = holdingQuantities.map { $0.isin }
-        let priceIndex = buildPriceIndex(for: isins)
+        let priceIndex = await buildPriceIndex(for: isins)
         
         let earliestPerInstrument = earliestDates(from: priceIndex, isins: isins)
         let effectiveStartDate = earliestPerInstrument.max() ?? cutoffStr
@@ -199,7 +197,7 @@ extension AppViewModel {
                 if let priceValue = priceLookup(index: priceIndex[holding.isin] ?? [], onOrBefore: dateStr) {
                     let holdingValue = holding.quantity * priceValue
                     let currency = getInstrumentCurrency(forIsin: holding.isin)
-                    let valueInEUR = convertToEUR(value: holdingValue, fromCurrency: currency, onDate: dateStr)
+                    let valueInEUR = await convertToEUR(value: holdingValue, fromCurrency: currency, onDate: dateStr)
                     totalValueEUR += valueInEUR
                 } else {
                     allHaveData = false
@@ -216,12 +214,11 @@ extension AppViewModel {
     }
     
     /// Convert quadrant value history from EUR to gold ounces using Veracash gold spot price
-    func getQuadrantValueHistoryInGold(quadrantId: Int?) -> [(date: Date, value: Double)] {
-        let eurHistory = getQuadrantValueHistory(quadrantId: quadrantId)
+    func getQuadrantValueHistoryInGold(quadrantId: Int?) async -> [(date: Date, value: Double)] {
+        let eurHistory = await getQuadrantValueHistory(quadrantId: quadrantId)
         if eurHistory.isEmpty { return [] }
         
-        // Build a lookup of gold prices by date (already done efficiently via buildPriceIndex)
-        let goldIndex = buildPriceIndex(for: ["VERACASH:GOLD_SPOT"])["VERACASH:GOLD_SPOT"] ?? []
+        let goldIndex = (await buildPriceIndex(for: ["VERACASH:GOLD_SPOT"]))["VERACASH:GOLD_SPOT"] ?? []
         if goldIndex.isEmpty { return [] }
         
         // Build a dictionary for exact-date lookups + fallback to binary search
@@ -264,15 +261,13 @@ extension AppViewModel {
         return goldHistory
     }
     
-    func getHoldingValueHistory(isin: String, quantity: Double) -> [(date: Date, value: Double)] {
+    func getHoldingValueHistory(isin: String, quantity: Double) async -> [(date: Date, value: Double)] {
         clearRateCache()
         let cutoffDate = selectedPeriod.comparisonDate
         let cutoffStr = AppDateFormatter.yearMonthDay.string(from: cutoffDate)
         
-        let priceIndex = buildPriceIndex(for: [isin])[isin] ?? [] // ascending
+        let priceIndex = (await buildPriceIndex(for: [isin]))[isin] ?? []
         let instrumentCurrency = getInstrumentCurrency(forIsin: isin)
-        
-        // Get current price for demo mode quantity calculation
         let latestPrice = priceIndex.last?.value
         let effectiveQty = effectiveQuantity(forIsin: isin, originalQuantity: quantity, currentPrice: latestPrice)
         
@@ -283,7 +278,7 @@ extension AppViewModel {
             if entry.date >= cutoffStr {
                 if let date = AppDateFormatter.yearMonthDay.date(from: entry.date) {
                     let holdingValue = effectiveQty * entry.value
-                    let valueInEUR = convertToEUR(value: holdingValue, fromCurrency: instrumentCurrency, onDate: entry.date)
+                    let valueInEUR = await convertToEUR(value: holdingValue, fromCurrency: instrumentCurrency, onDate: entry.date)
                     holdingHistory.append((date: date, value: valueInEUR))
                 }
             }
@@ -292,7 +287,7 @@ extension AppViewModel {
         return holdingHistory
     }
     
-    func getAccountValueHistory(accountId: Int) -> [(date: Date, value: Double)] {
+    func getAccountValueHistory(accountId: Int) async -> [(date: Date, value: Double)] {
         clearRateCache()
         let cutoffDate = selectedPeriod.comparisonDate
         let cutoffStr = AppDateFormatter.yearMonthDay.string(from: cutoffDate)
@@ -302,7 +297,7 @@ extension AppViewModel {
         var holdingQuantities: [(isin: String, quantity: Double)] = []
         for holding in accountHoldings {
             if holding.quantity > 0 {
-                let latestPrice = db.getLatestPrice(forIsin: holding.isin)
+                let latestPrice = await db.getLatestPrice(forIsin: holding.isin)
                 let quantity = effectiveQuantity(forIsin: holding.isin, originalQuantity: holding.quantity, currentPrice: latestPrice?.value)
                 holdingQuantities.append((isin: holding.isin, quantity: quantity))
             }
@@ -311,7 +306,7 @@ extension AppViewModel {
         if holdingQuantities.isEmpty { return [] }
         
         let isins = holdingQuantities.map { $0.isin }
-        let priceIndex = buildPriceIndex(for: isins)
+        let priceIndex = await buildPriceIndex(for: isins)
         
         let earliestPerInstrument = earliestDates(from: priceIndex, isins: isins)
         let effectiveStartDate = earliestPerInstrument.max() ?? cutoffStr
@@ -330,7 +325,7 @@ extension AppViewModel {
                 if let priceValue = priceLookup(index: priceIndex[holding.isin] ?? [], onOrBefore: dateStr) {
                     let holdingValue = holding.quantity * priceValue
                     let currency = getInstrumentCurrency(forIsin: holding.isin)
-                    let valueInEUR = convertToEUR(value: holdingValue, fromCurrency: currency, onDate: dateStr)
+                    let valueInEUR = await convertToEUR(value: holdingValue, fromCurrency: currency, onDate: dateStr)
                     totalValueEUR += valueInEUR
                 } else {
                     allHaveData = false

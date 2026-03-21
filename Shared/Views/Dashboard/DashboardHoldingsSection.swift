@@ -5,19 +5,19 @@ import Charts
 struct iOSDashboardHoldingsSectionEnhanced: View {
     @EnvironmentObject var viewModel: AppViewModel
     let privacyMode: Bool
+    @State private var holdingsWithQuantity: [(isin: String, name: String, quantity: Double)] = []
+    @State private var holdingHistories: [String: [(date: Date, value: Double)]] = [:]
     
     var body: some View {
         LazyVGrid(columns: [GridItem(.flexible())], spacing: 12) {
-            let allHoldings = viewModel.getAllHoldingsWithQuantity()
-            
-            if allHoldings.isEmpty {
+            if holdingsWithQuantity.isEmpty {
                 Text(L10n.holdingsNoHoldings)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity)
                     .padding()
             } else {
-                ForEach(allHoldings, id: \.isin) { holding in
-                    let history = viewModel.getHoldingValueHistory(isin: holding.isin, quantity: holding.quantity)
+                ForEach(holdingsWithQuantity, id: \.isin) { holding in
+                    let history = holdingHistories[holding.isin] ?? []
                     let valueEUR = history.last?.value
                     
                     EnhancedTrendCard(
@@ -30,5 +30,12 @@ struct iOSDashboardHoldingsSectionEnhanced: View {
             }
         }
         .padding(.horizontal)
+        .task(id: viewModel.selectedPeriod) {
+            holdingsWithQuantity = await viewModel.getAllHoldingsWithQuantity()
+            holdingHistories = [:]
+            for h in holdingsWithQuantity {
+                holdingHistories[h.isin] = await viewModel.getHoldingValueHistory(isin: h.isin, quantity: h.quantity)
+            }
+        }
     }
 }

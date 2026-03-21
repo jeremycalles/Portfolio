@@ -4,11 +4,11 @@ import Charts
 // MARK: - Quadrant Report View
 struct QuadrantReportView: View {
     @EnvironmentObject var viewModel: AppViewModel
+    @State private var report: [QuadrantReportItem] = []
     
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // Period Picker
                 HStack(spacing: 16) {
                     Text(L10n.reportsComparisonPeriod)
                         .font(.headline)
@@ -30,9 +30,6 @@ struct QuadrantReportView: View {
                 }
                 .padding(.horizontal)
                 
-                // Report Content
-                let report = viewModel.getQuadrantReport()
-                
                 if report.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "chart.pie")
@@ -46,12 +43,10 @@ struct QuadrantReportView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(.top, 100)
                 } else {
-                    // Quadrant sections
                     ForEach(report) { item in
                         QuadrantSection(item: item)
                     }
                     
-                    // Grand Total (EUR)
                     GroupBox {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(L10n.generalGrandTotal.uppercased())
@@ -60,7 +55,7 @@ struct QuadrantReportView: View {
                             
                             Divider()
                             
-                            let totals = viewModel.getGrandTotalsEUR()
+                            let totals = (current: report.map { $0.totalValueEUR }.reduce(0, +), previous: report.map { $0.totalPreviousValueEUR }.reduce(0, +))
                             HStack {
                                 Text("EUR")
                                     .font(.headline)
@@ -89,6 +84,9 @@ struct QuadrantReportView: View {
             .padding(.vertical)
         }
         .navigationTitle(L10n.reportsQuadrantReport)
+        .task(id: viewModel.selectedPeriod) {
+            report = await viewModel.getQuadrantReport()
+        }
     }
     
     var formattedComparisonDate: String {
@@ -246,8 +244,8 @@ struct PriceHistoryView: View {
                 .tag(instrument)
             }
             .frame(minWidth: 200, maxWidth: 300)
-            .onChange(of: selectedInstrument) { _, newValue in
-                refreshPriceHistory()
+            .onChange(of: selectedInstrument) { _, _ in
+                Task { await refreshPriceHistory() }
             }
             
             // Price history
@@ -276,25 +274,25 @@ struct PriceHistoryView: View {
                                 Button("1 Month (Daily)") {
                                     Task {
                                         await viewModel.backfillSingleInstrument(instrument, period: "1mo", interval: "1d")
-                                        refreshPriceHistory()
+                                        await refreshPriceHistory()
                                     }
                                 }
                                 Button("1 Year (Monthly)") {
                                     Task {
                                         await viewModel.backfillSingleInstrument(instrument, period: "1y", interval: "1mo")
-                                        refreshPriceHistory()
+                                        await refreshPriceHistory()
                                     }
                                 }
                                 Button("2 Years (Monthly)") {
                                     Task {
                                         await viewModel.backfillSingleInstrument(instrument, period: "2y", interval: "1mo")
-                                        refreshPriceHistory()
+                                        await refreshPriceHistory()
                                     }
                                 }
                                 Button("5 Years (Monthly)") {
                                     Task {
                                         await viewModel.backfillSingleInstrument(instrument, period: "5y", interval: "1mo")
-                                        refreshPriceHistory()
+                                        await refreshPriceHistory()
                                     }
                                 }
                             } label: {
@@ -386,8 +384,10 @@ struct PriceHistoryView: View {
                     instrument: instrument,
                     existingPrice: nil,
                     onSave: { date, value, currency in
-                        viewModel.addManualPrice(isin: instrument.isin, date: date, value: value, currency: currency)
-                        refreshPriceHistory()
+                        Task {
+                            await viewModel.addManualPrice(isin: instrument.isin, date: date, value: value, currency: currency)
+                            await refreshPriceHistory()
+                        }
                     }
                 )
             }
@@ -398,12 +398,13 @@ struct PriceHistoryView: View {
                     instrument: instrument,
                     existingPrice: price,
                     onSave: { date, value, currency in
-                        // Delete old price if date changed, then add new
-                        if date != price.date {
-                            viewModel.deletePrice(isin: instrument.isin, date: price.date)
+                        Task {
+                            if date != price.date {
+                                await viewModel.deletePrice(isin: instrument.isin, date: price.date)
+                            }
+                            await viewModel.addManualPrice(isin: instrument.isin, date: date, value: value, currency: currency)
+                            await refreshPriceHistory()
                         }
-                        viewModel.addManualPrice(isin: instrument.isin, date: date, value: value, currency: currency)
-                        refreshPriceHistory()
                     }
                 )
             }
@@ -412,8 +413,10 @@ struct PriceHistoryView: View {
             Button(L10n.generalCancel, role: .cancel) { }
             Button(L10n.generalDelete, role: .destructive) {
                 if let instrument = selectedInstrument, let price = priceToDelete {
-                    viewModel.deletePrice(isin: instrument.isin, date: price.date)
-                    refreshPriceHistory()
+                    Task {
+                        await viewModel.deletePrice(isin: instrument.isin, date: price.date)
+                        await refreshPriceHistory()
+                    }
                 }
             }
         } message: {
@@ -424,11 +427,14 @@ struct PriceHistoryView: View {
         .sheet(isPresented: $viewModel.showBackfillLogs) {
             BackfillLogsSheet(logs: viewModel.backfillLogs)
         }
+        .task(id: selectedInstrument?.isin) {
+            await refreshPriceHistory()
+        }
     }
     
-    private func refreshPriceHistory() {
+    private func refreshPriceHistory() async {
         if let instrument = selectedInstrument {
-            priceHistory = viewModel.getPriceHistory(forIsin: instrument.isin)
+            priceHistory = await viewModel.getPriceHistory(forIsin: instrument.isin)
         } else {
             priceHistory = []
         }
@@ -497,10 +503,12 @@ struct PriceGraphView: View {
             }
             .frame(minWidth: 200, maxWidth: 300)
             .onChange(of: selectedInstrument) { _, newValue in
-                if let instrument = newValue {
-                    priceHistory = viewModel.getPriceHistory(forIsin: instrument.isin)
-                } else {
-                    priceHistory = []
+                Task {
+                    if let instrument = newValue {
+                        priceHistory = await viewModel.getPriceHistory(forIsin: instrument.isin)
+                    } else {
+                        priceHistory = []
+                    }
                 }
             }
             

@@ -181,11 +181,13 @@ struct AutoRefreshPromptView: View {
                 .keyboardShortcut(.cancelAction)
                 
                 Button(L10n.settingsEnable) {
-                    MacOSSchedulerManager.shared.install()
-                    if dontAskAgain {
-                        MacOSSchedulerManager.shared.dismissPromptPermanently()
+                    Task {
+                        await MacOSSchedulerManager.shared.install()
+                        if dontAskAgain {
+                            MacOSSchedulerManager.shared.dismissPromptPermanently()
+                        }
+                        await MainActor.run { dismiss() }
                     }
-                    dismiss()
                 }
                 .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.defaultAction)

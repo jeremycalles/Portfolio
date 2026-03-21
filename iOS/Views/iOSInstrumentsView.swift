@@ -42,7 +42,7 @@ struct iOSInstrumentsView: View {
             }
             .onDelete { indexSet in
                 for index in indexSet {
-                    viewModel.deleteInstrument(viewModel.instruments[index].isin)
+                    Task { await viewModel.deleteInstrument(viewModel.instruments[index].isin) }
                 }
             }
         }
@@ -138,7 +138,7 @@ struct iOSInstrumentDetailView: View {
                 }
                 .onChange(of: selectedQuadrantId) { _, newValue in
                     if newValue != instrument.quadrantId {
-                        viewModel.assignQuadrant(instrumentIsin: instrument.isin, quadrantId: newValue)
+                        Task { await viewModel.assignQuadrant(instrumentIsin: instrument.isin, quadrantId: newValue) }
                     }
                 }
             } header: {
@@ -171,8 +171,10 @@ struct iOSInstrumentDetailView: View {
                         }
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button(role: .destructive) {
-                                viewModel.deletePrice(isin: instrument.isin, date: price.date)
-                                refreshPriceHistory()
+                                Task {
+                                    await viewModel.deletePrice(isin: instrument.isin, date: price.date)
+                                    await refreshPriceHistory()
+                                }
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
@@ -187,28 +189,28 @@ struct iOSInstrumentDetailView: View {
                         Button("1 Month (Daily)") {
                             Task {
                                 await viewModel.backfillSingleInstrument(instrument, period: "1mo", interval: "1d")
-                                refreshPriceHistory()
+                                await refreshPriceHistory()
                                 showingBackfillLogs = true
                             }
                         }
                         Button("1 Year (Monthly)") {
                             Task {
                                 await viewModel.backfillSingleInstrument(instrument, period: "1y", interval: "1mo")
-                                refreshPriceHistory()
+                                await refreshPriceHistory()
                                 showingBackfillLogs = true
                             }
                         }
                         Button("2 Years (Monthly)") {
                             Task {
                                 await viewModel.backfillSingleInstrument(instrument, period: "2y", interval: "1mo")
-                                refreshPriceHistory()
+                                await refreshPriceHistory()
                                 showingBackfillLogs = true
                             }
                         }
                         Button("5 Years (Monthly)") {
                             Task {
                                 await viewModel.backfillSingleInstrument(instrument, period: "5y", interval: "1mo")
-                                refreshPriceHistory()
+                                await refreshPriceHistory()
                                 showingBackfillLogs = true
                             }
                         }
@@ -238,14 +240,14 @@ struct iOSInstrumentDetailView: View {
         }
         .onAppear {
             selectedQuadrantId = instrument.quadrantId
-            refreshPriceHistory()
+            Task { await refreshPriceHistory() }
         }
         .sheet(isPresented: $showingEditInstrumentSheet) {
             iOSInstrumentEditSheet(
                 instrument: instrument,
                 onDismiss: { showingEditInstrumentSheet = false },
                 onSave: { updated in
-                    viewModel.updateInstrument(updated)
+                    Task { await viewModel.updateInstrument(updated) }
                     showingEditInstrumentSheet = false
                 }
             )
@@ -256,8 +258,10 @@ struct iOSInstrumentDetailView: View {
                 instrument: instrument,
                 existingPrice: nil,
                 onSave: { date, value, currency in
-                    viewModel.addManualPrice(isin: instrument.isin, date: date, value: value, currency: currency)
-                    refreshPriceHistory()
+                    Task {
+                        await viewModel.addManualPrice(isin: instrument.isin, date: date, value: value, currency: currency)
+                        await refreshPriceHistory()
+                    }
                 }
             )
         }
@@ -267,12 +271,13 @@ struct iOSInstrumentDetailView: View {
                     instrument: instrument,
                     existingPrice: price,
                     onSave: { date, value, currency in
-                        // Delete old price if date changed, then add new
-                        if date != price.date {
-                            viewModel.deletePrice(isin: instrument.isin, date: price.date)
+                        Task {
+                            if date != price.date {
+                                await viewModel.deletePrice(isin: instrument.isin, date: price.date)
+                            }
+                            await viewModel.addManualPrice(isin: instrument.isin, date: date, value: value, currency: currency)
+                            await refreshPriceHistory()
                         }
-                        viewModel.addManualPrice(isin: instrument.isin, date: date, value: value, currency: currency)
-                        refreshPriceHistory()
                     }
                 )
             }
@@ -282,8 +287,8 @@ struct iOSInstrumentDetailView: View {
         }
     }
     
-    private func refreshPriceHistory() {
-        priceHistory = viewModel.getPriceHistory(forIsin: instrument.isin)
+    private func refreshPriceHistory() async {
+        priceHistory = await viewModel.getPriceHistory(forIsin: instrument.isin)
     }
 }
 
@@ -306,7 +311,7 @@ struct iOSInstrumentEditSheet: View {
     @State private var tickerValidationMessage: String? = nil
     @State private var tickerIsValid: Bool? = nil
     
-    private var originalLatestPrice: Price? { DatabaseService.shared.getLatestPrice(forIsin: instrument.isin) }
+    @State private var latestPrice: Price?
     private let currencies = ["EUR", "USD", "GBP", "CHF", "JPY"]
     
     var body: some View {
@@ -397,10 +402,10 @@ struct iOSInstrumentEditSheet: View {
                             )
                             if hasLatestPrice, let value = parseDecimal(latestPriceText), value > 0 {
                                 let newDateStr = AppDateFormatter.yearMonthDay.string(from: latestPriceDate)
-                                if let old = originalLatestPrice, old.date != newDateStr {
-                                    viewModel.deletePrice(isin: instrument.isin, date: old.date)
+                                if let old = latestPrice, old.date != newDateStr {
+                                    Task { await viewModel.deletePrice(isin: instrument.isin, date: old.date) }
                                 }
-                                viewModel.addManualPrice(isin: instrument.isin, date: newDateStr, value: value, currency: currency)
+                                Task { await viewModel.addManualPrice(isin: instrument.isin, date: newDateStr, value: value, currency: currency) }
                             }
                             onSave(updated)
                         }
@@ -408,16 +413,20 @@ struct iOSInstrumentEditSheet: View {
                     .disabled(isValidatingTicker)
                 }
             }
+            .task(id: instrument.isin) {
+                let price = await DatabaseService.shared.getLatestPrice(forIsin: instrument.isin)
+                latestPrice = price
+                if let p = price {
+                    hasLatestPrice = true
+                    latestPriceDate = AppDateFormatter.yearMonthDay.date(from: p.date) ?? Date()
+                    latestPriceText = String(format: "%.4f", p.value)
+                }
+            }
             .onAppear {
                 name = instrument.name ?? ""
                 ticker = instrument.ticker ?? ""
                 currency = instrument.currency ?? "EUR"
                 quadrantId = instrument.quadrantId
-                if let price = originalLatestPrice {
-                    hasLatestPrice = true
-                    latestPriceDate = AppDateFormatter.yearMonthDay.date(from: price.date) ?? Date()
-                    latestPriceText = String(format: "%.4f", price.value)
-                }
             }
         }
     }

@@ -17,10 +17,7 @@ class AppViewModel: ObservableObject {
     @Published var selectedPeriod: ReportPeriod = .oneWeek {
         didSet {
             if oldValue != selectedPeriod {
-                // Defer to avoid "Publishing changes from within view updates" when Picker writes during body
-                DispatchQueue.main.async { [weak self] in
-                    self?.recomputeDashboardCache()
-                }
+                Task { @MainActor in await self.recomputeDashboardCache() }
             }
         }
     }
@@ -32,6 +29,10 @@ class AppViewModel: ObservableObject {
     @Published private(set) var cachedMSCIWorldHistory: [(date: Date, value: Double)] = []
     @Published private(set) var cachedGrandTotalsEUR: (current: Double, previous: Double) = (0, 0)
     @Published private(set) var cachedQuadrantReport: [QuadrantReportItem] = []
+    @Published private(set) var cachedGoldTotals: (current: Double, previous: Double)? = nil
+    @Published private(set) var cachedGoldOzHistory: [(date: Date, value: Double)] = []
+    @Published private(set) var lastInstrumentUpdateDate: Date? = nil
+    @Published private(set) var cachedHoldingDetailsByAccount: [Int: [HoldingDetail]] = [:]
     
     // Backfill logs for single instrument
     @Published var backfillLogs: [String] = []
@@ -44,7 +45,7 @@ class AppViewModel: ObservableObject {
     private var eurRateCache: [String: Double] = [:]
     
     init() {
-        refreshAll()
+        Task { await refreshAll() }
     }
     
     // MARK: - Demo Mode Helpers
@@ -62,8 +63,8 @@ class AppViewModel: ObservableObject {
     /// - Parameters:
     ///   - isin: The instrument ISIN
     ///   - currentPrice: The current price per unit (used to calculate quantity that keeps value < 50,000)
-    func effectiveTotalQuantity(forIsin isin: String, currentPrice: Double?) -> Double {
-        let originalTotal = db.getTotalQuantity(forIsin: isin)
+    func effectiveTotalQuantity(forIsin isin: String, currentPrice: Double?) async -> Double {
+        let originalTotal = await db.getTotalQuantity(forIsin: isin)
         return demoMode.getTotalRandomizedQuantity(forIsin: isin, originalTotal: originalTotal, currentPrice: currentPrice)
     }
     
@@ -75,7 +76,7 @@ class AppViewModel: ObservableObject {
     ///   - fromCurrency: The source currency (nil or "EUR" means no conversion needed)
     ///   - onDate: The date to use for the exchange rate lookup
     /// - Returns: The value converted to EUR
-    func convertToEUR(value: Double, fromCurrency: String?, onDate: String) -> Double {
+    func convertToEUR(value: Double, fromCurrency: String?, onDate: String) async -> Double {
         guard let currency = fromCurrency, currency != "EUR" else { return value }
         
         let cacheKey = "\(currency)|\(onDate)"
@@ -83,19 +84,16 @@ class AppViewModel: ObservableObject {
             return value * cachedRate
         }
         
-        // Try to get rate on or before the specified date
-        if let rate = db.getRateOnOrBefore(from: currency, to: "EUR", date: onDate) {
+        if let rate = await db.getRateOnOrBefore(from: currency, to: "EUR", date: onDate) {
             eurRateCache[cacheKey] = rate.rate
             return value * rate.rate
         }
         
-        // Fallback to latest rate if no historical rate
-        if let rate = db.getLatestRate(from: currency, to: "EUR") {
+        if let rate = await db.getLatestRate(from: currency, to: "EUR") {
             eurRateCache[cacheKey] = rate.rate
             return value * rate.rate
         }
         
-        // No conversion available - return original value
         return value
     }
     
@@ -110,13 +108,13 @@ class AppViewModel: ObservableObject {
     }
     
     // MARK: - Refresh Data
-    func refreshAll() {
-        instruments = db.getAllInstruments()
-        quadrants = db.getAllQuadrants()
-        bankAccounts = db.getAllBankAccounts()
-        holdings = db.getAllHoldings()
+    func refreshAll() async {
+        instruments = await db.getAllInstruments()
+        quadrants = await db.getAllQuadrants()
+        bankAccounts = await db.getAllBankAccounts()
+        holdings = await db.getAllHoldings()
         rebuildCurrencyIndex()
-        recomputeDashboardCache()
+        await recomputeDashboardCache()
     }
     
     private func rebuildCurrencyIndex() {
@@ -131,31 +129,39 @@ class AppViewModel: ObservableObject {
     }
     
     /// Recomputes all cached dashboard data. Called after refreshAll(), price updates, and period changes.
-    func recomputeDashboardCache() {
-        cachedPortfolioHistory = getPortfolioValueHistory()
-        cachedSP500History = getSP500ComparisonHistory()
-        cachedGoldHistory = getGoldComparisonHistory()
-        cachedMSCIWorldHistory = getMSCIWorldComparisonHistory()
-        cachedGrandTotalsEUR = getGrandTotalsEUR()
-        cachedQuadrantReport = getQuadrantReport()
+    func recomputeDashboardCache() async {
+        cachedPortfolioHistory = await getPortfolioValueHistory()
+        cachedSP500History = await getSP500ComparisonHistory()
+        cachedGoldHistory = await getGoldComparisonHistory()
+        cachedMSCIWorldHistory = await getMSCIWorldComparisonHistory()
+        cachedGrandTotalsEUR = await getGrandTotalsEUR()
+        cachedQuadrantReport = await getQuadrantReport()
+        cachedGoldTotals = await getGrandTotalsInGold()
+        cachedGoldOzHistory = await getGoldOzHistory()
+        lastInstrumentUpdateDate = await getLastInstrumentUpdateDate()
+        var detailsByAccount: [Int: [HoldingDetail]] = [:]
+        for account in bankAccounts {
+            detailsByAccount[account.id] = await getHoldingDetails(forAccount: account.id)
+        }
+        cachedHoldingDetailsByAccount = detailsByAccount
     }
     
     // MARK: - Targeted Refresh Methods
-    func refreshInstruments() {
-        instruments = db.getAllInstruments()
+    func refreshInstruments() async {
+        instruments = await db.getAllInstruments()
         rebuildCurrencyIndex()
     }
     
-    func refreshQuadrants() {
-        quadrants = db.getAllQuadrants()
+    func refreshQuadrants() async {
+        quadrants = await db.getAllQuadrants()
     }
     
-    func refreshBankAccounts() {
-        bankAccounts = db.getAllBankAccounts()
+    func refreshBankAccounts() async {
+        bankAccounts = await db.getAllBankAccounts()
     }
     
-    func refreshHoldings() {
-        holdings = db.getAllHoldings()
+    func refreshHoldings() async {
+        holdings = await db.getAllHoldings()
     }
     
     // MARK: - Instruments
@@ -174,9 +180,8 @@ class AppViewModel: ObservableObject {
                 quadrantId: nil
             )
             
-            db.addOrUpdateInstrument(instrument)
+            await db.addOrUpdateInstrument(instrument)
             
-            // Save price if available
             if let value = result.value {
                 let price = Price(
                     id: nil,
@@ -185,11 +190,11 @@ class AppViewModel: ObservableObject {
                     value: value,
                     currency: result.currency
                 )
-                db.addPrice(price)
+                await db.addPrice(price)
             }
             
             statusMessage = "Added: \(result.name ?? isin)"
-            refreshInstruments()
+            await refreshInstruments()
         } else {
             errorMessage = Self.addInstrumentErrorMessage(for: isin)
             statusMessage = ""
@@ -210,20 +215,20 @@ class AppViewModel: ObservableObject {
         return "Could not find data for ISIN: \(isin)"
     }
     
-    func deleteInstrument(_ isin: String) {
-        db.deleteInstrument(isin)
-        refreshInstruments()
-        refreshHoldings()
+    func deleteInstrument(_ isin: String) async {
+        await db.deleteInstrument(isin)
+        await refreshInstruments()
+        await refreshHoldings()
     }
     
-    func assignQuadrant(instrumentIsin: String, quadrantId: Int?) {
-        db.assignQuadrant(instrumentIsin: instrumentIsin, quadrantId: quadrantId)
-        refreshInstruments()
+    func assignQuadrant(instrumentIsin: String, quadrantId: Int?) async {
+        await db.assignQuadrant(instrumentIsin: instrumentIsin, quadrantId: quadrantId)
+        await refreshInstruments()
     }
     
-    func updateInstrument(_ instrument: Instrument) {
-        db.addOrUpdateInstrument(instrument)
-        refreshInstruments()
+    func updateInstrument(_ instrument: Instrument) async {
+        await db.addOrUpdateInstrument(instrument)
+        await refreshInstruments()
     }
     
     /// Validates the ticker by fetching market data for the given ISIN and optional ticker.
@@ -237,43 +242,42 @@ class AppViewModel: ObservableObject {
         return (false, result.failureReason ?? "No data found for this ticker")
     }
     
-    func deletePrice(isin: String, date: String) {
-        db.deletePrice(isin: isin, date: date)
-        // Prices aren't stored in @Published arrays — no table reload needed
+    func deletePrice(isin: String, date: String) async {
+        await db.deletePrice(isin: isin, date: date)
     }
     
     // MARK: - Quadrants
-    func addQuadrant(name: String) {
-        if db.addQuadrant(name: name) {
-            refreshQuadrants()
+    func addQuadrant(name: String) async {
+        if await db.addQuadrant(name: name) {
+            await refreshQuadrants()
         } else {
             errorMessage = "Quadrant '\(name)' already exists"
         }
     }
     
-    func deleteQuadrant(id: Int) {
-        db.deleteQuadrant(id: id)
-        refreshQuadrants()
-        refreshInstruments() // quadrant assignment may be cleared
+    func deleteQuadrant(id: Int) async {
+        await db.deleteQuadrant(id: id)
+        await refreshQuadrants()
+        await refreshInstruments()
     }
     
     // MARK: - Bank Accounts
-    func addBankAccount(bank: String, account: String) {
-        if db.addBankAccount(bank: bank, account: account) {
-            refreshBankAccounts()
+    func addBankAccount(bank: String, account: String) async {
+        if await db.addBankAccount(bank: bank, account: account) {
+            await refreshBankAccounts()
         } else {
             errorMessage = "Account '\(bank) - \(account)' already exists"
         }
     }
     
-    func deleteBankAccount(id: Int) {
-        db.deleteBankAccount(id: id)
-        refreshBankAccounts()
-        refreshHoldings() // holdings for deleted account are removed
+    func deleteBankAccount(id: Int) async {
+        await db.deleteBankAccount(id: id)
+        await refreshBankAccounts()
+        await refreshHoldings()
     }
     
     // MARK: - Holdings
-    func addHolding(accountId: Int, isin: String, quantity: Double, purchaseDate: String?, purchasePrice: Double?) {
+    func addHolding(accountId: Int, isin: String, quantity: Double, purchaseDate: String?, purchasePrice: Double?) async {
         let holding = Holding(
             id: nil,
             accountId: accountId,
@@ -283,23 +287,23 @@ class AppViewModel: ObservableObject {
             purchasePrice: purchasePrice,
             lastUpdated: nil
         )
-        db.addOrUpdateHolding(holding)
-        refreshHoldings()
-        if let instrument = db.getInstrument(byIsin: isin) {
+        await db.addOrUpdateHolding(holding)
+        await refreshHoldings()
+        if let instrument = await db.getInstrument(byIsin: isin) {
             Task {
                 await backfillSingleInstrument(instrument, period: "1mo", interval: "1d", silent: true)
             }
         }
     }
     
-    func updateHolding(accountId: Int, isin: String, quantity: Double, purchaseDate: String?, purchasePrice: Double?) {
-        db.updateHolding(accountIdValue: accountId, instrumentIsin: isin, quantity: quantity, purchaseDate: purchaseDate, purchasePrice: purchasePrice)
-        refreshHoldings()
+    func updateHolding(accountId: Int, isin: String, quantity: Double, purchaseDate: String?, purchasePrice: Double?) async {
+        await db.updateHolding(accountIdValue: accountId, instrumentIsin: isin, quantity: quantity, purchaseDate: purchaseDate, purchasePrice: purchasePrice)
+        await refreshHoldings()
     }
     
-    func deleteHolding(accountId: Int, isin: String) {
-        db.deleteHolding(accountIdValue: accountId, instrumentIsin: isin)
-        refreshHoldings()
+    func deleteHolding(accountId: Int, isin: String) async {
+        await db.deleteHolding(accountIdValue: accountId, instrumentIsin: isin)
+        await refreshHoldings()
     }
     
     /// Date when the app last refreshed prices (background or manual). Same source as Settings "Last refresh".
@@ -308,24 +312,23 @@ class AppViewModel: ObservableObject {
     }
     
     /// Date of the most recent price data in the database (fallback when no refresh timestamp exists).
-    func getLastInstrumentUpdateDate() -> Date? {
-        guard let dateStr = db.getLastInstrumentUpdateDate() else { return nil }
+    func getLastInstrumentUpdateDate() async -> Date? {
+        guard let dateStr = await db.getLastInstrumentUpdateDate() else { return nil }
         if let date = AppDateFormatter.yearMonthDay.date(from: dateStr) { return date }
         return AppDateFormatter.yearMonthDayTime.date(from: dateStr)
     }
     
     /// Get current gold spot price in EUR per ounce (from VERACASH:GOLD_SPOT which is per gram)
-    func getCurrentGoldOuncePrice() -> Double? {
-        if let latestPrice = db.getLatestPrice(forIsin: "VERACASH:GOLD_SPOT") {
-            // VERACASH:GOLD_SPOT is price per gram, convert to per ounce (1 troy oz = 31.1034768 g)
+    func getCurrentGoldOuncePrice() async -> Double? {
+        if let latestPrice = await db.getLatestPrice(forIsin: "VERACASH:GOLD_SPOT") {
             return latestPrice.value * 31.1034768
         }
         return nil
     }
     
     // MARK: - Price History
-    func getPriceHistory(forIsin isin: String) -> [Price] {
-        return db.getPriceHistory(forIsin: isin)
+    func getPriceHistory(forIsin isin: String) async -> [Price] {
+        return await db.getPriceHistory(forIsin: isin)
     }
     
     // MARK: - Dismiss Error

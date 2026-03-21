@@ -46,7 +46,7 @@ struct BankAccountsView: View {
                             .foregroundColor(.secondary)
                         
                         Button {
-                            viewModel.deleteBankAccount(id: account.id)
+                            Task { await viewModel.deleteBankAccount(id: account.id) }
                         } label: {
                             Image(systemName: "trash")
                                 .foregroundColor(.red)
@@ -80,10 +80,12 @@ struct BankAccountsView: View {
                     .keyboardShortcut(.cancelAction)
                     
                     Button(L10n.generalAdd) {
-                        viewModel.addBankAccount(
-                            bank: newBankName.trimmingCharacters(in: .whitespaces),
-                            account: newAccountName.trimmingCharacters(in: .whitespaces)
-                        )
+                        Task {
+                            await viewModel.addBankAccount(
+                                bank: newBankName.trimmingCharacters(in: .whitespaces),
+                                account: newAccountName.trimmingCharacters(in: .whitespaces)
+                            )
+                        }
                         showingAddSheet = false
                         newBankName = ""
                         newAccountName = ""
@@ -186,7 +188,7 @@ struct HoldingsView: View {
                                                 }
                                                 
                                                 Button {
-                                                    viewModel.deleteHolding(accountId: account.id, isin: holding.isin)
+                                                    Task { await viewModel.deleteHolding(accountId: account.id, isin: holding.isin) }
                                                 } label: {
                                                     Image(systemName: "trash")
                                                         .foregroundColor(.red)

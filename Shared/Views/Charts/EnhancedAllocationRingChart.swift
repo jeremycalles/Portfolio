@@ -25,7 +25,7 @@ struct EnhancedAllocationRingChart: View {
         } else {
             var data: [(name: String, value: Double, color: Color)] = []
             for (index, account) in viewModel.bankAccounts.enumerated() {
-                let details = viewModel.getHoldingDetails(forAccount: account.id)
+                let details = viewModel.cachedHoldingDetailsByAccount[account.id] ?? []
                 let totalValue = details.reduce(0.0) { sum, detail in
                     sum + (detail.currentPrice ?? 0) * detail.quantity
                 }

@@ -272,6 +272,11 @@ struct L10n {
     static var settingsStatusActive: String { manager.localized("settings.statusActive") }
     static var settingsStatusInstalledNotRunning: String { manager.localized("settings.statusInstalledNotRunning") }
     static var settingsStatusNotInstalled: String { manager.localized("settings.statusNotInstalled") }
+    static func settingsLoginItemRegistrationFailed(_ detail: String) -> String {
+        String(format: manager.localized("settings.loginItemRegistrationFailed"), detail)
+    }
+    static var settingsLoginItemRequiresApproval: String { manager.localized("settings.loginItemRequiresApproval") }
+    static var settingsOpenLoginItemsSettings: String { manager.localized("settings.openLoginItemsSettings") }
     static var settingsEnable: String { manager.localized("settings.enable") }
     static var settingsDisable: String { manager.localized("settings.disable") }
     static var settingsRunNow: String { manager.localized("settings.runNow") }

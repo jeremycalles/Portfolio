@@ -1,5 +1,31 @@
 import SwiftUI
 
+// MARK: - Latest Price Cell (async load)
+private struct LatestPriceCell: View {
+    let isin: String
+    let currency: String
+    @State private var price: Price?
+    
+    var body: some View {
+        Group {
+            if let price = price {
+                VStack(alignment: .trailing) {
+                    Text(formatCurrency(price.value, currency: currency))
+                    Text(price.date)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                Text("—")
+                    .foregroundColor(.secondary)
+            }
+        }
+        .task(id: isin) {
+            price = await DatabaseService.shared.getLatestPrice(forIsin: isin)
+        }
+    }
+}
+
 // MARK: - Instruments View
 struct InstrumentsView: View {
     @EnvironmentObject var viewModel: AppViewModel
@@ -76,18 +102,7 @@ struct InstrumentsView: View {
                 .width(min: 100, ideal: 150)
                 
                 TableColumn("Latest Price") { instrument in
-                    if let price = DatabaseService.shared.getLatestPrice(forIsin: instrument.isin) {
-                        VStack(alignment: .trailing) {
-                            // Use instrument currency for consistent display
-                            Text(formatCurrency(price.value, currency: instrument.currency ?? "EUR"))
-                            Text(price.date)
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                        }
-                    } else {
-                        Text("—")
-                            .foregroundColor(.secondary)
-                    }
+                    LatestPriceCell(isin: instrument.isin, currency: instrument.currency ?? "EUR")
                 }
                 .width(min: 100, ideal: 120)
                 
@@ -107,12 +122,12 @@ struct InstrumentsView: View {
                             } else {
                                 ForEach(viewModel.quadrants) { quadrant in
                                     Button(quadrant.name) {
-                                        viewModel.assignQuadrant(instrumentIsin: instrument.isin, quadrantId: quadrant.id)
+                                        Task { await viewModel.assignQuadrant(instrumentIsin: instrument.isin, quadrantId: quadrant.id) }
                                     }
                                 }
                                 Divider()
                                 Button(L10n.instrumentsRemoveFromQuadrant) {
-                                    viewModel.assignQuadrant(instrumentIsin: instrument.isin, quadrantId: nil)
+                                    Task { await viewModel.assignQuadrant(instrumentIsin: instrument.isin, quadrantId: nil) }
                                 }
                             }
                         } label: {
@@ -122,7 +137,7 @@ struct InstrumentsView: View {
                         .help(L10n.instrumentsAssignToQuadrant)
                         
                         Button {
-                            viewModel.deleteInstrument(instrument.isin)
+                            Task { await viewModel.deleteInstrument(instrument.isin) }
                         } label: {
                             Image(systemName: "trash")
                                 .foregroundColor(.red)
@@ -143,7 +158,7 @@ struct InstrumentsView: View {
                 instrument: instrument,
                 onDismiss: { instrumentToEdit = nil },
                 onSave: { updated in
-                    viewModel.updateInstrument(updated)
+                    Task { await viewModel.updateInstrument(updated) }
                     instrumentToEdit = nil
                 }
             )
@@ -220,8 +235,7 @@ struct EditInstrumentSheet: View {
     @State private var isValidatingTicker: Bool = false
     @State private var tickerValidationMessage: String? = nil
     @State private var tickerIsValid: Bool? = nil
-    private var originalLatestPrice: Price? { DatabaseService.shared.getLatestPrice(forIsin: instrument.isin) }
-    
+    @State private var latestPrice: Price?
     private let currencies = ["EUR", "USD", "GBP", "CHF", "JPY"]
     
     private let labelWidth: CGFloat = 72
@@ -365,10 +379,10 @@ struct EditInstrumentSheet: View {
                         )
                         if hasLatestPrice, let value = parseDecimal(latestPriceText), value > 0 {
                             let newDateStr = AppDateFormatter.yearMonthDay.string(from: latestPriceDate)
-                            if let old = originalLatestPrice, old.date != newDateStr {
-                                viewModel.deletePrice(isin: instrument.isin, date: old.date)
+                            if let old = latestPrice, old.date != newDateStr {
+                                Task { await viewModel.deletePrice(isin: instrument.isin, date: old.date) }
                             }
-                            viewModel.addManualPrice(isin: instrument.isin, date: newDateStr, value: value, currency: currency)
+                            Task { await viewModel.addManualPrice(isin: instrument.isin, date: newDateStr, value: value, currency: currency) }
                         }
                         onSave(updated)
                     }
@@ -379,16 +393,20 @@ struct EditInstrumentSheet: View {
             .padding()
         }
         .frame(minWidth: 420, minHeight: 400)
+        .task(id: instrument.isin) {
+            let p = await DatabaseService.shared.getLatestPrice(forIsin: instrument.isin)
+            latestPrice = p
+            if let p = p {
+                hasLatestPrice = true
+                latestPriceDate = AppDateFormatter.yearMonthDay.date(from: p.date) ?? Date()
+                latestPriceText = String(format: "%.4f", p.value)
+            }
+        }
         .onAppear {
             name = instrument.name ?? ""
             ticker = instrument.ticker ?? ""
             currency = instrument.currency ?? "EUR"
             quadrantId = instrument.quadrantId
-            if let price = originalLatestPrice {
-                hasLatestPrice = true
-                latestPriceDate = AppDateFormatter.yearMonthDay.date(from: price.date) ?? Date()
-                latestPriceText = String(format: "%.4f", price.value)
-            }
         }
     }
 }
@@ -434,7 +452,7 @@ struct QuadrantsView: View {
                         Spacer()
                         
                         Button {
-                            viewModel.deleteQuadrant(id: quadrant.id)
+                            Task { await viewModel.deleteQuadrant(id: quadrant.id) }
                         } label: {
                             Image(systemName: "trash")
                                 .foregroundColor(.red)
@@ -482,7 +500,7 @@ struct QuadrantsView: View {
                     .keyboardShortcut(.cancelAction)
                     
                     Button(L10n.generalAdd) {
-                        viewModel.addQuadrant(name: newQuadrantName.trimmingCharacters(in: .whitespaces))
+                        Task { await viewModel.addQuadrant(name: newQuadrantName.trimmingCharacters(in: .whitespaces)) }
                         showingAddSheet = false
                         newQuadrantName = ""
                     }

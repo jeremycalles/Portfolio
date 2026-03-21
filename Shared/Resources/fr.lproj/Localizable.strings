@@ -216,10 +216,13 @@
 "settings.backgroundUpdates" = "Mises à jour en arrière-plan";
 "settings.backgroundUpdatesDescription" = "Les prix sont automatiquement mis à jour en arrière-plan lorsque l'app n'est pas utilisée. Appui long pour voir les logs.";
 "settings.automaticUpdates" = "Mises à jour automatiques";
-"settings.automaticUpdatesDescription" = "Actualiser les prix toutes les 3 heures, même lorsque l'app est fermée";
+"settings.automaticUpdatesDescription" = "Actualiser les prix selon l’intervalle choisi, même lorsque l’app est fermée, via l’assistant intégré activé dans Ouverture.";
 "settings.statusActive" = "Actif";
 "settings.statusInstalledNotRunning" = "Installé mais non actif";
 "settings.statusNotInstalled" = "Non installé";
+"settings.loginItemRegistrationFailed" = "Impossible d’activer l’assistant en arrière-plan : %@";
+"settings.loginItemRequiresApproval" = "Activez l’assistant Portfolio dans Réglages Système → Général → Ouverture (ou Ouverture et extensions) pour que les actualisations planifiées fonctionnent quand l’app est fermée.";
+"settings.openLoginItemsSettings" = "Ouvrir les réglages Ouverture…";
 "settings.enable" = "Activer";
 "settings.disable" = "Désactiver";
 "settings.runNow" = "Exécuter maintenant";

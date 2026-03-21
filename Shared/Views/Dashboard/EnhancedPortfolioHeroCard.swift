@@ -37,12 +37,11 @@ struct EnhancedPortfolioHeroCard: View {
     }
     
     private var goldTotals: (current: Double, previous: Double)? {
-        viewModel.getGrandTotalsInGold()
+        viewModel.cachedGoldTotals
     }
     
-    // Use gold history for consistent change calculation (same as Trend chart)
     private var goldHistory: [(date: Date, value: Double)] {
-        viewModel.getGoldOzHistory()
+        viewModel.cachedGoldOzHistory
     }
     
     private var goldChange: Double? {
@@ -98,7 +97,7 @@ struct EnhancedPortfolioHeroCard: View {
                         Text("\(L10n.summaryLastUpdate) \(Self.relativeDateTimeFormatter.localizedString(for: lastRefresh, relativeTo: Date()))")
                             .font(.caption2)
                             .foregroundColor(.secondary)
-                    } else if let lastUpdate = viewModel.getLastInstrumentUpdateDate() {
+                    } else if let lastUpdate = viewModel.lastInstrumentUpdateDate {
                         Text("\(L10n.summaryLastUpdate) \(Self.lastUpdateFormatter.string(from: lastUpdate))")
                             .font(.caption2)
                             .foregroundColor(.secondary)

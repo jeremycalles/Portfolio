@@ -5,17 +5,15 @@ import Charts
 struct QuickStatsRow: View {
     @EnvironmentObject var viewModel: AppViewModel
     let privacyMode: Bool
+    @State private var statsData: [QuickStatData] = []
     
-    private var statsData: [QuickStatData] {
+    private func computeStats(from allHoldings: [(isin: String, name: String, quantity: Double)], histories: [String: [(date: Date, value: Double)]]) -> [QuickStatData] {
         var stats: [QuickStatData] = []
-        
-        let allHoldings = viewModel.getAllHoldingsWithQuantity()
         guard !allHoldings.isEmpty else { return stats }
         
-        // Calculate holding changes
         var holdingChanges: [(name: String, change: Double, value: Double)] = []
         for holding in allHoldings {
-            let history = viewModel.getHoldingValueHistory(isin: holding.isin, quantity: holding.quantity)
+            let history = histories[holding.isin] ?? []
             if let first = history.first?.value, let last = history.last?.value, first > 0 {
                 let changePercent = ((last - first) / first) * 100
                 holdingChanges.append((name: holding.name, change: changePercent, value: last))
@@ -68,15 +66,25 @@ struct QuickStatsRow: View {
     }
     
     var body: some View {
-        if !statsData.isEmpty {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(statsData) { stat in
-                        QuickStatCard(data: stat)
+        Group {
+            if !statsData.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(statsData) { stat in
+                            QuickStatCard(data: stat)
+                        }
                     }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
             }
+        }
+        .task(id: viewModel.selectedPeriod) {
+            let allHoldings = await viewModel.getAllHoldingsWithQuantity()
+            var histories: [String: [(date: Date, value: Double)]] = [:]
+            for h in allHoldings {
+                histories[h.isin] = await viewModel.getHoldingValueHistory(isin: h.isin, quantity: h.quantity)
+            }
+            statsData = computeStats(from: allHoldings, histories: histories)
         }
     }
 }

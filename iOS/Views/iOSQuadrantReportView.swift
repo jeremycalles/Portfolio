@@ -16,8 +16,7 @@ struct iOSQuadrantReportView: View {
                 }
             }
             
-            // Quadrant Reports
-            let report = viewModel.getQuadrantReport()
+            let report = viewModel.cachedQuadrantReport
             ForEach(report) { item in
                 Section(item.quadrant?.name ?? "Unassigned") {
                     ForEach(item.holdings) { holding in

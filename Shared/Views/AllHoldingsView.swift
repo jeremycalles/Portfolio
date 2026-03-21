@@ -59,7 +59,7 @@ struct AllHoldingsView: View {
                 
                 // Holdings grouped by account
                 ForEach(viewModel.bankAccounts) { account in
-                    let details = viewModel.getHoldingDetails(forAccount: account.id)
+                    let details = viewModel.cachedHoldingDetailsByAccount[account.id] ?? []
                     let accountTotal = details.compactMap { $0.currentValueEUR }.reduce(0, +)
                     let accountPreviousTotal = details.compactMap { $0.previousValueEUR }.reduce(0, +)
                     
@@ -204,10 +204,6 @@ struct AllHoldingsView: View {
     }
     
     private func getAllHoldingDetails() -> [HoldingDetail] {
-        var allDetails: [HoldingDetail] = []
-        for account in viewModel.bankAccounts {
-            allDetails.append(contentsOf: viewModel.getHoldingDetails(forAccount: account.id))
-        }
-        return allDetails
+        viewModel.bankAccounts.flatMap { viewModel.cachedHoldingDetailsByAccount[$0.id] ?? [] }
     }
 }

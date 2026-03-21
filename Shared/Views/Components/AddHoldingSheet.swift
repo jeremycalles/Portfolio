@@ -36,7 +36,7 @@ struct AddHoldingSheet: View {
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button(L10n.generalAdd) {
-                            addHolding()
+                            Task { await addHolding() }
                         }
                         .disabled(!isValid)
                     }
@@ -57,7 +57,7 @@ struct AddHoldingSheet: View {
                 .keyboardShortcut(.cancelAction)
                 
                 Button(L10n.generalAdd) {
-                    addHolding()
+                    Task { await addHolding() }
                 }
                 .keyboardShortcut(.defaultAction)
                 .disabled(!isValid)
@@ -131,7 +131,7 @@ struct AddHoldingSheet: View {
         }
     }
     
-    private func addHolding() {
+    private func addHolding() async {
         guard let accountId = selectedAccountId,
               let isin = selectedIsin,
               let quantity = parseDecimal(quantityText),
@@ -142,7 +142,7 @@ struct AddHoldingSheet: View {
         let purchasePrice = includePurchaseInfo ? parseDecimal(purchasePriceText) : nil
         let purchaseDateStr = includePurchaseInfo ? AppDateFormatter.yearMonthDay.string(from: purchaseDate) : nil
         
-        viewModel.addHolding(
+        await viewModel.addHolding(
             accountId: accountId,
             isin: isin,
             quantity: quantity,

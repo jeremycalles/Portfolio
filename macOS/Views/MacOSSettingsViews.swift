@@ -16,7 +16,7 @@ struct MacOSLockGateView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .databaseDidImport)) { _ in
-            viewModel.refreshAll()
+            Task { await viewModel.refreshAll() }
         }
     }
 }
@@ -77,7 +77,7 @@ struct GeneralSettingsView: View {
                             Spacer()
                             Button {
                                 demoMode.regenerateSeed()
-                                viewModel.refreshAll()
+                                Task { await viewModel.refreshAll() }
                             } label: {
                                 Label(L10n.settingsDemoModeRandomize, systemImage: "arrow.clockwise")
                                     .font(.caption)
@@ -345,30 +345,37 @@ struct DatabaseSettingsView: View {
         let destURL = URL(fileURLWithPath: destPath)
         let destDir = destURL.deletingLastPathComponent()
         
-        do {
+        Task {
             guard url.startAccessingSecurityScopedResource() else {
-                importMessage = "Cannot access the selected file"
-                showingImportAlert = true
+                await MainActor.run {
+                    importMessage = "Cannot access the selected file"
+                    showingImportAlert = true
+                }
                 return
             }
             defer { url.stopAccessingSecurityScopedResource() }
-            
-            DatabaseService.shared.closeConnection()
-            try FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
-            if FileManager.default.fileExists(atPath: destPath) {
-                let backupPath = destPath + ".backup"
-                try? FileManager.default.removeItem(atPath: backupPath)
-                try FileManager.default.moveItem(atPath: destPath, toPath: backupPath)
+            do {
+                await DatabaseService.shared.closeConnection()
+                try FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
+                if FileManager.default.fileExists(atPath: destPath) {
+                    let backupPath = destPath + ".backup"
+                    try? FileManager.default.removeItem(atPath: backupPath)
+                    try FileManager.default.moveItem(atPath: destPath, toPath: backupPath)
+                }
+                try FileManager.default.copyItem(at: url, to: destURL)
+                await DatabaseService.shared.reconnectToDatabase()
+                await MainActor.run {
+                    importMessage = "Database imported successfully. Restart the app or switch views to load the new data."
+                    showingImportAlert = true
+                }
+                NotificationCenter.default.post(name: .databaseDidImport, object: nil)
+            } catch {
+                await DatabaseService.shared.reconnectToDatabase()
+                await MainActor.run {
+                    importMessage = "Import failed: \(error.localizedDescription)"
+                    showingImportAlert = true
+                }
             }
-            try FileManager.default.copyItem(at: url, to: destURL)
-            DatabaseService.shared.reconnectToDatabase()
-            importMessage = "Database imported successfully. Restart the app or switch views to load the new data."
-            showingImportAlert = true
-            NotificationCenter.default.post(name: .databaseDidImport, object: nil)
-        } catch {
-            DatabaseService.shared.reconnectToDatabase()
-            importMessage = "Import failed: \(error.localizedDescription)"
-            showingImportAlert = true
         }
     }
     

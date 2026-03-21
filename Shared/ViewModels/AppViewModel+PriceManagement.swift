@@ -18,10 +18,9 @@ struct RefreshResult: Identifiable {
 
 extension AppViewModel {
     // MARK: - Manual Price Management
-    func addManualPrice(isin: String, date: String, value: Double, currency: String) {
+    func addManualPrice(isin: String, date: String, value: Double, currency: String) async {
         let price = Price(id: nil, isin: isin, date: date, value: value, currency: currency)
-        db.addPrice(price)
-        // Prices aren't stored in @Published arrays — no table reload needed
+        await db.addPrice(price)
     }
     
     // MARK: - Update Prices
@@ -63,7 +62,6 @@ extension AppViewModel {
                 return collected
             }
             
-            // Store results on MainActor and collect failure reasons for debug log
             for (instrument, result) in results {
                 if let value = result.value {
                     let price = Price(
@@ -73,7 +71,7 @@ extension AppViewModel {
                         value: value,
                         currency: result.currency
                     )
-                    db.addPrice(price)
+                    await db.addPrice(price)
                     successCount += 1
                 } else {
                     failedNames.append(instrument.displayName)
@@ -91,7 +89,7 @@ extension AppViewModel {
         // Update exchange rates
         statusMessage = "Updating exchange rates..."
         if let rate = await marketData.fetchExchangeRate(from: "USD", to: "EUR") {
-            db.addExchangeRate(rate)
+            await db.addExchangeRate(rate)
         }
         
         statusMessage = "Update complete!"
@@ -116,15 +114,10 @@ extension AppViewModel {
         // Align with Settings "Last refresh" (same key as iOS BackgroundTaskManager)
         UserDefaults.standard.set(Date(), forKey: "lastBackgroundRefresh")
         
-        // Recompute cached dashboard data after price updates
-        refreshAll()
+        await refreshAll()
         
-        // Fetch and store benchmarks history in background (no UI blocking)
-        Task {
-            await fetchAndStoreBenchmarksInBackground()
-            // Recompute again after benchmarks are stored for up-to-date comparison charts
-            await MainActor.run { recomputeDashboardCache() }
-        }
+        await fetchAndStoreBenchmarksInBackground()
+        await recomputeDashboardCache()
         
         // Clear status after delay (skip for pull-to-refresh)
         if showCompletionDelay {
@@ -142,10 +135,9 @@ extension AppViewModel {
         
         let (sp500Result, goldResult, msciResult) = await (sp500Prices, goldPrices, msciPrices)
         
-        // Store results (must be on MainActor for db access)
-        for price in sp500Result { db.addPrice(price) }
-        for price in goldResult { db.addPrice(price) }
-        for price in msciResult { db.addPrice(price) }
+        for price in sp500Result { await db.addPrice(price) }
+        for price in goldResult { await db.addPrice(price) }
+        for price in msciResult { await db.addPrice(price) }
     }
     
     // MARK: - Backfill Historical Data
@@ -164,17 +156,16 @@ extension AppViewModel {
             )
             
             for price in prices {
-                db.addPrice(price)
+                await db.addPrice(price)
             }
             
             try? await Task.sleep(nanoseconds: 500_000_000)
         }
         
-        // Backfill exchange rates
         statusMessage = "Backfilling exchange rates..."
         let rates = await marketData.fetchHistoricalRates(from: "USD", to: "EUR", period: period, interval: interval)
         for rate in rates {
-            db.addExchangeRate(rate)
+            await db.addExchangeRate(rate)
         }
         
         statusMessage = "Backfill complete!"
@@ -255,11 +246,10 @@ extension AppViewModel {
         var addedCount = 0
         var skippedCount = 0
         
-        // Batch-load existing dates to avoid N individual db.getPrice() calls
-        let existingDates = Set(db.getPriceHistory(forIsin: instrument.isin).map { $0.date })
+        let existingDates = Set((await db.getPriceHistory(forIsin: instrument.isin)).map { $0.date })
         for price in prices {
             if !existingDates.contains(price.date) {
-                db.addPrice(price)
+                await db.addPrice(price)
                 addedCount += 1
             } else {
                 skippedCount += 1
@@ -288,7 +278,7 @@ extension AppViewModel {
             let rates = await marketData.fetchHistoricalRates(from: currency, to: "EUR", period: period, interval: interval)
             
             for rate in rates {
-                db.addExchangeRate(rate)
+                await db.addExchangeRate(rate)
             }
             
             if !silent {

@@ -31,7 +31,12 @@ struct DashboardView: View {
     @EnvironmentObject var viewModel: AppViewModel
     @State private var viewMode: DashboardViewMode = .quadrants
     @State private var privacyMode: Bool = false
-    @State private var quadrantGoldMode: Set<Int> = []  // Track which quadrants show gold ounces
+    @State private var quadrantGoldMode: Set<Int> = []
+    @State private var quadrantHistories: [Int: [(date: Date, value: Double)]] = [:]
+    @State private var goldQuadrantHistories: [Int: [(date: Date, value: Double)]] = [:]
+    @State private var holdingsWithQuantity: [(isin: String, name: String, quantity: Double)] = []
+    @State private var holdingHistories: [String: [(date: Date, value: Double)]] = [:]
+    @State private var accountHistories: [Int: [(date: Date, value: Double)]] = [:]
     
     private static let lastUpdateFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -99,9 +104,9 @@ struct DashboardView: View {
                     if !privacyMode {
                         GroupBox(L10n.dashboardPortfolioSummary) {
                             let totals = viewModel.cachedGrandTotalsEUR
-                            let goldTotals = viewModel.getGrandTotalsInGold()
+                            let goldTotals = viewModel.cachedGoldTotals
                             let history = viewModel.cachedPortfolioHistory
-                            let goldHistory = viewModel.getGoldOzHistory()
+                            let goldHistory = viewModel.cachedGoldOzHistory
                             
                             // Compute change from history (same as Trend chart)
                             let eurChange: Double? = {
@@ -131,7 +136,7 @@ struct DashboardView: View {
                                             Text("\(L10n.summaryLastUpdate) \(Self.relativeDateTimeFormatter.localizedString(for: lastRefresh, relativeTo: Date()))")
                                                 .font(.caption2)
                                                 .foregroundColor(.secondary)
-                                        } else if let lastUpdate = viewModel.getLastInstrumentUpdateDate() {
+                                        } else if let lastUpdate = viewModel.lastInstrumentUpdateDate {
                                             Text("\(L10n.summaryLastUpdate) \(Self.lastUpdateFormatter.string(from: lastUpdate))")
                                                 .font(.caption2)
                                                 .foregroundColor(.secondary)
@@ -284,9 +289,9 @@ struct DashboardView: View {
                             let title = isGoldMode ? "\(quadrant.name) (oz Au)" : quadrant.name
                             
                             GroupBox(title) {
-                                let history = isGoldMode
-                                    ? viewModel.getQuadrantValueHistoryInGold(quadrantId: quadrant.id)
-                                    : viewModel.getQuadrantValueHistory(quadrantId: quadrant.id)
+                                let history: [(date: Date, value: Double)] = isGoldMode
+                                    ? (goldQuadrantHistories[quadrant.id] ?? [])
+                                    : (quadrantHistories[quadrant.id] ?? [])
                                 
                                 if history.isEmpty {
                                     Text(isGoldMode ? L10n.chartNoGoldPriceData : L10n.generalNoData)
@@ -314,15 +319,13 @@ struct DashboardView: View {
                     .padding(.horizontal)
                     
                 case .holdings:
-                    // Holdings Trend Charts (2 per row)
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
                         GridItem(.flexible())
                     ], spacing: 16) {
-                        let holdings = viewModel.getAllHoldingsWithQuantity()
-                        ForEach(holdings, id: \.isin) { holding in
+                        ForEach(holdingsWithQuantity, id: \.isin) { holding in
                             GroupBox(holding.name) {
-                                let history = viewModel.getHoldingValueHistory(isin: holding.isin, quantity: holding.quantity)
+                                let history = holdingHistories[holding.isin] ?? []
                                 
                                 if history.isEmpty {
                                     Text(L10n.generalNoData)
@@ -339,10 +342,7 @@ struct DashboardView: View {
                     .padding(.horizontal)
                     
                 case .accounts:
-                    // Account Trend Charts (2 per row) - only accounts with data
-                    let accountsWithData = viewModel.bankAccounts.filter { account in
-                        !viewModel.getAccountValueHistory(accountId: account.id).isEmpty
-                    }
+                    let accountsWithData = viewModel.bankAccounts.filter { (accountHistories[$0.id] ?? []).isEmpty == false }
                     
                     if accountsWithData.isEmpty {
                         Text(L10n.dashboardNoAccountsWithData)
@@ -356,7 +356,7 @@ struct DashboardView: View {
                         ], spacing: 16) {
                             ForEach(accountsWithData) { account in
                                 GroupBox(account.displayName) {
-                                    let history = viewModel.getAccountValueHistory(accountId: account.id)
+                                    let history = accountHistories[account.id] ?? []
                                     PortfolioTrendChart(history: history, compact: true)
                                         .frame(height: 150)
                                 }
@@ -371,5 +371,19 @@ struct DashboardView: View {
             .padding(.vertical)
         }
         .navigationTitle(L10n.navDashboard)
+        .task(id: viewModel.selectedPeriod) {
+            for q in viewModel.quadrants {
+                quadrantHistories[q.id] = await viewModel.getQuadrantValueHistory(quadrantId: q.id)
+                goldQuadrantHistories[q.id] = await viewModel.getQuadrantValueHistoryInGold(quadrantId: q.id)
+            }
+            holdingsWithQuantity = await viewModel.getAllHoldingsWithQuantity()
+            holdingHistories = [:]
+            for h in holdingsWithQuantity {
+                holdingHistories[h.isin] = await viewModel.getHoldingValueHistory(isin: h.isin, quantity: h.quantity)
+            }
+            for account in viewModel.bankAccounts {
+                accountHistories[account.id] = await viewModel.getAccountValueHistory(accountId: account.id)
+            }
+        }
     }
 }

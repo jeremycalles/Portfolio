@@ -66,8 +66,12 @@ class BackgroundTaskManager: ObservableObject {
         BGTaskScheduler.shared.register(
             forTaskWithIdentifier: Self.refreshTaskIdentifier,
             using: nil
-        ) { task in
-            self.handleAppRefresh(task: task as! BGAppRefreshTask)
+        ) { [weak self] task in
+            guard let refreshTask = task as? BGAppRefreshTask else {
+                print("[BackgroundTask] Unexpected task type: \(type(of: task))")
+                return
+            }
+            self?.handleAppRefresh(task: refreshTask)
         }
         
         print("[BackgroundTask] Registered background refresh task")
@@ -124,8 +128,7 @@ class BackgroundTaskManager: ObservableObject {
         var successCount = 0
         var failureCount = 0
         
-        // Get the shared view model or database service
-        let instruments = DatabaseService.shared.getAllInstruments()
+        let instruments = await DatabaseService.shared.getAllInstruments()
         
         guard !instruments.isEmpty else {
             log("No instruments to refresh")
@@ -147,7 +150,7 @@ class BackgroundTaskManager: ObservableObject {
                     value: price,
                     currency: result.currency
                 )
-                DatabaseService.shared.addPrice(newPrice)
+                await DatabaseService.shared.addPrice(newPrice)
                 
                 // Update instrument info if available (but NOT currency - that should stay as originally set)
                 if result.name != nil || result.ticker != nil {
@@ -155,7 +158,7 @@ class BackgroundTaskManager: ObservableObject {
                     if let name = result.name { updatedInstrument.name = name }
                     if let ticker = result.ticker { updatedInstrument.ticker = ticker }
                     // Do NOT update currency here - FT may return wrong share class currency
-                    DatabaseService.shared.addOrUpdateInstrument(updatedInstrument)
+                    await DatabaseService.shared.addOrUpdateInstrument(updatedInstrument)
                 }
                 
                 log("\(displayName): \(String(format: "%.2f", price)) \(result.currency ?? "")")
@@ -172,30 +175,19 @@ class BackgroundTaskManager: ObservableObject {
         // Save last refresh time
         UserDefaults.standard.set(Date(), forKey: "lastBackgroundRefresh")
         
-        // Fetch and store benchmarks history (S&P 500, Gold, MSCI World) in background
+        // Fetch and store benchmarks history in background
         Task.detached(priority: .utility) {
-            // S&P 500
             let sp500Prices = await MarketDataService.shared.fetchSP500History(period: "2y", interval: "1d")
-            await MainActor.run {
-                for price in sp500Prices {
-                    DatabaseService.shared.addPrice(price)
-                }
+            for price in sp500Prices {
+                await DatabaseService.shared.addPrice(price)
             }
-            
-            // Gold
             let goldPrices = await MarketDataService.shared.fetchGoldHistory(period: "2y", interval: "1d")
-            await MainActor.run {
-                for price in goldPrices {
-                    DatabaseService.shared.addPrice(price)
-                }
+            for price in goldPrices {
+                await DatabaseService.shared.addPrice(price)
             }
-            
-            // MSCI World
             let msciPrices = await MarketDataService.shared.fetchMSCIWorldHistory(period: "2y", interval: "1d")
-            await MainActor.run {
-                for price in msciPrices {
-                    DatabaseService.shared.addPrice(price)
-                }
+            for price in msciPrices {
+                await DatabaseService.shared.addPrice(price)
             }
         }
         

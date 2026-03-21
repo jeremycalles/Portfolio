@@ -40,7 +40,7 @@ struct iOSAllHoldingsView: View {
             
             // Holdings grouped by account
             ForEach(viewModel.bankAccounts) { account in
-                let details = viewModel.getHoldingDetails(forAccount: account.id)
+                let details = viewModel.cachedHoldingDetailsByAccount[account.id] ?? []
                 if !details.isEmpty {
                     Section(account.displayName) {
                         ForEach(details) { holding in
@@ -83,7 +83,7 @@ struct iOSAllHoldingsView: View {
                             .buttonStyle(.plain)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 Button(role: .destructive) {
-                                    viewModel.deleteHolding(accountId: account.id, isin: holding.isin)
+                                    Task { await viewModel.deleteHolding(accountId: account.id, isin: holding.isin) }
                                 } label: {
                                     Label("Delete", systemImage: "trash")
                                 }

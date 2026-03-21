@@ -8,7 +8,7 @@ struct QuadrantPieChart: View {
     var compact: Bool = false
     
     private var quadrantData: [(name: String, value: Double, color: Color)] {
-        let report = viewModel.getQuadrantReport()
+        let report = viewModel.cachedQuadrantReport
         let colors: [Color] = [.blue, .green, .orange, .purple, .pink, .cyan, .yellow, .mint, .indigo, .teal]
         
         var data: [(name: String, value: Double, color: Color)] = []

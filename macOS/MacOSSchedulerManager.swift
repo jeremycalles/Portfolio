@@ -1,6 +1,8 @@
 #if os(macOS)
 import SwiftUI
 import AppKit
+import ServiceManagement
+import CoreFoundation
 
 // MARK: - Refresh Interval
 enum RefreshInterval: Int, CaseIterable, Identifiable {
@@ -26,8 +28,6 @@ enum RefreshInterval: Int, CaseIterable, Identifiable {
 class MacOSSchedulerManager: ObservableObject {
     static let shared = MacOSSchedulerManager()
     
-    private let agentLabel = "com.portfolio.app.pricerefresh"
-    private let plistPath: String
     private let logDir: URL
     private let logPath: URL
     
@@ -35,15 +35,16 @@ class MacOSSchedulerManager: ObservableObject {
     @Published var isRunning: Bool = false
     @Published var isRefreshing: Bool = false
     @Published var lastRefreshLog: String = ""
+    /// Shown when `SMAppService` registration fails or the login item needs user approval.
+    @Published var launchAgentSetupError: String?
     
     @Published var selectedInterval: RefreshInterval {
         didSet {
             UserDefaults.standard.set(selectedInterval.rawValue, forKey: "refreshIntervalSeconds")
-            // If installed, reinstall with new interval
-            if isInstalled {
-                reinstall()
-            }
-            // Restart in-app timer with new interval
+            refreshDefaults.set(selectedInterval.rawValue, forKey: PortfolioRefreshBridge.refreshIntervalSecondsKey)
+            refreshDefaults.synchronize()
+            postRefreshPrefsDarwinNotification()
+            syncLoginItemHelperAfterPreferenceChange()
             if timerEnabled {
                 startTimer()
             }
@@ -53,176 +54,204 @@ class MacOSSchedulerManager: ObservableObject {
     @Published var timerEnabled: Bool = false {
         didSet {
             UserDefaults.standard.set(timerEnabled, forKey: "backgroundRefreshEnabled")
+            refreshDefaults.set(timerEnabled, forKey: PortfolioRefreshBridge.backgroundRefreshEnabledKey)
+            refreshDefaults.synchronize()
+            postRefreshPrefsDarwinNotification()
             if timerEnabled {
                 startTimer()
             } else {
                 stopTimer()
             }
+            syncLoginItemHelperAfterPreferenceChange()
         }
     }
     
     private var refreshTimer: Timer?
     
+    private var refreshDefaults: UserDefaults {
+        UserDefaults(suiteName: PortfolioRefreshBridge.appGroupIdentifier) ?? .standard
+    }
+    
+    private var loginItemService: SMAppService {
+        SMAppService.loginItem(identifier: PortfolioRefreshBridge.loginItemBundleIdentifier)
+    }
+    
     // MARK: - Init
     
     init() {
-        let homeDir = FileManager.default.homeDirectoryForCurrentUser
-        plistPath = homeDir.appendingPathComponent("Library/LaunchAgents/\(agentLabel).plist").path
-        logDir = homeDir.appendingPathComponent("Library/Logs/PortfolioApp")
+        if let lib = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first {
+            logDir = lib.appendingPathComponent("Logs/PortfolioApp", isDirectory: true)
+        } else {
+            logDir = FileManager.default.temporaryDirectory.appendingPathComponent("PortfolioAppLogs", isDirectory: true)
+        }
         logPath = logDir.appendingPathComponent("refresh.log")
         
-        // Load persisted interval
-        let savedInterval = UserDefaults.standard.integer(forKey: "refreshIntervalSeconds")
-        selectedInterval = RefreshInterval(rawValue: savedInterval) ?? .threeHours
+        let suite = UserDefaults(suiteName: PortfolioRefreshBridge.appGroupIdentifier)
+        if let suite {
+            if suite.object(forKey: PortfolioRefreshBridge.refreshIntervalSecondsKey) == nil {
+                let v = UserDefaults.standard.integer(forKey: "refreshIntervalSeconds")
+                if v != 0 {
+                    suite.set(v, forKey: PortfolioRefreshBridge.refreshIntervalSecondsKey)
+                }
+            }
+            if suite.object(forKey: PortfolioRefreshBridge.backgroundRefreshEnabledKey) == nil {
+                suite.set(
+                    UserDefaults.standard.bool(forKey: "backgroundRefreshEnabled"),
+                    forKey: PortfolioRefreshBridge.backgroundRefreshEnabledKey
+                )
+            }
+            suite.synchronize()
+        }
         
-        // Load persisted timer state
-        timerEnabled = UserDefaults.standard.bool(forKey: "backgroundRefreshEnabled")
+        let suiteInterval = suite?.integer(forKey: PortfolioRefreshBridge.refreshIntervalSecondsKey) ?? 0
+        let standardInterval = UserDefaults.standard.integer(forKey: "refreshIntervalSeconds")
+        let resolvedInterval = suiteInterval != 0 ? suiteInterval : standardInterval
+        selectedInterval = RefreshInterval(rawValue: resolvedInterval) ?? .threeHours
+        
+        let suiteTimer = suite?.object(forKey: PortfolioRefreshBridge.backgroundRefreshEnabledKey) as? Bool
+        timerEnabled = suiteTimer ?? UserDefaults.standard.bool(forKey: "backgroundRefreshEnabled")
         
         checkStatus()
         loadLastLog()
         
-        // Auto-start timer if enabled
         if timerEnabled {
             startTimer()
+        }
+    }
+    
+    private func migrateRefreshPreferencesFromStandardUserDefaults() {
+        guard UserDefaults(suiteName: PortfolioRefreshBridge.appGroupIdentifier) != nil else { return }
+        if refreshDefaults.object(forKey: PortfolioRefreshBridge.refreshIntervalSecondsKey) == nil {
+            let v = UserDefaults.standard.integer(forKey: "refreshIntervalSeconds")
+            if v != 0 {
+                refreshDefaults.set(v, forKey: PortfolioRefreshBridge.refreshIntervalSecondsKey)
+            }
+        }
+        if refreshDefaults.object(forKey: PortfolioRefreshBridge.backgroundRefreshEnabledKey) == nil {
+            refreshDefaults.set(
+                UserDefaults.standard.bool(forKey: "backgroundRefreshEnabled"),
+                forKey: PortfolioRefreshBridge.backgroundRefreshEnabledKey
+            )
+        }
+        refreshDefaults.synchronize()
+    }
+    
+    private func postRefreshPrefsDarwinNotification() {
+        CFNotificationCenterPostNotification(
+            CFNotificationCenterGetDarwinNotifyCenter(),
+            CFNotificationName(PortfolioRefreshBridge.refreshPrefsDarwinNotification),
+            nil,
+            nil,
+            true
+        )
+    }
+    
+    /// If the login item is enabled but no helper process is running, launch it (e.g. after toggling preferences).
+    private func syncLoginItemHelperAfterPreferenceChange() {
+        guard isInstalled, timerEnabled else { return }
+        let bid = PortfolioRefreshBridge.loginItemBundleIdentifier
+        let running = NSRunningApplication.runningApplications(withBundleIdentifier: bid)
+        if running.isEmpty {
+            Task { await launchEmbeddedLoginItem() }
         }
     }
     
     // MARK: - Status Check
     
     func checkStatus() {
-        isInstalled = FileManager.default.fileExists(atPath: plistPath)
-        
-        let task = Process()
-        task.launchPath = "/bin/launchctl"
-        task.arguments = ["list", agentLabel]
-        
-        let pipe = Pipe()
-        task.standardOutput = pipe
-        task.standardError = pipe
-        
-        do {
-            try task.run()
-            task.waitUntilExit()
-            isRunning = task.terminationStatus == 0
-        } catch {
+        switch loginItemService.status {
+        case .enabled:
+            isInstalled = true
+            isRunning = true
+        case .requiresApproval:
+            isInstalled = true
+            isRunning = false
+        default:
+            isInstalled = false
             isRunning = false
         }
     }
     
-    // MARK: - Plist Generation
+    // MARK: - Install / Uninstall (SMAppService + embedded login item)
     
-    private func generatePlist() -> [String: Any] {
-        return [
-            "Label": agentLabel,
-            "ProgramArguments": ["/usr/bin/open", "-g", "portfolio://refresh"],
-            "StartInterval": selectedInterval.rawValue,
-            "StandardOutPath": logDir.appendingPathComponent("launchagent.stdout.log").path,
-            "StandardErrorPath": logDir.appendingPathComponent("launchagent.stderr.log").path,
-            "RunAtLoad": true,
-        ]
-    }
-    
-    private func writePlist() -> Bool {
-        // Ensure LaunchAgents directory exists
-        let launchAgentsDir = (plistPath as NSString).deletingLastPathComponent
-        try? FileManager.default.createDirectory(atPath: launchAgentsDir, withIntermediateDirectories: true)
-        
-        // Ensure log directory exists
-        try? FileManager.default.createDirectory(at: logDir, withIntermediateDirectories: true)
-        
-        let plistData = generatePlist()
-        do {
-            let data = try PropertyListSerialization.data(fromPropertyList: plistData, format: .xml, options: 0)
-            try data.write(to: URL(fileURLWithPath: plistPath))
-            return true
-        } catch {
-            appendLog("Failed to write plist: \(error.localizedDescription)", isError: true)
-            return false
-        }
-    }
-    
-    // MARK: - Install / Uninstall
-    
-    func install() {
-        guard writePlist() else { return }
-        
-        let task = Process()
-        task.launchPath = "/bin/launchctl"
-        task.arguments = ["load", plistPath]
+    func install() async {
+        launchAgentSetupError = nil
+        migrateRefreshPreferencesFromStandardUserDefaults()
+        refreshDefaults.set(selectedInterval.rawValue, forKey: PortfolioRefreshBridge.refreshIntervalSecondsKey)
+        refreshDefaults.set(true, forKey: PortfolioRefreshBridge.backgroundRefreshEnabledKey)
+        refreshDefaults.synchronize()
+        postRefreshPrefsDarwinNotification()
         
         do {
-            try task.run()
-            task.waitUntilExit()
-            appendLog("Launch Agent installed (interval: \(selectedInterval.displayName))")
+            try await loginItemService.register()
         } catch {
-            appendLog("Failed to load launch agent: \(error.localizedDescription)", isError: true)
+            let message = error.localizedDescription
+            launchAgentSetupError = L10n.settingsLoginItemRegistrationFailed(message)
+            appendLog("Login item registration failed: \(message)", isError: true)
+            checkStatus()
+            return
         }
         
         checkStatus()
+        appendLog("Login item registered (interval: \(selectedInterval.displayName))")
         
-        // Also enable the in-app timer
+        if loginItemService.status == .requiresApproval {
+            launchAgentSetupError = L10n.settingsLoginItemRequiresApproval
+        }
+        
         if !timerEnabled {
             timerEnabled = true
         }
+        
+        await launchEmbeddedLoginItem()
     }
     
-    func uninstall() {
-        // Unload if running
-        if isInstalled {
-            let task = Process()
-            task.launchPath = "/bin/launchctl"
-            task.arguments = ["unload", plistPath]
-            
-            do {
-                try task.run()
-                task.waitUntilExit()
-            } catch {
-                appendLog("Failed to unload launch agent: \(error.localizedDescription)", isError: true)
-            }
-            
-            // Remove plist file
-            try? FileManager.default.removeItem(atPath: plistPath)
-            appendLog("Launch Agent uninstalled")
+    func uninstall() async {
+        launchAgentSetupError = nil
+        terminateLoginItemHelper()
+        do {
+            try await loginItemService.unregister()
+        } catch {
+            let message = error.localizedDescription
+            launchAgentSetupError = L10n.settingsLoginItemRegistrationFailed(message)
+            appendLog("Login item unregister failed: \(message)", isError: true)
         }
-        
-        checkStatus()
-        
-        // Also stop the in-app timer
+        refreshDefaults.set(false, forKey: PortfolioRefreshBridge.backgroundRefreshEnabledKey)
+        refreshDefaults.synchronize()
+        postRefreshPrefsDarwinNotification()
         if timerEnabled {
             timerEnabled = false
         }
+        checkStatus()
+        appendLog("Login item unregistered")
     }
     
-    func reinstall() {
-        // Unload existing
-        if isInstalled {
-            let unloadTask = Process()
-            unloadTask.launchPath = "/bin/launchctl"
-            unloadTask.arguments = ["unload", plistPath]
-            do {
-                try unloadTask.run()
-                unloadTask.waitUntilExit()
-            } catch {
-                // Ignore — may not be loaded
-            }
+    func openLoginItemsSystemSettings() {
+        if let url = URL(string: "x-apple.systempreferences:com.apple.LoginItems-Settings.extension") {
+            NSWorkspace.shared.open(url)
         }
-        
-        // Write new plist with updated interval
-        guard writePlist() else { return }
-        
-        // Load
-        let loadTask = Process()
-        loadTask.launchPath = "/bin/launchctl"
-        loadTask.arguments = ["load", plistPath]
+    }
+    
+    private func terminateLoginItemHelper() {
+        let bid = PortfolioRefreshBridge.loginItemBundleIdentifier
+        NSRunningApplication.runningApplications(withBundleIdentifier: bid).forEach { $0.terminate() }
+    }
+    
+    private func launchEmbeddedLoginItem() async {
+        let url = Bundle.main.bundleURL
+            .appendingPathComponent("Contents/Library/LoginItems", isDirectory: true)
+            .appendingPathComponent("PortfolioRefreshLoginItem.app", isDirectory: true)
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            appendLog("Login item helper missing from app bundle (expected at \(url.path))", isError: true)
+            return
+        }
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.activates = false
         do {
-            try loadTask.run()
-            loadTask.waitUntilExit()
-            appendLog("Launch Agent reinstalled (interval: \(selectedInterval.displayName))")
+            _ = try await NSWorkspace.shared.openApplication(at: url, configuration: configuration)
         } catch {
-            appendLog("Failed to reload launch agent: \(error.localizedDescription)", isError: true)
+            appendLog("Could not start login item helper: \(error.localizedDescription)", isError: true)
         }
-        
-        checkStatus()
     }
     
     // MARK: - In-App Timer
@@ -260,7 +289,7 @@ class MacOSSchedulerManager: ObservableObject {
         var successCount = 0
         var failureCount = 0
         
-        let instruments = DatabaseService.shared.getAllInstruments()
+        let instruments = await DatabaseService.shared.getAllInstruments()
         
         guard !instruments.isEmpty else {
             appendLog("No instruments to refresh")
@@ -283,14 +312,14 @@ class MacOSSchedulerManager: ObservableObject {
                     value: price,
                     currency: result.currency
                 )
-                DatabaseService.shared.addPrice(newPrice)
+                await DatabaseService.shared.addPrice(newPrice)
                 
                 // Update instrument info if available (but NOT currency)
                 if result.name != nil || result.ticker != nil {
                     var updatedInstrument = instrument
                     if let name = result.name { updatedInstrument.name = name }
                     if let ticker = result.ticker { updatedInstrument.ticker = ticker }
-                    DatabaseService.shared.addOrUpdateInstrument(updatedInstrument)
+                    await DatabaseService.shared.addOrUpdateInstrument(updatedInstrument)
                 }
                 
                 appendLog("\(displayName): \(String(format: "%.2f", price)) \(result.currency ?? "")")
@@ -308,7 +337,7 @@ class MacOSSchedulerManager: ObservableObject {
         // Update exchange rates
         appendLog("Updating exchange rates...")
         if let rate = await MarketDataService.shared.fetchExchangeRate(from: "USD", to: "EUR") {
-            DatabaseService.shared.addExchangeRate(rate)
+            await DatabaseService.shared.addExchangeRate(rate)
             appendLog("USD/EUR rate updated")
         }
         
@@ -320,9 +349,9 @@ class MacOSSchedulerManager: ObservableObject {
         
         let (sp500Result, goldResult, msciResult) = await (sp500Prices, goldPrices, msciPrices)
         
-        for price in sp500Result { DatabaseService.shared.addPrice(price) }
-        for price in goldResult { DatabaseService.shared.addPrice(price) }
-        for price in msciResult { DatabaseService.shared.addPrice(price) }
+        for price in sp500Result { await DatabaseService.shared.addPrice(price) }
+        for price in goldResult { await DatabaseService.shared.addPrice(price) }
+        for price in msciResult { await DatabaseService.shared.addPrice(price) }
         
         appendLog("Benchmarks updated (S&P500: \(sp500Result.count), Gold: \(goldResult.count), MSCI: \(msciResult.count))")
         
@@ -444,6 +473,20 @@ struct BackgroundRefreshSettingsView: View {
                 }
                 .pickerStyle(.segmented)
                 
+                if let setupError = manager.launchAgentSetupError {
+                    Text(setupError)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .textSelection(.enabled)
+                }
+                
+                if manager.isInstalled && !manager.isRunning {
+                    Button(L10n.settingsOpenLoginItemsSettings) {
+                        manager.openLoginItemsSystemSettings()
+                    }
+                    .buttonStyle(.link)
+                }
+                
                 // Last refresh
                 if let lastRefresh = manager.timeSinceLastRefresh() {
                     HStack {
@@ -460,12 +503,12 @@ struct BackgroundRefreshSettingsView: View {
                 HStack(spacing: 12) {
                     if manager.isInstalled {
                         Button(L10n.settingsDisable) {
-                            manager.uninstall()
+                            Task { await manager.uninstall() }
                         }
                         .buttonStyle(.bordered)
                     } else {
                         Button(L10n.settingsEnable) {
-                            manager.install()
+                            Task { await manager.install() }
                         }
                         .buttonStyle(.borderedProminent)
                     }

@@ -5,6 +5,8 @@ import Charts
 struct iOSDashboardAccountsSectionEnhanced: View {
     @EnvironmentObject var viewModel: AppViewModel
     let privacyMode: Bool
+    @State private var accountHistories: [Int: [(date: Date, value: Double)]] = [:]
+    @State private var accountDetails: [Int: [HoldingDetail]] = [:]
     
     var body: some View {
         LazyVGrid(columns: [GridItem(.flexible())], spacing: 12) {
@@ -14,14 +16,9 @@ struct iOSDashboardAccountsSectionEnhanced: View {
                     .frame(maxWidth: .infinity)
                     .padding()
             } else {
-                // Show accounts with data
-                let accountsWithData = viewModel.bankAccounts.filter { account in
-                    !viewModel.getAccountValueHistory(accountId: account.id).isEmpty
-                }
-                
-                ForEach(accountsWithData) { account in
-                    let history = viewModel.getAccountValueHistory(accountId: account.id)
-                    let details = viewModel.getHoldingDetails(forAccount: account.id)
+                ForEach(viewModel.bankAccounts) { account in
+                    let history = accountHistories[account.id] ?? []
+                    let details = accountDetails[account.id] ?? []
                     let totalValue = details.compactMap { $0.currentValueEUR }.reduce(0, +)
                     
                     EnhancedTrendCard(
@@ -31,25 +28,14 @@ struct iOSDashboardAccountsSectionEnhanced: View {
                         privacyMode: privacyMode
                     )
                 }
-                
-                // Accounts without chart data
-                let accountsWithoutData = viewModel.bankAccounts.filter { account in
-                    viewModel.getAccountValueHistory(accountId: account.id).isEmpty
-                }
-                
-                ForEach(accountsWithoutData) { account in
-                    let details = viewModel.getHoldingDetails(forAccount: account.id)
-                    let totalValue = details.compactMap { $0.currentValueEUR }.reduce(0, +)
-                    
-                    EnhancedTrendCard(
-                        title: "\(account.displayName) (\(details.count) holdings)",
-                        history: [],
-                        currentValue: totalValue,
-                        privacyMode: privacyMode
-                    )
-                }
             }
         }
         .padding(.horizontal)
+        .task(id: viewModel.selectedPeriod) {
+            for account in viewModel.bankAccounts {
+                accountHistories[account.id] = await viewModel.getAccountValueHistory(accountId: account.id)
+                accountDetails[account.id] = await viewModel.getHoldingDetails(forAccount: account.id)
+            }
+        }
     }
 }

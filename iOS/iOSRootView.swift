@@ -61,7 +61,7 @@ struct iOSRootView: View {
             .tag(4)
         }
         .onAppear {
-            viewModel.refreshAll()
+            Task { await viewModel.refreshAll() }
         }
         .alert(L10n.generalError, isPresented: .constant(viewModel.errorMessage != nil)) {
             Button(L10n.generalOk) {

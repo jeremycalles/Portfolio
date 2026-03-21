@@ -216,10 +216,13 @@
 "settings.backgroundUpdates" = "Background Updates";
 "settings.backgroundUpdatesDescription" = "Prices are automatically updated in the background when the app is not in use. Long-press to view logs.";
 "settings.automaticUpdates" = "Automatic Updates";
-"settings.automaticUpdatesDescription" = "Refresh prices every 3 hours, even when the app is closed";
+"settings.automaticUpdatesDescription" = "Refresh prices on the schedule you choose, even when the app is closed, using the embedded helper enabled in Login Items.";
 "settings.statusActive" = "Active";
 "settings.statusInstalledNotRunning" = "Installed but not running";
 "settings.statusNotInstalled" = "Not installed";
+"settings.loginItemRegistrationFailed" = "Could not enable the background helper: %@";
+"settings.loginItemRequiresApproval" = "Turn on the Portfolio helper under System Settings → General → Login Items (or Open at Login) so scheduled refreshes can run while the app is closed.";
+"settings.openLoginItemsSettings" = "Open Login Items settings…";
 "settings.enable" = "Enable";
 "settings.disable" = "Disable";
 "settings.runNow" = "Run Now";

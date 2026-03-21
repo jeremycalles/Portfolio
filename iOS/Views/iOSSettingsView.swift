@@ -64,7 +64,7 @@ struct iOSSettingsView: View {
                         
                         Button {
                             demoMode.regenerateSeed()
-                            viewModel.refreshAll()
+                            Task { await viewModel.refreshAll() }
                         } label: {
                             HStack {
                                 Label(L10n.settingsDemoModeRandomize, systemImage: "arrow.clockwise")
@@ -241,7 +241,7 @@ struct iOSSettingsView: View {
                     }
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                         Button(role: .destructive) {
-                            viewModel.deleteBankAccount(id: account.id)
+                            Task { await viewModel.deleteBankAccount(id: account.id) }
                         } label: {
                             Label("Delete", systemImage: "trash")
                         }
@@ -274,7 +274,7 @@ struct iOSSettingsView: View {
                     }
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                         Button(role: .destructive) {
-                            viewModel.deleteQuadrant(id: quadrant.id)
+                            Task { await viewModel.deleteQuadrant(id: quadrant.id) }
                         } label: {
                             Label("Delete", systemImage: "trash")
                         }
@@ -367,32 +367,37 @@ struct iOSSettingsView: View {
         let destURL = URL(fileURLWithPath: destPath)
         let destDir = destURL.deletingLastPathComponent()
         
-        do {
-            // Start accessing security-scoped resource
+        Task {
             guard url.startAccessingSecurityScopedResource() else {
-                importMessage = "Cannot access the selected file"
-                showingAlert = true
+                await MainActor.run {
+                    importMessage = "Cannot access the selected file"
+                    showingAlert = true
+                }
                 return
             }
             defer { url.stopAccessingSecurityScopedResource() }
-            
-            DatabaseService.shared.closeConnection()
-            try FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
-            if FileManager.default.fileExists(atPath: destPath) {
-                let backupPath = destPath + ".backup"
-                try? FileManager.default.removeItem(atPath: backupPath)
-                try FileManager.default.moveItem(atPath: destPath, toPath: backupPath)
+            do {
+                await DatabaseService.shared.closeConnection()
+                try FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
+                if FileManager.default.fileExists(atPath: destPath) {
+                    let backupPath = destPath + ".backup"
+                    try? FileManager.default.removeItem(atPath: backupPath)
+                    try FileManager.default.moveItem(atPath: destPath, toPath: backupPath)
+                }
+                try FileManager.default.copyItem(at: url, to: destURL)
+                await DatabaseService.shared.reconnectToDatabase()
+                await MainActor.run {
+                    importMessage = "Database imported successfully! Please restart the app to load the new data."
+                    showingAlert = true
+                }
+                await viewModel.refreshAll()
+            } catch {
+                await DatabaseService.shared.reconnectToDatabase()
+                await MainActor.run {
+                    importMessage = "Import failed: \(error.localizedDescription)"
+                    showingAlert = true
+                }
             }
-            try FileManager.default.copyItem(at: url, to: destURL)
-            DatabaseService.shared.reconnectToDatabase()
-            importMessage = "Database imported successfully! Please restart the app to load the new data."
-            showingAlert = true
-            viewModel.refreshAll()
-            
-        } catch {
-            DatabaseService.shared.reconnectToDatabase()
-            importMessage = "Import failed: \(error.localizedDescription)"
-            showingAlert = true
         }
     }
 }
@@ -471,7 +476,7 @@ struct AddQuadrantSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
                         let name = quadrantName.trimmingCharacters(in: .whitespaces)
-                        viewModel.addQuadrant(name: name)
+                        Task { await viewModel.addQuadrant(name: name) }
                         dismiss()
                     }
                     .disabled(!isValid)
@@ -520,7 +525,7 @@ struct AddBankAccountSheet: View {
                     Button("Add") {
                         let bank = bankName.trimmingCharacters(in: .whitespaces)
                         let account = accountName.trimmingCharacters(in: .whitespaces)
-                        viewModel.addBankAccount(bank: bank, account: account)
+                        Task { await viewModel.addBankAccount(bank: bank, account: account) }
                         dismiss()
                     }
                     .disabled(!isValid)

@@ -111,7 +111,7 @@ struct EditHoldingView: View {
         guard let quantity = parseDecimal(quantityText), quantity > 0 else { return }
         let purchaseDateStr: String? = includePurchaseInfo ? AppDateFormatter.yearMonthDay.string(from: purchaseDate) : nil
         let purchasePrice: Double? = includePurchaseInfo ? parseDecimal(purchasePriceText) : nil
-        viewModel.updateHolding(accountId: accountId, isin: isin, quantity: quantity, purchaseDate: purchaseDateStr, purchasePrice: purchasePrice)
+        Task { await viewModel.updateHolding(accountId: accountId, isin: isin, quantity: quantity, purchaseDate: purchaseDateStr, purchasePrice: purchasePrice) }
         dismiss()
     }
 }
