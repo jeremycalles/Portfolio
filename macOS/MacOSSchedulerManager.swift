@@ -449,123 +449,143 @@ struct BackgroundRefreshSettingsView: View {
     
     var body: some View {
         Form {
-            Section(L10n.settingsBackgroundRefresh) {
-                // Status header
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(L10n.settingsAutomaticUpdates)
-                            .font(.headline)
-                        Text(L10n.settingsAutomaticUpdatesDescription)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Spacer()
-                    
+            Section {
+                // Status Header
+                PremiumSettingsRow(
+                    title: L10n.settingsAutomaticUpdates,
+                    subtitle: L10n.settingsAutomaticUpdatesDescription,
+                    icon: "arrow.clockwise.circle.fill",
+                    iconColor: .blue
+                ) {
                     statusBadge
                 }
                 
-                // Interval picker
-                Picker("Refresh interval", selection: $manager.selectedInterval) {
-                    ForEach(RefreshInterval.allCases) { interval in
-                        Text(interval.displayName).tag(interval)
+                // Interval Picker
+                PremiumSettingsRow(
+                    title: L10n.settingsBackgroundRefreshInterval,
+                    icon: "timer",
+                    iconColor: .gray
+                ) {
+                    Picker("", selection: $manager.selectedInterval) {
+                        ForEach(RefreshInterval.allCases) { interval in
+                            Text(interval.displayName).tag(interval)
+                        }
                     }
-                }
-                .pickerStyle(.segmented)
-                
-                if let setupError = manager.launchAgentSetupError {
-                    Text(setupError)
-                        .font(.caption)
-                        .foregroundStyle(.red)
-                        .textSelection(.enabled)
+                    .pickerStyle(.menu)
+                    .labelsHidden()
+                    .frame(width: 120)
                 }
                 
-                if manager.isInstalled && !manager.isRunning {
-                    Button(L10n.settingsOpenLoginItemsSettings) {
-                        manager.openLoginItemsSystemSettings()
-                    }
-                    .buttonStyle(.link)
-                }
-                
-                // Last refresh
+                // Last Refresh info
                 if let lastRefresh = manager.timeSinceLastRefresh() {
-                    HStack {
-                        Text(L10n.settingsLastRefresh)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text(lastRefresh)
-                            .foregroundColor(.secondary)
+                    PremiumSettingsRow(
+                        title: L10n.settingsLastRefresh,
+                        subtitle: lastRefresh,
+                        icon: "clock.fill",
+                        iconColor: .gray
+                    ) {
+                        EmptyView()
                     }
-                    .font(.caption)
                 }
                 
-                // Action buttons
-                HStack(spacing: 12) {
-                    if manager.isInstalled {
-                        Button(L10n.settingsDisable) {
-                            manager.uninstall()
+                // Actions
+                VStack(alignment: .leading, spacing: 12) {
+                    if let setupError = manager.launchAgentSetupError {
+                        Label(setupError, systemImage: "exclamationmark.triangle.fill")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .padding(8)
+                            .background(Color.red.opacity(0.1))
+                            .cornerRadius(6)
+                    }
+                    
+                    if manager.isInstalled && !manager.isRunning {
+                        Button(L10n.settingsOpenLoginItemsSettings) {
+                            manager.openLoginItemsSystemSettings()
+                        }
+                        .buttonStyle(.link)
+                        .font(.caption)
+                    }
+                    
+                    HStack(spacing: 12) {
+                        if manager.isInstalled {
+                            Button(L10n.settingsDisable) {
+                                manager.uninstall()
+                            }
+                            .buttonStyle(.bordered)
+                        } else {
+                            Button(L10n.settingsEnable) {
+                                Task { await manager.install() }
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                        
+                        Button(L10n.settingsRunNow) {
+                            Task { await manager.performBackgroundRefresh() }
                         }
                         .buttonStyle(.bordered)
-                    } else {
-                        Button(L10n.settingsEnable) {
-                            Task { await manager.install() }
+                        .disabled(manager.isRefreshing)
+                        
+                        if manager.isRefreshing {
+                            ProgressView().controlSize(.small)
                         }
-                        .buttonStyle(.borderedProminent)
-                    }
-                    
-                    Button(L10n.settingsRunNow) {
-                        Task {
-                            await manager.performBackgroundRefresh()
-                        }
-                    }
-                    .disabled(manager.isRefreshing)
-                    
-                    if manager.isRefreshing {
-                        ProgressView()
-                            .scaleEffect(0.7)
-                    }
-                    
-                    Spacer()
-                    
-                    Button(L10n.settingsRefreshStatus) {
-                        manager.checkStatus()
-                    }
-                    .buttonStyle(.link)
-                }
-            }
-            
-            Section("Logs") {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text(L10n.settingsRecentActivity)
-                            .font(.headline)
+                        
                         Spacer()
                         
-                        Button("Clear") {
-                            manager.clearLogs()
+                        Button(L10n.settingsRefreshStatus) {
+                            manager.checkStatus()
                         }
                         .buttonStyle(.link)
+                        .font(.caption)
+                    }
+                }
+                .padding(.vertical, 4)
+                .padding(.leading, 42)
+            } header: {
+                SettingsSectionHeader(title: L10n.settingsBackgroundRefresh, icon: "arrow.clockwise", color: .blue)
+            }
+            
+            Section {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Label(L10n.settingsRecentActivity, systemImage: "list.bullet.rectangle.fill")
+                            .font(.headline)
                         
-                        Button(L10n.settingsOpenLogsFolder) {
-                            manager.openLogsInFinder()
+                        Spacer()
+                        
+                        HStack(spacing: 16) {
+                            Button("Clear") {
+                                manager.clearLogs()
+                            }
+                            .buttonStyle(.link)
+                            
+                            Button(L10n.settingsOpenLogsFolder) {
+                                manager.openLogsInFinder()
+                            }
+                            .buttonStyle(.link)
                         }
-                        .buttonStyle(.link)
+                        .font(.caption)
                     }
                     
                     ScrollView {
                         Text(manager.lastRefreshLog)
                             .font(.system(size: 11, design: .monospaced))
+                            .foregroundColor(.secondary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .textSelection(.enabled)
                     }
-                    .frame(height: 120)
-                    .padding(8)
-                    .background(Color(nsColor: .textBackgroundColor))
-                    .cornerRadius(6)
+                    .frame(height: 140)
+                    .padding(10)
+                    .background(Color.black.opacity(0.05))
+                    .cornerRadius(8)
                 }
+                .padding(.vertical, 8)
+            } header: {
+                SettingsSectionHeader(title: "Logs", icon: "doc.text.fill", color: .gray)
             }
         }
-        .padding()
+        .formStyle(.grouped)
+        .padding(.top, 8)
         .onAppear {
             manager.checkStatus()
             manager.loadLastLog()
@@ -581,6 +601,7 @@ struct BackgroundRefreshSettingsView: View {
                 Text(L10n.settingsStatusActive)
                     .foregroundColor(.green)
             }
+            .font(.caption.bold())
         } else if manager.isInstalled {
             HStack(spacing: 4) {
                 Image(systemName: "pause.circle.fill")
@@ -588,6 +609,7 @@ struct BackgroundRefreshSettingsView: View {
                 Text(L10n.settingsStatusInstalledNotRunning)
                     .foregroundColor(.orange)
             }
+            .font(.caption.bold())
         } else if manager.timerEnabled {
             HStack(spacing: 4) {
                 Image(systemName: "timer")
@@ -595,6 +617,7 @@ struct BackgroundRefreshSettingsView: View {
                 Text("In-app timer active")
                     .foregroundColor(.blue)
             }
+            .font(.caption.bold())
         } else {
             HStack(spacing: 4) {
                 Image(systemName: "xmark.circle.fill")
@@ -602,6 +625,7 @@ struct BackgroundRefreshSettingsView: View {
                 Text(L10n.settingsStatusNotInstalled)
                     .foregroundColor(.secondary)
             }
+            .font(.caption.bold())
         }
     }
 }

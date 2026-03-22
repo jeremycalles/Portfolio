@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		BLH1 /* PortfolioRefreshLoginItem.app in Embed Login Item */ = {isa = PBXBuildFile; fileRef = PR04 /* PortfolioRefreshLoginItem.app */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		F05C926A2F70967100C4EC0E /* SettingsUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F05C92692F70967100C4EC0E /* SettingsUI.swift */; };
+		F05C926B2F70967100C4EC0E /* SettingsUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F05C92692F70967100C4EC0E /* SettingsUI.swift */; };
 		F0C1E7BD2F3002810066E539 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F0C1E7BB2F3002810066E539 /* Localizable.strings */; };
 		F0C1E7BE2F3002810066E539 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F0C1E7B82F3002810066E539 /* Localizable.strings */; };
 		F0C1E7BF2F3002810066E539 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F0C1E7BB2F3002810066E539 /* Localizable.strings */; };
@@ -155,6 +157,7 @@
 		F038 /* DemoModeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DemoModeManager.swift; path = Shared/Services/DemoModeManager.swift; sourceTree = SOURCE_ROOT; };
 		F040 /* HapticService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HapticService.swift; path = Shared/Services/HapticService.swift; sourceTree = SOURCE_ROOT; };
 		F042 /* StorageLogsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StorageLogsView.swift; path = Shared/Views/Components/StorageLogsView.swift; sourceTree = SOURCE_ROOT; };
+		F05C92692F70967100C4EC0E /* SettingsUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsUI.swift; sourceTree = "<group>"; };
 		F0C1E7B72F3002810066E539 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Localizable.strings; sourceTree = "<group>"; };
 		F0C1E7BA2F3002810066E539 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = Localizable.strings; sourceTree = "<group>"; };
 		F0C1E7C12F3003410066E539 /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
@@ -385,6 +388,7 @@
 				S021 /* PortfolioTrendChart.swift */,
 				S022 /* QuadrantPieChart.swift */,
 				S023 /* AccountsPieChart.swift */,
+				F05C92692F70967100C4EC0E /* SettingsUI.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -628,6 +632,7 @@
 				M026 /* MacOSLockManager.swift in Sources */,
 				M027 /* BiometricAuth.swift in Sources */,
 				M029 /* MacOSSettingsViews.swift in Sources */,
+				F05C926B2F70967100C4EC0E /* SettingsUI.swift in Sources */,
 				S032 /* BackfillLogsSheet.swift in Sources */,
 				S042 /* StorageLogsView.swift in Sources */,
 				S034 /* AddHoldingSheet.swift in Sources */,
@@ -664,6 +669,7 @@
 				I017 /* ChangeLabel.swift in Sources */,
 				I018 /* AppViewModel+History.swift in Sources */,
 				I019 /* AppViewModel+PriceManagement.swift in Sources */,
+				F05C926A2F70967100C4EC0E /* SettingsUI.swift in Sources */,
 				I020 /* AppViewModel+Reports.swift in Sources */,
 				I021 /* DashboardView.swift in Sources */,
 				I022 /* AllHoldingsView.swift in Sources */,

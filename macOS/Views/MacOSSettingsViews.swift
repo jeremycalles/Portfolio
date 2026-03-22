@@ -57,141 +57,166 @@ struct GeneralSettingsView: View {
     @EnvironmentObject var lockManager: MacOSLockManager
     @StateObject private var demoMode = DemoModeManager.shared
 
-    private let sectionSpacing: CGFloat = 20
-    private let footerTopPadding: CGFloat = 8
-
     var body: some View {
         Form {
-                Section {
-                    Toggle(L10n.settingsDemoModeEnable, isOn: $demoMode.isDemoModeEnabled)
+            // Mode Démo
+            Section {
+                PremiumSettingsRow(
+                    title: L10n.settingsDemoModeEnable,
+                    subtitle: L10n.settingsDemoModeDescription,
+                    icon: "play.circle.fill",
+                    iconColor: .blue
+                ) {
+                    Toggle("", isOn: $demoMode.isDemoModeEnabled)
                         .toggleStyle(.switch)
-                    if demoMode.isDemoModeEnabled {
-                        HStack {
-                            Text(L10n.settingsDemoModeActive)
-                                .font(.caption)
-                                .foregroundColor(.orange)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.orange.opacity(0.2))
-                                .cornerRadius(4)
-                            Spacer()
-                            Button {
-                                demoMode.regenerateSeed()
-                                Task { await viewModel.refreshAll() }
-                            } label: {
-                                Label(L10n.settingsDemoModeRandomize, systemImage: "arrow.clockwise")
-                                    .font(.caption)
-                            }
-                            .buttonStyle(.bordered)
-                        }
-                    }
-                } header: {
-                    sectionHeader(L10n.settingsDemoMode, isFirst: true)
-                } footer: {
-                    Text(L10n.settingsDemoModeDescription)
-                        .padding(.top, footerTopPadding)
+                        .labelsHidden()
                 }
 
-                Section {
-                    HStack(spacing: 14) {
+                if demoMode.isDemoModeEnabled {
+                    HStack {
+                        Label(L10n.settingsDemoModeActive, systemImage: "info.circle.fill")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.orange.opacity(0.1))
+                            .cornerRadius(6)
+                        
+                        Spacer()
+                        
                         Button {
-                            Task {
-                                await viewModel.updateAllPrices()
-                            }
+                            demoMode.regenerateSeed()
+                            Task { await viewModel.refreshAll() }
                         } label: {
-                            Label(L10n.actionUpdatePrices, systemImage: "arrow.clockwise")
+                            Label(L10n.settingsDemoModeRandomize, systemImage: "shuffle")
+                                .font(.caption)
                         }
-                        .disabled(viewModel.isLoading)
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                    }
+                    .padding(.leading, 42) // Align with text after icon
+                }
+            } header: {
+                SettingsSectionHeader(title: L10n.settingsDemoMode, icon: "cpu", color: .blue)
+            }
 
-                        Menu {
-                            Button(L10n.actionBackfill1Year) {
-                                Task {
-                                    await viewModel.backfillHistorical(period: "1y", interval: "1mo")
-                                }
-                            }
-                            Button(L10n.actionBackfill2Years) {
-                                Task {
-                                    await viewModel.backfillHistorical(period: "2y", interval: "1mo")
-                                }
-                            }
-                            Button(L10n.actionBackfill5Years) {
-                                Task {
-                                    await viewModel.backfillHistorical(period: "5y", interval: "1mo")
-                                }
-                            }
-                            Divider()
-                            Button(L10n.actionBackfill1Month) {
-                                Task {
-                                    await viewModel.backfillHistorical(period: "1mo", interval: "1d")
-                                }
-                            }
-                        } label: {
-                            Label(L10n.settingsBackfillData, systemImage: "clock.arrow.circlepath")
+            // Gestion des données
+            Section {
+                PremiumSettingsRow(
+                    title: L10n.settingsUpdatePrices,
+                    subtitle: L10n.settingsUpdatePricesDescription,
+                    icon: "arrow.clockwise.circle.fill",
+                    iconColor: .green
+                ) {
+                    Button {
+                        Task { await viewModel.updateAllPrices() }
+                    } label: {
+                        Text(L10n.actionUpdatePrices)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(viewModel.isLoading)
+                }
+
+                PremiumSettingsRow(
+                    title: L10n.settingsBackfillData,
+                    subtitle: L10n.settingsImportExportHint,
+                    icon: "clock.arrow.circlepath",
+                    iconColor: .green
+                ) {
+                    Menu {
+                        Button(L10n.actionBackfill1Year) {
+                            Task { await viewModel.backfillHistorical(period: "1y", interval: "1mo") }
                         }
-                        .disabled(viewModel.isLoading)
+                        Button(L10n.actionBackfill2Years) {
+                            Task { await viewModel.backfillHistorical(period: "2y", interval: "1mo") }
+                        }
+                        Button(L10n.actionBackfill5Years) {
+                            Task { await viewModel.backfillHistorical(period: "5y", interval: "1mo") }
+                        }
+                        Divider()
+                        Button(L10n.actionBackfill1Month) {
+                            Task { await viewModel.backfillHistorical(period: "1mo", interval: "1d") }
+                        }
+                    } label: {
+                        Text(L10n.settingsBackfillData)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(viewModel.isLoading)
+                }
+            } header: {
+                SettingsSectionHeader(title: L10n.settingsDataManagement, icon: "externaldrive.fill", color: .green)
+            }
+
+            // Protection Touch ID
+            Section {
+                PremiumSettingsRow(
+                    title: L10n.settingsTouchIDProtectionEnable,
+                    subtitle: L10n.settingsTouchIDProtectionDescription,
+                    icon: "touchid",
+                    iconColor: .orange
+                ) {
+                    Toggle("", isOn: $lockManager.isTouchIDProtectionEnabled)
+                        .toggleStyle(.switch)
+                        .labelsHidden()
+                }
+            } header: {
+                SettingsSectionHeader(title: L10n.settingsTouchIDProtection, icon: "lock.shield.fill", color: .orange)
+            }
+
+            // À propos
+            Section {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack(spacing: 16) {
+                        // App Icon Placeholder
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .frame(width: 48, height: 48)
+                            
+                            Image(systemName: "chart.pie.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.white)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(L10n.appName)
+                                .font(.headline)
+                            Text(L10n.appTagline)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
                     }
                     .padding(.vertical, 4)
-                } header: {
-                    sectionHeader(L10n.settingsDataManagement, isFirst: false)
-                } footer: {
-                    Text(L10n.settingsUpdatePricesDescription)
-                        .padding(.top, footerTopPadding)
-                }
-
-                Section {
-                    HStack {
-                        Text(L10n.settingsTouchIDProtectionEnable)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Spacer(minLength: 16)
-                        Toggle("", isOn: $lockManager.isTouchIDProtectionEnabled)
-                            .toggleStyle(.switch)
-                            .labelsHidden()
-                    }
-                } header: {
-                    sectionHeader(L10n.settingsTouchIDProtection, isFirst: false)
-                } footer: {
-                    Text(L10n.settingsTouchIDProtectionDescription)
-                        .padding(.top, footerTopPadding)
-                }
-
-                Section {
-                    HStack {
-                        Text(L10n.appName)
-                            .font(.headline)
-                        Spacer()
-                        Text(L10n.appTagline)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.vertical, 2)
-
+                    
+                    Divider()
+                    
                     HStack {
                         Text(L10n.settingsVersion)
+                            .foregroundColor(.primary)
                         Spacer()
                         Text(Bundle.appShortVersion)
                             .foregroundColor(.secondary)
+                            .monospacedDigit()
                     }
-                    .padding(.vertical, 2)
-
+                    
                     HStack {
                         Text(L10n.generalBuild)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.primary)
                         Spacer()
                         Text(Bundle.appBuildNumber)
+                            .foregroundColor(.secondary)
+                            .monospacedDigit()
                     }
-                    .padding(.vertical, 2)
-                } header: {
-                    sectionHeader(L10n.settingsAbout, isFirst: false)
                 }
+                .padding(.vertical, 8)
+            } header: {
+                SettingsSectionHeader(title: L10n.settingsAbout, icon: "info.circle.fill", color: .purple)
+            }
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 16)
-        .padding(.bottom, 28)
-    }
-
-    private func sectionHeader(_ title: String, isFirst: Bool) -> some View {
-        Text(title)
-            .padding(.top, isFirst ? 0 : sectionSpacing)
-            .textCase(nil)
+        .formStyle(.grouped)
+        .padding(.top, 8)
     }
 }
 
@@ -202,37 +227,27 @@ struct LanguageSettingsView: View {
     var body: some View {
         Form {
             Section {
-                VStack(alignment: .leading, spacing: 16) {
-                    HStack {
-                        Image(systemName: "globe")
-                            .font(.title)
-                            .foregroundColor(.accentColor)
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(L10n.settingsLanguage)
-                                .font(.headline)
-                            Text(L10n.settingsLanguageDescription)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    
+                PremiumSettingsRow(
+                    title: L10n.settingsLanguage,
+                    subtitle: L10n.settingsLanguageDescription,
+                    icon: "globe",
+                    iconColor: .blue
+                ) {
                     Picker("", selection: $languageManager.currentLanguage) {
                         ForEach(AppLanguage.allCases) { language in
-                            HStack {
-                                Text(language.displayName)
-                                if language == languageManager.currentLanguage {
-                                    Image(systemName: "checkmark")
-                                }
-                            }
-                            .tag(language)
+                            Text(language.displayName).tag(language)
                         }
                     }
-                    .pickerStyle(.radioGroup)
+                    .pickerStyle(.menu)
                     .labelsHidden()
+                    .frame(width: 120)
                 }
+            } header: {
+                SettingsSectionHeader(title: L10n.settingsLanguage, icon: "character.bubble.fill", color: .blue)
             }
         }
-        .padding()
+        .formStyle(.grouped)
+        .padding(.top, 8)
     }
 }
 
@@ -245,71 +260,104 @@ struct DatabaseSettingsView: View {
     @State private var showingBackupAlert = false
     @State private var backupAlertMessage: String?
     @State private var isBackingUp = false
+    
     var body: some View {
         Form {
-            Section(L10n.settingsDatabaseImportExport) {
-                Button {
-                    showingImportPicker = true
-                } label: {
-                    Label(L10n.settingsImportDatabase, systemImage: "square.and.arrow.down")
-                }
-                
-                Button {
-                    exportDatabaseToFile()
-                } label: {
-                    Label(L10n.settingsExportDatabase, systemImage: "square.and.arrow.up")
-                }
-                
-                Button {
-                    showingStorageLogs = true
-                } label: {
-                    Label(L10n.settingsStorageLogs, systemImage: "doc.text.magnifyingglass")
-                }
-            }
-            
-            Section(L10n.settingsDatabase) {
-                HStack {
-                    Image(systemName: "internaldrive")
-                        .foregroundColor(.blue)
-                    Text(L10n.settingsDatabaseStoredLocally)
-                }
-                if DatabaseService.shared.iCloudBackupAvailable {
+            Section {
+                PremiumSettingsRow(
+                    title: L10n.settingsImportDatabase,
+                    subtitle: L10n.settingsImportExportHint,
+                    icon: "square.and.arrow.down.fill",
+                    iconColor: .blue
+                ) {
                     Button {
-                        isBackingUp = true
-                        DatabaseService.shared.backupDatabaseToICloud { result in
-                            isBackingUp = false
-                            switch result {
-                            case .success:
-                                backupAlertMessage = "Backup completed."
-                            case .failure(let error):
-                                backupAlertMessage = error.localizedDescription
-                            }
-                            showingBackupAlert = true
-                        }
+                        showingImportPicker = true
                     } label: {
-                        Label(L10n.settingsBackupToICloudNow, systemImage: "icloud.and.arrow.up")
+                        Text(L10n.generalManage)
                     }
-                    .disabled(isBackingUp)
-                }
-            }
-            
-            Section("Database Path") {
-                HStack {
-                    Text(DatabaseService.shared.getDatabasePath())
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .textSelection(.enabled)
+                    .buttonStyle(.bordered)
                 }
                 
-                Button(L10n.settingsOpenInFinder) {
-                    let path = DatabaseService.shared.getDatabasePath()
-                    let url = URL(fileURLWithPath: path).deletingLastPathComponent()
-                    NSWorkspace.shared.open(url)
+                PremiumSettingsRow(
+                    title: L10n.settingsExportDatabase,
+                    icon: "square.and.arrow.up.fill",
+                    iconColor: .blue
+                ) {
+                    Button {
+                        exportDatabaseToFile()
+                    } label: {
+                        Text(L10n.generalData)
+                    }
+                    .buttonStyle(.bordered)
                 }
+                
+                PremiumSettingsRow(
+                    title: L10n.settingsStorageLogs,
+                    subtitle: L10n.settingsStorageLogsDescription,
+                    icon: "doc.text.magnifyingglass",
+                    iconColor: .gray
+                ) {
+                    Button {
+                        showingStorageLogs = true
+                    } label: {
+                        Text(L10n.generalOverview)
+                    }
+                    .buttonStyle(.bordered)
+                }
+            } header: {
+                SettingsSectionHeader(title: L10n.settingsDatabaseImportExport, icon: "folder.fill", color: .blue)
+            }
+            
+            Section {
+                PremiumSettingsRow(
+                    title: L10n.settingsDatabaseStoredLocally,
+                    icon: "internaldrive.fill",
+                    iconColor: .blue
+                ) {
+                    if DatabaseService.shared.iCloudBackupAvailable {
+                        Button {
+                            isBackingUp = true
+                            DatabaseService.shared.backupDatabaseToICloud { result in
+                                isBackingUp = false
+                                switch result {
+                                case .success:
+                                    backupAlertMessage = "Backup completed."
+                                case .failure(let error):
+                                    backupAlertMessage = error.localizedDescription
+                                }
+                                showingBackupAlert = true
+                            }
+                        } label: {
+                            if isBackingUp {
+                                ProgressView().controlSize(.small)
+                            } else {
+                                Text(L10n.settingsBackupToICloudNow)
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(isBackingUp)
+                    }
+                }
+                
+                PremiumSettingsRow(
+                    title: "Database Path",
+                    subtitle: DatabaseService.shared.getDatabasePath(),
+                    icon: "link",
+                    iconColor: .gray
+                ) {
+                    Button(L10n.settingsOpenInFinder) {
+                        let path = DatabaseService.shared.getDatabasePath()
+                        let url = URL(fileURLWithPath: path).deletingLastPathComponent()
+                        NSWorkspace.shared.open(url)
+                    }
+                    .buttonStyle(.bordered)
+                }
+            } header: {
+                SettingsSectionHeader(title: L10n.settingsDatabase, icon: "cylinder.split.1x2.fill", color: .blue)
             }
         }
-        .padding()
-        .frame(minWidth: 450, minHeight: 320)
+        .formStyle(.grouped)
+        .padding(.top, 8)
         .fileImporter(
             isPresented: $showingImportPicker,
             allowedContentTypes: [.database, .data],
