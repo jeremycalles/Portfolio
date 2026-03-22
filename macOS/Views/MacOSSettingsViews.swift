@@ -408,3 +408,18 @@ struct DatabaseSettingsView: View {
         }
     }
 }
+
+// MARK: - Previews
+
+#Preview("MacOSSystemSettingsView") {
+    MacOSSystemSettingsView()
+        .environmentObject(AppViewModel.preview)
+        .environmentObject(LanguageManager.shared)
+        .environmentObject(MacOSLockManager.shared)
+}
+
+#Preview("MacOSLockGateView") {
+    MacOSLockGateView()
+        .environmentObject(AppViewModel.preview)
+        .environmentObject(MacOSLockManager.shared)
+}

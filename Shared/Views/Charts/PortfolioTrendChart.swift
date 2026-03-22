@@ -223,3 +223,16 @@ struct PortfolioTrendChart: View {
         .padding(compact ? 8 : 16)
     }
 }
+
+// MARK: - Previews
+
+#Preview("PortfolioTrendChart") {
+    let today = Date()
+    let history: [(date: Date, value: Double)] = (0..<30).reversed().compactMap { i in
+        guard let date = Calendar.current.date(byAdding: .day, value: -i, to: today) else { return nil }
+        return (date: date, value: 12_500 * (1 + Double(30 - i) / 30.0 * 0.08))
+    }
+    PortfolioTrendChart(history: history)
+        .frame(height: 300)
+        .padding()
+}

@@ -39,3 +39,10 @@ struct ModernPeriodSelector: View {
         .padding(.horizontal)
     }
 }
+
+// MARK: - Previews
+
+#Preview("ModernPeriodSelector") {
+    ModernPeriodSelector(selectedPeriod: .constant(.oneWeek), accentColor: .blue)
+        .padding()
+}

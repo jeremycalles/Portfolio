@@ -217,3 +217,12 @@ struct iOSDashboardView: View {
         }
     }
 }
+
+// MARK: - Previews
+
+#Preview("iOSRootView") {
+    iOSRootView()
+        .environmentObject(AppViewModel.preview)
+        .environmentObject(IOSLockManager.shared)
+        .environmentObject(LanguageManager.shared)
+}

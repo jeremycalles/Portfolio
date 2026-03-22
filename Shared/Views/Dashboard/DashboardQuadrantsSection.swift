@@ -67,3 +67,10 @@ struct iOSDashboardQuadrantsSectionEnhanced: View {
         }
     }
 }
+
+// MARK: - Previews
+
+#Preview("DashboardQuadrantsSection") {
+    iOSDashboardQuadrantsSectionEnhanced(privacyMode: false)
+        .environmentObject(AppViewModel.preview)
+}

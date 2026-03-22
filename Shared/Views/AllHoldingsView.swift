@@ -207,3 +207,12 @@ struct AllHoldingsView: View {
         viewModel.bankAccounts.flatMap { viewModel.cachedHoldingDetailsByAccount[$0.id] ?? [] }
     }
 }
+
+// MARK: - Previews
+
+#Preview("AllHoldingsView") {
+    NavigationStack {
+        AllHoldingsView()
+            .environmentObject(AppViewModel.preview)
+    }
+}

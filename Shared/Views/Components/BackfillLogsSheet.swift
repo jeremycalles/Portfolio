@@ -99,3 +99,15 @@ struct BackfillLogsSheet: View {
         return .primary
     }
 }
+
+// MARK: - Previews
+
+#Preview("BackfillLogsSheet") {
+    BackfillLogsSheet(logs: [
+        "✅ FR0010315770 (Lyxor MSCI World): 27.40 EUR",
+        "  • Backfilled 30 data points",
+        "⚠️ Skipped IE00B4L5Y983: No data returned",
+        "✅ LU1681043599 (Amundi Nasdaq-100): 85.10 EUR",
+        "  • Backfilled 30 data points",
+    ])
+}

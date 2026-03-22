@@ -72,3 +72,12 @@ struct iOSQuadrantReportView: View {
         }
     }
 }
+
+// MARK: - Previews
+
+#Preview("iOSQuadrantReportView") {
+    NavigationStack {
+        iOSQuadrantReportView(privacyMode: false)
+            .environmentObject(AppViewModel.preview)
+    }
+}

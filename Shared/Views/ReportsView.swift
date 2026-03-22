@@ -713,3 +713,20 @@ struct StatBox: View {
     }
 }
 #endif
+
+// MARK: - Previews
+
+#Preview("QuadrantReportView") {
+    NavigationStack {
+        QuadrantReportView()
+            .environmentObject(AppViewModel.preview)
+    }
+}
+
+#Preview("QuadrantSection") {
+    let holdings = [
+        HoldingDetail(accountId: 1, isin: "FR0010315770", instrumentName: "Lyxor MSCI World", instrumentCurrency: "EUR", ticker: "EWLD.PA", quantity: 50, currentPrice: 27.40, previousPrice: 25.80, priceDate: "2026-03-22", currentValueEUR: 1370, previousValueEUR: 1290),
+        HoldingDetail(accountId: 1, isin: "LU1681043599", instrumentName: "Amundi Nasdaq-100", instrumentCurrency: "EUR", ticker: "PANX.PA", quantity: 30, currentPrice: 85.10, previousPrice: 78.50, priceDate: "2026-03-22", currentValueEUR: 2553, previousValueEUR: 2355),
+    ]
+    QuadrantSection(item: QuadrantReportItem(quadrant: Quadrant(id: 1, name: "Growth"), holdings: holdings))
+}

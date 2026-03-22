@@ -39,3 +39,10 @@ struct iOSDashboardAccountsSectionEnhanced: View {
         }
     }
 }
+
+// MARK: - Previews
+
+#Preview("DashboardAccountsSection") {
+    iOSDashboardAccountsSectionEnhanced(privacyMode: false)
+        .environmentObject(AppViewModel.preview)
+}

@@ -178,3 +178,17 @@ struct EnhancedPortfolioHeroCard: View {
         .padding(.horizontal)
     }
 }
+
+// MARK: - Previews
+
+#Preview("EnhancedPortfolioHeroCard") {
+    let today = Date()
+    let sparkline: [(date: Date, value: Double)] = (0..<30).reversed().compactMap { i in
+        guard let date = Calendar.current.date(byAdding: .day, value: -i, to: today) else { return nil }
+        return (date: date, value: 12_500 * (1 + Double(30 - i) / 30.0 * 0.08))
+    }
+    EnhancedPortfolioHeroCard(currentValue: 13_500, previousValue: 12_500, sparklineData: sparkline, privacyMode: false)
+        .environmentObject(AppViewModel.preview)
+        .frame(width: 400)
+        .padding()
+}

@@ -387,3 +387,12 @@ struct DashboardView: View {
         }
     }
 }
+
+// MARK: - Previews
+
+#Preview("DashboardView") {
+    NavigationStack {
+        DashboardView()
+            .environmentObject(AppViewModel.preview)
+    }
+}

@@ -512,3 +512,12 @@ struct QuadrantsView: View {
         }
     }
 }
+
+// MARK: - Previews
+
+#Preview("InstrumentsView") {
+    NavigationStack {
+        InstrumentsView()
+            .environmentObject(AppViewModel.preview)
+    }
+}

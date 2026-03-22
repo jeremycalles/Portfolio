@@ -187,3 +187,15 @@ extension View {
         .animation(.easeInOut(duration: 0.3), value: result?.id)
     }
 }
+
+// MARK: - Previews
+
+#Preview("RefreshResultBanner Success") {
+    RefreshResultBanner(result: RefreshResult(successCount: 5, failureCount: 0, totalCount: 5, failedInstruments: [], timestamp: Date(), lastError: nil, debugLogLines: []), onDismiss: {})
+        .padding()
+}
+
+#Preview("RefreshResultBanner Partial") {
+    RefreshResultBanner(result: RefreshResult(successCount: 3, failureCount: 2, totalCount: 5, failedInstruments: ["IE00B4L5Y983", "FR0011550185"], timestamp: Date(), lastError: "timeout", debugLogLines: []), onDismiss: {})
+        .padding()
+}

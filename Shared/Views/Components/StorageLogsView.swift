@@ -59,3 +59,9 @@ struct StorageLogsView: View {
         }
     }
 }
+
+// MARK: - Previews
+
+#Preview("StorageLogsView") {
+    StorageLogsView()
+}

@@ -157,3 +157,16 @@ struct GlassEffectFallback: ViewModifier {
         #endif
     }
 }
+
+// MARK: - Previews
+
+#Preview("EnhancedTrendCard") {
+    let today = Date()
+    let history: [(date: Date, value: Double)] = (0..<30).reversed().compactMap { i in
+        guard let date = Calendar.current.date(byAdding: .day, value: -i, to: today) else { return nil }
+        return (date: date, value: 1370 * (1 + Double(30 - i) / 30.0 * 0.06))
+    }
+    EnhancedTrendCard(title: "Lyxor MSCI World", history: history, currentValue: 1452, privacyMode: false)
+        .frame(width: 350)
+        .padding()
+}

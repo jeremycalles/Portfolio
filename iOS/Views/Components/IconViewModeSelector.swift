@@ -42,3 +42,10 @@ struct IconViewModeSelector: View {
         .padding(.horizontal)
     }
 }
+
+// MARK: - Previews
+
+#Preview("IconViewModeSelector") {
+    IconViewModeSelector(selectedMode: .constant(.quadrants))
+        .padding()
+}

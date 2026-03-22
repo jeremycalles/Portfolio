@@ -153,3 +153,10 @@ struct AddHoldingSheet: View {
         dismiss()
     }
 }
+
+// MARK: - Previews
+
+#Preview("AddHoldingSheet") {
+    AddHoldingSheet()
+        .environmentObject(AppViewModel.preview)
+}

@@ -197,3 +197,12 @@ struct AutoRefreshPromptView: View {
         .frame(width: 400)
     }
 }
+
+// MARK: - Previews
+
+#Preview("ContentView") {
+    ContentView()
+        .environmentObject(AppViewModel.preview)
+        .environmentObject(LanguageManager.shared)
+        .environmentObject(MacOSLockManager.shared)
+}

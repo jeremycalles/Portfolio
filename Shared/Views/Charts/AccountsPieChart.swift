@@ -105,3 +105,11 @@ struct AccountsPieChart: View {
         .padding(compact ? 8 : 12)
     }
 }
+
+// MARK: - Previews
+
+#Preview("AccountsPieChart") {
+    AccountsPieChart(privacyMode: false)
+        .environmentObject(AppViewModel.preview)
+        .frame(width: 300, height: 300)
+}

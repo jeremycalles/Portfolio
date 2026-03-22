@@ -147,3 +147,11 @@ struct IOSLockGateView: View {
     }
 }
 #endif
+
+// MARK: - Previews
+
+#Preview("IOSLockGateView") {
+    IOSLockGateView()
+        .environmentObject(AppViewModel.preview)
+        .environmentObject(IOSLockManager.shared)
+}

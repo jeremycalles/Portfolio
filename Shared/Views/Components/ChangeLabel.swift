@@ -14,3 +14,15 @@ struct ChangeLabel: View {
         .foregroundColor(change >= 0 ? .green : .red)
     }
 }
+
+// MARK: - Previews
+
+#Preview("ChangeLabel Positive") {
+    ChangeLabel(change: 7.63)
+        .padding()
+}
+
+#Preview("ChangeLabel Negative") {
+    ChangeLabel(change: -3.21)
+        .padding()
+}

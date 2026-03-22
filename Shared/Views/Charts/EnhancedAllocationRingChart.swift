@@ -140,3 +140,17 @@ struct EnhancedAllocationRingChart: View {
         .padding(.horizontal)
     }
 }
+
+// MARK: - Previews
+
+#Preview("EnhancedAllocationRingChart Quadrants") {
+    EnhancedAllocationRingChart(privacyMode: false, isQuadrants: true)
+        .environmentObject(AppViewModel.preview)
+        .frame(width: 350, height: 400)
+}
+
+#Preview("EnhancedAllocationRingChart Accounts") {
+    EnhancedAllocationRingChart(privacyMode: false, isQuadrants: false)
+        .environmentObject(AppViewModel.preview)
+        .frame(width: 350, height: 400)
+}

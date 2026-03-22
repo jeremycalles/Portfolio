@@ -432,3 +432,12 @@ struct iOSInstrumentEditSheet: View {
     }
 }
 
+
+// MARK: - Previews
+
+#Preview("iOSInstrumentsView") {
+    NavigationStack {
+        iOSInstrumentsView()
+            .environmentObject(AppViewModel.preview)
+    }
+}

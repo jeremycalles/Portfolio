@@ -220,3 +220,12 @@ struct HoldingsView: View {
     }
 }
 
+
+// MARK: - Previews
+
+#Preview("BankAccountsView") {
+    NavigationStack {
+        BankAccountsView()
+            .environmentObject(AppViewModel.preview)
+    }
+}

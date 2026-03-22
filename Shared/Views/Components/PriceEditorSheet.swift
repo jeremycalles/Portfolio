@@ -137,3 +137,21 @@ struct PriceEditorSheet: View {
         }
     }
 }
+
+// MARK: - Previews
+
+#Preview("PriceEditorSheet New") {
+    PriceEditorSheet(
+        instrument: Instrument(isin: "FR0010315770", ticker: "EWLD.PA", name: "Lyxor MSCI World", currency: "EUR", quadrantId: nil),
+        existingPrice: nil,
+        onSave: { _, _, _ in }
+    )
+}
+
+#Preview("PriceEditorSheet Edit") {
+    PriceEditorSheet(
+        instrument: Instrument(isin: "FR0010315770", ticker: "EWLD.PA", name: "Lyxor MSCI World", currency: "EUR", quadrantId: nil),
+        existingPrice: Price(id: 1, isin: "FR0010315770", date: "2026-03-22", value: 27.40, currency: "EUR"),
+        onSave: { _, _, _ in }
+    )
+}

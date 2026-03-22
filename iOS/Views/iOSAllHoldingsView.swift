@@ -155,3 +155,12 @@ struct iOSAllHoldingsView: View {
         }
     }
 }
+
+// MARK: - Previews
+
+#Preview("iOSAllHoldingsView") {
+    NavigationStack {
+        iOSAllHoldingsView(privacyMode: false)
+            .environmentObject(AppViewModel.preview)
+    }
+}

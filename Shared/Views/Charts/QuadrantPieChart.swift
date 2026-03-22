@@ -128,3 +128,11 @@ struct QuadrantPieChart: View {
         .padding(compact ? 8 : 12)
     }
 }
+
+// MARK: - Previews
+
+#Preview("QuadrantPieChart") {
+    QuadrantPieChart(privacyMode: false)
+        .environmentObject(AppViewModel.preview)
+        .frame(width: 300, height: 300)
+}

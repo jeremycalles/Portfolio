@@ -39,3 +39,10 @@ struct iOSDashboardHoldingsSectionEnhanced: View {
         }
     }
 }
+
+// MARK: - Previews
+
+#Preview("DashboardHoldingsSection") {
+    iOSDashboardHoldingsSectionEnhanced(privacyMode: false)
+        .environmentObject(AppViewModel.preview)
+}

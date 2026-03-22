@@ -340,4 +340,101 @@ class AppViewModel: ObservableObject {
     func dismissRefreshResult() {
         refreshResult = nil
     }
+    
+    // MARK: - Preview Support
+    
+    /// A pre-populated view model for SwiftUI previews (does not touch the database).
+    static var preview: AppViewModel {
+        let vm = AppViewModel(forPreview: true)
+        
+        let today = Date()
+        let calendar = Calendar.current
+        
+        // Mock instruments
+        vm.instruments = [
+            Instrument(isin: "FR0010315770", ticker: "EWLD.PA", name: "Lyxor MSCI World", currency: "EUR", quadrantId: 1),
+            Instrument(isin: "LU1681043599", ticker: "PANX.PA", name: "Amundi Nasdaq-100", currency: "EUR", quadrantId: 1),
+            Instrument(isin: "FR0011550185", ticker: "ESE.PA", name: "BNP S&P 500", currency: "EUR", quadrantId: 2),
+            Instrument(isin: "IE00B4L5Y983", ticker: "IWDA.AS", name: "iShares Core MSCI World", currency: "USD", quadrantId: 2),
+        ]
+        
+        // Mock quadrants
+        vm.quadrants = [
+            Quadrant(id: 1, name: "Growth"),
+            Quadrant(id: 2, name: "Core"),
+        ]
+        
+        // Mock bank accounts
+        vm.bankAccounts = [
+            BankAccount(id: 1, bankName: "BoursoBank", accountName: "PEA"),
+            BankAccount(id: 2, bankName: "Fortuneo", accountName: "CTO"),
+        ]
+        
+        // Mock holdings
+        vm.holdings = [
+            Holding(id: 1, accountId: 1, isin: "FR0010315770", quantity: 50, purchaseDate: "2024-01-15", purchasePrice: 24.50, lastUpdated: nil),
+            Holding(id: 2, accountId: 1, isin: "LU1681043599", quantity: 30, purchaseDate: "2024-03-10", purchasePrice: 72.30, lastUpdated: nil),
+            Holding(id: 3, accountId: 2, isin: "FR0011550185", quantity: 100, purchaseDate: "2023-06-01", purchasePrice: 18.90, lastUpdated: nil),
+            Holding(id: 4, accountId: 2, isin: "IE00B4L5Y983", quantity: 20, purchaseDate: "2024-06-20", purchasePrice: 82.00, lastUpdated: nil),
+        ]
+        
+        // Mock cached dashboard data — generate 30-day history
+        var portfolioHistory: [(date: Date, value: Double)] = []
+        var sp500History: [(date: Date, value: Double)] = []
+        var goldHistory: [(date: Date, value: Double)] = []
+        var msciHistory: [(date: Date, value: Double)] = []
+        var goldOzHistory: [(date: Date, value: Double)] = []
+        
+        let basePortfolioValue: Double = 12_500
+        let baseSP500Value: Double = 12_500
+        let baseGoldValue: Double = 12_500
+        let baseMSCIValue: Double = 12_500
+        let baseGoldOz: Double = 4.8
+        
+        for i in (0..<30).reversed() {
+            guard let date = calendar.date(byAdding: .day, value: -i, to: today) else { continue }
+            let progress = Double(30 - i) / 30.0
+            portfolioHistory.append((date: date, value: basePortfolioValue * (1 + progress * 0.08 + Double.random(in: -0.01...0.01))))
+            sp500History.append((date: date, value: baseSP500Value * (1 + progress * 0.06 + Double.random(in: -0.01...0.01))))
+            goldHistory.append((date: date, value: baseGoldValue * (1 + progress * 0.03 + Double.random(in: -0.005...0.005))))
+            msciHistory.append((date: date, value: baseMSCIValue * (1 + progress * 0.07 + Double.random(in: -0.01...0.01))))
+            goldOzHistory.append((date: date, value: baseGoldOz * (1 + progress * 0.05 + Double.random(in: -0.005...0.005))))
+        }
+        
+        vm.cachedPortfolioHistory = portfolioHistory
+        vm.cachedSP500History = sp500History
+        vm.cachedGoldHistory = goldHistory
+        vm.cachedMSCIWorldHistory = msciHistory
+        vm.cachedGoldOzHistory = goldOzHistory
+        vm.cachedGrandTotalsEUR = (current: 13_500, previous: 12_500)
+        vm.cachedGoldTotals = (current: 5.04, previous: 4.80)
+        vm.lastInstrumentUpdateDate = today
+        
+        // Mock quadrant report
+        let mockHoldings1 = [
+            HoldingDetail(accountId: 1, isin: "FR0010315770", instrumentName: "Lyxor MSCI World", instrumentCurrency: "EUR", ticker: "EWLD.PA", quantity: 50, currentPrice: 27.40, previousPrice: 25.80, priceDate: "2026-03-22", currentValueEUR: 1370, previousValueEUR: 1290),
+            HoldingDetail(accountId: 1, isin: "LU1681043599", instrumentName: "Amundi Nasdaq-100", instrumentCurrency: "EUR", ticker: "PANX.PA", quantity: 30, currentPrice: 85.10, previousPrice: 78.50, priceDate: "2026-03-22", currentValueEUR: 2553, previousValueEUR: 2355),
+        ]
+        let mockHoldings2 = [
+            HoldingDetail(accountId: 2, isin: "FR0011550185", instrumentName: "BNP S&P 500", instrumentCurrency: "EUR", ticker: "ESE.PA", quantity: 100, currentPrice: 21.30, previousPrice: 20.10, priceDate: "2026-03-22", currentValueEUR: 2130, previousValueEUR: 2010),
+            HoldingDetail(accountId: 2, isin: "IE00B4L5Y983", instrumentName: "iShares Core MSCI World", instrumentCurrency: "USD", ticker: "IWDA.AS", quantity: 20, currentPrice: 89.50, previousPrice: 85.00, priceDate: "2026-03-22", currentValueEUR: 1648, previousValueEUR: 1565),
+        ]
+        vm.cachedQuadrantReport = [
+            QuadrantReportItem(quadrant: Quadrant(id: 1, name: "Growth"), holdings: mockHoldings1),
+            QuadrantReportItem(quadrant: Quadrant(id: 2, name: "Core"), holdings: mockHoldings2),
+        ]
+        
+        // Mock holding details by account
+        vm.cachedHoldingDetailsByAccount = [
+            1: mockHoldings1,
+            2: mockHoldings2,
+        ]
+        
+        return vm
+    }
+    
+    /// Private initializer for previews — skips database refresh.
+    private init(forPreview: Bool) {
+        // No-op: the static `preview` property populates all @Published properties directly.
+    }
 }

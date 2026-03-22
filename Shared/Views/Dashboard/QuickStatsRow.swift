@@ -129,3 +129,11 @@ struct QuickStatCard: View {
         .modifier(GlassEffectFallback(cornerRadius: 16, interactive: false))
     }
 }
+
+// MARK: - Previews
+
+#Preview("QuickStatsRow") {
+    QuickStatsRow(privacyMode: false)
+        .environmentObject(AppViewModel.preview)
+        .padding()
+}

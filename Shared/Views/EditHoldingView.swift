@@ -115,3 +115,12 @@ struct EditHoldingView: View {
         dismiss()
     }
 }
+
+// MARK: - Previews
+
+#Preview("EditHoldingView") {
+    NavigationStack {
+        EditHoldingView(accountId: 1, isin: "FR0010315770")
+            .environmentObject(AppViewModel.preview)
+    }
+}

@@ -592,3 +592,14 @@ struct BackgroundLogsView: View {
         }
     }
 }
+
+// MARK: - Previews
+
+#Preview("iOSSettingsView") {
+    NavigationStack {
+        iOSSettingsView(privacyMode: .constant(false))
+            .environmentObject(AppViewModel.preview)
+            .environmentObject(LanguageManager.shared)
+            .environmentObject(IOSLockManager.shared)
+    }
+}
