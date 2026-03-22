@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BLH1 /* PortfolioRefreshLoginItem.app in Embed Login Item */ = {isa = PBXBuildFile; fileRef = PR04 /* PortfolioRefreshLoginItem.app */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		F0C1E7BD2F3002810066E539 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F0C1E7BB2F3002810066E539 /* Localizable.strings */; };
 		F0C1E7BE2F3002810066E539 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F0C1E7B82F3002810066E539 /* Localizable.strings */; };
 		F0C1E7BF2F3002810066E539 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F0C1E7BB2F3002810066E539 /* Localizable.strings */; };
@@ -54,6 +55,8 @@
 		IV16 /* iOSSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V016 /* iOSSettingsView.swift */; };
 		IV17 /* RefreshResultBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = V017 /* RefreshResultBanner.swift */; };
 		IV18 /* IOSLockManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = V018 /* IOSLockManager.swift */; };
+		LI01 /* PortfolioRefreshBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = S02A /* PortfolioRefreshBridge.swift */; };
+		LI02 /* PortfolioRefreshLoginItemApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = S02B /* PortfolioRefreshLoginItemApp.swift */; };
 		M001 /* PortfolioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = S001 /* PortfolioApp.swift */; };
 		M002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S002 /* ContentView.swift */; };
 		M003 /* InstrumentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S003 /* InstrumentsView.swift */; };
@@ -83,6 +86,7 @@
 		M027 /* BiometricAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = S027 /* BiometricAuth.swift */; };
 		M028 /* EditHoldingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S028 /* EditHoldingView.swift */; };
 		M029 /* MacOSSettingsViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = S029 /* MacOSSettingsViews.swift */; };
+		M02A /* PortfolioRefreshBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = S02A /* PortfolioRefreshBridge.swift */; };
 		M0BA /* Bundle+AppVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BA /* Bundle+AppVersion.swift */; };
 		M0BB /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BB /* AppLogger.swift */; };
 		MV02 /* EnhancedTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = V002 /* EnhancedTrendCard.swift */; };
@@ -107,10 +111,6 @@
 		TS01 /* ModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF01 /* ModelsTests.swift */; };
 		TS02 /* FormattingHelpersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF02 /* FormattingHelpersTests.swift */; };
 		TS03 /* DateFormattersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF03 /* DateFormattersTests.swift */; };
-		M02A /* PortfolioRefreshBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = S02A /* PortfolioRefreshBridge.swift */; };
-		LI01 /* PortfolioRefreshBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = S02A /* PortfolioRefreshBridge.swift */; };
-		LI02 /* PortfolioRefreshLoginItemApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = S02B /* PortfolioRefreshLoginItemApp.swift */; };
-		BLH1 /* PortfolioRefreshLoginItem.app in Embed Login Item */ = {isa = PBXBuildFile; fileRef = PR04 /* PortfolioRefreshLoginItem.app */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -130,10 +130,25 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		CLIP1 /* Embed Login Item */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Library/LoginItems;
+			dstSubfolderSpec = 1;
+			files = (
+				BLH1 /* PortfolioRefreshLoginItem.app in Embed Login Item */,
+			);
+			name = "Embed Login Item";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		A001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E001 /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
 		E002 /* iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iOS.entitlements; sourceTree = "<group>"; };
+		E003 /* RefreshLoginItem.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RefreshLoginItem.entitlements; sourceTree = "<group>"; };
 		F032 /* BackfillLogsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BackfillLogsSheet.swift; path = Shared/Views/Components/BackfillLogsSheet.swift; sourceTree = SOURCE_ROOT; };
 		F034 /* AddHoldingSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AddHoldingSheet.swift; path = Shared/Views/Components/AddHoldingSheet.swift; sourceTree = SOURCE_ROOT; };
 		F036 /* PriceEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PriceEditorSheet.swift; path = Shared/Views/Components/PriceEditorSheet.swift; sourceTree = SOURCE_ROOT; };
@@ -147,9 +162,6 @@
 		PR02 /* PortfolioMultiplatform.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PortfolioMultiplatform.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		PR03 /* PortfolioCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PortfolioCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		PR04 /* PortfolioRefreshLoginItem.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PortfolioRefreshLoginItem.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E003 /* RefreshLoginItem.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RefreshLoginItem.entitlements; sourceTree = "<group>"; };
-		S02A /* PortfolioRefreshBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioRefreshBridge.swift; sourceTree = "<group>"; };
-		S02B /* PortfolioRefreshLoginItemApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioRefreshLoginItemApp.swift; sourceTree = "<group>"; };
 		S001 /* PortfolioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioApp.swift; sourceTree = "<group>"; };
 		S002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContentView.swift; path = macOS/Views/ContentView.swift; sourceTree = SOURCE_ROOT; };
 		S003 /* InstrumentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InstrumentsView.swift; path = macOS/Views/InstrumentsView.swift; sourceTree = SOURCE_ROOT; };
@@ -179,6 +191,8 @@
 		S027 /* BiometricAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricAuth.swift; sourceTree = "<group>"; };
 		S028 /* EditHoldingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditHoldingView.swift; sourceTree = "<group>"; };
 		S029 /* MacOSSettingsViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MacOSSettingsViews.swift; path = macOS/Views/MacOSSettingsViews.swift; sourceTree = SOURCE_ROOT; };
+		S02A /* PortfolioRefreshBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioRefreshBridge.swift; sourceTree = "<group>"; };
+		S02B /* PortfolioRefreshLoginItemApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioRefreshLoginItemApp.swift; sourceTree = "<group>"; };
 		S0BA /* Bundle+AppVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Bundle+AppVersion.swift"; path = "Shared/Helpers/Bundle+AppVersion.swift"; sourceTree = SOURCE_ROOT; };
 		S0BB /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppLogger.swift; path = Shared/Helpers/AppLogger.swift; sourceTree = SOURCE_ROOT; };
 		TF01 /* ModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ModelsTests.swift; path = Tests/PortfolioCoreTests/ModelsTests.swift; sourceTree = SOURCE_ROOT; };
@@ -237,20 +251,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		CLIP1 /* Embed Login Item */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = Contents/Library/LoginItems;
-			dstSubfolderSpec = 1;
-			files = (
-				BLH1 /* PortfolioRefreshLoginItem.app in Embed Login Item */,
-			);
-			name = "Embed Login Item";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXGroup section */
 		F0C1E7B92F3002810066E539 /* en.lproj */ = {
@@ -318,14 +318,6 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
-		G014 /* macOS */ = {
-			isa = PBXGroup;
-			children = (
-				S02A /* PortfolioRefreshBridge.swift */,
-			);
-			path = macOS;
-			sourceTree = "<group>";
-		};
 		G002 /* macOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -341,14 +333,6 @@
 				S029 /* MacOSSettingsViews.swift */,
 			);
 			path = macOS;
-			sourceTree = "<group>";
-		};
-		GLI1 /* RefreshLoginItem */ = {
-			isa = PBXGroup;
-			children = (
-				S02B /* PortfolioRefreshLoginItemApp.swift */,
-			);
-			path = RefreshLoginItem;
 			sourceTree = "<group>";
 		};
 		G003 /* iOS */ = {
@@ -436,6 +420,22 @@
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
+		G014 /* macOS */ = {
+			isa = PBXGroup;
+			children = (
+				S02A /* PortfolioRefreshBridge.swift */,
+			);
+			path = macOS;
+			sourceTree = "<group>";
+		};
+		GLI1 /* RefreshLoginItem */ = {
+			isa = PBXGroup;
+			children = (
+				S02B /* PortfolioRefreshLoginItemApp.swift */,
+			);
+			path = RefreshLoginItem;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -483,6 +483,23 @@
 			productReference = PR02 /* PortfolioMultiplatform.app */;
 			productType = "com.apple.product-type.application";
 		};
+		T003 /* PortfolioCoreTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CL04 /* Build configuration list for PBXNativeTarget "PortfolioCoreTests" */;
+			buildPhases = (
+				SP03 /* Sources */,
+				FM03 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				TD01 /* PBXTargetDependency */,
+			);
+			name = PortfolioCoreTests;
+			productName = PortfolioCoreTests;
+			productReference = PR03 /* PortfolioCoreTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		T004 /* PortfolioRefreshLoginItem */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CL06 /* Build configuration list for PBXNativeTarget "PortfolioRefreshLoginItem" */;
@@ -500,23 +517,6 @@
 			productName = PortfolioRefreshLoginItem;
 			productReference = PR04 /* PortfolioRefreshLoginItem.app */;
 			productType = "com.apple.product-type.application";
-		};
-		T003 /* PortfolioCoreTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = CL04 /* Build configuration list for PBXNativeTarget "PortfolioCoreTests" */;
-			buildPhases = (
-				SP03 /* Sources */,
-				FM03 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				TD01 /* PBXTargetDependency */,
-			);
-			name = PortfolioCoreTests;
-			productName = PortfolioCoreTests;
-			productReference = PR03 /* PortfolioCoreTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -644,15 +644,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		SP04 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				LI01 /* PortfolioRefreshBridge.swift in Sources */,
-				LI02 /* PortfolioRefreshLoginItemApp.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		SP02 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -712,6 +703,15 @@
 				TS01 /* ModelsTests.swift in Sources */,
 				TS02 /* FormattingHelpersTests.swift in Sources */,
 				TS03 /* DateFormattersTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		SP04 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				LI01 /* PortfolioRefreshBridge.swift in Sources */,
+				LI02 /* PortfolioRefreshLoginItemApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -881,7 +881,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 18;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 73Y2U9Q7Q7;
@@ -900,7 +900,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0.4.1;
+				MARKETING_VERSION = 1.0.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.ios;
 				PRODUCT_NAME = PortfolioMultiplatform;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -920,7 +920,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 18;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 73Y2U9Q7Q7;
@@ -939,7 +939,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0.4.1;
+				MARKETING_VERSION = 1.0.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.ios;
 				PRODUCT_NAME = PortfolioMultiplatform;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -958,7 +958,7 @@
 				CODE_SIGN_ENTITLEMENTS = iOS/iOS.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 73Y2U9Q7Q7;
 				ENABLE_PREVIEWS = YES;
@@ -975,7 +975,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.4;
+				MARKETING_VERSION = 1.0.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.ios;
 				PRODUCT_NAME = PortfolioMultiplatform;
 				SDKROOT = iphoneos;
@@ -994,7 +994,7 @@
 				CODE_SIGN_ENTITLEMENTS = iOS/iOS.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 73Y2U9Q7Q7;
 				ENABLE_PREVIEWS = YES;
@@ -1011,7 +1011,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.4;
+				MARKETING_VERSION = 1.0.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.ios;
 				PRODUCT_NAME = PortfolioMultiplatform;
 				SDKROOT = iphoneos;
@@ -1074,6 +1074,7 @@
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1081,7 +1082,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0.4.1;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.ios.RefreshLoginItem;
 				PRODUCT_NAME = PortfolioRefreshLoginItem;
 				SDKROOT = macosx;
@@ -1105,6 +1106,7 @@
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1112,7 +1114,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0.4.1;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.ios.RefreshLoginItem;
 				PRODUCT_NAME = PortfolioRefreshLoginItem;
 				SDKROOT = macosx;

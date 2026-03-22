@@ -183,7 +183,7 @@ class MacOSSchedulerManager: ObservableObject {
         postRefreshPrefsDarwinNotification()
         
         do {
-            try await loginItemService.register()
+            try loginItemService.register()
         } catch {
             let message = error.localizedDescription
             launchAgentSetupError = L10n.settingsLoginItemRegistrationFailed(message)
@@ -206,11 +206,11 @@ class MacOSSchedulerManager: ObservableObject {
         await launchEmbeddedLoginItem()
     }
     
-    func uninstall() async {
+    func uninstall() {
         launchAgentSetupError = nil
         terminateLoginItemHelper()
         do {
-            try await loginItemService.unregister()
+            try loginItemService.unregister()
         } catch {
             let message = error.localizedDescription
             launchAgentSetupError = L10n.settingsLoginItemRegistrationFailed(message)
@@ -503,7 +503,7 @@ struct BackgroundRefreshSettingsView: View {
                 HStack(spacing: 12) {
                     if manager.isInstalled {
                         Button(L10n.settingsDisable) {
-                            Task { await manager.uninstall() }
+                            manager.uninstall()
                         }
                         .buttonStyle(.bordered)
                     } else {

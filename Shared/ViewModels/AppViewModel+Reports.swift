@@ -56,7 +56,6 @@ extension AppViewModel {
         var items: [QuadrantReportItem] = []
         let comparisonDate = selectedPeriod.comparisonDate
         let comparisonDateStr = AppDateFormatter.yearMonthDay.string(from: comparisonDate)
-        let todayStr = AppDateFormatter.yearMonthDay.string(from: Date())
         
         for quadrant in quadrants {
             let quadrantInstruments = instruments.filter { $0.quadrantId == quadrant.id }
@@ -71,7 +70,7 @@ extension AppViewModel {
                         : await db.getPriceOnOrBefore(forIsin: instrument.isin, date: comparisonDateStr)
                     let currency = instrument.currency
                     let currentValueEUR: Double? = latestPrice != nil ? await convertToEUR(value: totalQuantity * latestPrice!.value, fromCurrency: currency, onDate: latestPrice!.date) : nil
-                    let previousValueEUR: Double? = previousPrice != nil ? await convertToEUR(value: totalQuantity * previousPrice!.value, fromCurrency: currency, onDate: previousPrice!.date ?? comparisonDateStr) : nil
+                    let previousValueEUR: Double? = previousPrice != nil ? await convertToEUR(value: totalQuantity * previousPrice!.value, fromCurrency: currency, onDate: previousPrice!.date) : nil
                     holdingDetails.append(HoldingDetail(
                         accountId: 0,
                         isin: instrument.isin,
@@ -105,7 +104,7 @@ extension AppViewModel {
                     : await db.getPriceOnOrBefore(forIsin: instrument.isin, date: comparisonDateStr)
                 let currency = instrument.currency
                 let currentValueEUR: Double? = latestPrice != nil ? await convertToEUR(value: totalQuantity * latestPrice!.value, fromCurrency: currency, onDate: latestPrice!.date) : nil
-                let previousValueEUR: Double? = previousPrice != nil ? await convertToEUR(value: totalQuantity * previousPrice!.value, fromCurrency: currency, onDate: previousPrice!.date ?? comparisonDateStr) : nil
+                let previousValueEUR: Double? = previousPrice != nil ? await convertToEUR(value: totalQuantity * previousPrice!.value, fromCurrency: currency, onDate: previousPrice!.date) : nil
                 unassignedDetails.append(HoldingDetail(
                     accountId: 0,
                     isin: instrument.isin,
