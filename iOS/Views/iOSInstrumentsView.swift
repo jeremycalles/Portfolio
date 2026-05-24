@@ -131,7 +131,7 @@ struct iOSInstrumentDetailView: View {
             
             Section {
                 Picker("Quadrant", selection: $selectedQuadrantId) {
-                    Text("Unassigned").tag(nil as Int?)
+                    Text(L10n.instrumentsUnassigned).tag(nil as Int?)
                     ForEach(viewModel.quadrants) { quadrant in
                         Text(quadrant.name).tag(quadrant.id as Int?)
                     }
@@ -176,7 +176,7 @@ struct iOSInstrumentDetailView: View {
                                     await refreshPriceHistory()
                                 }
                             } label: {
-                                Label("Delete", systemImage: "trash")
+                                Label(L10n.generalDelete, systemImage: "trash")
                             }
                         }
                     }

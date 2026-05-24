@@ -139,7 +139,7 @@ struct iOSDashboardView: View {
                                 Image(systemName: "chart.xyaxis.line")
                                     .font(.system(size: 32))
                                     .foregroundColor(.secondary.opacity(0.5))
-                                Text("No data available")
+                                Text(L10n.dashboardNoDataAvailable)
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                             }

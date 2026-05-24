@@ -41,7 +41,7 @@ struct iOSDashboardQuadrantsSectionEnhanced: View {
             
             let unassigned = unassignedGoldMode ? unassignedGoldHistory : unassignedHistory
             if !unassigned.isEmpty {
-                let title = unassignedGoldMode ? "Unassigned (oz Au)" : "Unassigned"
+                let title = unassignedGoldMode ? "\(L10n.instrumentsUnassigned) (oz Au)" : L10n.instrumentsUnassigned
                 EnhancedTrendCard(
                     title: title,
                     history: unassigned,

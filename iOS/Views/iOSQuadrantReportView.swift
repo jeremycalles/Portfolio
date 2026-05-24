@@ -18,7 +18,7 @@ struct iOSQuadrantReportView: View {
             
             let report = viewModel.cachedQuadrantReport
             ForEach(report) { item in
-                Section(item.quadrant?.name ?? "Unassigned") {
+                Section(item.quadrant?.name ?? L10n.instrumentsUnassigned) {
                     ForEach(item.holdings) { holding in
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
@@ -31,7 +31,7 @@ struct iOSQuadrantReportView: View {
                             }
                             
                             HStack {
-                                Text("\(holding.quantity, specifier: "%.4f") units")
+                                Text(L10n.holdingsQuantityUnits(formatQuantity(holding.quantity)))
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                                 Spacer()
@@ -39,7 +39,7 @@ struct iOSQuadrantReportView: View {
                                     Text(formatCurrency(value, currency: "EUR"))
                                         .fontWeight(.medium)
                                 } else if privacyMode {
-                                    Text("***")
+                                    Text(L10n.privacyHiddenLong)
                                         .foregroundColor(.secondary)
                                 }
                             }
@@ -49,14 +49,14 @@ struct iOSQuadrantReportView: View {
                     
                     // Section Total (EUR)
                     HStack {
-                        Text("Total (EUR)")
+                        Text(L10n.summaryTotalEur)
                             .fontWeight(.semibold)
                         Spacer()
                         if !privacyMode {
                             Text(formatCurrency(item.totalValueEUR, currency: "EUR"))
                                 .fontWeight(.bold)
                         } else {
-                            Text("***")
+                            Text(L10n.privacyHiddenLong)
                                 .foregroundColor(.secondary)
                         }
                         if let change = item.changePercentEUR {

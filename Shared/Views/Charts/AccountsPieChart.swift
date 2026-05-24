@@ -92,7 +92,7 @@ struct AccountsPieChart: View {
                                         .font(.caption)
                                         .fontWeight(.medium)
                                 } else {
-                                    Text("***")
+                                    Text(L10n.privacyHiddenLong)
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }

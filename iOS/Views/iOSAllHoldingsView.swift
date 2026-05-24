@@ -134,7 +134,7 @@ struct iOSAllHoldingsView: View {
                         let changePercent: Double? = totalPreviousValue > 0 ? ((totalValue - totalPreviousValue) / totalPreviousValue) * 100 : nil
                         
                         HStack {
-                            Text("Total (EUR)")
+                            Text(L10n.summaryTotalEur)
                                 .fontWeight(.semibold)
                             Spacer()
                             if !privacyMode {

@@ -17,7 +17,7 @@ struct QuadrantPieChart: View {
             // Sum all currency values for this quadrant (simplified - assumes single currency or converts)
             let totalValue = item.totalValue.values.reduce(0, +)
             if totalValue > 0 {
-                let name = item.quadrant?.name ?? "Unassigned"
+                let name = item.quadrant?.name ?? L10n.instrumentsUnassigned
                 let color = colors[index % colors.count]
                 data.append((name: name, value: totalValue, color: color))
             }
@@ -115,7 +115,7 @@ struct QuadrantPieChart: View {
                                             .fontWeight(.medium)
                                     }
                                 } else {
-                                    Text("***")
+                                    Text(L10n.privacyHiddenLong)
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }

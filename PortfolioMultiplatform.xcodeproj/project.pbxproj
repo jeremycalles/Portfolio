@@ -981,7 +981,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.5;
+				MARKETING_VERSION = 1.0.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.ios;
 				PRODUCT_NAME = PortfolioMultiplatform;
 				SDKROOT = iphoneos;
@@ -1017,7 +1017,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.5;
+				MARKETING_VERSION = 1.0.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.ios;
 				PRODUCT_NAME = PortfolioMultiplatform;
 				SDKROOT = iphoneos;

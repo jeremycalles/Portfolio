@@ -97,11 +97,14 @@ struct L10n {
     static var generalOverview: String { manager.localized("general.overview") }
     static var generalManage: String { manager.localized("general.manage") }
     static var generalData: String { manager.localized("general.data") }
+    static var generalTotal: String { manager.localized("general.total") }
     static var generalSubtotal: String { manager.localized("general.subtotal") }
     static var generalGrandTotal: String { manager.localized("general.grandTotal") }
     static var generalPerformance: String { manager.localized("general.performance") }
     static var generalNa: String { manager.localized("general.na") }
     static var generalBuild: String { manager.localized("general.build") }
+    static var changeGain: String { manager.localized("change.gain") }
+    static var changeLoss: String { manager.localized("change.loss") }
     
     // Navigation
     static var navDashboard: String { manager.localized("nav.dashboard") }
@@ -342,8 +345,12 @@ struct L10n {
     static var chartSp500Comparison: String { manager.localized("chart.sp500Comparison") }
     static var chartGoldComparison: String { manager.localized("chart.goldComparison") }
     static var chartMsciWorldComparison: String { manager.localized("chart.msciWorldComparison") }
+    static func chartMoreItems(_ count: Int) -> String {
+        String(format: manager.localized("chart.moreItems"), count)
+    }
     // Privacy
     static var privacyHidden: String { manager.localized("privacy.hidden") }
+    static var privacyHiddenLong: String { manager.localized("privacy.hiddenLong") }
     
     // Tooltips
     static var tooltipUpdateAllPrices: String { manager.localized("tooltip.updateAllPrices") }

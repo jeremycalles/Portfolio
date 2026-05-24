@@ -243,7 +243,7 @@ struct iOSSettingsView: View {
                         Button(role: .destructive) {
                             Task { await viewModel.deleteBankAccount(id: account.id) }
                         } label: {
-                            Label("Delete", systemImage: "trash")
+                            Label(L10n.generalDelete, systemImage: "trash")
                         }
                     }
                 }
@@ -276,7 +276,7 @@ struct iOSSettingsView: View {
                         Button(role: .destructive) {
                             Task { await viewModel.deleteQuadrant(id: quadrant.id) }
                         } label: {
-                            Label("Delete", systemImage: "trash")
+                            Label(L10n.generalDelete, systemImage: "trash")
                         }
                     }
                 }

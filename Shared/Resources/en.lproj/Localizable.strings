@@ -23,6 +23,8 @@
 "general.performance" = "Performance";
 "general.na" = "N/A";
 "general.build" = "Build";
+"change.gain" = "Gain";
+"change.loss" = "Loss";
 
 // MARK: - Lock (macOS)
 "lock.unlockButton" = "Unlock with Touch ID";
@@ -285,6 +287,7 @@
 "chart.sp500Comparison" = "S&P 500";
 "chart.goldComparison" = "Gold";
 "chart.msciWorldComparison" = "MSCI World";
+"chart.moreItems" = "+%d more";
 
 // MARK: - Privacy
 "privacy.hidden" = "•••";

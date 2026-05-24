@@ -16,7 +16,7 @@ struct EnhancedAllocationRingChart: View {
             for (index, item) in report.enumerated() {
                 let totalValue = item.totalValue.values.reduce(0, +)
                 if totalValue > 0 {
-                    let name = item.quadrant?.name ?? "Unassigned"
+                    let name = item.quadrant?.name ?? L10n.instrumentsUnassigned
                     let color = colors[index % colors.count]
                     data.append((name: name, value: totalValue, color: color))
                 }
@@ -98,7 +98,7 @@ struct EnhancedAllocationRingChart: View {
                                 Text(formatCompactCurrency(totalValue))
                                     .font(.system(size: 16, weight: .bold, design: .rounded))
                             }
-                            Text("Total")
+                            Text(L10n.generalTotal)
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
                         }
@@ -125,7 +125,7 @@ struct EnhancedAllocationRingChart: View {
                             }
                         }
                         if chartData.count > 5 {
-                            Text("+\(chartData.count - 5) more")
+                            Text(L10n.chartMoreItems(chartData.count - 5))
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
                         }
