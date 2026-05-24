@@ -93,6 +93,13 @@ struct PortfolioTrendChart: View {
         }
     }
 
+    private func formatScrubbedValue(_ value: Double) -> String {
+        if unit == "oz" {
+            return String(format: "%.3f oz", value)
+        }
+        return formatCurrency(value, currency: "EUR")
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: compact ? 4 : 8) {
             // Legend and % on the same line
@@ -207,16 +214,26 @@ struct PortfolioTrendChart: View {
                     .foregroundStyle(chartColor)
                     .symbolSize(42)
                     .annotation(position: .top, alignment: .center) {
-                        VStack(spacing: 2) {
+                        VStack(spacing: 3) {
                             Text(Self.shortDateFormatter.string(from: point.date))
                                 .font(.caption2)
-                                .foregroundStyle(.secondary)
-                            Text(privacyMode ? "••••••" : formatValue(point.value))
+                                .foregroundStyle(Color.secondary)
+                            Text(privacyMode ? "••••••" : formatScrubbedValue(point.value))
                                 .font(.caption.weight(.semibold))
+                                .monospacedDigit()
+                                .foregroundStyle(Color.primary)
                         }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 6)
-                        .portfolioGlassSurface(cornerRadius: 10)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 7)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(Color(.systemBackground).opacity(0.96))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+                        )
+                        .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 3)
                     }
                 }
             }
