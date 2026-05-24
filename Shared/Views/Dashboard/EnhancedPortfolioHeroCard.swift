@@ -1,12 +1,10 @@
 import SwiftUI
-import Charts
 
 // MARK: - Enhanced Portfolio Hero Card
 struct EnhancedPortfolioHeroCard: View {
     @EnvironmentObject var viewModel: AppViewModel
     let currentValue: Double
     let previousValue: Double
-    let sparklineData: [(date: Date, value: Double)]
     let privacyMode: Bool
     @State private var showGoldMode: Bool = false
     
@@ -124,20 +122,7 @@ struct EnhancedPortfolioHeroCard: View {
                     Spacer()
                 }
 
-                ZStack(alignment: .bottom) {
-                    if !displayedSparklineData.isEmpty {
-                        sparkline
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 82)
-                            .opacity(0.36)
-                            .padding(.top, 8)
-                    }
-
-                    VStack(alignment: .leading, spacing: 10) {
-                        valueBlock
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                valueBlock
             }
         }
         .frame(maxWidth: .infinity)
@@ -243,63 +228,12 @@ struct EnhancedPortfolioHeroCard: View {
         )
     }
 
-    private var displayedSparklineData: [(date: Date, value: Double)] {
-        sparklineData
-    }
-
-    @available(iOS 26.0, *)
-    private var sparkline: some View {
-        Chart(displayedSparklineData, id: \.date) { item in
-            LineMark(
-                x: .value("Date", item.date),
-                y: .value("Value", item.value)
-            )
-            .foregroundStyle(showGoldMode ? Color.yellow : (isPositive ? Color.green : Color.red))
-            .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-            .interpolationMethod(.linear)
-
-            AreaMark(
-                x: .value("Date", item.date),
-                y: .value("Value", item.value)
-            )
-            .foregroundStyle(
-                LinearGradient(
-                    colors: [(showGoldMode ? Color.yellow : (isPositive ? Color.green : Color.red)).opacity(0.18), .clear],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
-            .interpolationMethod(.linear)
-        }
-        .chartXScale(domain: sparklineDateDomain)
-        .chartYAxis(.hidden)
-        .chartXAxis(.hidden)
-        .chartLegend(.hidden)
-    }
-
-    private var sparklineDateDomain: ClosedRange<Date> {
-        let now = Date()
-        guard let first = displayedSparklineData.first?.date,
-              let last = displayedSparklineData.last?.date else {
-            return now...now
-        }
-        if first == last {
-            let end = Calendar.current.date(byAdding: .minute, value: 1, to: last) ?? last
-            return first...end
-        }
-        return first...last
-    }
 }
 
 // MARK: - Previews
 
 #Preview("EnhancedPortfolioHeroCard") {
-    let today = Date()
-    let sparkline: [(date: Date, value: Double)] = (0..<30).reversed().compactMap { i in
-        guard let date = Calendar.current.date(byAdding: .day, value: -i, to: today) else { return nil }
-        return (date: date, value: 12_500 * (1 + Double(30 - i) / 30.0 * 0.08))
-    }
-    EnhancedPortfolioHeroCard(currentValue: 13_500, previousValue: 12_500, sparklineData: sparkline, privacyMode: false)
+    EnhancedPortfolioHeroCard(currentValue: 13_500, previousValue: 12_500, privacyMode: false)
         .environmentObject(AppViewModel.preview)
         .frame(width: 400)
         .padding()

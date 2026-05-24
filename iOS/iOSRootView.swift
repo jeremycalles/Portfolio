@@ -143,14 +143,12 @@ struct iOSDashboardView: View {
                 // MARK: - Enhanced Hero Portfolio Card
                 let totals = viewModel.cachedGrandTotalsEUR
                 let history = viewModel.cachedPortfolioHistory
-                let sparklineData = Array(history.suffix(20))
                 // Use first value from history for change calculation (consistent with Trend chart)
                 let previousFromHistory = history.first?.value ?? 0
                 
                 EnhancedPortfolioHeroCard(
                     currentValue: totals.current,
                     previousValue: previousFromHistory,
-                    sparklineData: sparklineData,
                     privacyMode: privacyMode
                 )
                 
@@ -264,13 +262,11 @@ struct iOSDashboardView: View {
             VStack(spacing: 16) {
                 let totals = viewModel.cachedGrandTotalsEUR
                 let history = viewModel.cachedPortfolioHistory
-                let sparklineData = Array(history.suffix(20))
                 let previousFromHistory = history.first?.value ?? 0
 
                 EnhancedPortfolioHeroCard(
                     currentValue: totals.current,
                     previousValue: previousFromHistory,
-                    sparklineData: sparklineData,
                     privacyMode: privacyMode
                 )
 
