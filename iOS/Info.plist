@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSFaceIDUsageDescription</key>
-	<string>Unlock Portfolio to view your dashboard.</string>
+	<string>Unlock Portfolio Vault to view your dashboard.</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.portfolio.app.refresh</string>

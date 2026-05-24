@@ -1,7 +1,7 @@
 /* French Localization */
 
 // MARK: - General
-"app.name" = "Portfolio";
+"app.name" = "Portfolio Vault";
 "app.tagline" = "Suivi actions, OPCVM & Or";
 "general.comparisonPeriod" = "Période de comparaison";
 "general.cancel" = "Annuler";
@@ -222,7 +222,7 @@
 "settings.exportDatabaseToDevice" = "Exporter la base vers un autre appareil";
 "settings.databaseImportExport" = "Import/Export de la base";
 "settings.exportToDeviceTitle" = "Exporter vers un autre appareil";
-"settings.exportToDeviceHint" = "Ouvrez Portfolio sur l'autre appareil pour le voir ici.";
+"settings.exportToDeviceHint" = "Ouvrez Portfolio Vault sur l'autre appareil pour le voir ici.";
 "settings.noPeersFound" = "Aucun appareil trouvé";
 "settings.databaseReceivedTitle" = "Base reçue";
 "settings.databaseReceivedMessage" = "Remplacer la base actuelle par celle reçue ?";
@@ -246,7 +246,7 @@
 "settings.statusInstalledNotRunning" = "Installé mais non actif";
 "settings.statusNotInstalled" = "Non installé";
 "settings.loginItemRegistrationFailed" = "Impossible d’activer l’assistant en arrière-plan : %@";
-"settings.loginItemRequiresApproval" = "Activez l’assistant Portfolio dans Réglages Système → Général → Ouverture (ou Ouverture et extensions) pour que les actualisations planifiées fonctionnent quand l’app est fermée.";
+"settings.loginItemRequiresApproval" = "Activez l’assistant Portfolio Vault dans Réglages Système → Général → Ouverture (ou Ouverture et extensions) pour que les actualisations planifiées fonctionnent quand l’app est fermée.";
 "settings.openLoginItemsSettings" = "Ouvrir les réglages Ouverture…";
 "settings.enable" = "Activer";
 "settings.disable" = "Désactiver";
