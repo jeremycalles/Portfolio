@@ -161,8 +161,8 @@
 		F0C1E7B72F3002810066E539 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Localizable.strings; sourceTree = "<group>"; };
 		F0C1E7BA2F3002810066E539 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = Localizable.strings; sourceTree = "<group>"; };
 		F0C1E7C12F3003410066E539 /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
-		PR01 /* PortfolioMultiplatform.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PortfolioMultiplatform.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		PR02 /* PortfolioMultiplatform.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PortfolioMultiplatform.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		PR01 /* Portfolio Vault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Portfolio Vault.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		PR02 /* Portfolio Vault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Portfolio Vault.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		PR03 /* PortfolioCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PortfolioCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		PR04 /* PortfolioRefreshLoginItem.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PortfolioRefreshLoginItem.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		S001 /* PortfolioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioApp.swift; sourceTree = "<group>"; };
@@ -359,8 +359,8 @@
 		G004 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				PR01 /* PortfolioMultiplatform.app */,
-				PR02 /* PortfolioMultiplatform.app */,
+				PR01 /* Portfolio Vault.app */,
+				PR02 /* Portfolio Vault.app */,
 				PR03 /* PortfolioCoreTests.xctest */,
 				PR04 /* PortfolioRefreshLoginItem.app */,
 			);
@@ -463,7 +463,7 @@
 				P002 /* SwiftSoup */,
 			);
 			productName = Portfolio;
-			productReference = PR01 /* PortfolioMultiplatform.app */;
+			productReference = PR01 /* Portfolio Vault.app */;
 			productType = "com.apple.product-type.application";
 		};
 		T002 /* Portfolio iOS */ = {
@@ -484,7 +484,7 @@
 				P004 /* SwiftSoup */,
 			);
 			productName = Portfolio;
-			productReference = PR02 /* PortfolioMultiplatform.app */;
+			productReference = PR02 /* Portfolio Vault.app */;
 			productType = "com.apple.product-type.application";
 		};
 		T003 /* PortfolioCoreTests */ = {
@@ -909,7 +909,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.ios;
-				PRODUCT_NAME = PortfolioMultiplatform;
+				PRODUCT_MODULE_NAME = PortfolioMultiplatform;
+				PRODUCT_NAME = "Portfolio Vault";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -949,7 +950,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.ios;
-				PRODUCT_NAME = PortfolioMultiplatform;
+				PRODUCT_MODULE_NAME = PortfolioMultiplatform;
+				PRODUCT_NAME = "Portfolio Vault";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -986,7 +988,8 @@
 				);
 				MARKETING_VERSION = 1.0.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.ios;
-				PRODUCT_NAME = PortfolioMultiplatform;
+				PRODUCT_MODULE_NAME = PortfolioMultiplatform;
+				PRODUCT_NAME = "Portfolio Vault";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -1023,7 +1026,8 @@
 				);
 				MARKETING_VERSION = 1.0.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.portfolio.app.ios;
-				PRODUCT_NAME = PortfolioMultiplatform;
+				PRODUCT_MODULE_NAME = PortfolioMultiplatform;
+				PRODUCT_NAME = "Portfolio Vault";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -1047,7 +1051,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PortfolioMultiplatform.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PortfolioMultiplatform";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Portfolio Vault.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Portfolio Vault";
 			};
 			name = Debug;
 		};
@@ -1066,7 +1070,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PortfolioMultiplatform.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PortfolioMultiplatform";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Portfolio Vault.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Portfolio Vault";
 			};
 			name = Release;
 		};
