@@ -19,6 +19,7 @@ struct PortfolioTrendChart: View {
     var interactive: Bool = false
     var privacyMode: Bool = false
     @State private var scrubbedPoint: (date: Date, value: Double)?
+    @State private var scrubbedXPosition: CGFloat?
 
     private var valueRange: (min: Double, max: Double) {
         var lo = Double.greatestFiniteMagnitude
@@ -213,28 +214,6 @@ struct PortfolioTrendChart: View {
                     )
                     .foregroundStyle(chartColor)
                     .symbolSize(42)
-                    .annotation(position: .top, alignment: .center) {
-                        VStack(spacing: 3) {
-                            Text(Self.shortDateFormatter.string(from: point.date))
-                                .font(.caption2)
-                                .foregroundStyle(Color.secondary)
-                            Text(privacyMode ? "••••••" : formatScrubbedValue(point.value))
-                                .font(.caption.weight(.semibold))
-                                .monospacedDigit()
-                                .foregroundStyle(Color.primary)
-                        }
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 7)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(Color(.systemBackground).opacity(0.96))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .stroke(Color.primary.opacity(0.08), lineWidth: 1)
-                        )
-                        .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 3)
-                    }
                 }
             }
             .chartForegroundStyleScale([
@@ -265,26 +244,64 @@ struct PortfolioTrendChart: View {
             .chartOverlay { proxy in
                 if interactive {
                     GeometryReader { geometry in
-                        Rectangle()
-                            .fill(.clear)
-                            .contentShape(Rectangle())
-                            .gesture(
-                                DragGesture(minimumDistance: 0)
-                                    .onChanged { value in
-                                        updateScrubbedPoint(at: value.location.x, proxy: proxy, geometry: geometry)
-                                    }
-                                    .onEnded { _ in
-                                        withAnimation(.easeOut(duration: 0.18)) {
-                                            scrubbedPoint = nil
+                        ZStack(alignment: .topLeading) {
+                            Rectangle()
+                                .fill(.clear)
+                                .contentShape(Rectangle())
+                                .gesture(
+                                    DragGesture(minimumDistance: 0)
+                                        .onChanged { value in
+                                            updateScrubbedPoint(at: value.location.x, proxy: proxy, geometry: geometry)
                                         }
-                                    }
-                            )
+                                        .onEnded { _ in
+                                            withAnimation(.easeOut(duration: 0.18)) {
+                                                scrubbedPoint = nil
+                                                scrubbedXPosition = nil
+                                            }
+                                        }
+                                )
+
+                            if let point = scrubbedPoint,
+                               let xPosition = scrubbedXPosition,
+                               let plotFrameAnchor = proxy.plotFrame {
+                                let plotFrame = geometry[plotFrameAnchor]
+                                scrubbedCallout(for: point)
+                                    .position(
+                                        x: min(max(plotFrame.minX + xPosition, 88), geometry.size.width - 88),
+                                        y: plotFrame.minY + 34
+                                    )
+                                    .allowsHitTesting(false)
+                            }
+                        }
                     }
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 4))
         }
         .padding(compact ? 8 : 16)
+    }
+
+    private func scrubbedCallout(for point: (date: Date, value: Double)) -> some View {
+        VStack(spacing: 3) {
+            Text(Self.shortDateFormatter.string(from: point.date))
+                .font(.caption2)
+                .foregroundStyle(Color.secondary)
+            Text(privacyMode ? "••••••" : formatScrubbedValue(point.value))
+                .font(.caption.weight(.semibold))
+                .monospacedDigit()
+                .foregroundStyle(Color.primary)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color(.systemBackground).opacity(0.96))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 3)
     }
 
     private func updateScrubbedPoint(at xPosition: CGFloat, proxy: ChartProxy, geometry: GeometryProxy) {
@@ -298,6 +315,7 @@ struct PortfolioTrendChart: View {
         }
         if let nearest {
             scrubbedPoint = nearest
+            scrubbedXPosition = relativeX
         }
     }
 }
