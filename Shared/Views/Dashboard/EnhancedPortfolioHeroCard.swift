@@ -116,22 +116,21 @@ struct EnhancedPortfolioHeroCard: View {
             } else {
                 HStack(alignment: .top, spacing: 12) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(showGoldMode ? L10n.dashboardPortfolioValueGold : L10n.dashboardPortfolioValue)
+                        Text(L10n.dashboardPortfolioValue)
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                         lastUpdateLabel
                     }
                     Spacer()
-                    currencyModeControl
                 }
 
-                ZStack(alignment: .bottomTrailing) {
+                ZStack(alignment: .bottom) {
                     if !displayedSparklineData.isEmpty {
                         sparkline
-                            .frame(height: 76)
-                            .opacity(0.45)
-                            .padding(.leading, 120)
-                            .padding(.top, 10)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 82)
+                            .opacity(0.36)
+                            .padding(.top, 8)
                     }
 
                     VStack(alignment: .leading, spacing: 10) {
@@ -244,48 +243,8 @@ struct EnhancedPortfolioHeroCard: View {
         )
     }
 
-    @available(iOS 26.0, *)
-    private var currencyModeControl: some View {
-        HStack(spacing: 4) {
-            heroModeButton(title: "EUR", systemImage: "eurosign", selected: !showGoldMode) {
-                showGoldMode = false
-            }
-            heroModeButton(title: "Au", systemImage: "circle.hexagongrid.fill", selected: showGoldMode) {
-                showGoldMode = true
-            }
-            .disabled(goldTotals == nil)
-            .opacity(goldTotals == nil ? 0.45 : 1)
-        }
-        .padding(4)
-        .portfolioGlassSurface(cornerRadius: 18, interactive: true)
-    }
-
-    @available(iOS 26.0, *)
-    private func heroModeButton(title: String, systemImage: String, selected: Bool, action: @escaping () -> Void) -> some View {
-        Button {
-            HapticService.impact(.light)
-            withAnimation(.spring(response: 0.28, dampingFraction: 0.78)) {
-                action()
-            }
-        } label: {
-            Label(title, systemImage: systemImage)
-                .labelStyle(.iconOnly)
-                .font(.system(size: 13, weight: .semibold))
-                .frame(width: 34, height: 30)
-                .foregroundStyle(selected ? .white : .primary)
-                .background {
-                    if selected {
-                        Capsule()
-                            .fill((showGoldMode ? Color.yellow : Color.accentColor).gradient)
-                    }
-                }
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(title)
-    }
-
     private var displayedSparklineData: [(date: Date, value: Double)] {
-        showGoldMode ? goldHistory.suffix(20).map { $0 } : sparklineData
+        sparklineData
     }
 
     @available(iOS 26.0, *)
@@ -297,7 +256,7 @@ struct EnhancedPortfolioHeroCard: View {
             )
             .foregroundStyle(showGoldMode ? Color.yellow : (isPositive ? Color.green : Color.red))
             .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-            .interpolationMethod(.catmullRom)
+            .interpolationMethod(.linear)
 
             AreaMark(
                 x: .value("Date", item.date),
@@ -310,10 +269,25 @@ struct EnhancedPortfolioHeroCard: View {
                     endPoint: .bottom
                 )
             )
-            .interpolationMethod(.catmullRom)
+            .interpolationMethod(.linear)
         }
+        .chartXScale(domain: sparklineDateDomain)
         .chartYAxis(.hidden)
         .chartXAxis(.hidden)
+        .chartLegend(.hidden)
+    }
+
+    private var sparklineDateDomain: ClosedRange<Date> {
+        let now = Date()
+        guard let first = displayedSparklineData.first?.date,
+              let last = displayedSparklineData.last?.date else {
+            return now...now
+        }
+        if first == last {
+            let end = Calendar.current.date(byAdding: .minute, value: 1, to: last) ?? last
+            return first...end
+        }
+        return first...last
     }
 }
 
