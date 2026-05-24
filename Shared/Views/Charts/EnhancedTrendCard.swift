@@ -132,14 +132,16 @@ struct EnhancedTrendCard: View {
     }
 }
 
-// MARK: - Glass effect with fallback for macOS < 26 (e.g. Sequoia)
+// MARK: - Glass effect with fallback for systems before Liquid Glass
 struct GlassEffectFallback: ViewModifier {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
     var cornerRadius: CGFloat
     var interactive: Bool
 
     func body(content: Content) -> some View {
-        #if os(macOS)
-        if #available(macOS 26.0, *) {
+        #if os(iOS) || os(macOS)
+        if #available(iOS 26.0, macOS 26.0, *), !reduceTransparency {
             if interactive {
                 content.glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
             } else {
@@ -155,6 +157,12 @@ struct GlassEffectFallback: ViewModifier {
             .background(.ultraThinMaterial)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
         #endif
+    }
+}
+
+extension View {
+    func portfolioGlassSurface(cornerRadius: CGFloat, interactive: Bool = false) -> some View {
+        modifier(GlassEffectFallback(cornerRadius: cornerRadius, interactive: interactive))
     }
 }
 

@@ -16,6 +16,9 @@ struct PortfolioTrendChart: View {
     var msciWorldHistory: [(date: Date, value: Double)]? = nil // Optional MSCI World comparison
     var compact: Bool = false
     var unit: String = "EUR"  // "EUR" or "oz" for gold ounces
+    var interactive: Bool = false
+    var privacyMode: Bool = false
+    @State private var scrubbedPoint: (date: Date, value: Double)?
 
     private var valueRange: (min: Double, max: Double) {
         var lo = Double.greatestFiniteMagnitude
@@ -192,6 +195,30 @@ struct PortfolioTrendChart: View {
                         .interpolationMethod(.catmullRom)
                     }
                 }
+                if interactive, let point = scrubbedPoint {
+                    RuleMark(x: .value("Selected Date", point.date))
+                        .foregroundStyle(.secondary.opacity(0.35))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+
+                    PointMark(
+                        x: .value("Selected Date", point.date),
+                        y: .value("Selected Value", point.value)
+                    )
+                    .foregroundStyle(chartColor)
+                    .symbolSize(42)
+                    .annotation(position: .top, alignment: .center) {
+                        VStack(spacing: 2) {
+                            Text(Self.shortDateFormatter.string(from: point.date))
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                            Text(privacyMode ? "••••••" : formatValue(point.value))
+                                .font(.caption.weight(.semibold))
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
+                        .portfolioGlassSurface(cornerRadius: 10)
+                    }
+                }
             }
             .chartForegroundStyleScale([
                 PortfolioChartSeries.portfolio: chartColor,
@@ -218,9 +245,43 @@ struct PortfolioTrendChart: View {
                 }
             }
             .chartLegend(.hidden)
+            .chartOverlay { proxy in
+                if interactive {
+                    GeometryReader { geometry in
+                        Rectangle()
+                            .fill(.clear)
+                            .contentShape(Rectangle())
+                            .gesture(
+                                DragGesture(minimumDistance: 0)
+                                    .onChanged { value in
+                                        updateScrubbedPoint(at: value.location.x, proxy: proxy, geometry: geometry)
+                                    }
+                                    .onEnded { _ in
+                                        withAnimation(.easeOut(duration: 0.18)) {
+                                            scrubbedPoint = nil
+                                        }
+                                    }
+                            )
+                    }
+                }
+            }
             .clipShape(RoundedRectangle(cornerRadius: 4))
         }
         .padding(compact ? 8 : 16)
+    }
+
+    private func updateScrubbedPoint(at xPosition: CGFloat, proxy: ChartProxy, geometry: GeometryProxy) {
+        guard !history.isEmpty else { return }
+        guard let plotFrameAnchor = proxy.plotFrame else { return }
+        let plotFrame = geometry[plotFrameAnchor]
+        let relativeX = min(max(xPosition - plotFrame.origin.x, 0), plotFrame.width)
+        guard let date: Date = proxy.value(atX: relativeX) else { return }
+        let nearest = history.min {
+            abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date))
+        }
+        if let nearest {
+            scrubbedPoint = nearest
+        }
     }
 }
 

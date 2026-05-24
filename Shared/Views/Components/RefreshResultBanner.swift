@@ -140,13 +140,10 @@ struct RefreshResultBanner: View {
             }
         }
         .padding()
-        .background(
+        .portfolioGlassSurface(cornerRadius: 16, interactive: true)
+        .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(.ultraThinMaterial)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(accentColor.opacity(0.3), lineWidth: 1)
-                )
+                .stroke(accentColor.opacity(0.3), lineWidth: 1)
         )
         .shadow(color: .black.opacity(0.1), radius: 12, x: 0, y: 4)
         .padding(.horizontal)
