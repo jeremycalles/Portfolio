@@ -51,6 +51,25 @@ struct DashboardView: View {
         return f
     }()
     
+    private var maskedValue: String { "••••••" }
+    
+    private var lastUpdateText: String {
+        if let lastRefresh = viewModel.getLastRefreshDate() {
+            return "\(L10n.summaryLastUpdate) \(Self.relativeDateTimeFormatter.localizedString(for: lastRefresh, relativeTo: Date()))"
+        }
+        if let lastUpdate = viewModel.lastInstrumentUpdateDate {
+            return "\(L10n.summaryLastUpdate) \(Self.lastUpdateFormatter.string(from: lastUpdate))"
+        }
+        return L10n.dashboardNoRefreshYet
+    }
+    
+    private var isDataStale: Bool {
+        guard let lastRefresh = viewModel.getLastRefreshDate() ?? viewModel.lastInstrumentUpdateDate else {
+            return true
+        }
+        return Date().timeIntervalSince(lastRefresh) > 24 * 60 * 60
+    }
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -86,9 +105,14 @@ struct DashboardView: View {
                     
                     Spacer()
                     
+                    Label(isDataStale ? L10n.dashboardDataStale : L10n.dashboardDataFresh, systemImage: isDataStale ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                        .font(.caption)
+                        .foregroundColor(isDataStale ? .orange : .green)
+                        .help(lastUpdateText)
+                    
                     // Privacy Toggle
                     Toggle(isOn: $privacyMode) {
-                        Label(L10n.privacyHidden, systemImage: privacyMode ? "eye.slash" : "eye")
+                        Label(L10n.dashboardHideValues, systemImage: privacyMode ? "eye.slash" : "eye")
                             .font(.headline)
                     }
                     #if os(macOS)
@@ -100,138 +124,86 @@ struct DashboardView: View {
                 
                 // Portfolio Summary, Trend, and Pie Chart side by side
                 HStack(alignment: .top, spacing: 16) {
-                    // Portfolio Totals (hidden in privacy mode)
-                    if !privacyMode {
-                        GroupBox(L10n.dashboardPortfolioSummary) {
-                            let totals = viewModel.cachedGrandTotalsEUR
-                            let goldTotals = viewModel.cachedGoldTotals
-                            let history = viewModel.cachedPortfolioHistory
-                            let goldHistory = viewModel.cachedGoldOzHistory
-                            
-                            // Compute change from history (same as Trend chart)
-                            let eurChange: Double? = {
-                                guard let first = history.first?.value, let last = history.last?.value, first > 0 else { return nil }
-                                return ((last - first) / first) * 100
-                            }()
-                            let goldChange: Double? = {
-                                guard let first = goldHistory.first?.value, let last = goldHistory.last?.value, first > 0 else { return nil }
-                                return ((last - first) / first) * 100
-                            }()
-                            let msciHistory = viewModel.cachedMSCIWorldHistory
-                            let msciChange: Double? = {
-                                guard let first = msciHistory.first?.value, let last = msciHistory.last?.value, first > 0 else { return nil }
-                                return ((last - first) / first) * 100
-                            }()
-                            
-                            if totals.current == 0 {
-                                Text(L10n.dashboardNoHoldings)
-                                    .foregroundColor(.secondary)
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            } else {
-                                VStack(alignment: .leading, spacing: 12) {
-                                    // Top right: same "Last refresh" as Settings (relative) or fallback to latest price date
-                                    HStack {
-                                        Spacer()
-                                        if let lastRefresh = viewModel.getLastRefreshDate() {
-                                            Text("\(L10n.summaryLastUpdate) \(Self.relativeDateTimeFormatter.localizedString(for: lastRefresh, relativeTo: Date()))")
-                                                .font(.caption2)
-                                                .foregroundColor(.secondary)
-                                        } else if let lastUpdate = viewModel.lastInstrumentUpdateDate {
-                                            Text("\(L10n.summaryLastUpdate) \(Self.lastUpdateFormatter.string(from: lastUpdate))")
-                                                .font(.caption2)
-                                                .foregroundColor(.secondary)
-                                        }
-                                    }
+                    GroupBox(L10n.dashboardPortfolioSummary) {
+                        let totals = viewModel.cachedGrandTotalsEUR
+                        let goldTotals = viewModel.cachedGoldTotals
+                        let history = viewModel.cachedPortfolioHistory
+                        let goldHistory = viewModel.cachedGoldOzHistory
+                        
+                        // Compute change from history (same as Trend chart)
+                        let eurChange: Double? = {
+                            guard let first = history.first?.value, let last = history.last?.value, first > 0 else { return nil }
+                            return ((last - first) / first) * 100
+                        }()
+                        let goldChange: Double? = {
+                            guard let first = goldHistory.first?.value, let last = goldHistory.last?.value, first > 0 else { return nil }
+                            return ((last - first) / first) * 100
+                        }()
+                        let msciHistory = viewModel.cachedMSCIWorldHistory
+                        let msciChange: Double? = {
+                            guard let first = msciHistory.first?.value, let last = msciHistory.last?.value, first > 0 else { return nil }
+                            return ((last - first) / first) * 100
+                        }()
+                        
+                        if totals.current == 0 {
+                            Text(L10n.dashboardNoHoldings)
+                                .foregroundColor(.secondary)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        } else {
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack {
+                                    Text(lastUpdateText)
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(1)
+                                    Spacer()
+                                }
+                                
+                                VStack(alignment: .leading, spacing: 14) {
                                     // EUR Value
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        HStack(alignment: .firstTextBaseline, spacing: 8) {
-                                            Text("EUR")
-                                                .font(.headline)
-                                            Text(formatCurrency(totals.current, currency: "EUR"))
-                                                .font(.title)
-                                                .fontWeight(.bold)
-                                        }
-                                        
-                                        HStack {
-                                            if let firstValue = history.first?.value, firstValue > 0 {
-                                                Text("\(L10n.summaryFrom) \(formatCurrency(firstValue, currency: "EUR"))")
-                                                    .font(.caption)
-                                                    .foregroundColor(.secondary)
-                                                
-                                                Spacer()
-                                                
-                                                if let change = eurChange {
-                                                    ChangeLabel(change: change)
-                                                }
-                                            }
-                                        }
-                                    }
+                                    DashboardSummaryMetric(
+                                        title: L10n.summaryTotalEur,
+                                        value: privacyMode ? maskedValue : formatCurrency(totals.current, currency: "EUR"),
+                                        fromValue: privacyMode ? nil : (history.first?.value).map { "\(L10n.summaryFrom) \(formatCurrency($0, currency: "EUR"))" },
+                                        change: privacyMode ? nil : eurChange,
+                                        accent: .primary
+                                    )
                                     
                                     // Gold Ounces Value
                                     if let gold = goldTotals {
                                         Divider()
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                                                Text(L10n.summaryGold)
-                                                    .font(.headline)
-                                                    .foregroundColor(.yellow)
-                                                Text(String(format: "%.2f oz", gold.current))
-                                                    .font(.title2)
-                                                    .fontWeight(.bold)
-                                            }
-                                            
-                                            HStack {
-                                                if let firstGold = goldHistory.first?.value, firstGold > 0 {
-                                                    Text("\(L10n.summaryFrom) \(String(format: "%.2f oz", firstGold))")
-                                                        .font(.caption)
-                                                        .foregroundColor(.secondary)
-                                                    
-                                                    Spacer()
-                                                    
-                                                    if let change = goldChange {
-                                                        ChangeLabel(change: change)
-                                                    }
-                                                }
-                                            }
-                                        }
+                                        DashboardSummaryMetric(
+                                            title: L10n.summaryGold,
+                                            value: privacyMode ? maskedValue : String(format: "%.2f %@", gold.current, L10n.summaryOz),
+                                            fromValue: privacyMode ? nil : (goldHistory.first?.value).map { "\(L10n.summaryFrom) \(String(format: "%.2f %@", $0, L10n.summaryOz))" },
+                                            change: privacyMode ? nil : goldChange,
+                                            accent: .yellow,
+                                            compact: true
+                                        )
                                     }
                                     
                                     #if os(macOS)
                                     if let firstMsci = msciHistory.first?.value, let lastMsci = msciHistory.last?.value, firstMsci > 0 {
                                         Divider()
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                                                Text(L10n.chartMsciWorldComparison)
-                                                    .font(.headline)
-                                                    .foregroundColor(.blue)
-                                                Text(formatCurrency(lastMsci, currency: "EUR"))
-                                                    .font(.title2)
-                                                    .fontWeight(.bold)
-                                            }
-                                            
-                                            HStack {
-                                                Text("\(L10n.summaryFrom) \(formatCurrency(firstMsci, currency: "EUR"))")
-                                                    .font(.caption)
-                                                    .foregroundColor(.secondary)
-                                                
-                                                Spacer()
-                                                
-                                                if let change = msciChange {
-                                                    ChangeLabel(change: change)
-                                                }
-                                            }
-                                        }
+                                        DashboardSummaryMetric(
+                                            title: L10n.chartMsciWorldComparison,
+                                            value: privacyMode ? maskedValue : formatCurrency(lastMsci, currency: "EUR"),
+                                            fromValue: privacyMode ? nil : "\(L10n.summaryFrom) \(formatCurrency(firstMsci, currency: "EUR"))",
+                                            change: privacyMode ? nil : msciChange,
+                                            accent: .blue,
+                                            compact: true
+                                        )
                                     }
                                     #endif
-                                    
-                                    Spacer()
                                 }
-                                .padding()
-                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                                
+                                Spacer()
                             }
+                            .padding()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                         }
-                        .frame(minWidth: 280, maxWidth: 280, minHeight: 270, maxHeight: .infinity)
                     }
+                    .frame(minWidth: 280, maxWidth: 280, minHeight: 270, maxHeight: .infinity)
                     
                     // Portfolio Trend Chart
                     GroupBox(L10n.dashboardPortfolioTrend) {
@@ -383,6 +355,44 @@ struct DashboardView: View {
             }
             for account in viewModel.bankAccounts {
                 accountHistories[account.id] = await viewModel.getAccountValueHistory(accountId: account.id)
+            }
+        }
+    }
+}
+
+private struct DashboardSummaryMetric: View {
+    let title: String
+    let value: String
+    let fromValue: String?
+    let change: Double?
+    let accent: Color
+    var compact: Bool = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(compact ? .subheadline : .headline)
+                .foregroundColor(accent)
+            
+            Text(value)
+                .font(compact ? .title2 : .title)
+                .fontWeight(.bold)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            
+            HStack {
+                if let fromValue {
+                    Text(fromValue)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
+                
+                Spacer()
+                
+                if let change {
+                    ChangeLabel(change: change)
+                }
             }
         }
     }

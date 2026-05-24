@@ -141,6 +141,10 @@ struct L10n {
     static var dashboardTotalPortfolioValue: String { manager.localized("dashboard.totalPortfolioValue") }
     static var dashboardNoAccountsWithData: String { manager.localized("dashboard.noAccountsWithData") }
     static var dashboardNoDataAvailable: String { manager.localized("dashboard.noDataAvailable") }
+    static var dashboardDataFresh: String { manager.localized("dashboard.dataFresh") }
+    static var dashboardDataStale: String { manager.localized("dashboard.dataStale") }
+    static var dashboardNoRefreshYet: String { manager.localized("dashboard.noRefreshYet") }
+    static var dashboardHideValues: String { manager.localized("dashboard.hideValues") }
     
     // Portfolio Summary
     static var summaryGold: String { manager.localized("summary.gold") }
@@ -204,6 +208,32 @@ struct L10n {
     static var holdingsChange: String { manager.localized("holdings.change") }
     static var holdingsQty: String { manager.localized("holdings.qty") }
     static var holdingsNoHoldings: String { manager.localized("holdings.noHoldings") }
+    static var holdingsSearchPlaceholder: String { manager.localized("holdings.searchPlaceholder") }
+    static var holdingsAllAccounts: String { manager.localized("holdings.allAccounts") }
+    static var holdingsFilter: String { manager.localized("holdings.filter") }
+    static var holdingsSort: String { manager.localized("holdings.sort") }
+    static var holdingsFilterAll: String { manager.localized("holdings.filterAll") }
+    static var holdingsFilterGains: String { manager.localized("holdings.filterGains") }
+    static var holdingsFilterLosses: String { manager.localized("holdings.filterLosses") }
+    static var holdingsFilterMissingPrice: String { manager.localized("holdings.filterMissingPrice") }
+    static var holdingsSortAccount: String { manager.localized("holdings.sortAccount") }
+    static var holdingsSortValueHigh: String { manager.localized("holdings.sortValueHigh") }
+    static var holdingsSortValueLow: String { manager.localized("holdings.sortValueLow") }
+    static var holdingsSortPerformanceHigh: String { manager.localized("holdings.sortPerformanceHigh") }
+    static var holdingsSortPerformanceLow: String { manager.localized("holdings.sortPerformanceLow") }
+    static var holdingsSortName: String { manager.localized("holdings.sortName") }
+    static var holdingsWeight: String { manager.localized("holdings.weight") }
+    static var holdingsNoMatches: String { manager.localized("holdings.noMatches") }
+    static var holdingsAdjustFilters: String { manager.localized("holdings.adjustFilters") }
+    static func holdingsQuantityUnits(_ quantity: String) -> String {
+        String(format: manager.localized("holdings.quantityUnits"), quantity)
+    }
+    static func holdingsShowingCount(_ visible: Int, _ total: Int) -> String {
+        String(format: manager.localized("holdings.showingCount"), visible, total)
+    }
+    static func holdingsWeightValue(_ weight: String) -> String {
+        String(format: manager.localized("holdings.weightValue"), weight)
+    }
     
     // Quadrants
     static var quadrantsAddQuadrant: String { manager.localized("quadrants.addQuadrant") }

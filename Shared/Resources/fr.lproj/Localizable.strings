@@ -63,6 +63,10 @@
 "dashboard.totalPortfolioValue" = "Valeur totale du portefeuille";
 "dashboard.noAccountsWithData" = "Aucun compte avec données";
 "dashboard.noDataAvailable" = "Aucune donnée disponible";
+"dashboard.dataFresh" = "Données à jour";
+"dashboard.dataStale" = "Données peut-être obsolètes";
+"dashboard.noRefreshYet" = "Pas encore actualisé";
+"dashboard.hideValues" = "Masquer les valeurs";
 
 // MARK: - Portfolio Summary
 "summary.gold" = "Or";
@@ -142,6 +146,25 @@
 "holdings.qty" = "Qté";
 "holdings.noHoldings" = "Aucune position";
 "holdings.noChartData" = "Aucune donnée graphique";
+"holdings.searchPlaceholder" = "Rechercher position, ticker, ISIN ou compte";
+"holdings.allAccounts" = "Tous les comptes";
+"holdings.filter" = "Filtre";
+"holdings.sort" = "Tri";
+"holdings.filterAll" = "Toutes les positions";
+"holdings.filterGains" = "En hausse";
+"holdings.filterLosses" = "En baisse";
+"holdings.filterMissingPrice" = "Prix manquant";
+"holdings.sortAccount" = "Compte";
+"holdings.sortValueHigh" = "Valeur décroissante";
+"holdings.sortValueLow" = "Valeur croissante";
+"holdings.sortPerformanceHigh" = "Performance décroissante";
+"holdings.sortPerformanceLow" = "Performance croissante";
+"holdings.sortName" = "Nom";
+"holdings.weight" = "Poids";
+"holdings.showingCount" = "%d sur %d affichées";
+"holdings.noMatches" = "Aucune position ne correspond";
+"holdings.adjustFilters" = "Modifiez la recherche, les filtres ou le compte.";
+"holdings.weightValue" = "%@ du portefeuille";
 
 // MARK: - Quadrants
 "quadrants.addQuadrant" = "Ajouter un quadrant";

@@ -63,6 +63,10 @@
 "dashboard.totalPortfolioValue" = "Total Portfolio Value";
 "dashboard.noAccountsWithData" = "No accounts with data";
 "dashboard.noDataAvailable" = "No data available";
+"dashboard.dataFresh" = "Data fresh";
+"dashboard.dataStale" = "Data may be stale";
+"dashboard.noRefreshYet" = "Not refreshed yet";
+"dashboard.hideValues" = "Hide values";
 
 // MARK: - Portfolio Summary
 "summary.gold" = "Gold";
@@ -142,6 +146,25 @@
 "holdings.qty" = "Qty";
 "holdings.noHoldings" = "No holdings";
 "holdings.noChartData" = "No chart data";
+"holdings.searchPlaceholder" = "Search holdings, ticker, ISIN, or account";
+"holdings.allAccounts" = "All accounts";
+"holdings.filter" = "Filter";
+"holdings.sort" = "Sort";
+"holdings.filterAll" = "All holdings";
+"holdings.filterGains" = "Gainers";
+"holdings.filterLosses" = "Losers";
+"holdings.filterMissingPrice" = "Missing price";
+"holdings.sortAccount" = "Account";
+"holdings.sortValueHigh" = "Value high to low";
+"holdings.sortValueLow" = "Value low to high";
+"holdings.sortPerformanceHigh" = "Performance high to low";
+"holdings.sortPerformanceLow" = "Performance low to high";
+"holdings.sortName" = "Name";
+"holdings.weight" = "Weight";
+"holdings.showingCount" = "Showing %d of %d";
+"holdings.noMatches" = "No holdings match";
+"holdings.adjustFilters" = "Adjust search, filters, or account selection.";
+"holdings.weightValue" = "%@ of portfolio";
 
 // MARK: - Quadrants
 "quadrants.addQuadrant" = "Add Quadrant";
