@@ -9,13 +9,13 @@ enum PortfolioRefreshBridge {
     /// Must match `PRODUCT_BUNDLE_IDENTIFIER` of the Refresh Login Item target and `SMAppService.loginItem(identifier:)`.
     static let loginItemBundleIdentifier = "com.portfolio.app.ios.RefreshLoginItem"
 
-    static let refreshURL = URL(string: "portfolio://refresh")!
-
     static let refreshIntervalSecondsKey = "refreshIntervalSeconds"
     static let backgroundRefreshEnabledKey = "backgroundRefreshEnabled"
 
     /// Darwin notify name so the helper can reschedule when the main app updates the shared defaults.
     static let refreshPrefsDarwinNotification = "com.portfolio.app.refreshPrefsChanged" as CFString
+    /// Darwin notify name so the helper can request a refresh without opening a visible app window.
+    static let refreshRequestDarwinNotification = "com.portfolio.app.refreshRequested" as CFString
 
     static var defaultRefreshIntervalSeconds: Int { 10_800 }
 }

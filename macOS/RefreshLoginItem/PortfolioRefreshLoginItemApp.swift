@@ -2,7 +2,7 @@
 import AppKit
 import CoreFoundation
 
-/// Headless login item: wakes at login and opens `portfolio://refresh` on a timer so the main sandboxed app performs the refresh.
+/// Headless login item: wakes at login and requests refreshes from the main app without opening windows.
 @main
 enum PortfolioRefreshLoginItemApp {
     static func main() {
@@ -63,18 +63,24 @@ private final class RefreshLoginItemDelegate: NSObject, NSApplicationDelegate {
         let seconds = raw > 0 ? raw : PortfolioRefreshBridge.defaultRefreshIntervalSeconds
         let interval = TimeInterval(seconds)
 
-        openRefreshURL()
+        postRefreshRequest()
 
         timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
-            self?.openRefreshURL()
+            self?.postRefreshRequest()
         }
         if let timer {
             RunLoop.main.add(timer, forMode: .common)
         }
     }
 
-    private func openRefreshURL() {
-        NSWorkspace.shared.open(PortfolioRefreshBridge.refreshURL)
+    private func postRefreshRequest() {
+        CFNotificationCenterPostNotification(
+            CFNotificationCenterGetDarwinNotifyCenter(),
+            CFNotificationName(PortfolioRefreshBridge.refreshRequestDarwinNotification),
+            nil,
+            nil,
+            true
+        )
     }
 }
 

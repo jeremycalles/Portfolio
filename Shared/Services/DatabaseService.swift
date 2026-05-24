@@ -280,12 +280,15 @@ private actor DatabaseActor {
     func getAllQuadrants() throws -> [Quadrant] {
         try ensureConnected()
         return try fetchAll(query: quadrants.order(quadName), mapper: quadrantFromRow)
+            .filter { !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     }
     
     func addQuadrant(name quadrantName: String) throws -> Bool {
         try ensureConnected()
         guard let db = connection else { return false }
-        try db.run(quadrants.insert(quadName <- quadrantName))
+        let trimmedName = quadrantName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else { return false }
+        try db.run(quadrants.insert(quadName <- trimmedName))
         return true
     }
     
@@ -299,12 +302,16 @@ private actor DatabaseActor {
     func getAllBankAccounts() throws -> [BankAccount] {
         try ensureConnected()
         return try fetchAll(query: bankAccounts.order(bankName, accountName), mapper: bankAccountFromRow)
+            .filter { !$0.bankName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !$0.accountName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     }
     
     func addBankAccount(bank: String, account: String) throws -> Bool {
         try ensureConnected()
         guard let db = connection else { return false }
-        try db.run(bankAccounts.insert(bankName <- bank, accountName <- account))
+        let trimmedBank = bank.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedAccount = account.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedBank.isEmpty, !trimmedAccount.isEmpty else { return false }
+        try db.run(bankAccounts.insert(bankName <- trimmedBank, accountName <- trimmedAccount))
         return true
     }
     

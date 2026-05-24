@@ -2,15 +2,19 @@ import SwiftUI
 import UniformTypeIdentifiers
 #if os(iOS)
 import UIKit
-#endif
+        #endif
 #if os(macOS)
 import AppKit
+import CoreFoundation
 #endif
 
 @main
 struct PortfolioApp: App {
     @StateObject private var viewModel = AppViewModel()
     @StateObject private var languageManager = LanguageManager.shared
+    #if os(macOS)
+    private let refreshRequestObserver = MacOSRefreshRequestObserver.shared
+    #endif
     
     #if os(iOS)
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
@@ -40,7 +44,7 @@ struct PortfolioApp: App {
             }
         }
         #else
-        WindowGroup {
+        Window(L10n.appName, id: "main") {
             MacOSLockGateView()
                 .environmentObject(viewModel)
                 .environmentObject(languageManager)
@@ -88,9 +92,37 @@ struct PortfolioApp: App {
                 .environmentObject(MacOSLockManager.shared)
                 .id(languageManager.refreshID)  // Force view refresh on language change
         }
-        #endif
+#endif
     }
 }
+
+#if os(macOS)
+final class MacOSRefreshRequestObserver {
+    static let shared = MacOSRefreshRequestObserver()
+    
+    private init() {
+        CFNotificationCenterAddObserver(
+            CFNotificationCenterGetDarwinNotifyCenter(),
+            Unmanaged.passUnretained(self).toOpaque(),
+            { _, _, _, _, _ in
+                Task { @MainActor in
+                    await MacOSSchedulerManager.shared.performBackgroundRefresh()
+                }
+            },
+            PortfolioRefreshBridge.refreshRequestDarwinNotification,
+            nil,
+            .deliverImmediately
+        )
+    }
+    
+    deinit {
+        CFNotificationCenterRemoveEveryObserver(
+            CFNotificationCenterGetDarwinNotifyCenter(),
+            Unmanaged.passUnretained(self).toOpaque()
+        )
+    }
+}
+#endif
 
 // MARK: - Notification Names
 extension Notification.Name {

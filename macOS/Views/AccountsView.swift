@@ -80,11 +80,10 @@ struct BankAccountsView: View {
                     .keyboardShortcut(.cancelAction)
                     
                     Button(L10n.generalAdd) {
+                        let bank = newBankName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        let account = newAccountName.trimmingCharacters(in: .whitespacesAndNewlines)
                         Task {
-                            await viewModel.addBankAccount(
-                                bank: newBankName.trimmingCharacters(in: .whitespaces),
-                                account: newAccountName.trimmingCharacters(in: .whitespaces)
-                            )
+                            await viewModel.addBankAccount(bank: bank, account: account)
                         }
                         showingAddSheet = false
                         newBankName = ""
@@ -92,8 +91,8 @@ struct BankAccountsView: View {
                     }
                     .keyboardShortcut(.defaultAction)
                     .disabled(
-                        newBankName.trimmingCharacters(in: .whitespaces).isEmpty ||
-                        newAccountName.trimmingCharacters(in: .whitespaces).isEmpty
+                        newBankName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                        newAccountName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                     )
                 }
             }

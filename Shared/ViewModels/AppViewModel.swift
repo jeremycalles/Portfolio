@@ -248,10 +248,17 @@ class AppViewModel: ObservableObject {
     
     // MARK: - Quadrants
     func addQuadrant(name: String) async {
-        if await db.addQuadrant(name: name) {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedName.isEmpty else {
+            errorMessage = "Quadrant name is required"
+            return
+        }
+
+        if await db.addQuadrant(name: trimmedName) {
             await refreshQuadrants()
         } else {
-            errorMessage = "Quadrant '\(name)' already exists"
+            errorMessage = "Quadrant '\(trimmedName)' already exists"
         }
     }
     
@@ -263,10 +270,18 @@ class AppViewModel: ObservableObject {
     
     // MARK: - Bank Accounts
     func addBankAccount(bank: String, account: String) async {
-        if await db.addBankAccount(bank: bank, account: account) {
+        let trimmedBank = bank.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedAccount = account.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedBank.isEmpty, !trimmedAccount.isEmpty else {
+            errorMessage = "Bank and account names are required"
+            return
+        }
+
+        if await db.addBankAccount(bank: trimmedBank, account: trimmedAccount) {
             await refreshBankAccounts()
         } else {
-            errorMessage = "Account '\(bank) - \(account)' already exists"
+            errorMessage = "Account '\(trimmedBank) - \(trimmedAccount)' already exists"
         }
     }
     

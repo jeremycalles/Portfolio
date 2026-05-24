@@ -500,12 +500,13 @@ struct QuadrantsView: View {
                     .keyboardShortcut(.cancelAction)
                     
                     Button(L10n.generalAdd) {
-                        Task { await viewModel.addQuadrant(name: newQuadrantName.trimmingCharacters(in: .whitespaces)) }
+                        let name = newQuadrantName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        Task { await viewModel.addQuadrant(name: name) }
                         showingAddSheet = false
                         newQuadrantName = ""
                     }
                     .keyboardShortcut(.defaultAction)
-                    .disabled(newQuadrantName.trimmingCharacters(in: .whitespaces).isEmpty)
+                    .disabled(newQuadrantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
             .padding(30)
