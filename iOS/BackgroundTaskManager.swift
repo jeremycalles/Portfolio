@@ -223,6 +223,16 @@ extension BackgroundTaskManager {
         // If more than 3 hours since last refresh
         return Date().timeIntervalSince(lastRefresh) > minimumRefreshInterval
     }
+
+    /// Time until the next foreground refresh is due. Returns 0 when the app has never refreshed.
+    func secondsUntilNextRefresh() -> TimeInterval {
+        guard let lastRefresh = UserDefaults.standard.object(forKey: "lastBackgroundRefresh") as? Date else {
+            return 0
+        }
+
+        let elapsed = Date().timeIntervalSince(lastRefresh)
+        return max(0, minimumRefreshInterval - elapsed)
+    }
     
     /// Get time since last refresh for display
     func timeSinceLastRefresh() -> String? {

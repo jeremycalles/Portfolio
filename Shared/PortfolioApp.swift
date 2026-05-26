@@ -20,6 +20,7 @@ struct PortfolioApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @Environment(\.scenePhase) private var scenePhase
     @State private var foregroundRefreshTask: Task<Void, Never>?
+    @State private var foregroundRefreshMonitorTask: Task<Void, Never>?
     #endif
     
     var body: some Scene {
@@ -37,19 +38,11 @@ struct PortfolioApp: App {
                 if IOSLockManager.shared.isTouchIDProtectionEnabled {
                     IOSLockManager.shared.lock()
                 }
+                stopForegroundRefreshMonitor()
                 BackgroundTaskManager.shared.appDidEnterBackground()
             case .active:
-                if BackgroundTaskManager.shared.appDidBecomeActive(),
-                   foregroundRefreshTask == nil,
-                   !viewModel.isLoading {
-                    foregroundRefreshTask = Task {
-                        await viewModel.refreshAll()
-                        await viewModel.startRefreshTask(showCompletionDelay: false).value
-                        await MainActor.run {
-                            foregroundRefreshTask = nil
-                        }
-                    }
-                }
+                refreshIfDueInForeground()
+                startForegroundRefreshMonitor()
             default:
                 break
             }
@@ -105,6 +98,38 @@ struct PortfolioApp: App {
         }
 #endif
     }
+
+    #if os(iOS)
+    private func refreshIfDueInForeground() {
+        guard foregroundRefreshTask == nil, !viewModel.isLoading else { return }
+        guard BackgroundTaskManager.shared.appDidBecomeActive() else { return }
+
+        foregroundRefreshTask = Task { @MainActor in
+            await viewModel.refreshAll()
+            await viewModel.startRefreshTask(showCompletionDelay: false).value
+            foregroundRefreshTask = nil
+        }
+    }
+
+    private func startForegroundRefreshMonitor() {
+        guard foregroundRefreshMonitorTask == nil else { return }
+
+        foregroundRefreshMonitorTask = Task { @MainActor in
+            while !Task.isCancelled {
+                let delay = max(5, BackgroundTaskManager.shared.secondsUntilNextRefresh())
+                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                guard !Task.isCancelled else { break }
+                guard scenePhase == .active else { continue }
+                refreshIfDueInForeground()
+            }
+        }
+    }
+
+    private func stopForegroundRefreshMonitor() {
+        foregroundRefreshMonitorTask?.cancel()
+        foregroundRefreshMonitorTask = nil
+    }
+    #endif
 }
 
 #if os(macOS)
