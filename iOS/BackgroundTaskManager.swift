@@ -40,6 +40,7 @@ class BackgroundTaskManager: ObservableObject {
         let entry = BackgroundTaskLogEntry(message: message, isError: isError)
         lastRefreshLogs.append(entry)
         print("[BackgroundTask] \(message)")
+        saveLogs()
     }
     
     private func clearLogs() {
@@ -87,10 +88,11 @@ class BackgroundTaskManager: ObservableObject {
         request.earliestBeginDate = Date(timeIntervalSinceNow: minimumRefreshInterval)
         
         do {
+            BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: Self.refreshTaskIdentifier)
             try BGTaskScheduler.shared.submit(request)
-            print("[BackgroundTask] Scheduled refresh for \(request.earliestBeginDate?.description ?? "unknown")")
+            log("Scheduled refresh for \(request.earliestBeginDate?.description ?? "unknown")")
         } catch {
-            print("[BackgroundTask] Failed to schedule refresh: \(error.localizedDescription)")
+            log("Failed to schedule refresh: \(error.localizedDescription)", isError: true)
         }
     }
     
@@ -205,11 +207,12 @@ extension BackgroundTaskManager {
     }
     
     /// Call when app becomes active
-    func appDidBecomeActive() {
-        // Optionally check if a refresh is needed
+    func appDidBecomeActive() -> Bool {
         if shouldRefreshOnForeground() {
-            print("[BackgroundTask] App became active, refresh may be needed")
+            log("App became active and refresh is due")
+            return true
         }
+        return false
     }
     
     private func shouldRefreshOnForeground() -> Bool {

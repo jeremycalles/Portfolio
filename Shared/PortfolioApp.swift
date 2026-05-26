@@ -19,6 +19,7 @@ struct PortfolioApp: App {
     #if os(iOS)
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @Environment(\.scenePhase) private var scenePhase
+    @State private var foregroundRefreshTask: Task<Void, Never>?
     #endif
     
     var body: some Scene {
@@ -38,7 +39,17 @@ struct PortfolioApp: App {
                 }
                 BackgroundTaskManager.shared.appDidEnterBackground()
             case .active:
-                BackgroundTaskManager.shared.appDidBecomeActive()
+                if BackgroundTaskManager.shared.appDidBecomeActive(),
+                   foregroundRefreshTask == nil,
+                   !viewModel.isLoading {
+                    foregroundRefreshTask = Task {
+                        await viewModel.refreshAll()
+                        await viewModel.startRefreshTask(showCompletionDelay: false).value
+                        await MainActor.run {
+                            foregroundRefreshTask = nil
+                        }
+                    }
+                }
             default:
                 break
             }
