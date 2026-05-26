@@ -219,6 +219,7 @@ class AppViewModel: ObservableObject {
         await db.deleteInstrument(isin)
         await refreshInstruments()
         await refreshHoldings()
+        await recomputeDashboardCache()
     }
     
     func assignQuadrant(instrumentIsin: String, quadrantId: Int?) async {
@@ -289,6 +290,7 @@ class AppViewModel: ObservableObject {
         await db.deleteBankAccount(id: id)
         await refreshBankAccounts()
         await refreshHoldings()
+        await recomputeDashboardCache()
     }
     
     // MARK: - Holdings
@@ -304,6 +306,7 @@ class AppViewModel: ObservableObject {
         )
         await db.addOrUpdateHolding(holding)
         await refreshHoldings()
+        await recomputeDashboardCache()
         if let instrument = await db.getInstrument(byIsin: isin) {
             Task {
                 await backfillSingleInstrument(instrument, period: "1mo", interval: "1d", silent: true)
@@ -314,11 +317,13 @@ class AppViewModel: ObservableObject {
     func updateHolding(accountId: Int, isin: String, quantity: Double, purchaseDate: String?, purchasePrice: Double?) async {
         await db.updateHolding(accountIdValue: accountId, instrumentIsin: isin, quantity: quantity, purchaseDate: purchaseDate, purchasePrice: purchasePrice)
         await refreshHoldings()
+        await recomputeDashboardCache()
     }
     
     func deleteHolding(accountId: Int, isin: String) async {
         await db.deleteHolding(accountIdValue: accountId, instrumentIsin: isin)
         await refreshHoldings()
+        await recomputeDashboardCache()
     }
     
     /// Date when the app last refreshed prices (background or manual). Same source as Settings "Last refresh".
