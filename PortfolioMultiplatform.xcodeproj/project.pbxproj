@@ -90,6 +90,7 @@
 		M028 /* EditHoldingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S028 /* EditHoldingView.swift */; };
 		M029 /* MacOSSettingsViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = S029 /* MacOSSettingsViews.swift */; };
 		M02A /* PortfolioRefreshBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = S02A /* PortfolioRefreshBridge.swift */; };
+		M02C /* MacOSWalkthroughView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S02C /* MacOSWalkthroughView.swift */; };
 		M0BA /* Bundle+AppVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BA /* Bundle+AppVersion.swift */; };
 		M0BB /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BB /* AppLogger.swift */; };
 		MV02 /* EnhancedTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = V002 /* EnhancedTrendCard.swift */; };
@@ -197,6 +198,7 @@
 		S029 /* MacOSSettingsViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MacOSSettingsViews.swift; path = macOS/Views/MacOSSettingsViews.swift; sourceTree = SOURCE_ROOT; };
 		S02A /* PortfolioRefreshBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioRefreshBridge.swift; sourceTree = "<group>"; };
 		S02B /* PortfolioRefreshLoginItemApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioRefreshLoginItemApp.swift; sourceTree = "<group>"; };
+		S02C /* MacOSWalkthroughView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MacOSWalkthroughView.swift; path = macOS/Views/MacOSWalkthroughView.swift; sourceTree = SOURCE_ROOT; };
 		S0BA /* Bundle+AppVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Bundle+AppVersion.swift"; path = "Shared/Helpers/Bundle+AppVersion.swift"; sourceTree = SOURCE_ROOT; };
 		S0BB /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppLogger.swift; path = Shared/Helpers/AppLogger.swift; sourceTree = SOURCE_ROOT; };
 		TF01 /* ModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ModelsTests.swift; path = Tests/PortfolioCoreTests/ModelsTests.swift; sourceTree = SOURCE_ROOT; };
@@ -336,6 +338,7 @@
 				S003 /* InstrumentsView.swift */,
 				S004 /* AccountsView.swift */,
 				S029 /* MacOSSettingsViews.swift */,
+				S02C /* MacOSWalkthroughView.swift */,
 			);
 			path = macOS;
 			sourceTree = "<group>";
@@ -635,6 +638,7 @@
 				M026 /* MacOSLockManager.swift in Sources */,
 				M027 /* BiometricAuth.swift in Sources */,
 				M029 /* MacOSSettingsViews.swift in Sources */,
+				M02C /* MacOSWalkthroughView.swift in Sources */,
 				F05C926B2F70967100C4EC0E /* SettingsUI.swift in Sources */,
 				S032 /* BackfillLogsSheet.swift in Sources */,
 				S042 /* StorageLogsView.swift in Sources */,

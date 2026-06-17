@@ -153,6 +153,7 @@ struct L10n {
     static var walkthroughTitle: String { manager.localized("walkthrough.title") }
     static var walkthroughSkip: String { manager.localized("walkthrough.skip") }
     static var walkthroughNext: String { manager.localized("walkthrough.next") }
+    static var walkthroughBack: String { manager.localized("walkthrough.back") }
     static var walkthroughStartUsingApp: String { manager.localized("walkthrough.startUsingApp") }
     static var walkthroughDoNotShowAgain: String { manager.localized("walkthrough.doNotShowAgain") }
     static var walkthroughPageDashboardTitle: String { manager.localized("walkthrough.page.dashboard.title") }

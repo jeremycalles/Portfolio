@@ -1,10 +1,14 @@
 import SwiftUI
 
+let macOSWalkthroughStorageKey = "portfolio_macos_walkthrough_hidden"
+
 // MARK: - Main Content View
 struct ContentView: View {
     @EnvironmentObject var viewModel: AppViewModel
     @State private var selectedTab = 0
     @State private var showAutoRefreshPrompt = false
+    @State private var showWalkthrough = false
+    @AppStorage(macOSWalkthroughStorageKey) private var hasHiddenWalkthrough = false
     
     var body: some View {
         NavigationSplitView {
@@ -104,11 +108,12 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            if MacOSSchedulerManager.shared.shouldPromptForAutoRefresh {
-                // Small delay so the window finishes rendering before showing the sheet
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    showAutoRefreshPrompt = true
+            if !hasHiddenWalkthrough {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    showWalkthrough = true
                 }
+            } else {
+                scheduleAutoRefreshPrompt()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .updatePrices)) { _ in
@@ -125,7 +130,22 @@ struct ContentView: View {
         .sheet(isPresented: $showAutoRefreshPrompt) {
             AutoRefreshPromptView()
         }
+        .sheet(isPresented: $showWalkthrough) {
+            MacOSWalkthroughView {
+                showWalkthrough = false
+                scheduleAutoRefreshPrompt()
+            }
+            .interactiveDismissDisabled()
+        }
         .refreshResultOverlay(result: viewModel.refreshResult, onDismiss: { viewModel.dismissRefreshResult() })
+    }
+
+    private func scheduleAutoRefreshPrompt() {
+        guard MacOSSchedulerManager.shared.shouldPromptForAutoRefresh else { return }
+        // Small delay so the current sheet/window transition finishes before showing the prompt.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            showAutoRefreshPrompt = true
+        }
     }
 }
 

@@ -74,6 +74,7 @@
 "walkthrough.title" = "Quick start";
 "walkthrough.skip" = "Skip";
 "walkthrough.next" = "Next";
+"walkthrough.back" = "Back";
 "walkthrough.startUsingApp" = "Start using Portfolio Vault";
 "walkthrough.doNotShowAgain" = "Do not show this again";
 "walkthrough.page.dashboard.title" = "Start from the dashboard";
