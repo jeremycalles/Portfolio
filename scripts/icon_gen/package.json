@@ -1,7 +1,7 @@
 {
   "name": "portfolio-icon-gen",
   "private": true,
-  "description": "Generate App Icon PNGs from SVG (opaque, no alpha for App Store)",
+  "description": "Generate App Icon PNGs from the source logo (opaque, no alpha for App Store)",
   "dependencies": {
     "sharp": "^0.33.5"
   }

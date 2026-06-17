@@ -4,6 +4,11 @@ Use this copy in App Store Connect for **Promotional Text**, **Description**, an
 
 ---
 
+## App Icon
+The App Store Connect marketing icon is generated from `assets/app-icon-source.jpg` into `Shared/Assets.xcassets/AppIcon.appiconset/icon-1024.png`. The same `AppIcon` asset catalog is configured for iOS and macOS builds.
+
+---
+
 ## Promotional Text
 **Limit: 170 characters** • Shown at the top of your listing • Can be updated anytime without a new version.
 

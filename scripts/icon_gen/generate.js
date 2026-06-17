@@ -5,12 +5,12 @@ const path = require('path');
 const projectRoot = path.resolve(__dirname, '../../');
 const appIconSetPath = path.join(projectRoot, 'Shared/Assets.xcassets/AppIcon.appiconset');
 const contentsJsonPath = path.join(appIconSetPath, 'Contents.json');
-const sourceSvgPath = path.join(appIconSetPath, 'icon.svg');
+const sourceIconPath = path.join(projectRoot, 'assets/app-icon-source.jpg');
 
 async function generateIcons() {
     try {
-        if (!fs.existsSync(sourceSvgPath)) {
-            console.error('Source SVG not found:', sourceSvgPath);
+        if (!fs.existsSync(sourceIconPath)) {
+            console.error('Source icon not found:', sourceIconPath);
             process.exit(1);
         }
 
@@ -33,10 +33,10 @@ async function generateIcons() {
 
             console.log(`Generating ${filename} (${pixelSize}x${pixelSize})...`);
 
-            // Flatten onto opaque background so PNGs have no alpha channel (App Store requirement)
-            await sharp(sourceSvgPath)
+            // Flatten onto opaque white so PNGs have no alpha channel (App Store requirement).
+            await sharp(sourceIconPath)
                 .resize(pixelSize, pixelSize)
-                .flatten({ background: '#1C1C1E' })
+                .flatten({ background: '#FFFFFF' })
                 .png()
                 .toFile(path.join(appIconSetPath, filename));
         }
