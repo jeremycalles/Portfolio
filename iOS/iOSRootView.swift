@@ -1,11 +1,15 @@
 import SwiftUI
 import Charts
 
+let iOSWalkthroughStorageKey = "portfolio_ios_walkthrough_hidden"
+
 // MARK: - iOS Root View with TabView Navigation
 struct iOSRootView: View {
     @EnvironmentObject var viewModel: AppViewModel
     @State private var selectedTab = 0
+    @State private var showsWalkthrough = false
     @AppStorage("privacyMode") private var privacyMode = false
+    @AppStorage(iOSWalkthroughStorageKey) private var hasHiddenWalkthrough = false
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -57,7 +61,14 @@ struct iOSRootView: View {
             .tag(4)
         }
         .onAppear {
+            showsWalkthrough = !hasHiddenWalkthrough
             Task { await viewModel.refreshAll() }
+        }
+        .fullScreenCover(isPresented: $showsWalkthrough) {
+            iOSWalkthroughView {
+                showsWalkthrough = false
+            }
+            .interactiveDismissDisabled()
         }
         .alert(L10n.generalError, isPresented: .constant(viewModel.errorMessage != nil)) {
             Button(L10n.generalOk) {

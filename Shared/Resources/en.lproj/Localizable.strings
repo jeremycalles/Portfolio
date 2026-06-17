@@ -70,6 +70,23 @@
 "dashboard.noRefreshYet" = "Not refreshed yet";
 "dashboard.hideValues" = "Hide values";
 
+// MARK: - Walkthrough
+"walkthrough.title" = "Quick start";
+"walkthrough.skip" = "Skip";
+"walkthrough.next" = "Next";
+"walkthrough.startUsingApp" = "Start using Portfolio Vault";
+"walkthrough.doNotShowAgain" = "Do not show this again";
+"walkthrough.page.dashboard.title" = "Start from the dashboard";
+"walkthrough.page.dashboard.message" = "The dashboard shows your total portfolio value, recent performance, and allocation by quadrant, holding, or account.";
+"walkthrough.page.instruments.title" = "Create your instruments";
+"walkthrough.page.instruments.message" = "Add each stock, ETF, fund, crypto asset, or gold identifier in Instruments. Assign instruments to quadrants to keep your portfolio organized.";
+"walkthrough.page.holdings.title" = "Add positions";
+"walkthrough.page.holdings.message" = "Open Holdings and tap + to choose an account, instrument, quantity, and optional purchase details for performance tracking.";
+"walkthrough.page.refresh.title" = "Refresh prices";
+"walkthrough.page.refresh.message" = "Use the refresh button or Settings to update prices, backfill history, and review background update status.";
+"walkthrough.page.privacy.title" = "Keep data private";
+"walkthrough.page.privacy.message" = "Your data stays on device. Use privacy mode to hide values and enable Face ID or Touch ID protection in Settings.";
+
 // MARK: - Portfolio Summary
 "summary.gold" = "Gold";
 "summary.from" = "from";

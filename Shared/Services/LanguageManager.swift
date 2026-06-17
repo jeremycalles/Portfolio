@@ -148,6 +148,23 @@ struct L10n {
     static var dashboardDataStale: String { manager.localized("dashboard.dataStale") }
     static var dashboardNoRefreshYet: String { manager.localized("dashboard.noRefreshYet") }
     static var dashboardHideValues: String { manager.localized("dashboard.hideValues") }
+
+    // Walkthrough
+    static var walkthroughTitle: String { manager.localized("walkthrough.title") }
+    static var walkthroughSkip: String { manager.localized("walkthrough.skip") }
+    static var walkthroughNext: String { manager.localized("walkthrough.next") }
+    static var walkthroughStartUsingApp: String { manager.localized("walkthrough.startUsingApp") }
+    static var walkthroughDoNotShowAgain: String { manager.localized("walkthrough.doNotShowAgain") }
+    static var walkthroughPageDashboardTitle: String { manager.localized("walkthrough.page.dashboard.title") }
+    static var walkthroughPageDashboardMessage: String { manager.localized("walkthrough.page.dashboard.message") }
+    static var walkthroughPageInstrumentsTitle: String { manager.localized("walkthrough.page.instruments.title") }
+    static var walkthroughPageInstrumentsMessage: String { manager.localized("walkthrough.page.instruments.message") }
+    static var walkthroughPageHoldingsTitle: String { manager.localized("walkthrough.page.holdings.title") }
+    static var walkthroughPageHoldingsMessage: String { manager.localized("walkthrough.page.holdings.message") }
+    static var walkthroughPageRefreshTitle: String { manager.localized("walkthrough.page.refresh.title") }
+    static var walkthroughPageRefreshMessage: String { manager.localized("walkthrough.page.refresh.message") }
+    static var walkthroughPagePrivacyTitle: String { manager.localized("walkthrough.page.privacy.title") }
+    static var walkthroughPagePrivacyMessage: String { manager.localized("walkthrough.page.privacy.message") }
     
     // Portfolio Summary
     static var summaryGold: String { manager.localized("summary.gold") }

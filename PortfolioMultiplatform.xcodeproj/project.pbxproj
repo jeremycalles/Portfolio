@@ -57,6 +57,7 @@
 		IV16 /* iOSSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V016 /* iOSSettingsView.swift */; };
 		IV17 /* RefreshResultBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = V017 /* RefreshResultBanner.swift */; };
 		IV18 /* IOSLockManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = V018 /* IOSLockManager.swift */; };
+		IV19 /* iOSWalkthroughView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V019 /* iOSWalkthroughView.swift */; };
 		LI01 /* PortfolioRefreshBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = S02A /* PortfolioRefreshBridge.swift */; };
 		LI02 /* PortfolioRefreshLoginItemApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = S02B /* PortfolioRefreshLoginItemApp.swift */; };
 		M001 /* PortfolioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = S001 /* PortfolioApp.swift */; };
@@ -216,6 +217,7 @@
 		V016 /* iOSSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = iOSSettingsView.swift; path = iOS/Views/iOSSettingsView.swift; sourceTree = SOURCE_ROOT; };
 		V017 /* RefreshResultBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RefreshResultBanner.swift; path = Shared/Views/Components/RefreshResultBanner.swift; sourceTree = SOURCE_ROOT; };
 		V018 /* IOSLockManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = IOSLockManager.swift; path = iOS/IOSLockManager.swift; sourceTree = SOURCE_ROOT; };
+		V019 /* iOSWalkthroughView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = iOSWalkthroughView.swift; path = iOS/iOSWalkthroughView.swift; sourceTree = SOURCE_ROOT; };
 		XCF2 /* Default.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Default.xcconfig; sourceTree = "<group>"; };
 		XCFG /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -352,6 +354,7 @@
 				V015 /* iOSInstrumentsView.swift */,
 				V016 /* iOSSettingsView.swift */,
 				V018 /* IOSLockManager.swift */,
+				V019 /* iOSWalkthroughView.swift */,
 			);
 			path = iOS;
 			sourceTree = "<group>";
@@ -693,6 +696,7 @@
 				IV17 /* RefreshResultBanner.swift in Sources */,
 				I027 /* BiometricAuth.swift in Sources */,
 				IV18 /* IOSLockManager.swift in Sources */,
+				IV19 /* iOSWalkthroughView.swift in Sources */,
 				S033 /* BackfillLogsSheet.swift in Sources */,
 				S043 /* StorageLogsView.swift in Sources */,
 				S035 /* AddHoldingSheet.swift in Sources */,

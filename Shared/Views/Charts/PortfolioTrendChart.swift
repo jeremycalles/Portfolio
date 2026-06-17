@@ -54,6 +54,14 @@ struct PortfolioTrendChart: View {
         return .blue
     }
 
+    private var calloutBackground: Color {
+        #if os(macOS)
+        return Color(nsColor: .windowBackgroundColor).opacity(0.96)
+        #else
+        return Color(.systemBackground).opacity(0.96)
+        #endif
+    }
+
     private var startDate: Date? {
         history.first?.date
     }
@@ -295,7 +303,7 @@ struct PortfolioTrendChart: View {
         .padding(.vertical, 7)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color(.systemBackground).opacity(0.96))
+                .fill(calloutBackground)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10, style: .continuous)

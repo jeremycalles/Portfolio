@@ -70,6 +70,23 @@
 "dashboard.noRefreshYet" = "Pas encore actualisé";
 "dashboard.hideValues" = "Masquer les valeurs";
 
+// MARK: - Walkthrough
+"walkthrough.title" = "Démarrage rapide";
+"walkthrough.skip" = "Ignorer";
+"walkthrough.next" = "Suivant";
+"walkthrough.startUsingApp" = "Commencer avec Portfolio Vault";
+"walkthrough.doNotShowAgain" = "Ne plus afficher";
+"walkthrough.page.dashboard.title" = "Commencez par le tableau de bord";
+"walkthrough.page.dashboard.message" = "Le tableau de bord affiche la valeur totale, la performance récente et la répartition par quadrant, position ou compte.";
+"walkthrough.page.instruments.title" = "Créez vos instruments";
+"walkthrough.page.instruments.message" = "Ajoutez chaque action, ETF, OPCVM, crypto-actif ou identifiant or dans Instruments. Assignez-les à des quadrants pour organiser le portefeuille.";
+"walkthrough.page.holdings.title" = "Ajoutez des positions";
+"walkthrough.page.holdings.message" = "Ouvrez Positions puis touchez + pour choisir un compte, un instrument, une quantité et éventuellement les détails d'achat.";
+"walkthrough.page.refresh.title" = "Actualisez les prix";
+"walkthrough.page.refresh.message" = "Utilisez le bouton d'actualisation ou Paramètres pour mettre à jour les prix, récupérer l'historique et suivre les mises à jour en arrière-plan.";
+"walkthrough.page.privacy.title" = "Gardez vos données privées";
+"walkthrough.page.privacy.message" = "Vos données restent sur l'appareil. Utilisez le mode confidentialité pour masquer les valeurs et activez Face ID ou Touch ID dans Paramètres.";
+
 // MARK: - Portfolio Summary
 "summary.gold" = "Or";
 "summary.from" = "depuis";
