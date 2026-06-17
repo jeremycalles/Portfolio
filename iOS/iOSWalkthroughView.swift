@@ -24,24 +24,36 @@ struct iOSWalkthroughView: View {
             ),
             WalkthroughPage(
                 id: 1,
+                symbolName: "building.columns.fill",
+                title: L10n.walkthroughPageBankAccountTitle,
+                message: L10n.walkthroughPageBankAccountMessage
+            ),
+            WalkthroughPage(
+                id: 2,
+                symbolName: "square.grid.2x2.fill",
+                title: L10n.walkthroughPageQuadrantsTitle,
+                message: L10n.walkthroughPageQuadrantsMessage
+            ),
+            WalkthroughPage(
+                id: 3,
                 symbolName: "doc.text.magnifyingglass",
                 title: L10n.walkthroughPageInstrumentsTitle,
                 message: L10n.walkthroughPageInstrumentsMessage
             ),
             WalkthroughPage(
-                id: 2,
+                id: 4,
                 symbolName: "list.bullet.rectangle.fill",
                 title: L10n.walkthroughPageHoldingsTitle,
                 message: L10n.walkthroughPageHoldingsMessage
             ),
             WalkthroughPage(
-                id: 3,
+                id: 5,
                 symbolName: "arrow.triangle.2.circlepath",
                 title: L10n.walkthroughPageRefreshTitle,
                 message: L10n.walkthroughPageRefreshMessage
             ),
             WalkthroughPage(
-                id: 4,
+                id: 6,
                 symbolName: "lock.shield.fill",
                 title: L10n.walkthroughPagePrivacyTitle,
                 message: L10n.walkthroughPagePrivacyMessage
@@ -54,8 +66,13 @@ struct iOSWalkthroughView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        ZStack {
+            Color(.systemGroupedBackground)
+                .ignoresSafeArea()
+
             VStack(spacing: 0) {
+                header
+
                 TabView(selection: $selectedPage) {
                     ForEach(pages) { page in
                         WalkthroughPageView(page: page)
@@ -72,43 +89,46 @@ struct iOSWalkthroughView: View {
                     }
                     .toggleStyle(.switch)
 
-                    Button {
-                        finish()
-                    } label: {
-                        Text(isLastPage ? L10n.walkthroughStartUsingApp : L10n.walkthroughSkip)
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
+                    WalkthroughGlassButton(
+                        title: isLastPage ? L10n.walkthroughStartUsingApp : L10n.walkthroughSkip,
+                        isProminent: true,
+                        action: finish
+                    )
 
                     if !isLastPage {
-                        Button {
+                        WalkthroughGlassButton(title: L10n.walkthroughNext) {
                             withAnimation(.easeInOut) {
                                 selectedPage = min(selectedPage + 1, pages.count - 1)
                             }
-                        } label: {
-                            Text(L10n.walkthroughNext)
-                                .font(.headline)
-                                .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.bordered)
-                        .controlSize(.large)
                     }
                 }
-                .padding(24)
-                .background(.regularMaterial)
-            }
-            .navigationTitle(L10n.walkthroughTitle)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(L10n.walkthroughSkip) {
-                        finish()
-                    }
-                }
+                .padding(18)
+                .walkthroughLiquidGlass(cornerRadius: 32, interactive: true)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 16)
             }
         }
+    }
+
+    private var header: some View {
+        HStack {
+            Spacer()
+
+            WalkthroughGlassButton(
+                title: L10n.walkthroughSkip,
+                isCompact: true,
+                action: finish
+            )
+        }
+        .overlay {
+            Text(L10n.walkthroughTitle)
+                .font(.title3.bold())
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 18)
+        .padding(.bottom, 8)
     }
 
     private func finish() {
@@ -116,6 +136,60 @@ struct iOSWalkthroughView: View {
             UserDefaults.standard.set(true, forKey: iOSWalkthroughStorageKey)
         }
         onFinish()
+    }
+}
+
+private struct WalkthroughGlassButton: View {
+    let title: String
+    var isProminent = false
+    var isCompact = false
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(isCompact ? .headline : .headline.weight(.semibold))
+                .foregroundStyle(isProminent ? Color.accentColor : .primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .frame(maxWidth: isCompact ? nil : .infinity)
+                .padding(.horizontal, isCompact ? 24 : 18)
+                .padding(.vertical, isCompact ? 14 : 18)
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .walkthroughLiquidGlass(cornerRadius: isCompact ? 28 : 30, interactive: true)
+    }
+}
+
+private struct WalkthroughLiquidGlassModifier: ViewModifier {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    let cornerRadius: CGFloat
+    let interactive: Bool
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *), !reduceTransparency {
+            if interactive {
+                content.glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
+            } else {
+                content.glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+            }
+        } else {
+            content
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .stroke(.white.opacity(0.34), lineWidth: 1)
+                }
+        }
+    }
+}
+
+private extension View {
+    func walkthroughLiquidGlass(cornerRadius: CGFloat, interactive: Bool = false) -> some View {
+        modifier(WalkthroughLiquidGlassModifier(cornerRadius: cornerRadius, interactive: interactive))
     }
 }
 
@@ -132,10 +206,7 @@ private struct WalkthroughPageView: View {
                     .foregroundStyle(.tint)
                     .symbolRenderingMode(.hierarchical)
                     .frame(width: 112, height: 112)
-                    .background(
-                        Circle()
-                            .fill(Color.accentColor.opacity(0.12))
-                    )
+                    .walkthroughLiquidGlass(cornerRadius: 56, interactive: true)
 
                 VStack(spacing: 12) {
                     Text(page.title)
@@ -149,6 +220,9 @@ private struct WalkthroughPageView: View {
                         .lineSpacing(4)
                 }
                 .frame(maxWidth: 360)
+                .padding(.horizontal, 22)
+                .padding(.vertical, 24)
+                .walkthroughLiquidGlass(cornerRadius: 30)
 
                 Spacer(minLength: 36)
             }

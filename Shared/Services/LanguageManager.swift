@@ -157,6 +157,10 @@ struct L10n {
     static var walkthroughDoNotShowAgain: String { manager.localized("walkthrough.doNotShowAgain") }
     static var walkthroughPageDashboardTitle: String { manager.localized("walkthrough.page.dashboard.title") }
     static var walkthroughPageDashboardMessage: String { manager.localized("walkthrough.page.dashboard.message") }
+    static var walkthroughPageBankAccountTitle: String { manager.localized("walkthrough.page.bankAccount.title") }
+    static var walkthroughPageBankAccountMessage: String { manager.localized("walkthrough.page.bankAccount.message") }
+    static var walkthroughPageQuadrantsTitle: String { manager.localized("walkthrough.page.quadrants.title") }
+    static var walkthroughPageQuadrantsMessage: String { manager.localized("walkthrough.page.quadrants.message") }
     static var walkthroughPageInstrumentsTitle: String { manager.localized("walkthrough.page.instruments.title") }
     static var walkthroughPageInstrumentsMessage: String { manager.localized("walkthrough.page.instruments.message") }
     static var walkthroughPageHoldingsTitle: String { manager.localized("walkthrough.page.holdings.title") }
