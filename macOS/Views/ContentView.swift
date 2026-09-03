@@ -173,7 +173,7 @@ struct AutoRefreshPromptView: View {
             HStack(spacing: 6) {
                 Image(systemName: "clock")
                     .foregroundColor(.secondary)
-                Text("Default interval: \(MacOSSchedulerManager.shared.selectedInterval.displayName)")
+                Text(L10n.settingsDefaultInterval(MacOSSchedulerManager.shared.selectedInterval.displayName))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -183,7 +183,7 @@ struct AutoRefreshPromptView: View {
             
             // Don't ask again checkbox
             Toggle(isOn: $dontAskAgain) {
-                Text("Don't ask again")
+                Text(L10n.settingsDontAskAgain)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -191,7 +191,7 @@ struct AutoRefreshPromptView: View {
             
             // Action buttons
             HStack(spacing: 12) {
-                Button("Not now") {
+                Button(L10n.settingsNotNow) {
                     if dontAskAgain {
                         MacOSSchedulerManager.shared.dismissPromptPermanently()
                     }

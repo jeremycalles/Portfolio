@@ -32,6 +32,20 @@ func formatCompactCurrency(_ value: Double) -> String {
 
 // MARK: - Decimal Parsing
 
+/// Converts `value` to EUR. Returns `value` when the currency is EUR or missing.
+/// Returns `nil` when a non-EUR currency has no exchange rate — never treat the raw amount as EUR.
+enum CurrencyConversion {
+    static func euros(value: Double, fromCurrency: String?, rate: Double?) -> Double? {
+        guard let currency = fromCurrency?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !currency.isEmpty,
+              currency.uppercased() != "EUR" else {
+            return value
+        }
+        guard let rate else { return nil }
+        return value * rate
+    }
+}
+
 /// Locale-aware decimal parsing (handles comma or period as decimal separator).
 /// Tries current locale first, then fallback replacing comma with period.
 func parseDecimal(_ text: String) -> Double? {

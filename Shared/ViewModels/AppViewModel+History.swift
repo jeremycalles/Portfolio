@@ -87,8 +87,12 @@ extension AppViewModel {
                 if let priceValue = priceLookup(index: priceIndex[holding.isin] ?? [], onOrBefore: dateStr) {
                     let holdingValue = holding.quantity * priceValue
                     let currency = getInstrumentCurrency(forIsin: holding.isin)
-                    let valueInEUR = await convertToEUR(value: holdingValue, fromCurrency: currency, onDate: dateStr)
-                    totalValueEUR += valueInEUR
+                    if let valueInEUR = await convertToEUR(value: holdingValue, fromCurrency: currency, onDate: dateStr) {
+                        totalValueEUR += valueInEUR
+                    } else {
+                        allHaveData = false
+                        break
+                    }
                 } else {
                     allHaveData = false
                     break
@@ -197,8 +201,12 @@ extension AppViewModel {
                 if let priceValue = priceLookup(index: priceIndex[holding.isin] ?? [], onOrBefore: dateStr) {
                     let holdingValue = holding.quantity * priceValue
                     let currency = getInstrumentCurrency(forIsin: holding.isin)
-                    let valueInEUR = await convertToEUR(value: holdingValue, fromCurrency: currency, onDate: dateStr)
-                    totalValueEUR += valueInEUR
+                    if let valueInEUR = await convertToEUR(value: holdingValue, fromCurrency: currency, onDate: dateStr) {
+                        totalValueEUR += valueInEUR
+                    } else {
+                        allHaveData = false
+                        break
+                    }
                 } else {
                     allHaveData = false
                     break
@@ -278,8 +286,9 @@ extension AppViewModel {
             if entry.date >= cutoffStr {
                 if let date = AppDateFormatter.yearMonthDay.date(from: entry.date) {
                     let holdingValue = effectiveQty * entry.value
-                    let valueInEUR = await convertToEUR(value: holdingValue, fromCurrency: instrumentCurrency, onDate: entry.date)
-                    holdingHistory.append((date: date, value: valueInEUR))
+                    if let valueInEUR = await convertToEUR(value: holdingValue, fromCurrency: instrumentCurrency, onDate: entry.date) {
+                        holdingHistory.append((date: date, value: valueInEUR))
+                    }
                 }
             }
         }
@@ -325,8 +334,12 @@ extension AppViewModel {
                 if let priceValue = priceLookup(index: priceIndex[holding.isin] ?? [], onOrBefore: dateStr) {
                     let holdingValue = holding.quantity * priceValue
                     let currency = getInstrumentCurrency(forIsin: holding.isin)
-                    let valueInEUR = await convertToEUR(value: holdingValue, fromCurrency: currency, onDate: dateStr)
-                    totalValueEUR += valueInEUR
+                    if let valueInEUR = await convertToEUR(value: holdingValue, fromCurrency: currency, onDate: dateStr) {
+                        totalValueEUR += valueInEUR
+                    } else {
+                        allHaveData = false
+                        break
+                    }
                 } else {
                     allHaveData = false
                     break

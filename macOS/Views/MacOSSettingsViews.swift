@@ -18,6 +18,9 @@ struct MacOSLockGateView: View {
         .onReceive(NotificationCenter.default.publisher(for: .databaseDidImport)) { _ in
             Task { await viewModel.refreshAll() }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .backgroundPricesDidRefresh)) { _ in
+            Task { await viewModel.refreshAll() }
+        }
     }
 }
 

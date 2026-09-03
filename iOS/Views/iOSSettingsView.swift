@@ -187,7 +187,7 @@ struct iOSSettingsView: View {
                         await viewModel.backfillHistorical(period: "1mo", interval: "1d")
                     }
                 } label: {
-                    Label("Backfill 1 Month (Daily)", systemImage: "clock.arrow.circlepath")
+                    Label(L10n.actionBackfill1Month, systemImage: "clock.arrow.circlepath")
                         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         .contentShape(Rectangle())
                 }
@@ -199,7 +199,7 @@ struct iOSSettingsView: View {
                 HStack {
                     Label(L10n.settingsBackgroundRefresh, systemImage: "arrow.clockwise.icloud")
                     Spacer()
-                    Text("Every 3 hours")
+                    Text(L10n.settingsBackgroundRefreshInterval)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -218,7 +218,7 @@ struct iOSSettingsView: View {
                     }
                 }
             } header: {
-                Text("Background Updates")
+                Text(L10n.settingsBackgroundUpdates)
             } footer: {
                 Text("Prices are automatically updated in the background when the app is not in use. Long-press to view logs.")
             }
@@ -251,7 +251,7 @@ struct iOSSettingsView: View {
                 Button {
                     showingAddAccountSheet = true
                 } label: {
-                    Label("Add Account", systemImage: "plus.circle")
+                    Label(L10n.accountsAddAccount, systemImage: "plus.circle")
                         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         .contentShape(Rectangle())
                 }

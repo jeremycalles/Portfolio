@@ -103,4 +103,23 @@ struct FormattingHelpersTests {
         let result = formatCurrency(-500.0, currency: "EUR")
         #expect(result.contains("500"))
     }
+
+    // MARK: - CurrencyConversion
+
+    @Test("euros returns the raw value for EUR or missing currency")
+    func eurosPassthroughForEUR() {
+        #expect(CurrencyConversion.euros(value: 10, fromCurrency: "EUR", rate: nil) == 10)
+        #expect(CurrencyConversion.euros(value: 10, fromCurrency: nil, rate: nil) == 10)
+        #expect(CurrencyConversion.euros(value: 10, fromCurrency: "  ", rate: nil) == 10)
+    }
+
+    @Test("euros applies the rate for a non-EUR currency")
+    func eurosAppliesRate() {
+        #expect(CurrencyConversion.euros(value: 10, fromCurrency: "USD", rate: 0.9) == 9)
+    }
+
+    @Test("euros returns nil when a non-EUR currency has no rate")
+    func eurosMissingRate() {
+        #expect(CurrencyConversion.euros(value: 10, fromCurrency: "USD", rate: nil) == nil)
+    }
 }

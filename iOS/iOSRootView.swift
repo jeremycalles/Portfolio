@@ -62,7 +62,6 @@ struct iOSRootView: View {
         }
         .onAppear {
             showsWalkthrough = !hasHiddenWalkthrough
-            Task { await viewModel.refreshAll() }
         }
         .fullScreenCover(isPresented: $showsWalkthrough) {
             iOSWalkthroughView {

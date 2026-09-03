@@ -117,7 +117,7 @@ The native SwiftUI application provides the best experience for tracking your po
 
 #### System Requirements
 - **iOS**: iOS 17.0 or later (iPhone and iPad)
-- **macOS**: macOS 14.0 Sonoma or later
+- **macOS**: macOS 15.0 Sequoia or later
 
 #### Installation from Xcode
 
@@ -313,7 +313,7 @@ Interactive charts for individual instruments:
 #### Automatic Updates
 
 - **Manual refresh**: Settings → Update All Prices (or toolbar on macOS).
-- **Background**: macOS Launch Agent or iOS Background Tasks (see [Automation](#automation)).
+- **Background**: macOS login item (`SMAppService`) or iOS Background Tasks (see [Automation](#automation)).
 
 #### Historical Backfilling
 
@@ -366,11 +366,11 @@ On first launch, the app offers to enable automatic price updates. You can accep
 To configure manually:
 1. Go to **Settings** → **Background Refresh**
 2. Choose an interval (1 hour, 3 hours, 6 hours, or 12 hours)
-3. Click **Enable** to install the Launch Agent and start the in-app timer
+3. Click **Enable** to register the login item helper and start the in-app timer
 
 The scheduler works in two complementary ways:
-- **Launch Agent**: A system-level `launchd` plist (`~/Library/LaunchAgents/com.portfolio.app.pricerefresh.plist`) triggers the app via a `portfolio://refresh` URL scheme at the configured interval — even when the app is not in the foreground.
-- **In-app Timer**: A repeating timer refreshes prices while the app is running, providing seamless updates without the Launch Agent.
+- **Login item**: An embedded `PortfolioRefreshLoginItem` helper (`SMAppService`) asks the main app to refresh at the chosen interval — including when the app was quit, by launching it in the background. Approve the helper under System Settings → General → Login Items if macOS asks.
+- **In-app timer**: A repeating timer refreshes prices while the app is running.
 
 Logs are written to `~/Library/Logs/PortfolioApp/refresh.log` and can be viewed directly in the Settings panel or opened in Finder.
 
@@ -426,14 +426,14 @@ On **iOS** and **macOS** you can enable **Touch ID Protection** (Face ID on iPho
 
 ## Automation
 
-### macOS Launch Agent
+### macOS login item
 
-The app manages a proper Launch Agent for automatic background updates:
+The Mac app uses an embedded login item (`SMAppService`), not a `launchctl` plist:
 1. Open **Settings** → **Background Refresh**
 2. Select your preferred interval (1h, 3h, 6h, or 12h)
-3. Click **Enable** to generate and install the plist
+3. Click **Enable** to register the helper
 
-The Launch Agent runs `/usr/bin/open -g portfolio://refresh` at the configured interval. This opens the app in the background (or sends the URL to the running instance) and triggers a full price refresh — instruments, exchange rates, and benchmarks (S&P 500, Gold, MSCI World). The plist is written to `~/Library/LaunchAgents/com.portfolio.app.pricerefresh.plist` and managed via `launchctl`. Changing the interval automatically reinstalls the agent with the new schedule.
+The helper posts a Darwin notification (and wakes the main app via `portfolio://refresh` if it is not running). The main app then refreshes instruments, exchange rates, and benchmarks (S&P 500, Gold, MSCI World). Changing the interval reschedules the helper. Both the iOS and macOS apps use bundle ID **com.portfolio.app.ios** (universal purchase).
 
 ### iOS Background Refresh
 
@@ -488,13 +488,11 @@ PortfolioMultiplatform/
 │       ├── AccountsView.swift
 │       ├── InstrumentsView.swift
 │       └── MacOSSettingsViews.swift
-├── Tests/                         # Tests (PortfolioCoreTests)
+├── Tests/                         # Tests (PortfolioCoreTests; imports the app module)
 │   └── PortfolioCoreTests/
 │       ├── ModelsTests.swift
 │       ├── FormattingHelpersTests.swift
 │       └── DateFormattersTests.swift
-├── Packages/                      # Swift packages
-│   └── PortfolioCore/
 ├── PortfolioMultiplatform.xcodeproj/
 ├── assets/screenshots/
 └── README.md
@@ -547,12 +545,12 @@ Do not commit secrets or local signing config. The repo uses **automatic signing
 ### Prerequisites
 
 - **Apple Developer Program** membership ($99/year) — [developer.apple.com/programs](https://developer.apple.com/programs/)
-- Your Apple ID added in **Xcode → Settings → Accounts**. In the project, set your **Team** under **Signing & Capabilities** for the iOS and/or macOS target (bundle IDs: **com.portfolio.app.ios**, **com.portfolio.app.macos**).
+- Your Apple ID added in **Xcode → Settings → Accounts**. In the project, set your **Team** under **Signing & Capabilities** for the iOS and/or macOS target (bundle ID: **com.portfolio.app.ios**).
 
 ### 1. Create the app(s) in App Store Connect
 
 - **iOS:** [App Store Connect](https://appstoreconnect.apple.com) → **My Apps** → **+** → **New App** → iOS, bundle ID **com.portfolio.app.ios**, SKU (e.g. `portfolio-ios`).
-- **macOS:** Same, New App → macOS, bundle ID **com.portfolio.app.macos**, SKU (e.g. `portfolio-macos`).
+- **macOS:** Same, New App → macOS, bundle ID **com.portfolio.app.ios** (same ID as iOS for a universal purchase), SKU (e.g. `portfolio-macos`).
 
 ### 2. Archive and upload
 

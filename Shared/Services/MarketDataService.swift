@@ -10,6 +10,10 @@ actor MarketDataService {
     private let session: URLSession
     private let userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     
+    private func log(_ message: String, isError: Bool = false) {
+        AppLogger.marketDataLog(message, isError: isError)
+    }
+    
     /// Last error from a failed fetch (for diagnostics when refresh fails for all instruments).
     private var lastFetchError: String?
     
@@ -48,7 +52,7 @@ actor MarketDataService {
         for attempt in 0...maxRetries {
             if attempt > 0 {
                 let delay = UInt64(pow(2.0, Double(attempt - 1))) * 1_000_000_000
-                print("[HTTP] Rate limited (429), retrying in \(Int(pow(2.0, Double(attempt - 1))))s...")
+                log("[HTTP] Rate limited (429), retrying in \(Int(pow(2.0, Double(attempt - 1))))s...")
                 try? await Task.sleep(nanoseconds: delay)
             }
             do {
@@ -305,43 +309,43 @@ actor MarketDataService {
         
         let isValidIsin = coreIsin.count == 12 && coreIsin.allSatisfy { $0.isLetter || $0.isNumber }
         let desiredCurrency = desiredCurrencyFromIdentifier(isin)
-        print("[MarketData] Fetching data for ISIN: \(isin), coreIsin: \(coreIsin), isValidIsin: \(isValidIsin), desiredCurrency: \(desiredCurrency ?? "any")")
+        log("[MarketData] Fetching data for ISIN: \(isin), coreIsin: \(coreIsin), isValidIsin: \(isValidIsin), desiredCurrency: \(desiredCurrency ?? "any")")
         
         // For ISINs (including "ISIN:CURRENCY" like LU0169518387:USD), try Financial Times first
         if isValidIsin {
             // First try FT with full identifier (e.g. LU0169518387:USD) – FT may have a separate page
             if desiredCurrency != nil && isin != coreIsin {
-                print("[MarketData] Trying FT with full identifier \(isin)...")
+                log("[MarketData] Trying FT with full identifier \(isin)...")
                 if let ftResult = await scrapeFT(isin: isin) {
                     if let ftCurrency = ftResult.currency, ftCurrency.uppercased() == desiredCurrency {
-                        print("[MarketData] FT SUCCESS for \(isin): \(ftResult.value ?? -1) \(ftCurrency)")
+                        log("[MarketData] FT SUCCESS for \(isin): \(ftResult.value ?? -1) \(ftCurrency)")
                         return MarketDataResult(isin: isin, ticker: ftResult.ticker, name: ftResult.name, value: ftResult.value, currency: ftResult.currency, date: ftResult.date)
                     } else {
-                        print("[MarketData] FT returned \(ftResult.currency ?? "?") but need \(desiredCurrency!) – skipping")
+                        log("[MarketData] FT returned \(ftResult.currency ?? "?") but need \(desiredCurrency!) – skipping")
                     }
                 }
             }
             
             // Then try FT with core ISIN (skip if currency doesn't match when a specific currency is desired)
-            print("[MarketData] Trying FT for \(coreIsin)...")
+            log("[MarketData] Trying FT for \(coreIsin)...")
             if let ftResult = await scrapeFT(isin: coreIsin) {
                 if let desired = desiredCurrency, let ftCurrency = ftResult.currency, ftCurrency.uppercased() != desired {
-                    print("[MarketData] FT returned \(ftCurrency) but need \(desired) – skipping FT")
+                    log("[MarketData] FT returned \(ftCurrency) but need \(desired) – skipping FT")
                 } else {
-                    print("[MarketData] FT SUCCESS for \(coreIsin): \(ftResult.value ?? -1) \(ftResult.currency ?? "?")")
+                    log("[MarketData] FT SUCCESS for \(coreIsin): \(ftResult.value ?? -1) \(ftResult.currency ?? "?")")
                     return MarketDataResult(isin: isin, ticker: ftResult.ticker, name: ftResult.name, value: ftResult.value, currency: ftResult.currency, date: ftResult.date)
                 }
             } else {
-                print("[MarketData] FT FAILED for \(coreIsin)")
+                log("[MarketData] FT FAILED for \(coreIsin)")
             }
         }
         
         // Resolve ticker if not provided (search by core ISIN so Yahoo finds the fund)
         var resolvedTicker = ticker
         if resolvedTicker == nil || resolvedTicker == "N/A" {
-            print("[MarketData] Resolving ticker for \(coreIsin)...")
+            log("[MarketData] Resolving ticker for \(coreIsin)...")
             resolvedTicker = await resolveIsinToTicker(isin: coreIsin)
-            print("[MarketData] Resolved ticker: \(resolvedTicker ?? "nil")")
+            log("[MarketData] Resolved ticker: \(resolvedTicker ?? "nil")")
         }
         if resolvedTicker == nil && !isValidIsin {
             resolvedTicker = isin
@@ -349,28 +353,28 @@ actor MarketDataService {
         
         // Try Yahoo Finance (URL-encode ticker so symbols like LU0169518387:USD work)
         if let tickerSymbol = resolvedTicker {
-            print("[MarketData] Trying Yahoo Finance for \(tickerSymbol)...")
+            log("[MarketData] Trying Yahoo Finance for \(tickerSymbol)...")
             if let yahooResult = await fetchYahooFinance(ticker: tickerSymbol, isin: isin) {
-                print("[MarketData] Yahoo SUCCESS for \(tickerSymbol): \(yahooResult.value ?? -1)")
+                log("[MarketData] Yahoo SUCCESS for \(tickerSymbol): \(yahooResult.value ?? -1)")
                 return yahooResult
             }
-            print("[MarketData] Yahoo FAILED for \(tickerSymbol)")
+            log("[MarketData] Yahoo FAILED for \(tickerSymbol)")
         }
         
         // Fallback to FT for ISINs (only if no specific currency requested, or currency matches)
-        print("[MarketData] Trying FT fallback for \(coreIsin)...")
+        log("[MarketData] Trying FT fallback for \(coreIsin)...")
         if let ftResult = await scrapeFT(isin: coreIsin) {
             if let desired = desiredCurrency, let ftCurrency = ftResult.currency, ftCurrency.uppercased() != desired {
-                print("[MarketData] FT fallback returned \(ftCurrency) but need \(desired) – skipping")
+                log("[MarketData] FT fallback returned \(ftCurrency) but need \(desired) – skipping")
             } else {
-                print("[MarketData] FT fallback SUCCESS for \(coreIsin)")
+                log("[MarketData] FT fallback SUCCESS for \(coreIsin)")
                 return MarketDataResult(isin: isin, ticker: ftResult.ticker, name: ftResult.name, value: ftResult.value, currency: ftResult.currency, date: ftResult.date)
             }
         }
         
         // Return empty result with last error for debugging
         let reason = lastFetchError ?? "All sources failed"
-        print("[MarketData] ALL METHODS FAILED for \(isin): \(reason)")
+        log("[MarketData] ALL METHODS FAILED for \(isin): \(reason)")
         return MarketDataResult(
             isin: isin,
             ticker: resolvedTicker,
@@ -474,7 +478,7 @@ actor MarketDataService {
             return nil
         } catch {
             if lastFetchError == nil { lastFetchError = error.localizedDescription }
-            print("Yahoo Finance error for \(ticker): \(error)")
+            log("Yahoo Finance error for \(ticker): \(error)")
             return nil
         }
     }
@@ -502,7 +506,7 @@ actor MarketDataService {
     func resolveIsinToTicker(isin: String) async -> String? {
         let encoded = isin.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? isin
         guard let url = URL(string: "https://query2.finance.yahoo.com/v1/finance/search?q=\(encoded)") else {
-            print("[Yahoo Search] Invalid URL for \(isin)")
+            log("[Yahoo Search] Invalid URL for \(isin)")
             return nil
         }
         
@@ -512,26 +516,26 @@ actor MarketDataService {
             let (data, response) = try await performRequest(request)
             
             if let httpResponse = response as? HTTPURLResponse {
-                print("[Yahoo Search] HTTP status: \(httpResponse.statusCode)")
+                log("[Yahoo Search] HTTP status: \(httpResponse.statusCode)")
             }
             
             if let responseStr = String(data: data, encoding: .utf8) {
-                print("[Yahoo Search] Response: \(responseStr.prefix(200))...")
+                log("[Yahoo Search] Response: \(responseStr.prefix(200))...")
             }
             
             if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let quotes = json["quotes"] as? [[String: Any]] {
-                print("[Yahoo Search] Found \(quotes.count) quotes")
+                log("[Yahoo Search] Found \(quotes.count) quotes")
                 if let first = quotes.first,
                    let symbol = first["symbol"] as? String {
-                    print("[Yahoo Search] Resolved to: \(symbol)")
+                    log("[Yahoo Search] Resolved to: \(symbol)")
                     return symbol
                 }
             }
         } catch {
-            print("[Yahoo Search] Error: \(error)")
+            log("[Yahoo Search] Error: \(error)")
         }
-        print("[Yahoo Search] Failed to resolve \(isin)")
+        log("[Yahoo Search] Failed to resolve \(isin)")
         return nil
     }
     
@@ -548,7 +552,7 @@ actor MarketDataService {
         
         for urlString in urls {
             guard let url = URL(string: urlString) else { continue }
-            print("[FT] Trying URL: \(urlString)")
+            log("[FT] Trying URL: \(urlString)")
             
             let request = createRequest(url: url, additionalHeaders: [("Accept", "text/html,application/xhtml+xml")])
             
@@ -556,25 +560,25 @@ actor MarketDataService {
                 let (data, response) = try await performRequest(request)
                 
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    print("[FT] No HTTP response")
+                    log("[FT] No HTTP response")
                     continue
                 }
                 
-                print("[FT] HTTP status: \(httpResponse.statusCode), final URL: \(httpResponse.url?.absoluteString ?? "?")")
+                log("[FT] HTTP status: \(httpResponse.statusCode), final URL: \(httpResponse.url?.absoluteString ?? "?")")
                 
                 guard (200...399).contains(httpResponse.statusCode),
                       let html = String(data: data, encoding: .utf8) else {
-                    print("[FT] Bad status or no HTML, data size: \(data.count)")
+                    log("[FT] Bad status or no HTML, data size: \(data.count)")
                     continue
                 }
                 
-                print("[FT] HTML size: \(html.count) chars")
+                log("[FT] HTML size: \(html.count) chars")
                 
                 let doc = try SwiftSoup.parse(html)
                 
                 // Check for error page
                 if let title = try? doc.title() {
-                    print("[FT] Page title: \(title)")
+                    log("[FT] Page title: \(title)")
                     if title.contains("Error") {
                         continue
                     }
@@ -583,7 +587,7 @@ actor MarketDataService {
                 // Parse price - find the row whose label is "Price (EUR)" etc.
                 let labelElements = try doc.select("span.mod-ui-data-list__label")
                 let valueElements = try doc.select("span.mod-ui-data-list__value")
-                print("[FT] Found \(labelElements.count) labels, \(valueElements.count) values")
+                log("[FT] Found \(labelElements.count) labels, \(valueElements.count) values")
                 
                 var price: Double?
                 var currency = "EUR"
@@ -591,7 +595,7 @@ actor MarketDataService {
                     guard i < valueElements.count else { break }
                     let labelText = try labelElements.get(i).text()
                     let valueText = try valueElements.get(i).text()
-                    print("[FT] Label[\(i)]: '\(labelText)' = '\(valueText)'")
+                    log("[FT] Label[\(i)]: '\(labelText)' = '\(valueText)'")
                     
                     guard labelText.contains("Price (") else { continue }
                     let cleanValue = valueText.replacingOccurrences(of: ",", with: "")
@@ -601,12 +605,12 @@ actor MarketDataService {
                     else if labelText.contains("GBP") { currency = "GBP" }
                     else if labelText.contains("CHF") { currency = "CHF" }
                     else if labelText.contains("JPY") { currency = "JPY" }
-                    print("[FT] Found price: \(price ?? -1) \(currency)")
+                    log("[FT] Found price: \(price ?? -1) \(currency)")
                     break
                 }
                 
                 guard let finalPrice = price else {
-                    print("[FT] No price found in labels")
+                    log("[FT] No price found in labels")
                     continue
                 }
                 
@@ -615,7 +619,7 @@ actor MarketDataService {
                 if let nameElement = try? doc.select("h1.mod-tearsheet-overview__header__name").first() {
                     name = try? nameElement.text()
                 }
-                print("[FT] Success: \(name ?? "?") = \(finalPrice) \(currency)")
+                log("[FT] Success: \(name ?? "?") = \(finalPrice) \(currency)")
                 
                 return MarketDataResult(
                     isin: isin,
@@ -626,12 +630,12 @@ actor MarketDataService {
                     date: today
                 )
             } catch {
-                print("[FT] Exception for \(isin) at \(urlString): \(error)")
+                log("[FT] Exception for \(isin) at \(urlString): \(error)")
                 continue
             }
         }
         
-        print("[FT] All URLs failed for \(isin)")
+        log("[FT] All URLs failed for \(isin)")
         return nil
     }
 #else
@@ -697,7 +701,7 @@ actor MarketDataService {
             }
             
         } catch {
-            print("Veracash gold scraping failed: \(error)")
+            log("Veracash gold scraping failed: \(error)")
         }
         return nil
     }
@@ -740,7 +744,7 @@ actor MarketDataService {
                 if let price = checkText(try tr.text()) { return price }
             }
         } catch {
-            print("Veracash silver scraping failed: \(error)")
+            log("Veracash silver scraping failed: \(error)")
         }
         return nil
     }
@@ -823,7 +827,7 @@ actor MarketDataService {
             guard let httpResponse = response as? HTTPURLResponse,
                   (200...399).contains(httpResponse.statusCode),
                   let html = String(data: data, encoding: .utf8) else {
-                print("[AuCOFFRE] Failed to fetch \(config.url)")
+                log("[AuCOFFRE] Failed to fetch \(config.url)")
                 return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: nil, currency: "EUR", date: today)
             }
             
@@ -843,7 +847,7 @@ actor MarketDataService {
                         if cellText.contains("€") && !cellText.contains("%") {
                             if let price = extractAuCoffrePrice(from: cellText) {
                                 let unitPrice = price / config.quantity
-                                print("[AuCOFFRE] Found \(config.name): \(price) / \(config.quantity) = \(unitPrice) EUR")
+                                log("[AuCOFFRE] Found \(config.name): \(price) / \(config.quantity) = \(unitPrice) EUR")
                                 return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: unitPrice, currency: "EUR", date: today)
                             }
                         }
@@ -860,7 +864,7 @@ actor MarketDataService {
                         let rowText = try parentRow.text()
                         if let price = extractAuCoffrePrice(from: rowText) {
                             let unitPrice = price / config.quantity
-                            print("[AuCOFFRE] Found \(config.name) via link: \(price) / \(config.quantity) = \(unitPrice) EUR")
+                            log("[AuCOFFRE] Found \(config.name) via link: \(price) / \(config.quantity) = \(unitPrice) EUR")
                             return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: unitPrice, currency: "EUR", date: today)
                         }
                     }
@@ -877,15 +881,15 @@ actor MarketDataService {
                     let candidate = String(suffix.prefix(50))
                     if let price = extractAuCoffrePrice(from: candidate) {
                         let unitPrice = price / config.quantity
-                        print("[AuCOFFRE] Found \(config.name) in body: \(price) / \(config.quantity) = \(unitPrice) EUR")
+                        log("[AuCOFFRE] Found \(config.name) in body: \(price) / \(config.quantity) = \(unitPrice) EUR")
                         return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: unitPrice, currency: "EUR", date: today)
                     }
                 }
             }
             
-            print("[AuCOFFRE] Could not find '\(config.searchText)' on \(config.url)")
+            log("[AuCOFFRE] Could not find '\(config.searchText)' on \(config.url)")
         } catch {
-            print("[AuCOFFRE] Scraping error for \(isin): \(error)")
+            log("[AuCOFFRE] Scraping error for \(isin): \(error)")
         }
         
         return MarketDataResult(isin: isin, ticker: config.ticker, name: config.name, value: nil, currency: "EUR", date: today)
@@ -941,7 +945,7 @@ actor MarketDataService {
     func scrapeAuCoffreHistorical(isin: String) async -> [Price] {
         guard let urlString = Self.coinHistoricalURLs[isin],
               let url = URL(string: urlString) else {
-            print("[AuCOFFRE Historical] No historical URL configured for \(isin)")
+            log("[AuCOFFRE Historical] No historical URL configured for \(isin)")
             return []
         }
         
@@ -956,14 +960,14 @@ actor MarketDataService {
             guard let httpResponse = response as? HTTPURLResponse,
                   (200...399).contains(httpResponse.statusCode),
                   let html = String(data: data, encoding: .utf8) else {
-                print("[AuCOFFRE Historical] Failed to fetch \(urlString)")
+                log("[AuCOFFRE Historical] Failed to fetch \(urlString)")
                 return []
             }
             
             // Extract the JSON data block containing initialData
             // Format: {"state": {...}, "initialData": {"data": [[timestamp_ms, price], ...]}, "config": {...}}
             guard let jsonRange = html.range(of: #"<script[^>]*>\s*(\{[^<]*"initialData"[^<]*\})\s*</script>"#, options: .regularExpression) else {
-                print("[AuCOFFRE Historical] Could not find initialData JSON in page for \(isin)")
+                log("[AuCOFFRE Historical] Could not find initialData JSON in page for \(isin)")
                 return []
             }
             
@@ -971,7 +975,7 @@ actor MarketDataService {
             let scriptContent = String(html[jsonRange])
             guard let jsonStart = scriptContent.firstIndex(of: "{"),
                   let jsonEnd = scriptContent.lastIndex(of: "}") else {
-                print("[AuCOFFRE Historical] Could not extract JSON from script for \(isin)")
+                log("[AuCOFFRE Historical] Could not extract JSON from script for \(isin)")
                 return []
             }
             
@@ -980,7 +984,7 @@ actor MarketDataService {
                   let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any],
                   let initialData = json["initialData"] as? [String: Any],
                   let historical = initialData["data"] as? [[Any]] else {
-                print("[AuCOFFRE Historical] Could not parse initialData for \(isin)")
+                log("[AuCOFFRE Historical] Could not parse initialData for \(isin)")
                 return []
             }
             
@@ -1012,11 +1016,11 @@ actor MarketDataService {
             // Sort by date
             prices.sort { $0.date < $1.date }
             
-            print("[AuCOFFRE Historical] Found \(prices.count) historical prices for \(isin)")
+            log("[AuCOFFRE Historical] Found \(prices.count) historical prices for \(isin)")
             return prices
             
         } catch {
-            print("[AuCOFFRE Historical] Scraping error for \(isin): \(error)")
+            log("[AuCOFFRE Historical] Scraping error for \(isin): \(error)")
             return []
         }
     }
@@ -1035,7 +1039,7 @@ actor MarketDataService {
     
     // Stub: SwiftSoup not available, cannot scrape historical data
     func scrapeAuCoffreHistorical(isin: String) async -> [Price] {
-        print("[AuCOFFRE Historical] SwiftSoup not available, cannot scrape historical data")
+        log("[AuCOFFRE Historical] SwiftSoup not available, cannot scrape historical data")
         return []
     }
 #endif
@@ -1114,7 +1118,7 @@ actor MarketDataService {
                 rate: finalRate
             )
         } catch {
-            print("Exchange rate fetch failed for \(pair): \(error)")
+            log("Exchange rate fetch failed for \(pair): \(error)")
             return nil
         }
     }
@@ -1138,7 +1142,7 @@ actor MarketDataService {
             
             // Parse gold prices
             guard let goldParsed = parseYahooChartJSON(goldResult.0) else {
-                print("[Gold Futures] Failed to parse gold futures data")
+                log("[Gold Futures] Failed to parse gold futures data")
                 return []
             }
             let (goldTimestamps, goldCloses, _, _) = goldParsed
@@ -1182,11 +1186,11 @@ actor MarketDataService {
                 ))
             }
             
-            print("[Gold Futures] Found \(prices.count) historical prices (converted to EUR)")
+            log("[Gold Futures] Found \(prices.count) historical prices (converted to EUR)")
             return prices
             
         } catch {
-            print("[Gold Futures] Failed to fetch historical data: \(error)")
+            log("[Gold Futures] Failed to fetch historical data: \(error)")
             return []
         }
     }
@@ -1245,13 +1249,13 @@ actor MarketDataService {
         
         // If no data and identifier is "ISIN:CURRENCY", try full identifier as Yahoo symbol (e.g. LU0169518387:USD)
         if prices.isEmpty && isin.contains(":"), primaryTicker != isin {
-            print("[MarketData] No data for \(primaryTicker), trying full identifier as ticker: \(isin)")
+            log("[MarketData] No data for \(primaryTicker), trying full identifier as ticker: \(isin)")
             prices = await fetchHistoricalPricesFromYahooChart(tickerSymbol: isin, isin: isin, period: period, interval: interval)
         }
         
         // Last fallback: try core ISIN only (e.g. LU0169518387)
         if prices.isEmpty && isValidIsin && coreIsin != primaryTicker {
-            print("[MarketData] No data for \(primaryTicker)/\(isin), trying core ISIN: \(coreIsin)")
+            log("[MarketData] No data for \(primaryTicker)/\(isin), trying core ISIN: \(coreIsin)")
             prices = await fetchHistoricalPricesFromYahooChart(tickerSymbol: coreIsin, isin: isin, period: period, interval: interval)
         }
         
@@ -1299,7 +1303,7 @@ actor MarketDataService {
             
             return prices
         } catch {
-            print("Historical data fetch failed for \(tickerSymbol): \(error)")
+            log("Historical data fetch failed for \(tickerSymbol): \(error)")
             return []
         }
     }
@@ -1359,7 +1363,7 @@ actor MarketDataService {
             
             return rates
         } catch {
-            print("Historical rates fetch failed for \(pair): \(error)")
+            log("Historical rates fetch failed for \(pair): \(error)")
             return []
         }
     }

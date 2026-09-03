@@ -153,6 +153,32 @@ private actor DatabaseActor {
         try db.run(exchangeRates.createIndex(fromCurrency, toCurrency, rateDate, ifNotExists: true))
         try db.run(holdings.createIndex(holdingIsin, ifNotExists: true))
         try db.run(holdings.createIndex(holdingAccountId, ifNotExists: true))
+        try migrateNaturalKeys(db)
+    }
+    
+    /// Deduplicate rows created by `insert(or: .replace)` on autoincrement PKs, then
+    /// add UNIQUE indexes so later replaces actually upsert.
+    private func migrateNaturalKeys(_ db: Connection) throws {
+        try db.run("DELETE FROM prices WHERE id NOT IN (SELECT id FROM (SELECT MAX(id) AS id FROM prices GROUP BY isin, date))")
+        try db.run("DELETE FROM exchange_rates WHERE id NOT IN (SELECT id FROM (SELECT MAX(id) AS id FROM exchange_rates GROUP BY from_currency, to_currency, date))")
+        try db.run("DELETE FROM holdings WHERE id NOT IN (SELECT id FROM (SELECT MAX(id) AS id FROM holdings GROUP BY account_id, isin))")
+        
+        try db.run("""
+            UPDATE holdings SET account_id = (
+                SELECT MIN(kept.id) FROM bank_accounts kept
+                INNER JOIN bank_accounts cur ON cur.id = holdings.account_id
+                WHERE kept.bank_name = cur.bank_name AND kept.account_name = cur.account_name
+            )
+            WHERE account_id NOT IN (
+                SELECT id FROM (SELECT MIN(id) AS id FROM bank_accounts GROUP BY bank_name, account_name)
+            )
+            """)
+        try db.run("DELETE FROM bank_accounts WHERE id NOT IN (SELECT id FROM (SELECT MIN(id) AS id FROM bank_accounts GROUP BY bank_name, account_name))")
+        
+        try db.run("CREATE UNIQUE INDEX IF NOT EXISTS prices_unique_isin_date ON prices (isin, date)")
+        try db.run("CREATE UNIQUE INDEX IF NOT EXISTS exchange_rates_unique_pair_date ON exchange_rates (from_currency, to_currency, date)")
+        try db.run("CREATE UNIQUE INDEX IF NOT EXISTS holdings_unique_account_isin ON holdings (account_id, isin)")
+        try db.run("CREATE UNIQUE INDEX IF NOT EXISTS bank_accounts_unique_bank_account ON bank_accounts (bank_name, account_name)")
     }
     
     func closeConnection() {
@@ -311,6 +337,8 @@ private actor DatabaseActor {
         let trimmedBank = bank.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedAccount = account.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedBank.isEmpty, !trimmedAccount.isEmpty else { return false }
+        let existing = bankAccounts.filter(bankName == trimmedBank && accountName == trimmedAccount)
+        if try db.pluck(existing) != nil { return false }
         try db.run(bankAccounts.insert(bankName <- trimmedBank, accountName <- trimmedAccount))
         return true
     }
@@ -362,14 +390,6 @@ private actor DatabaseActor {
 class DatabaseService: ObservableObject {
     static let shared = DatabaseService()
 
-    #if os(macOS)
-    static func projectRootPath() -> String {
-        let home = ProcessInfo.processInfo.environment["HOME"]
-            ?? FileManager.default.homeDirectoryForCurrentUser.path
-        return (home as NSString).appendingPathComponent("github/Portfolio")
-    }
-    #endif
-    
     private let dbPath: String
     private let dbActor: DatabaseActor
     
@@ -391,17 +411,6 @@ class DatabaseService: ObservableObject {
         self.dbActor = DatabaseActor(path: dbPath)
         
         let fm = FileManager.default
-        
-        #if os(macOS)
-        if !fm.fileExists(atPath: dbPath) {
-            let legacyPath = (Self.projectRootPath() as NSString).appendingPathComponent("data/stocks.db")
-            if fm.fileExists(atPath: legacyPath) {
-                let destDir = URL(fileURLWithPath: dbPath).deletingLastPathComponent()
-                try? fm.createDirectory(at: destDir, withIntermediateDirectories: true)
-                try? fm.copyItem(atPath: legacyPath, toPath: dbPath)
-            }
-        }
-        #endif
         
         var restoredFromICloud = false
         if !fm.fileExists(atPath: dbPath), let containerURL = iCloudBackupContainerURL {
@@ -720,7 +729,9 @@ class DatabaseService: ObservableObject {
         return documentsURL.appendingPathComponent("PortfolioData/stocks.db").path
         #else
         let home = ProcessInfo.processInfo.environment["HOME"] ?? FileManager.default.homeDirectoryForCurrentUser.path
-        return (home as NSString).appendingPathComponent("github/Portfolio/data/stocks.db")
+        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
+        return appSupport.appendingPathComponent("Portfolio/data/stocks.db").path
         #endif
     }
 }

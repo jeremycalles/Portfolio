@@ -45,7 +45,7 @@ extension AppViewModel {
             let batchEnd = min(batchStart + batchSize, total)
             let batch = Array(instruments[batchStart..<batchEnd])
             
-            statusMessage = "Updating \(min(batchEnd, total))/\(total)..."
+            statusMessage = L10n.statusUpdatingProgress(min(batchEnd, total), total)
             
             // Fetch prices concurrently within the batch
             let results: [(Instrument, MarketDataResult)] = await withTaskGroup(of: (Instrument, MarketDataResult).self, returning: [(Instrument, MarketDataResult)].self) { group in
@@ -87,12 +87,12 @@ extension AppViewModel {
         }
         
         // Update exchange rates
-        statusMessage = "Updating exchange rates..."
+        statusMessage = L10n.statusUpdatingExchangeRates
         if let rate = await marketData.fetchExchangeRate(from: "USD", to: "EUR") {
             await db.addExchangeRate(rate)
         }
         
-        statusMessage = "Update complete!"
+        statusMessage = L10n.statusUpdateComplete
         isLoading = false
         
         // When all failed, capture first error from MarketDataService for diagnostics (e.g. iOS network)
@@ -114,10 +114,8 @@ extension AppViewModel {
         // Align with Settings "Last refresh" (same key as iOS BackgroundTaskManager)
         UserDefaults.standard.set(Date(), forKey: "lastBackgroundRefresh")
         
-        await refreshAll()
-        
         await fetchAndStoreBenchmarksInBackground()
-        await recomputeDashboardCache()
+        await refreshAll()
         
         // Clear status after delay (skip for pull-to-refresh)
         if showCompletionDelay {
@@ -146,7 +144,7 @@ extension AppViewModel {
         let total = instruments.count
         
         for (index, instrument) in instruments.enumerated() {
-            statusMessage = "Backfilling \(index + 1)/\(total): \(instrument.displayName)"
+            statusMessage = L10n.statusBackfillingProgress(index + 1, total, instrument.displayName)
             
             let prices = await marketData.fetchHistoricalData(
                 isin: instrument.isin,
@@ -162,13 +160,13 @@ extension AppViewModel {
             try? await Task.sleep(nanoseconds: 500_000_000)
         }
         
-        statusMessage = "Backfilling exchange rates..."
+        statusMessage = L10n.statusBackfillingExchangeRates
         let rates = await marketData.fetchHistoricalRates(from: "USD", to: "EUR", period: period, interval: interval)
         for rate in rates {
             await db.addExchangeRate(rate)
         }
         
-        statusMessage = "Backfill complete!"
+        statusMessage = L10n.statusBackfillComplete
         isLoading = false
         
         try? await Task.sleep(nanoseconds: 2_000_000_000)
@@ -189,7 +187,7 @@ extension AppViewModel {
             backfillLogs.append("[\(timestamp)] Period: \(period), Interval: \(interval)")
             backfillLogs.append("")
             
-            statusMessage = "Backfilling: \(instrument.displayName)"
+            statusMessage = L10n.statusBackfillingInstrument(instrument.displayName)
         }
         
         // Build list of tickers to try (primary, then "ISIN:CURRENCY" if applicable, then core ISIN)

@@ -14,6 +14,7 @@ struct PortfolioApp: App {
     @StateObject private var languageManager = LanguageManager.shared
     #if os(macOS)
     private let refreshRequestObserver = MacOSRefreshRequestObserver.shared
+    private let schedulerManager = MacOSSchedulerManager.shared
     #endif
     
     #if os(iOS)
@@ -41,6 +42,9 @@ struct PortfolioApp: App {
                 stopForegroundRefreshMonitor()
                 BackgroundTaskManager.shared.appDidEnterBackground()
             case .active:
+                Task { @MainActor in
+                    await viewModel.refreshAll()
+                }
                 refreshIfDueInForeground()
                 startForegroundRefreshMonitor()
             default:
@@ -57,7 +61,7 @@ struct PortfolioApp: App {
                 .onOpenURL { url in
                     guard url.scheme == "portfolio", url.host == "refresh" else { return }
                     Task {
-                        await MacOSSchedulerManager.shared.performBackgroundRefresh()
+                        await schedulerManager.performBackgroundRefresh()
                     }
                 }
         }
@@ -165,6 +169,7 @@ extension Notification.Name {
     static let updatePrices = Notification.Name("updatePrices")
     static let backfillHistorical = Notification.Name("backfillHistorical")
     static let databaseDidImport = Notification.Name("databaseDidImport")
+    static let backgroundPricesDidRefresh = Notification.Name("backgroundPricesDidRefresh")
 }
 
 // MARK: - iOS App Delegate

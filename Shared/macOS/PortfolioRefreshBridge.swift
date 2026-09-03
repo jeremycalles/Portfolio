@@ -9,6 +9,12 @@ enum PortfolioRefreshBridge {
     /// Must match `PRODUCT_BUNDLE_IDENTIFIER` of the Refresh Login Item target and `SMAppService.loginItem(identifier:)`.
     static let loginItemBundleIdentifier = "com.portfolio.app.ios.RefreshLoginItem"
 
+    /// Must match the main Mac app `PRODUCT_BUNDLE_IDENTIFIER`.
+    static let mainAppBundleIdentifier = "com.portfolio.app.ios"
+
+    /// Wakes the main app when it is not running so a Darwin ping is not dropped.
+    static let refreshURL = URL(string: "portfolio://refresh")
+
     static let refreshIntervalSecondsKey = "refreshIntervalSeconds"
     static let backgroundRefreshEnabledKey = "backgroundRefreshEnabled"
 

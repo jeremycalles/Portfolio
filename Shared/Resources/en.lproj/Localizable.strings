@@ -241,20 +241,7 @@
 "settings.importExportHint" = "Use Import/Export to manually transfer your database between devices.";
 "settings.importDatabase" = "Import Database from File";
 "settings.exportDatabase" = "Export Database";
-"settings.exportDatabaseToDevice" = "Export Database to another device";
 "settings.databaseImportExport" = "Database Import/Export";
-"settings.exportToDeviceTitle" = "Export to another device";
-"settings.exportToDeviceHint" = "Open Portfolio Vault on the other device to see it here.";
-"settings.noPeersFound" = "No devices found";
-"settings.databaseReceivedTitle" = "Database received";
-"settings.databaseReceivedMessage" = "Replace your current database with the one received?";
-"settings.exportSuccess" = "Database sent successfully.";
-"settings.exportFailed" = "Export failed";
-"settings.replace" = "Replace";
-"settings.incomingInvitationTitle" = "Incoming Connection";
-"settings.incomingInvitationMessage" = "%@ wants to send you a database. Accept?";
-"settings.accept" = "Accept";
-"settings.decline" = "Decline";
 "settings.openInFinder" = "Open in Finder";
 "settings.privacyMode" = "Privacy Mode";
 "settings.backgroundRefresh" = "Background Refresh";
@@ -286,6 +273,28 @@
 "settings.storageLogsDescription" = "Logs for database connection and backup events.";
 "settings.databaseStoredLocally" = "Stored locally";
 "settings.backupToICloudNow" = "Backup to iCloud now";
+"settings.dontAskAgain" = "Don't ask again";
+"settings.notNow" = "Not now";
+"settings.inAppTimerActive" = "In-app timer active";
+"settings.defaultInterval" = "Default interval: %@";
+"settings.logs" = "Logs";
+"settings.clear" = "Clear";
+
+"status.updatingProgress" = "Updating %d/%d...";
+"status.updatingExchangeRates" = "Updating exchange rates...";
+"status.updateComplete" = "Update complete!";
+"status.backfillingProgress" = "Backfilling %d/%d: %@";
+"status.backfillingExchangeRates" = "Backfilling exchange rates...";
+"status.backfillComplete" = "Backfill complete!";
+"status.backfillingInstrument" = "Backfilling: %@";
+"status.fetchingData" = "Fetching data for %@...";
+"status.addedInstrument" = "Added: %@";
+"error.couldNotFindData" = "Could not find data for ISIN: %@";
+"error.couldNotFindDataISINLength" = "Could not find data for %@. The part before \":%@\" should be a 12-character ISIN (you have %d). Check for a typo (e.g. missing or extra character).";
+"error.quadrantNameRequired" = "Quadrant name is required";
+"error.quadrantAlreadyExists" = "Quadrant '%@' already exists";
+"error.bankAccountNamesRequired" = "Bank and account names are required";
+"error.accountAlreadyExists" = "Account '%@ - %@' already exists";
 
 // MARK: - Actions
 "action.updatePrices" = "Update Prices";

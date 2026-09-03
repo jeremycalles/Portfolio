@@ -5,6 +5,8 @@ const path = require('path');
 const projectRoot = path.resolve(__dirname, '../../');
 const appIconSetPath = path.join(projectRoot, 'Shared/Assets.xcassets/AppIcon.appiconset');
 const contentsJsonPath = path.join(appIconSetPath, 'Contents.json');
+// Source of truth for every AppIcon PNG. Contents.json only lists those PNGs —
+// a loose icon.svg in the appiconset is ignored by the asset compiler.
 const sourceIconPath = path.join(projectRoot, 'assets/app-icon-source.jpg');
 
 async function generateIcons() {
@@ -33,10 +35,12 @@ async function generateIcons() {
 
             console.log(`Generating ${filename} (${pixelSize}x${pixelSize})...`);
 
-            // Flatten onto opaque white so PNGs have no alpha channel (App Store requirement).
+            // Opaque RGB (App Store rejects iOS icons with alpha). Flatten to black
+            // so the dark gold-chart artwork does not pick up a white halo.
             await sharp(sourceIconPath)
-                .resize(pixelSize, pixelSize)
-                .flatten({ background: '#FFFFFF' })
+                .resize(pixelSize, pixelSize, { fit: 'cover' })
+                .flatten({ background: '#000000' })
+                .removeAlpha()
                 .png()
                 .toFile(path.join(appIconSetPath, filename));
         }

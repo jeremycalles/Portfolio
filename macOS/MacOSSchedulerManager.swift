@@ -67,6 +67,7 @@ class MacOSSchedulerManager: ObservableObject {
     }
     
     private var refreshTimer: Timer?
+    private var helperWatchdog: Timer?
     
     private var refreshDefaults: UserDefaults {
         UserDefaults(suiteName: PortfolioRefreshBridge.appGroupIdentifier) ?? .standard
@@ -116,7 +117,21 @@ class MacOSSchedulerManager: ObservableObject {
         
         if timerEnabled {
             startTimer()
+        } else if isInstalled {
+            startHelperWatchdog()
         }
+        
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.recoverScheduleIfNeeded()
+            }
+        }
+        
+        Task { recoverScheduleIfNeeded() }
     }
     
     private func migrateRefreshPreferencesFromStandardUserDefaults() {
@@ -162,6 +177,7 @@ class MacOSSchedulerManager: ObservableObject {
         switch loginItemService.status {
         case .enabled:
             isInstalled = true
+            // SMAppService enabled means the helper should run; process may still be restarting.
             isRunning = true
         case .requiresApproval:
             isInstalled = true
@@ -170,6 +186,38 @@ class MacOSSchedulerManager: ObservableObject {
             isInstalled = false
             isRunning = false
         }
+    }
+    
+    private func isLoginItemHelperRunning() -> Bool {
+        !NSRunningApplication.runningApplications(
+            withBundleIdentifier: PortfolioRefreshBridge.loginItemBundleIdentifier
+        ).isEmpty
+    }
+    
+    /// Relaunch a dead helper and catch up if the last refresh is overdue.
+    func recoverScheduleIfNeeded() {
+        checkStatus()
+        guard timerEnabled || isInstalled else { return }
+        
+        if loginItemService.status == .requiresApproval {
+            launchAgentSetupError = L10n.settingsLoginItemRequiresApproval
+        } else if loginItemService.status == .enabled, timerEnabled, !isLoginItemHelperRunning() {
+            appendLog("Login item helper was not running; relaunching")
+            Task { await launchEmbeddedLoginItem() }
+        }
+        
+        Task { await refreshIfDue() }
+    }
+    
+    /// Runs a refresh when the last successful run is older than the selected interval (or never ran).
+    func refreshIfDue() async {
+        guard timerEnabled || isInstalled else { return }
+        let interval = TimeInterval(selectedInterval.rawValue)
+        if let lastRefresh = UserDefaults.standard.object(forKey: "lastBackgroundRefresh") as? Date {
+            guard Date().timeIntervalSince(lastRefresh) >= interval else { return }
+        }
+        appendLog("Catch-up refresh (last run older than \(selectedInterval.displayName))")
+        await performBackgroundRefresh()
     }
     
     // MARK: - Install / Uninstall (SMAppService + embedded login item)
@@ -222,6 +270,7 @@ class MacOSSchedulerManager: ObservableObject {
         if timerEnabled {
             timerEnabled = false
         }
+        stopHelperWatchdog()
         checkStatus()
         appendLog("Login item unregistered")
     }
@@ -266,13 +315,36 @@ class MacOSSchedulerManager: ObservableObject {
         }
         // Keep timer alive during modal run loops
         if let timer = refreshTimer {
+            timer.tolerance = min(interval * 0.1, 60)
             RunLoop.main.add(timer, forMode: .common)
         }
+        startHelperWatchdog()
     }
     
     func stopTimer() {
         refreshTimer?.invalidate()
         refreshTimer = nil
+        if !timerEnabled && !isInstalled {
+            stopHelperWatchdog()
+        }
+    }
+    
+    private func startHelperWatchdog() {
+        helperWatchdog?.invalidate()
+        helperWatchdog = Timer.scheduledTimer(withTimeInterval: 15 * 60, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.recoverScheduleIfNeeded()
+            }
+        }
+        if let helperWatchdog {
+            helperWatchdog.tolerance = 60
+            RunLoop.main.add(helperWatchdog, forMode: .common)
+        }
+    }
+    
+    private func stopHelperWatchdog() {
+        helperWatchdog?.invalidate()
+        helperWatchdog = nil
     }
     
     // MARK: - Shared Refresh Logic
@@ -284,6 +356,7 @@ class MacOSSchedulerManager: ObservableObject {
         }
         
         isRefreshing = true
+        defer { isRefreshing = false }
         appendLog("Starting background refresh")
         
         var successCount = 0
@@ -293,7 +366,6 @@ class MacOSSchedulerManager: ObservableObject {
         
         guard !instruments.isEmpty else {
             appendLog("No instruments to refresh")
-            isRefreshing = false
             return
         }
         
@@ -359,7 +431,7 @@ class MacOSSchedulerManager: ObservableObject {
         UserDefaults.standard.set(Date(), forKey: "lastBackgroundRefresh")
         
         appendLog("Refresh complete: \(successCount) success, \(failureCount) failed")
-        isRefreshing = false
+        NotificationCenter.default.post(name: .backgroundPricesDidRefresh, object: nil)
         
         // Restart timer to avoid double-refresh soon after manual trigger
         if timerEnabled {
@@ -554,7 +626,7 @@ struct BackgroundRefreshSettingsView: View {
                         Spacer()
                         
                         HStack(spacing: 16) {
-                            Button("Clear") {
+                            Button(L10n.settingsClear) {
                                 manager.clearLogs()
                             }
                             .buttonStyle(.link)
@@ -581,7 +653,7 @@ struct BackgroundRefreshSettingsView: View {
                 }
                 .padding(.vertical, 8)
             } header: {
-                SettingsSectionHeader(title: "Logs", icon: "doc.text.fill", color: .gray)
+                SettingsSectionHeader(title: L10n.settingsLogs, icon: "doc.text.fill", color: .gray)
             }
         }
         .formStyle(.grouped)
@@ -614,7 +686,7 @@ struct BackgroundRefreshSettingsView: View {
             HStack(spacing: 4) {
                 Image(systemName: "timer")
                     .foregroundColor(.blue)
-                Text("In-app timer active")
+                Text(L10n.settingsInAppTimerActive)
                     .foregroundColor(.blue)
             }
             .font(.caption.bold())

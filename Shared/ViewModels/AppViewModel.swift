@@ -76,25 +76,25 @@ class AppViewModel: ObservableObject {
     ///   - fromCurrency: The source currency (nil or "EUR" means no conversion needed)
     ///   - onDate: The date to use for the exchange rate lookup
     /// - Returns: The value converted to EUR
-    func convertToEUR(value: Double, fromCurrency: String?, onDate: String) async -> Double {
+    func convertToEUR(value: Double, fromCurrency: String?, onDate: String) async -> Double? {
         guard let currency = fromCurrency, currency != "EUR" else { return value }
         
         let cacheKey = "\(currency)|\(onDate)"
         if let cachedRate = eurRateCache[cacheKey] {
-            return value * cachedRate
+            return CurrencyConversion.euros(value: value, fromCurrency: currency, rate: cachedRate)
         }
         
         if let rate = await db.getRateOnOrBefore(from: currency, to: "EUR", date: onDate) {
             eurRateCache[cacheKey] = rate.rate
-            return value * rate.rate
+            return CurrencyConversion.euros(value: value, fromCurrency: currency, rate: rate.rate)
         }
         
         if let rate = await db.getLatestRate(from: currency, to: "EUR") {
             eurRateCache[cacheKey] = rate.rate
-            return value * rate.rate
+            return CurrencyConversion.euros(value: value, fromCurrency: currency, rate: rate.rate)
         }
         
-        return value
+        return CurrencyConversion.euros(value: value, fromCurrency: currency, rate: nil)
     }
     
     /// Clears the exchange rate cache. Call at the start of each history/report computation.
@@ -167,7 +167,7 @@ class AppViewModel: ObservableObject {
     // MARK: - Instruments
     func addInstrument(isin: String) async {
         isLoading = true
-        statusMessage = "Fetching data for \(isin)..."
+        statusMessage = L10n.statusFetchingData(isin)
         
         let result = await marketData.fetchData(isin: isin)
         
@@ -193,7 +193,7 @@ class AppViewModel: ObservableObject {
                 await db.addPrice(price)
             }
             
-            statusMessage = "Added: \(result.name ?? isin)"
+            statusMessage = L10n.statusAddedInstrument(result.name ?? isin)
             await refreshInstruments()
         } else {
             errorMessage = Self.addInstrumentErrorMessage(for: isin)
@@ -209,10 +209,10 @@ class AppViewModel: ObservableObject {
             let prefix = String(isin[..<colonIdx]).trimmingCharacters(in: .whitespaces)
             let suffix = String(isin[isin.index(after: colonIdx)...])
             if prefix.count != 12 {
-                return "Could not find data for \(isin). The part before \":\(suffix)\" should be a 12-character ISIN (you have \(prefix.count)). Check for a typo (e.g. missing or extra character)."
+                return L10n.errorCouldNotFindDataISINLength(isin, suffix, prefix.count)
             }
         }
-        return "Could not find data for ISIN: \(isin)"
+        return L10n.errorCouldNotFindData(isin)
     }
     
     func deleteInstrument(_ isin: String) async {
@@ -252,14 +252,14 @@ class AppViewModel: ObservableObject {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedName.isEmpty else {
-            errorMessage = "Quadrant name is required"
+            errorMessage = L10n.errorQuadrantNameRequired
             return
         }
 
         if await db.addQuadrant(name: trimmedName) {
             await refreshQuadrants()
         } else {
-            errorMessage = "Quadrant '\(trimmedName)' already exists"
+            errorMessage = L10n.errorQuadrantAlreadyExists(trimmedName)
         }
     }
     
@@ -275,14 +275,14 @@ class AppViewModel: ObservableObject {
         let trimmedAccount = account.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedBank.isEmpty, !trimmedAccount.isEmpty else {
-            errorMessage = "Bank and account names are required"
+            errorMessage = L10n.errorBankAccountNamesRequired
             return
         }
 
         if await db.addBankAccount(bank: trimmedBank, account: trimmedAccount) {
             await refreshBankAccounts()
         } else {
-            errorMessage = "Account '\(trimmedBank) - \(trimmedAccount)' already exists"
+            errorMessage = L10n.errorAccountAlreadyExists(trimmedBank, trimmedAccount)
         }
     }
     

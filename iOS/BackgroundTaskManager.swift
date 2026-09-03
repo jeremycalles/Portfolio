@@ -29,6 +29,7 @@ class BackgroundTaskManager: ObservableObject {
     // Log storage
     @Published private(set) var lastRefreshLogs: [BackgroundTaskLogEntry] = []
     private let logsKey = "backgroundRefreshLogs"
+    private let logsMaxCount = 200
     
     private init() {
         loadLogs()
@@ -39,12 +40,11 @@ class BackgroundTaskManager: ObservableObject {
     private func log(_ message: String, isError: Bool = false) {
         let entry = BackgroundTaskLogEntry(message: message, isError: isError)
         lastRefreshLogs.append(entry)
+        if lastRefreshLogs.count > logsMaxCount {
+            lastRefreshLogs.removeFirst(lastRefreshLogs.count - logsMaxCount)
+        }
         print("[BackgroundTask] \(message)")
         saveLogs()
-    }
-    
-    private func clearLogs() {
-        lastRefreshLogs.removeAll()
     }
     
     private func saveLogs() {
@@ -100,7 +100,6 @@ class BackgroundTaskManager: ObservableObject {
     
     private func handleAppRefresh(task: BGAppRefreshTask) {
         Task { @MainActor in
-            self.clearLogs()
             self.log("Starting background refresh")
         }
         
@@ -108,9 +107,12 @@ class BackgroundTaskManager: ObservableObject {
         scheduleAppRefresh()
         
         let refreshTask = Task { @MainActor in
-            let success = await self.performPriceRefresh()
-            task.setTaskCompleted(success: success)
-            self.log("Background refresh completed with success: \(success)")
+            let completed = await self.performPriceRefresh()
+            // Report success whenever the attempt finished or made progress.
+            // Per-ticker failures must not be reported as task failure — iOS
+            // deprioritizes future BGAppRefresh scheduling after false.
+            task.setTaskCompleted(success: completed)
+            self.log("Background refresh completed with success: \(completed)")
             self.saveLogs()
         }
         
@@ -139,8 +141,15 @@ class BackgroundTaskManager: ObservableObject {
         
         log("Found \(instruments.count) instruments to refresh")
         
-        // Update prices for all instruments
         for instrument in instruments {
+            if Task.isCancelled {
+                log("Cancelled with \(successCount) updated, \(failureCount) failed", isError: true)
+                if successCount > 0 {
+                    UserDefaults.standard.set(Date(), forKey: "lastBackgroundRefresh")
+                }
+                return successCount > 0
+            }
+            
             let displayName = instrument.name ?? instrument.ticker ?? instrument.isin
             
             let result = await MarketDataService.shared.fetchData(isin: instrument.isin, ticker: instrument.ticker)
@@ -154,12 +163,10 @@ class BackgroundTaskManager: ObservableObject {
                 )
                 await DatabaseService.shared.addPrice(newPrice)
                 
-                // Update instrument info if available (but NOT currency - that should stay as originally set)
                 if result.name != nil || result.ticker != nil {
                     var updatedInstrument = instrument
                     if let name = result.name { updatedInstrument.name = name }
                     if let ticker = result.ticker { updatedInstrument.ticker = ticker }
-                    // Do NOT update currency here - FT may return wrong share class currency
                     await DatabaseService.shared.addOrUpdateInstrument(updatedInstrument)
                 }
                 
@@ -170,32 +177,12 @@ class BackgroundTaskManager: ObservableObject {
                 failureCount += 1
             }
             
-            // Small delay to avoid rate limiting
-            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+            try? await Task.sleep(nanoseconds: 150_000_000)
         }
         
-        // Save last refresh time
         UserDefaults.standard.set(Date(), forKey: "lastBackgroundRefresh")
-        
-        // Fetch and store benchmarks history in background
-        Task.detached(priority: .utility) {
-            let sp500Prices = await MarketDataService.shared.fetchSP500History(period: "2y", interval: "1d")
-            for price in sp500Prices {
-                await DatabaseService.shared.addPrice(price)
-            }
-            let goldPrices = await MarketDataService.shared.fetchGoldHistory(period: "2y", interval: "1d")
-            for price in goldPrices {
-                await DatabaseService.shared.addPrice(price)
-            }
-            let msciPrices = await MarketDataService.shared.fetchMSCIWorldHistory(period: "2y", interval: "1d")
-            for price in msciPrices {
-                await DatabaseService.shared.addPrice(price)
-            }
-        }
-        
         log("Refresh complete: \(successCount) success, \(failureCount) failed")
-        
-        return failureCount == 0
+        return true
     }
 }
 

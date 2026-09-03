@@ -241,20 +241,7 @@
 "settings.importExportHint" = "Utilisez Import/Export pour transférer manuellement votre base de données entre appareils.";
 "settings.importDatabase" = "Importer la base de données";
 "settings.exportDatabase" = "Exporter la base de données";
-"settings.exportDatabaseToDevice" = "Exporter la base vers un autre appareil";
 "settings.databaseImportExport" = "Import/Export de la base";
-"settings.exportToDeviceTitle" = "Exporter vers un autre appareil";
-"settings.exportToDeviceHint" = "Ouvrez Portfolio Vault sur l'autre appareil pour le voir ici.";
-"settings.noPeersFound" = "Aucun appareil trouvé";
-"settings.databaseReceivedTitle" = "Base reçue";
-"settings.databaseReceivedMessage" = "Remplacer la base actuelle par celle reçue ?";
-"settings.exportSuccess" = "Base envoyée avec succès.";
-"settings.exportFailed" = "Échec de l'export";
-"settings.replace" = "Remplacer";
-"settings.incomingInvitationTitle" = "Connexion entrante";
-"settings.incomingInvitationMessage" = "%@ souhaite vous envoyer une base de données. Accepter ?";
-"settings.accept" = "Accepter";
-"settings.decline" = "Refuser";
 "settings.openInFinder" = "Ouvrir dans le Finder";
 "settings.privacyMode" = "Mode privé";
 "settings.backgroundRefresh" = "Actualisation en arrière-plan";
@@ -286,6 +273,28 @@
 "settings.storageLogsDescription" = "Logs des connexions à la base et des sauvegardes.";
 "settings.databaseStoredLocally" = "Stocké localement";
 "settings.backupToICloudNow" = "Sauvegarder sur iCloud maintenant";
+"settings.dontAskAgain" = "Ne plus demander";
+"settings.notNow" = "Pas maintenant";
+"settings.inAppTimerActive" = "Minuteur interne actif";
+"settings.defaultInterval" = "Intervalle par défaut : %@";
+"settings.logs" = "Journaux";
+"settings.clear" = "Effacer";
+
+"status.updatingProgress" = "Mise à jour %d/%d...";
+"status.updatingExchangeRates" = "Mise à jour des taux de change...";
+"status.updateComplete" = "Mise à jour terminée !";
+"status.backfillingProgress" = "Récupération %d/%d : %@";
+"status.backfillingExchangeRates" = "Récupération des taux de change...";
+"status.backfillComplete" = "Récupération terminée !";
+"status.backfillingInstrument" = "Récupération : %@";
+"status.fetchingData" = "Récupération des données pour %@...";
+"status.addedInstrument" = "Ajouté : %@";
+"error.couldNotFindData" = "Impossible de trouver des données pour l'ISIN : %@";
+"error.couldNotFindDataISINLength" = "Impossible de trouver des données pour %@. La partie avant \":%@\" doit être un ISIN de 12 caractères (vous en avez %d). Vérifiez une faute de frappe.";
+"error.quadrantNameRequired" = "Le nom du quadrant est requis";
+"error.quadrantAlreadyExists" = "Le quadrant « %@ » existe déjà";
+"error.bankAccountNamesRequired" = "Les noms de banque et de compte sont requis";
+"error.accountAlreadyExists" = "Le compte « %@ - %@ » existe déjà";
 
 // MARK: - Actions
 "action.updatePrices" = "Mettre à jour les prix";

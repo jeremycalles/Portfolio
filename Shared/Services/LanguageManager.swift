@@ -345,6 +345,63 @@ struct L10n {
     static var settingsStorageLogsDescription: String { manager.localized("settings.storageLogsDescription") }
     static var settingsDatabaseStoredLocally: String { manager.localized("settings.databaseStoredLocally") }
     static var settingsBackupToICloudNow: String { manager.localized("settings.backupToICloudNow") }
+    static var settingsDontAskAgain: String { manager.localized("settings.dontAskAgain") }
+    static var settingsNotNow: String { manager.localized("settings.notNow") }
+    static var settingsInAppTimerActive: String { manager.localized("settings.inAppTimerActive") }
+    static func settingsDefaultInterval(_ interval: String) -> String {
+        String(format: manager.localized("settings.defaultInterval"), interval)
+    }
+    static var settingsLogs: String { manager.localized("settings.logs") }
+    static var settingsClear: String { manager.localized("settings.clear") }
+    static var settingsBackgroundRefreshLogs: String { manager.localized("settings.backgroundRefreshLogs") }
+    static var settingsAccountDetails: String { manager.localized("settings.accountDetails") }
+    static var settingsAccountDetailsHint: String { manager.localized("settings.accountDetailsHint") }
+    
+    static func statusUpdatingProgress(_ current: Int, _ total: Int) -> String {
+        String(format: manager.localized("status.updatingProgress"), current, total)
+    }
+    static var statusUpdatingExchangeRates: String { manager.localized("status.updatingExchangeRates") }
+    static var statusUpdateComplete: String { manager.localized("status.updateComplete") }
+    static func statusBackfillingProgress(_ current: Int, _ total: Int, _ name: String) -> String {
+        String(format: manager.localized("status.backfillingProgress"), current, total, name)
+    }
+    static var statusBackfillingExchangeRates: String { manager.localized("status.backfillingExchangeRates") }
+    static var statusBackfillComplete: String { manager.localized("status.backfillComplete") }
+    static func statusBackfillingInstrument(_ name: String) -> String {
+        String(format: manager.localized("status.backfillingInstrument"), name)
+    }
+    static func statusFetchingData(_ isin: String) -> String {
+        String(format: manager.localized("status.fetchingData"), isin)
+    }
+    static func statusAddedInstrument(_ name: String) -> String {
+        String(format: manager.localized("status.addedInstrument"), name)
+    }
+    static func errorCouldNotFindData(_ isin: String) -> String {
+        String(format: manager.localized("error.couldNotFindData"), isin)
+    }
+    static func errorCouldNotFindDataISINLength(_ identifier: String, _ suffix: String, _ count: Int) -> String {
+        String(format: manager.localized("error.couldNotFindDataISINLength"), identifier, suffix, count)
+    }
+    static var errorQuadrantNameRequired: String { manager.localized("error.quadrantNameRequired") }
+    static func errorQuadrantAlreadyExists(_ name: String) -> String {
+        String(format: manager.localized("error.quadrantAlreadyExists"), name)
+    }
+    static var errorBankAccountNamesRequired: String { manager.localized("error.bankAccountNamesRequired") }
+    static func errorAccountAlreadyExists(_ bank: String, _ account: String) -> String {
+        String(format: manager.localized("error.accountAlreadyExists"), bank, account)
+    }
+    
+    static var accountsAccountName: String { manager.localized("accounts.accountName") }
+    static var accountsBankName: String { manager.localized("accounts.bankName") }
+    static var holdingsQuantity: String { manager.localized("holdings.quantity") }
+    static var instrumentsIsin: String { manager.localized("instruments.isin") }
+    static var instrumentsName: String { manager.localized("instruments.name") }
+    static var instrumentsTicker: String { manager.localized("instruments.ticker") }
+    static var instrumentsQuadrant: String { manager.localized("instruments.quadrant") }
+    static func chartDataPoints(_ count: Int) -> String {
+        String(format: manager.localized("chart.dataPoints"), count)
+    }
+    static var tooltipBackfillHistoricalData: String { manager.localized("tooltip.backfillHistoricalData") }
     
     // Actions
     static var actionUpdatePrices: String { manager.localized("action.updatePrices") }
