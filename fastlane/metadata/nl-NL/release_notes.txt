@@ -1,1 +1,5 @@
-Eerste versie. Aandelen, ETF, fondsen, goud, crypto en rekeningen op één plek. Data op het apparaat, optionele iCloud-back-up. iOS en macOS.
+Grafieken volgen nu je koop- en verkooplots, zodat de historie de hoeveelheden gebruikt die je echt had.
+
+Een korte walkthrough helpt je op iPhone en Mac. Geplande koersupdates zijn betrouwbaarder: de Mac-helper wekt de app zodat verversingen niet verloren gaan.
+
+Je gegevens blijven op het apparaat.

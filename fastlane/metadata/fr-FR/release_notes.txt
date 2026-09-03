@@ -1,1 +1,5 @@
-Première version. Suivez actions, ETF, fonds, or, crypto et comptes bancaires au même endroit. Vos données restent sur l’appareil, avec sauvegarde iCloud optionnelle. Disponible sur iOS et macOS.
+Les graphiques suivent désormais vos lots d’achat et de vente : l’historique utilise les quantités réellement détenues.
+
+Un court tutoriel vous guide sur iPhone et Mac. Les actualisations planifiées sont plus fiables : l’assistant Mac réveille l’app pour ne plus perdre les mises à jour.
+
+Vos données restent sur l’appareil.

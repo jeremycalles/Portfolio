@@ -1,1 +1,5 @@
-Erste Version. Aktien, ETFs, Fonds, Gold, Krypto und Bankkonten an einem Ort. Daten bleiben auf dem Gerät, optionales iCloud-Backup. iOS und macOS.
+Charts folgen jetzt Kauf- und Verkaufslosen — die Historie nutzt die Mengen, die Sie wirklich gehalten haben.
+
+Eine kurze Einführung startet auf iPhone und Mac. Geplante Kursupdates sind zuverlässiger: Der Mac-Helfer weckt die App, damit Aktualisierungen nicht verloren gehen.
+
+Ihre Daten bleiben auf dem Gerät.

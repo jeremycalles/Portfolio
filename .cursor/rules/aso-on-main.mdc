@@ -1,0 +1,36 @@
+---
+description: Update App Store listing copy when committing user-facing work to main
+alwaysApply: true
+---
+
+# ASO on main
+
+When committing or pushing **user-facing app changes** to `main` (features, UX, onboarding, refresh, charts, privacy), update listing copy in the **same change** and publish it.
+
+Skip for docs-only, CI-only, or metadata-only commits.
+
+## What to edit
+
+- `fastlane/metadata/*/release_notes.txt` — What’s New for this version. Write EN and FR fully; keep other locales in sync (not “Initial release”).
+- `fastlane/metadata/*/description.txt` — add a FEATURES bullet only if the change is a lasting capability users should see on the product page.
+- `AppStore-Metadata.md` What’s New block.
+
+Do **not** restuff name / subtitle / keywords unless search terms actually changed. Do not repeat a token across those three fields. Home-screen name stays **Portfolio Vault**. No Yahoo / Veracash / AuCOFFRE in keywords.
+
+## Publish
+
+```bash
+python3 scripts/validate_app_store_metadata.py
+export APP_STORE_CONNECT_API_KEY_PATH="$HOME/.appstoreconnect/portfolio-api-key.json"
+APP_VERSION=<MARKETING_VERSION> bundle exec fastlane metadata_upload
+```
+
+What’s New lands on the Prepare for Submission version. Include the metadata files in the `main` commit.
+
+## Example
+
+User-facing: buy/sell lots on charts.
+
+What’s New: *Charts now follow your buy and sell lots, so history uses the quantities you actually held.*
+
+Description: add `Buy & sell lots — Charts use historical quantities, not only today’s position`.

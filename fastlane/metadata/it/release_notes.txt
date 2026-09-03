@@ -1,1 +1,5 @@
-Prima versione. Azioni, ETF, fondi, oro, crypto e conti in un unico posto. Dati sul dispositivo, backup iCloud opzionale. iOS e macOS.
+I grafici seguono ora i lotti di acquisto e vendita: la cronologia usa le quantità che avevi davvero.
+
+Una breve guida ti avvia su iPhone e Mac. Gli aggiornamenti pianificati sono più affidabili: l’helper Mac sveglia l’app così i refresh non si perdono.
+
+I dati restano sul dispositivo.

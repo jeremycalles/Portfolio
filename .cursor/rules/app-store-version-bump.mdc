@@ -57,4 +57,6 @@ When bumping, update `APP_VERSION` fallbacks if present:
 
 ## Release follow-up
 
+Before committing to `main`: refresh What’s New / FEATURES for user-facing changes and upload with `bundle exec fastlane metadata_upload` (see `aso-on-main.mdc`). Include those metadata files in the commit.
+
 After commit: push to the branch Xcode Cloud watches (`main`) and trigger/re-run the archive workflows so the new build reaches App Store Connect. Binary upload is Xcode Cloud, not fastlane.

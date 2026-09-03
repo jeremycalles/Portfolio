@@ -1,1 +1,5 @@
-Initial release. Track stocks, ETFs, funds, gold, crypto, and bank accounts in one place. Your data stays on your device with optional iCloud sync. Available on iOS and macOS.
+Charts now follow your buy and sell lots, so history uses the quantities you actually held.
+
+A short walkthrough gets you started on iPhone and Mac. Scheduled price updates are more reliable on both platforms—the Mac helper wakes the app so refreshes are not dropped.
+
+Your data still stays on your device.

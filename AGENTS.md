@@ -140,9 +140,9 @@ Bump **iOS, macOS, and PortfolioRefreshLoginItem** together. See `.cursor/rules/
 1. Query App Store Connect → highest uploaded `CURRENT_PROJECT_VERSION` for `com.portfolio.app.ios`.
 2. Bump `MARKETING_VERSION` and set `CURRENT_PROJECT_VERSION` to **max uploaded + 1** (Debug + Release, all three app targets).
 3. Update fastlane defaults if present (`fastlane/Fastfile`, `Deliverfile`, `ci_scripts/ci_pre_xcodebuild.sh` fallback).
-4. Commit and push to the branch Xcode Cloud watches (usually `main`).
-5. Confirm / trigger the Xcode Cloud workflows; binary upload is handled by the workflow post-action, not fastlane.
-6. Optionally refresh `fastlane/metadata/*/release_notes.txt` before the build if `UPLOAD_APP_STORE_METADATA=1`.
+4. Update ASO for user-facing changes (`fastlane/metadata/*/release_notes.txt` and FEATURES in descriptions). Validate and `bundle exec fastlane metadata_upload`. See `.cursor/rules/aso-on-main.mdc`.
+5. Commit and push to the branch Xcode Cloud watches (usually `main`), including the metadata files.
+6. Confirm / trigger the Xcode Cloud workflows; binary upload is handled by the workflow post-action, not fastlane.
 
 ### fastlane (metadata only)
 

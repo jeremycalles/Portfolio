@@ -4,6 +4,8 @@
 > Setup: [fastlane/README.md](fastlane/README.md).
 >
 > Name, subtitle, keywords, and description are locked on a live version. `metadata_upload` creates the next Prepare for Submission version (currently **1.0.7**) and uploads indexed copy there. Promotional text is also patched on the live listing.
+>
+> When committing user-facing app work to `main`, rewrite What’s New (and FEATURES if needed) and upload before or in that commit. See `.cursor/rules/aso-on-main.mdc`.
 
 App name on the home screen stays **Portfolio Vault**. One App Store Connect app (`com.portfolio.app.ios`) covers iOS and macOS (universal purchase).
 
@@ -68,7 +70,11 @@ Lead with what people type (stocks, gold, crypto, no account), then WHAT YOU CAN
 ## What’s New
 
 ```
-Initial release. Track stocks, ETFs, funds, gold, crypto, and bank accounts in one place. Your data stays on your device with optional iCloud sync. Available on iOS and macOS.
+Charts now follow your buy and sell lots, so history uses the quantities you actually held.
+
+A short walkthrough gets you started on iPhone and Mac. Scheduled price updates are more reliable on both platforms—the Mac helper wakes the app so refreshes are not dropped.
+
+Your data still stays on your device.
 ```
 
 ---

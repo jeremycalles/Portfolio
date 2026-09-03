@@ -16,9 +16,11 @@ FONCTIONNALITÉS
 • Prix de revient et performance — Dates d’achat, plus/moins-values, comparaison 1J, 1S, 1M, 1A, YTD
 • Quadrants — Regroupez les instruments par catégorie (Technologie, Métaux précieux, Taux, etc.)
 • Graphiques interactifs — Tendance du portefeuille, allocation et historique par instrument
+• Lots d’achat et de vente — Les graphiques utilisent les quantités historiques, pas seulement la position du jour
+• Tutoriel — Court guidage sur iPhone et Mac
 • Valorisation en or — Voir la valeur du portefeuille en onces d’or, pour une lecture ajustée de l’inflation
 • Données intelligentes — Meilleure source selon le type d’instrument ; historique pour les tendances
-• Mises à jour en arrière-plan — Actualisation automatique des cours sur iOS et macOS
+• Mises à jour en arrière-plan — Actualisation automatique ; l’assistant Mac réveille l’app pour ne pas perdre les mises à jour
 • Mode confidentialité — Masquez les montants à l’écran ; Face ID / Touch ID / verrouillage optionnels
 • Bilingue — Anglais et français
 • Sauvegarde iCloud optionnelle — Copie de la base locale ; l’app ne s’exécute jamais depuis iCloud

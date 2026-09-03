@@ -16,9 +16,11 @@ FEATURES
 • Cost basis & performance — Purchase dates, prices, gain/loss, comparison over 1D, 1W, 1M, 1Y, YTD
 • Quadrant organization — Group instruments by category (Technology, Precious Metals, Fixed Income, etc.)
 • Interactive charts — Portfolio trend, allocation, and instrument history
+• Buy & sell lots — Charts use historical quantities, not only today’s position
+• Guided walkthrough — Short onboarding on iPhone and Mac
 • Gold valuation — See portfolio value in gold ounces for an inflation-adjusted view
 • Smart data — Best source per instrument type; historical backfill for trends
-• Background updates — Automatic price refresh on iOS and macOS
+• Background updates — Automatic price refresh on iOS and macOS; the Mac helper wakes the app so scheduled updates are not dropped
 • Privacy mode — Hide sensitive values on screen; Face ID / Touch ID / device lock optional
 • Bilingual — Full English and French
 • Optional iCloud backup — Copy the local database to your iCloud; the app never runs from iCloud

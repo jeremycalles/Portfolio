@@ -10,6 +10,6 @@ WAS SIE VERFOLGEN KÖNNEN
 • Kryptowährungen — gängige Paare
 • Bankkonten — manuelle Cash-Positionen
 
-Funktionen: mehrere Konten, Einstandskurse, Charts, Goldunzen, Hintergrund-Updates, Datenschutzmodus, Face ID / Touch ID, Englisch und Französisch, optionales iCloud-Backup.
+Funktionen: mehrere Konten, Einstandskurse, Kauf-/Verkaufslose für historische Charts, kurze Einführung, Goldunzen, zuverlässige Hintergrund-Updates, Datenschutzmodus, Face ID / Touch ID, Englisch und Französisch, optionales iCloud-Backup.
 
 Es gehen nur öffentliche Marktdaten-Anfragen (Ticker, NAVs) raus. Keine Analytics, keine Werbung.
