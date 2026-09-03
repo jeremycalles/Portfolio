@@ -26,12 +26,16 @@ struct EnhancedPortfolioHeroCard: View {
     }
     
     private var changePercent: Double {
+        if let twr = viewModel.cachedPeriodTWR { return twr }
         guard previousValue > 0 else { return 0 }
         return (change / previousValue) * 100
     }
     
     private var isPositive: Bool {
-        change >= 0
+        if viewModel.cachedPeriodTWR != nil {
+            return (viewModel.cachedPeriodTWR ?? 0) >= 0
+        }
+        return change >= 0
     }
     
     private var goldTotals: (current: Double, previous: Double)? {
@@ -43,15 +47,13 @@ struct EnhancedPortfolioHeroCard: View {
     }
     
     private var goldChange: Double? {
-        guard let gold = goldTotals,
-              let firstGold = goldHistory.first?.value else { return nil }
-        return gold.current - firstGold
+        guard let first = goldHistory.first?.value, let last = goldHistory.last?.value else { return nil }
+        return last - first
     }
     
     private var goldChangePercent: Double? {
-        guard let gold = goldTotals,
-              let firstGold = goldHistory.first?.value, firstGold > 0 else { return nil }
-        return ((gold.current - firstGold) / firstGold) * 100
+        guard let first = goldHistory.first?.value, let last = goldHistory.last?.value else { return nil }
+        return PortfolioHistoryBuilder.percentChange(from: first, to: last)
     }
     
     private var isGoldPositive: Bool {

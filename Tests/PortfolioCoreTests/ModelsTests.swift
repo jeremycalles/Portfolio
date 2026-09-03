@@ -131,35 +131,55 @@ struct ModelsTests {
 
     // MARK: - ReportPeriod
 
-    @Test("comparisonDate returns a date in the past for all cases",
+    @Test("comparisonDate is not in the future",
           arguments: ReportPeriod.allCases)
     func reportPeriodComparisonDate(period: ReportPeriod) {
         let date = period.comparisonDate
-        #expect(date < Date())
+        #expect(date <= Date())
     }
 
-    @Test("oneDay returns approximately yesterday")
+    @Test("oneDay is the previous calendar day at start of day")
     func reportPeriodOneDay() {
-        let expected = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let expected = calendar.date(byAdding: .day, value: -1, to: today)!
         let result = ReportPeriod.oneDay.comparisonDate
-        let diff = abs(result.timeIntervalSince(expected))
-        #expect(diff < 1.0)
+        #expect(calendar.isDate(result, inSameDayAs: expected))
+        #expect(result == calendar.startOfDay(for: result))
     }
 
-    @Test("oneWeek returns approximately 7 days ago")
+    @Test("oneWeek is 7 calendar days before today")
     func reportPeriodOneWeek() {
-        let expected = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let expected = calendar.date(byAdding: .day, value: -7, to: today)!
         let result = ReportPeriod.oneWeek.comparisonDate
-        let diff = abs(result.timeIntervalSince(expected))
-        #expect(diff < 1.0)
+        #expect(calendar.isDate(result, inSameDayAs: expected))
+        #expect(result == calendar.startOfDay(for: result))
+    }
+
+    @Test("oneMonth is one calendar month before today, not a fixed 30 days")
+    func reportPeriodOneMonth() {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let expectedMonth = calendar.date(byAdding: .month, value: -1, to: today)!
+        let thirtyDays = calendar.date(byAdding: .day, value: -30, to: today)!
+        let result = ReportPeriod.oneMonth.comparisonDate
+        #expect(calendar.isDate(result, inSameDayAs: expectedMonth))
+        if !calendar.isDate(expectedMonth, inSameDayAs: thirtyDays) {
+            #expect(!calendar.isDate(result, inSameDayAs: thirtyDays))
+        }
     }
 
     @Test("yearToDate returns January 1st of current year")
     func reportPeriodYearToDate() {
+        let calendar = Calendar.current
         let result = ReportPeriod.yearToDate.comparisonDate
-        let components = Calendar.current.dateComponents([.month, .day], from: result)
+        let components = calendar.dateComponents([.year, .month, .day], from: result)
         #expect(components.month == 1)
         #expect(components.day == 1)
+        #expect(components.year == calendar.component(.year, from: Date()))
+        #expect(result == calendar.startOfDay(for: result))
     }
 
     // MARK: - RefreshResult

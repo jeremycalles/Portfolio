@@ -51,6 +51,7 @@ private actor DatabaseActor {
     private let quadrants = Table("quadrants")
     private let bankAccounts = Table("bank_accounts")
     private let holdings = Table("holdings")
+    private let holdingTransactions = Table("holding_transactions")
     
     private let isin = SQLite.Expression<String>("isin")
     private let ticker = SQLite.Expression<String?>("ticker")
@@ -79,6 +80,13 @@ private actor DatabaseActor {
     private let purchaseDate = SQLite.Expression<String?>("purchase_date")
     private let purchasePrice = SQLite.Expression<Double?>("purchase_price")
     private let lastUpdated = SQLite.Expression<String?>("last_updated")
+    private let txId = SQLite.Expression<Int>("id")
+    private let txAccountId = SQLite.Expression<Int>("account_id")
+    private let txIsin = SQLite.Expression<String>("isin")
+    private let txDate = SQLite.Expression<String>("date")
+    private let txQuantityDelta = SQLite.Expression<Double>("quantity_delta")
+    private let txUnitPrice = SQLite.Expression<Double?>("unit_price")
+    private let txCreatedAt = SQLite.Expression<String?>("created_at")
     
     private func instrumentFromRow(_ row: Row) -> Instrument {
         Instrument(isin: row[isin], ticker: row[ticker], name: row[name], currency: row[currency], quadrantId: row[quadrantId])
@@ -97,6 +105,9 @@ private actor DatabaseActor {
     }
     private func holdingFromRow(_ row: Row) -> Holding {
         Holding(id: row[holdingId], accountId: row[holdingAccountId], isin: row[holdingIsin], quantity: row[quantity], purchaseDate: row[purchaseDate], purchasePrice: row[purchasePrice], lastUpdated: row[lastUpdated])
+    }
+    private func holdingTransactionFromRow(_ row: Row) -> HoldingTransaction {
+        HoldingTransaction(id: row[txId], accountId: row[txAccountId], isin: row[txIsin], date: row[txDate], quantityDelta: row[txQuantityDelta], unitPrice: row[txUnitPrice], createdAt: row[txCreatedAt])
     }
     
     private func fetchAll<T>(query: QueryType, mapper: (Row) -> T) throws -> [T] {
@@ -153,6 +164,16 @@ private actor DatabaseActor {
         try db.run(exchangeRates.createIndex(fromCurrency, toCurrency, rateDate, ifNotExists: true))
         try db.run(holdings.createIndex(holdingIsin, ifNotExists: true))
         try db.run(holdings.createIndex(holdingAccountId, ifNotExists: true))
+        try db.run(holdingTransactions.create(ifNotExists: true) { t in
+            t.column(txId, primaryKey: .autoincrement)
+            t.column(txAccountId)
+            t.column(txIsin)
+            t.column(txDate)
+            t.column(txQuantityDelta)
+            t.column(txUnitPrice)
+            t.column(txCreatedAt)
+        })
+        try db.run(holdingTransactions.createIndex(txAccountId, txIsin, txDate, ifNotExists: true))
         try migrateNaturalKeys(db)
     }
     
@@ -216,6 +237,7 @@ private actor DatabaseActor {
         try db.run(instruments.filter(isin == instrumentIsin).delete())
         try db.run(prices.filter(priceIsin == instrumentIsin).delete())
         try db.run(holdings.filter(holdingIsin == instrumentIsin).delete())
+        try db.run(holdingTransactions.filter(txIsin == instrumentIsin).delete())
     }
     
     func assignQuadrant(instrumentIsin: String, quadrantId newQuadrantId: Int?) throws {
@@ -277,6 +299,14 @@ private actor DatabaseActor {
         try ensureConnected()
         guard let db = connection else { return nil }
         let query = prices.filter(priceIsin == instrumentIsin && date < targetDate).order(date.desc).limit(1)
+        if let row = try db.pluck(query) { return priceFromRow(row) }
+        return nil
+    }
+
+    func getEarliestPrice(forIsin instrumentIsin: String) throws -> Price? {
+        try ensureConnected()
+        guard let db = connection else { return nil }
+        let query = prices.filter(priceIsin == instrumentIsin).order(date.asc).limit(1)
         if let row = try db.pluck(query) { return priceFromRow(row) }
         return nil
     }
@@ -382,6 +412,62 @@ private actor DatabaseActor {
         try ensureConnected()
         guard let db = connection else { return 0 }
         return try db.scalar(holdings.filter(holdingIsin == instrumentIsin).select(quantity.sum)) ?? 0
+    }
+
+    func addHoldingTransaction(_ transaction: HoldingTransaction, now: String) throws {
+        try ensureConnected()
+        guard let db = connection else { return }
+        try db.run(holdingTransactions.insert(
+            txAccountId <- transaction.accountId,
+            txIsin <- transaction.isin,
+            txDate <- transaction.date,
+            txQuantityDelta <- transaction.quantityDelta,
+            txUnitPrice <- transaction.unitPrice,
+            txCreatedAt <- transaction.createdAt ?? now
+        ))
+    }
+
+    func getAllHoldingTransactions() throws -> [HoldingTransaction] {
+        try ensureConnected()
+        return try fetchAll(query: holdingTransactions.order(txDate.asc, txId.asc), mapper: holdingTransactionFromRow)
+    }
+
+    func getHoldingTransactions(forIsin instrumentIsin: String) throws -> [HoldingTransaction] {
+        try ensureConnected()
+        return try fetchAll(
+            query: holdingTransactions.filter(txIsin == instrumentIsin).order(txDate.asc, txId.asc),
+            mapper: holdingTransactionFromRow
+        )
+    }
+
+    func getHoldingTransactions(accountId accountIdValue: Int, isin instrumentIsin: String) throws -> [HoldingTransaction] {
+        try ensureConnected()
+        return try fetchAll(
+            query: holdingTransactions.filter(txAccountId == accountIdValue && txIsin == instrumentIsin).order(txDate.asc, txId.asc),
+            mapper: holdingTransactionFromRow
+        )
+    }
+
+    /// Opening buy from `purchaseDate` + `quantity` when that holding has no lots yet.
+    func seedHoldingTransactionsFromHoldings(now: String) throws {
+        try ensureConnected()
+        let existing = try getAllHoldings()
+        for holding in existing {
+            let lots = try getHoldingTransactions(accountId: holding.accountId, isin: holding.isin)
+            guard lots.isEmpty, holding.quantity > 0, let date = holding.purchaseDate else { continue }
+            try addHoldingTransaction(
+                HoldingTransaction(
+                    id: nil,
+                    accountId: holding.accountId,
+                    isin: holding.isin,
+                    date: date,
+                    quantityDelta: holding.quantity,
+                    unitPrice: holding.purchasePrice,
+                    createdAt: now
+                ),
+                now: now
+            )
+        }
     }
 }
 
@@ -599,6 +685,10 @@ class DatabaseService: ObservableObject {
     func getPriceBefore(forIsin instrumentIsin: String, date targetDate: String) async -> Price? {
         do { return try await dbActor.getPriceBefore(forIsin: instrumentIsin, date: targetDate) } catch { logActorError(error, "getPriceBefore"); return nil }
     }
+
+    func getEarliestPrice(forIsin instrumentIsin: String) async -> Price? {
+        do { return try await dbActor.getEarliestPrice(forIsin: instrumentIsin) } catch { logActorError(error, "getEarliestPrice"); return nil }
+    }
     
     // MARK: - Exchange Rates
     func addExchangeRate(_ exchangeRate: ExchangeRate) async {
@@ -665,6 +755,37 @@ class DatabaseService: ObservableObject {
     func getTotalQuantity(forIsin instrumentIsin: String) async -> Double {
         do { return try await dbActor.getTotalQuantity(forIsin: instrumentIsin) } catch { logActorError(error, "getTotalQuantity"); return 0 }
     }
+
+    func addHoldingTransaction(accountId: Int, isin: String, date: String, quantityDelta: Double, unitPrice: Double?) async {
+        let now = AppDateFormatter.iso8601.string(from: Date())
+        let tx = HoldingTransaction(
+            id: nil,
+            accountId: accountId,
+            isin: isin,
+            date: date,
+            quantityDelta: quantityDelta,
+            unitPrice: unitPrice,
+            createdAt: now
+        )
+        do { try await dbActor.addHoldingTransaction(tx, now: now) } catch { logActorError(error, "addHoldingTransaction") }
+    }
+
+    func getAllHoldingTransactions() async -> [HoldingTransaction] {
+        do { return try await dbActor.getAllHoldingTransactions() } catch { logActorError(error, "getAllHoldingTransactions"); return [] }
+    }
+
+    func getHoldingTransactions(forIsin instrumentIsin: String) async -> [HoldingTransaction] {
+        do { return try await dbActor.getHoldingTransactions(forIsin: instrumentIsin) } catch { logActorError(error, "getHoldingTransactions"); return [] }
+    }
+
+    func getHoldingTransactions(accountId: Int, isin: String) async -> [HoldingTransaction] {
+        do { return try await dbActor.getHoldingTransactions(accountId: accountId, isin: isin) } catch { logActorError(error, "getHoldingTransactions"); return [] }
+    }
+
+    func seedHoldingTransactionsFromHoldings() async {
+        let now = AppDateFormatter.iso8601.string(from: Date())
+        do { try await dbActor.seedHoldingTransactionsFromHoldings(now: now) } catch { logActorError(error, "seedHoldingTransactionsFromHoldings") }
+    }
     
     // MARK: - Database Path
     func getDatabasePath() -> String {
@@ -702,6 +823,7 @@ class DatabaseService: ObservableObject {
     func getPriceHistory(forIsin instrumentIsin: String) async -> [Price] { [] }
     func getPriceOnOrBefore(forIsin instrumentIsin: String, date targetDate: String) async -> Price? { nil }
     func getPriceBefore(forIsin instrumentIsin: String, date targetDate: String) async -> Price? { nil }
+    func getEarliestPrice(forIsin instrumentIsin: String) async -> Price? { nil }
     
     func addExchangeRate(_ exchangeRate: ExchangeRate) async {}
     func getLatestRate(from: String, to: String) async -> ExchangeRate? { nil }
@@ -721,6 +843,11 @@ class DatabaseService: ObservableObject {
     func updateHolding(accountIdValue: Int, instrumentIsin: String, quantity newQuantity: Double, purchaseDate newPurchaseDate: String?, purchasePrice newPurchasePrice: Double?) async {}
     func deleteHolding(accountIdValue: Int, instrumentIsin: String) async {}
     func getTotalQuantity(forIsin instrumentIsin: String) async -> Double { 0 }
+    func addHoldingTransaction(accountId: Int, isin: String, date: String, quantityDelta: Double, unitPrice: Double?) async {}
+    func getAllHoldingTransactions() async -> [HoldingTransaction] { [] }
+    func getHoldingTransactions(forIsin instrumentIsin: String) async -> [HoldingTransaction] { [] }
+    func getHoldingTransactions(accountId: Int, isin: String) async -> [HoldingTransaction] { [] }
+    func seedHoldingTransactionsFromHoldings() async {}
     
     func getDatabasePath() -> String {
         #if os(iOS)

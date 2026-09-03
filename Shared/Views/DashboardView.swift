@@ -131,18 +131,18 @@ struct DashboardView: View {
                         let goldHistory = viewModel.cachedGoldOzHistory
                         
                         // Compute change from history (same as Trend chart)
-                        let eurChange: Double? = {
-                            guard let first = history.first?.value, let last = history.last?.value, first > 0 else { return nil }
-                            return ((last - first) / first) * 100
+                        let eurChange: Double? = viewModel.cachedPeriodTWR ?? {
+                            guard let first = history.first?.value, let last = history.last?.value else { return nil }
+                            return PortfolioHistoryBuilder.percentChange(from: first, to: last)
                         }()
                         let goldChange: Double? = {
-                            guard let first = goldHistory.first?.value, let last = goldHistory.last?.value, first > 0 else { return nil }
-                            return ((last - first) / first) * 100
+                            guard let first = goldHistory.first?.value, let last = goldHistory.last?.value else { return nil }
+                            return PortfolioHistoryBuilder.percentChange(from: first, to: last)
                         }()
                         let msciHistory = viewModel.cachedMSCIWorldHistory
                         let msciChange: Double? = {
-                            guard let first = msciHistory.first?.value, let last = msciHistory.last?.value, first > 0 else { return nil }
-                            return ((last - first) / first) * 100
+                            guard let first = msciHistory.first?.value, let last = msciHistory.last?.value else { return nil }
+                            return PortfolioHistoryBuilder.percentChange(from: first, to: last)
                         }()
                         
                         if totals.current == 0 {
@@ -222,7 +222,8 @@ struct DashboardView: View {
                                     history: history,
                                     sp500History: sp500History.isEmpty ? nil : sp500History,
                                     goldHistory: goldHistory.isEmpty ? nil : goldHistory,
-                                    msciWorldHistory: msciWorldHistory.isEmpty ? nil : msciWorldHistory
+                                    msciWorldHistory: msciWorldHistory.isEmpty ? nil : msciWorldHistory,
+                                    performancePercent: viewModel.cachedPeriodTWR
                                 )
                             }
                             .frame(maxWidth: .infinity, maxHeight: .infinity)

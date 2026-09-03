@@ -163,7 +163,7 @@
 "holdings.quantity" = "Quantité";
 "holdings.quantityUnits" = "%@ unités";
 "holdings.purchaseDetails" = "Détails d'achat";
-"holdings.purchaseDetailsHint" = "Optionnel : Suivez votre prix de revient pour le calcul de performance";
+"holdings.purchaseDetailsHint" = "Utilisé pour les graphiques : date à laquelle cette quantité est entrée dans le portefeuille";
 "holdings.instrument" = "Instrument";
 "holdings.value" = "Valeur";
 "holdings.change" = "Variation";

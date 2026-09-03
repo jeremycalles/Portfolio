@@ -11,9 +11,8 @@ struct EnhancedTrendCard: View {
     
     private var changePercent: Double? {
         guard let first = history.first?.value,
-              let last = history.last?.value,
-              first > 0 else { return nil }
-        return ((last - first) / first) * 100
+              let last = history.last?.value else { return nil }
+        return PortfolioHistoryBuilder.percentChange(from: first, to: last)
     }
     
     private var chartColor: Color {
@@ -107,7 +106,7 @@ struct EnhancedTrendCard: View {
                     )
                     .foregroundStyle(chartColor)
                     .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-                    .interpolationMethod(.catmullRom)
+                    .interpolationMethod(.linear)
                     
                     AreaMark(
                         x: .value("Date", item.date),
@@ -120,7 +119,7 @@ struct EnhancedTrendCard: View {
                             endPoint: .bottom
                         )
                     )
-                    .interpolationMethod(.catmullRom)
+                    .interpolationMethod(.linear)
                 }
                 .chartYAxis(.hidden)
                 .chartXAxis(.hidden)

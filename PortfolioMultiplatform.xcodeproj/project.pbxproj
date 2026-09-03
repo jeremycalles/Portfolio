@@ -42,6 +42,7 @@
 		I027 /* BiometricAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = S027 /* BiometricAuth.swift */; };
 		I0BA /* Bundle+AppVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BA /* Bundle+AppVersion.swift */; };
 		I0BB /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BB /* AppLogger.swift */; };
+		I0BC /* PortfolioHistoryBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BC /* PortfolioHistoryBuilder.swift */; };
 		IV02 /* EnhancedTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = V002 /* EnhancedTrendCard.swift */; };
 		IV05 /* EnhancedAllocationRingChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = V005 /* EnhancedAllocationRingChart.swift */; };
 		IV06 /* EnhancedPortfolioHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = V006 /* EnhancedPortfolioHeroCard.swift */; };
@@ -93,6 +94,7 @@
 		M02C /* MacOSWalkthroughView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S02C /* MacOSWalkthroughView.swift */; };
 		M0BA /* Bundle+AppVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BA /* Bundle+AppVersion.swift */; };
 		M0BB /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BB /* AppLogger.swift */; };
+		M0BC /* PortfolioHistoryBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BC /* PortfolioHistoryBuilder.swift */; };
 		MV02 /* EnhancedTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = V002 /* EnhancedTrendCard.swift */; };
 		MV05 /* EnhancedAllocationRingChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = V005 /* EnhancedAllocationRingChart.swift */; };
 		MV06 /* EnhancedPortfolioHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = V006 /* EnhancedPortfolioHeroCard.swift */; };
@@ -115,6 +117,7 @@
 		TS01 /* ModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF01 /* ModelsTests.swift */; };
 		TS02 /* FormattingHelpersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF02 /* FormattingHelpersTests.swift */; };
 		TS03 /* DateFormattersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF03 /* DateFormattersTests.swift */; };
+		TS04 /* PortfolioHistoryBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF04 /* PortfolioHistoryBuilderTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -201,9 +204,11 @@
 		S02C /* MacOSWalkthroughView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MacOSWalkthroughView.swift; path = macOS/Views/MacOSWalkthroughView.swift; sourceTree = SOURCE_ROOT; };
 		S0BA /* Bundle+AppVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Bundle+AppVersion.swift"; path = "Shared/Helpers/Bundle+AppVersion.swift"; sourceTree = SOURCE_ROOT; };
 		S0BB /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppLogger.swift; path = Shared/Helpers/AppLogger.swift; sourceTree = SOURCE_ROOT; };
+		S0BC /* PortfolioHistoryBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PortfolioHistoryBuilder.swift; path = Shared/Helpers/PortfolioHistoryBuilder.swift; sourceTree = SOURCE_ROOT; };
 		TF01 /* ModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ModelsTests.swift; path = Tests/PortfolioCoreTests/ModelsTests.swift; sourceTree = SOURCE_ROOT; };
 		TF02 /* FormattingHelpersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FormattingHelpersTests.swift; path = Tests/PortfolioCoreTests/FormattingHelpersTests.swift; sourceTree = SOURCE_ROOT; };
 		TF03 /* DateFormattersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DateFormattersTests.swift; path = Tests/PortfolioCoreTests/DateFormattersTests.swift; sourceTree = SOURCE_ROOT; };
+		TF04 /* PortfolioHistoryBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PortfolioHistoryBuilderTests.swift; path = Tests/PortfolioCoreTests/PortfolioHistoryBuilderTests.swift; sourceTree = SOURCE_ROOT; };
 		V002 /* EnhancedTrendCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EnhancedTrendCard.swift; path = Shared/Views/Charts/EnhancedTrendCard.swift; sourceTree = SOURCE_ROOT; };
 		V005 /* EnhancedAllocationRingChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EnhancedAllocationRingChart.swift; path = Shared/Views/Charts/EnhancedAllocationRingChart.swift; sourceTree = SOURCE_ROOT; };
 		V006 /* EnhancedPortfolioHeroCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EnhancedPortfolioHeroCard.swift; path = Shared/Views/Dashboard/EnhancedPortfolioHeroCard.swift; sourceTree = SOURCE_ROOT; };
@@ -305,6 +310,7 @@
 				S014 /* FormattingHelpers.swift */,
 				S0BA /* Bundle+AppVersion.swift */,
 				S0BB /* AppLogger.swift */,
+				S0BC /* PortfolioHistoryBuilder.swift */,
 				S015 /* ChangeLabel.swift */,
 				V017 /* RefreshResultBanner.swift */,
 				F032 /* BackfillLogsSheet.swift */,
@@ -379,6 +385,7 @@
 				TF01 /* ModelsTests.swift */,
 				TF02 /* FormattingHelpersTests.swift */,
 				TF03 /* DateFormattersTests.swift */,
+				TF04 /* PortfolioHistoryBuilderTests.swift */,
 			);
 			name = Tests;
 			path = Tests/PortfolioCoreTests;
@@ -621,6 +628,7 @@
 				M014 /* FormattingHelpers.swift in Sources */,
 				M0BA /* Bundle+AppVersion.swift in Sources */,
 				M0BB /* AppLogger.swift in Sources */,
+				M0BC /* PortfolioHistoryBuilder.swift in Sources */,
 				M015 /* ChangeLabel.swift in Sources */,
 				M016 /* AppViewModel+History.swift in Sources */,
 				M017 /* AppViewModel+PriceManagement.swift in Sources */,
@@ -672,6 +680,7 @@
 				I016 /* FormattingHelpers.swift in Sources */,
 				I0BA /* Bundle+AppVersion.swift in Sources */,
 				I0BB /* AppLogger.swift in Sources */,
+				I0BC /* PortfolioHistoryBuilder.swift in Sources */,
 				I017 /* ChangeLabel.swift in Sources */,
 				I018 /* AppViewModel+History.swift in Sources */,
 				I019 /* AppViewModel+PriceManagement.swift in Sources */,
@@ -716,6 +725,7 @@
 				TS01 /* ModelsTests.swift in Sources */,
 				TS02 /* FormattingHelpersTests.swift in Sources */,
 				TS03 /* DateFormattersTests.swift in Sources */,
+				TS04 /* PortfolioHistoryBuilderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

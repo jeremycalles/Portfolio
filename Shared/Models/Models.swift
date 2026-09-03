@@ -79,6 +79,17 @@ struct Holding: Identifiable, Codable {
     var lastUpdated: String?
 }
 
+// MARK: - Holding Transaction (buy +, sell −)
+struct HoldingTransaction: Identifiable, Codable {
+    var id: Int?
+    let accountId: Int
+    let isin: String
+    let date: String
+    let quantityDelta: Double
+    let unitPrice: Double?
+    let createdAt: String?
+}
+
 // MARK: - Holding with Details (for display)
 struct HoldingDetail: Identifiable {
     var id: String { "\(accountId)-\(isin)" }
@@ -140,8 +151,8 @@ enum ReportPeriod: String, CaseIterable, Identifiable {
     }
     
     var comparisonDate: Date {
-        let today = Date()
         let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
         
         switch self {
         case .oneDay:
@@ -149,7 +160,7 @@ enum ReportPeriod: String, CaseIterable, Identifiable {
         case .oneWeek:
             return calendar.date(byAdding: .day, value: -7, to: today) ?? today
         case .oneMonth:
-            return calendar.date(byAdding: .day, value: -30, to: today) ?? today
+            return calendar.date(byAdding: .month, value: -1, to: today) ?? today
         case .oneYear:
             return calendar.date(byAdding: .year, value: -1, to: today) ?? today
         case .yearToDate:

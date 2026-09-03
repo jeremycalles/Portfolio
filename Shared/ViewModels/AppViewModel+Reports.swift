@@ -1,6 +1,19 @@
 import Foundation
 
 extension AppViewModel {
+    /// Price used as the period baseline. Falls back to the earliest known price so a
+    /// holding without history before the cutoff is counted as unchanged, not omitted
+    /// from previous totals (which inflated period %).
+    private func comparisonPrice(forIsin isin: String, latestPrice: Price?, comparisonDateStr: String) async -> Price? {
+        if selectedPeriod == .oneDay, let currentDate = latestPrice?.date {
+            return await db.getPriceBefore(forIsin: isin, date: currentDate)
+        }
+        if let price = await db.getPriceOnOrBefore(forIsin: isin, date: comparisonDateStr) {
+            return price
+        }
+        return await db.getEarliestPrice(forIsin: isin)
+    }
+
     // MARK: - Reports
     func getHoldingDetails(forAccount accountId: Int) async -> [HoldingDetail] {
         clearRateCache()
@@ -14,12 +27,13 @@ extension AppViewModel {
             guard let instrument = instruments.first(where: { $0.isin == holding.isin }) else { continue }
             
             let latestPrice = await db.getLatestPrice(forIsin: holding.isin)
-            var previousPrice: Price?
-            if selectedPeriod == .oneDay, let currentDate = latestPrice?.date {
-                previousPrice = await db.getPriceBefore(forIsin: holding.isin, date: currentDate)
-            } else {
-                previousPrice = await db.getPriceOnOrBefore(forIsin: holding.isin, date: comparisonDateStr)
-            }
+            let previousPrice = await comparisonPrice(forIsin: holding.isin, latestPrice: latestPrice, comparisonDateStr: comparisonDateStr)
+            let txs = await db.getHoldingTransactions(accountId: holding.accountId, isin: holding.isin)
+            let previousQty = PortfolioHistoryBuilder.quantityOnDate(
+                transactions: txs.map { ($0.date, $0.quantityDelta) },
+                date: comparisonDateStr,
+                fallbackQuantity: holding.quantity
+            )
             
             let quantity = effectiveQuantity(forIsin: holding.isin, originalQuantity: holding.quantity, currentPrice: latestPrice?.value)
             let currency = instrument.currency
@@ -29,8 +43,8 @@ extension AppViewModel {
                 currentValueEURConverted = await convertToEUR(value: value, fromCurrency: currency, onDate: latestPrice?.date ?? todayStr)
             }
             var previousValueEURConverted: Double? = nil
-            if let price = previousPrice?.value {
-                let value = quantity * price
+            if previousQty > 0, let price = previousPrice?.value {
+                let value = previousQty * price
                 previousValueEURConverted = await convertToEUR(value: value, fromCurrency: currency, onDate: previousPrice?.date ?? comparisonDateStr)
             }
             
@@ -56,6 +70,11 @@ extension AppViewModel {
         var items: [QuadrantReportItem] = []
         let comparisonDate = selectedPeriod.comparisonDate
         let comparisonDateStr = AppDateFormatter.yearMonthDay.string(from: comparisonDate)
+        let allTx = await db.getAllHoldingTransactions()
+        var txByIsin: [String: [(date: String, quantityDelta: Double)]] = [:]
+        for tx in allTx {
+            txByIsin[tx.isin, default: []].append((tx.date, tx.quantityDelta))
+        }
         
         for quadrant in quadrants {
             let quadrantInstruments = instruments.filter { $0.quadrantId == quadrant.id }
@@ -65,12 +84,16 @@ extension AppViewModel {
                 let latestPrice = await db.getLatestPrice(forIsin: instrument.isin)
                 let totalQuantity = await effectiveTotalQuantity(forIsin: instrument.isin, currentPrice: latestPrice?.value)
                 if totalQuantity > 0 {
-                    let previousPrice: Price? = selectedPeriod == .oneDay && latestPrice != nil
-                        ? await db.getPriceBefore(forIsin: instrument.isin, date: latestPrice!.date)
-                        : await db.getPriceOnOrBefore(forIsin: instrument.isin, date: comparisonDateStr)
+                    let previousPrice = await comparisonPrice(forIsin: instrument.isin, latestPrice: latestPrice, comparisonDateStr: comparisonDateStr)
+                    let realTotal = await db.getTotalQuantity(forIsin: instrument.isin)
+                    let previousQty = PortfolioHistoryBuilder.quantityOnDate(
+                        transactions: txByIsin[instrument.isin] ?? [],
+                        date: comparisonDateStr,
+                        fallbackQuantity: realTotal
+                    )
                     let currency = instrument.currency
                     let currentValueEUR: Double? = latestPrice != nil ? await convertToEUR(value: totalQuantity * latestPrice!.value, fromCurrency: currency, onDate: latestPrice!.date) : nil
-                    let previousValueEUR: Double? = previousPrice != nil ? await convertToEUR(value: totalQuantity * previousPrice!.value, fromCurrency: currency, onDate: previousPrice!.date) : nil
+                    let previousValueEUR: Double? = (previousQty > 0 && previousPrice != nil) ? await convertToEUR(value: previousQty * previousPrice!.value, fromCurrency: currency, onDate: previousPrice!.date) : nil
                     holdingDetails.append(HoldingDetail(
                         accountId: 0,
                         isin: instrument.isin,
@@ -99,12 +122,16 @@ extension AppViewModel {
             let latestPrice = await db.getLatestPrice(forIsin: instrument.isin)
             let totalQuantity = await effectiveTotalQuantity(forIsin: instrument.isin, currentPrice: latestPrice?.value)
             if totalQuantity > 0 {
-                let previousPrice: Price? = selectedPeriod == .oneDay && latestPrice != nil
-                    ? await db.getPriceBefore(forIsin: instrument.isin, date: latestPrice!.date)
-                    : await db.getPriceOnOrBefore(forIsin: instrument.isin, date: comparisonDateStr)
+                let previousPrice = await comparisonPrice(forIsin: instrument.isin, latestPrice: latestPrice, comparisonDateStr: comparisonDateStr)
+                let realTotal = await db.getTotalQuantity(forIsin: instrument.isin)
+                let previousQty = PortfolioHistoryBuilder.quantityOnDate(
+                    transactions: txByIsin[instrument.isin] ?? [],
+                    date: comparisonDateStr,
+                    fallbackQuantity: realTotal
+                )
                 let currency = instrument.currency
                 let currentValueEUR: Double? = latestPrice != nil ? await convertToEUR(value: totalQuantity * latestPrice!.value, fromCurrency: currency, onDate: latestPrice!.date) : nil
-                let previousValueEUR: Double? = previousPrice != nil ? await convertToEUR(value: totalQuantity * previousPrice!.value, fromCurrency: currency, onDate: previousPrice!.date) : nil
+                let previousValueEUR: Double? = (previousQty > 0 && previousPrice != nil) ? await convertToEUR(value: previousQty * previousPrice!.value, fromCurrency: currency, onDate: previousPrice!.date) : nil
                 unassignedDetails.append(HoldingDetail(
                     accountId: 0,
                     isin: instrument.isin,

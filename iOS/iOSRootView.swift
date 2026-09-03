@@ -124,11 +124,11 @@ struct iOSDashboardView: View {
     @State private var viewMode: DashboardViewMode = .quadrants
     
     private var portfolioChange: (amount: Double, percent: Double)? {
-        let totals = viewModel.cachedGrandTotalsEUR
-        guard totals.previous > 0 else { return nil }
-        let amount = totals.current - totals.previous
-        let percent = (amount / totals.previous) * 100
-        return (amount, percent)
+        let history = viewModel.cachedPortfolioHistory
+        guard let first = history.first?.value, let last = history.last?.value else { return nil }
+        let percent = viewModel.cachedPeriodTWR ?? PortfolioHistoryBuilder.percentChange(from: first, to: last)
+        guard let percent else { return nil }
+        return (last - first, percent)
     }
     
     private var isPositiveChange: Bool {
@@ -201,7 +201,8 @@ struct iOSDashboardView: View {
                                 history: history,
                                 sp500History: sp500History.isEmpty ? nil : sp500History,
                                 goldHistory: goldHistory.isEmpty ? nil : goldHistory,
-                                msciWorldHistory: msciWorldHistory.isEmpty ? nil : msciWorldHistory
+                                msciWorldHistory: msciWorldHistory.isEmpty ? nil : msciWorldHistory,
+                                performancePercent: viewModel.cachedPeriodTWR
                             )
                             .frame(height: 250)
                             .padding(.horizontal)
@@ -436,6 +437,7 @@ private struct iOSPortfolioPerformancePanel: View {
                         sp500History: sp500History.isEmpty ? nil : sp500History,
                         goldHistory: goldHistory.isEmpty ? nil : goldHistory,
                         msciWorldHistory: msciWorldHistory.isEmpty ? nil : msciWorldHistory,
+                        performancePercent: viewModel.cachedPeriodTWR,
                         interactive: true,
                         privacyMode: privacyMode
                     )

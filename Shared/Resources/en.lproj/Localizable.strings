@@ -163,7 +163,7 @@
 "holdings.quantity" = "Quantity";
 "holdings.quantityUnits" = "%@ units";
 "holdings.purchaseDetails" = "Purchase Details";
-"holdings.purchaseDetailsHint" = "Optional: Track your cost basis for performance calculation";
+"holdings.purchaseDetailsHint" = "Used for charts: the date this quantity entered the portfolio";
 "holdings.instrument" = "Instrument";
 "holdings.value" = "Value";
 "holdings.change" = "Change";

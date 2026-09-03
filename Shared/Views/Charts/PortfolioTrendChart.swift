@@ -14,6 +14,7 @@ struct PortfolioTrendChart: View {
     var sp500History: [(date: Date, value: Double)]? = nil  // Optional S&P 500 comparison (same amount invested)
     var goldHistory: [(date: Date, value: Double)]? = nil   // Optional Gold comparison
     var msciWorldHistory: [(date: Date, value: Double)]? = nil // Optional MSCI World comparison
+    var performancePercent: Double? = nil
     var compact: Bool = false
     var unit: String = "EUR"  // "EUR" or "oz" for gold ounces
     var interactive: Bool = false
@@ -41,10 +42,11 @@ struct PortfolioTrendChart: View {
     private var maxValue: Double { valueRange.max }
 
     private var valueChange: Double? {
-        guard let first = history.first?.value, let last = history.last?.value, first > 0 else {
+        if let performancePercent { return performancePercent }
+        guard let first = history.first?.value, let last = history.last?.value else {
             return nil
         }
-        return ((last - first) / first) * 100
+        return PortfolioHistoryBuilder.percentChange(from: first, to: last)
     }
 
     private var chartColor: Color {
@@ -166,7 +168,7 @@ struct PortfolioTrendChart: View {
                         y: .value("Value", item.value)
                     )
                     .foregroundStyle(by: .value("Series", PortfolioChartSeries.portfolio))
-                    .interpolationMethod(.catmullRom)
+                    .interpolationMethod(.linear)
                     AreaMark(
                         x: .value("Date", item.date),
                         y: .value("Value", item.value)
@@ -178,7 +180,7 @@ struct PortfolioTrendChart: View {
                             endPoint: .bottom
                         )
                     )
-                    .interpolationMethod(.catmullRom)
+                    .interpolationMethod(.linear)
                     .lineStyle(StrokeStyle(lineWidth: 0))
                 }
                 if let sp = sp500History, !sp.isEmpty {
@@ -188,7 +190,7 @@ struct PortfolioTrendChart: View {
                             y: .value("Value", item.value)
                         )
                         .foregroundStyle(by: .value("Series", PortfolioChartSeries.sp500))
-                        .interpolationMethod(.catmullRom)
+                        .interpolationMethod(.linear)
                     }
                 }
                 if let gd = goldHistory, !gd.isEmpty {
@@ -198,7 +200,7 @@ struct PortfolioTrendChart: View {
                             y: .value("Value", item.value)
                         )
                         .foregroundStyle(by: .value("Series", PortfolioChartSeries.gold))
-                        .interpolationMethod(.catmullRom)
+                        .interpolationMethod(.linear)
                     }
                 }
                 if let mw = msciWorldHistory, !mw.isEmpty {
@@ -208,7 +210,7 @@ struct PortfolioTrendChart: View {
                             y: .value("Value", item.value)
                         )
                         .foregroundStyle(by: .value("Series", PortfolioChartSeries.msciWorld))
-                        .interpolationMethod(.catmullRom)
+                        .interpolationMethod(.linear)
                     }
                 }
                 if interactive, let point = scrubbedPoint {

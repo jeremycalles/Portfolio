@@ -33,6 +33,7 @@ class AppViewModel: ObservableObject {
     @Published private(set) var cachedGoldOzHistory: [(date: Date, value: Double)] = []
     @Published private(set) var lastInstrumentUpdateDate: Date? = nil
     @Published private(set) var cachedHoldingDetailsByAccount: [Int: [HoldingDetail]] = [:]
+    @Published private(set) var cachedPeriodTWR: Double? = nil
     
     // Backfill logs for single instrument
     @Published var backfillLogs: [String] = []
@@ -113,6 +114,7 @@ class AppViewModel: ObservableObject {
         quadrants = await db.getAllQuadrants()
         bankAccounts = await db.getAllBankAccounts()
         holdings = await db.getAllHoldings()
+        await db.seedHoldingTransactionsFromHoldings()
         rebuildCurrencyIndex()
         await recomputeDashboardCache()
     }
@@ -134,11 +136,24 @@ class AppViewModel: ObservableObject {
         cachedSP500History = await getSP500ComparisonHistory()
         cachedGoldHistory = await getGoldComparisonHistory()
         cachedMSCIWorldHistory = await getMSCIWorldComparisonHistory()
-        cachedGrandTotalsEUR = await getGrandTotalsEUR()
         cachedQuadrantReport = await getQuadrantReport()
-        cachedGoldTotals = await getGrandTotalsInGold()
         cachedGoldOzHistory = await getGoldOzHistory()
         lastInstrumentUpdateDate = await getLastInstrumentUpdateDate()
+        cachedPeriodTWR = await periodTWR(from: cachedPortfolioHistory)
+
+        // Period % must use the same first/last points as the trend chart.
+        let totals = await getGrandTotalsEUR()
+        if let first = cachedPortfolioHistory.first?.value, let last = cachedPortfolioHistory.last?.value {
+            cachedGrandTotalsEUR = (current: last, previous: first)
+        } else {
+            cachedGrandTotalsEUR = totals
+        }
+        if let first = cachedGoldOzHistory.first?.value, let last = cachedGoldOzHistory.last?.value {
+            cachedGoldTotals = (current: last, previous: first)
+        } else {
+            cachedGoldTotals = await getGrandTotalsInGold()
+        }
+
         var detailsByAccount: [Int: [HoldingDetail]] = [:]
         for account in bankAccounts {
             detailsByAccount[account.id] = await getHoldingDetails(forAccount: account.id)
@@ -295,6 +310,10 @@ class AppViewModel: ObservableObject {
     
     // MARK: - Holdings
     func addHolding(accountId: Int, isin: String, quantity: Double, purchaseDate: String?, purchasePrice: Double?) async {
+        if holdings.contains(where: { $0.accountId == accountId && $0.isin == isin }) {
+            await updateHolding(accountId: accountId, isin: isin, quantity: quantity, purchaseDate: purchaseDate, purchasePrice: purchasePrice)
+            return
+        }
         let holding = Holding(
             id: nil,
             accountId: accountId,
@@ -305,6 +324,14 @@ class AppViewModel: ObservableObject {
             lastUpdated: nil
         )
         await db.addOrUpdateHolding(holding)
+        let lotDate = purchaseDate ?? AppDateFormatter.todayString
+        await db.addHoldingTransaction(
+            accountId: accountId,
+            isin: isin,
+            date: lotDate,
+            quantityDelta: quantity,
+            unitPrice: purchasePrice
+        )
         await refreshHoldings()
         await recomputeDashboardCache()
         if let instrument = await db.getInstrument(byIsin: isin) {
@@ -315,12 +342,34 @@ class AppViewModel: ObservableObject {
     }
     
     func updateHolding(accountId: Int, isin: String, quantity: Double, purchaseDate: String?, purchasePrice: Double?) async {
+        let previousQty = holdings.first { $0.accountId == accountId && $0.isin == isin }?.quantity ?? 0
+        let delta = quantity - previousQty
         await db.updateHolding(accountIdValue: accountId, instrumentIsin: isin, quantity: quantity, purchaseDate: purchaseDate, purchasePrice: purchasePrice)
+        if abs(delta) > 1e-12 {
+            let lotDate = purchaseDate ?? AppDateFormatter.todayString
+            await db.addHoldingTransaction(
+                accountId: accountId,
+                isin: isin,
+                date: lotDate,
+                quantityDelta: delta,
+                unitPrice: purchasePrice
+            )
+        }
         await refreshHoldings()
         await recomputeDashboardCache()
     }
     
     func deleteHolding(accountId: Int, isin: String) async {
+        let remaining = holdings.first { $0.accountId == accountId && $0.isin == isin }?.quantity ?? 0
+        if remaining > 0 {
+            await db.addHoldingTransaction(
+                accountId: accountId,
+                isin: isin,
+                date: AppDateFormatter.todayString,
+                quantityDelta: -remaining,
+                unitPrice: nil
+            )
+        }
         await db.deleteHolding(accountIdValue: accountId, instrumentIsin: isin)
         await refreshHoldings()
         await recomputeDashboardCache()
@@ -428,6 +477,7 @@ class AppViewModel: ObservableObject {
         vm.cachedGoldOzHistory = goldOzHistory
         vm.cachedGrandTotalsEUR = (current: 13_500, previous: 12_500)
         vm.cachedGoldTotals = (current: 5.04, previous: 4.80)
+        vm.cachedPeriodTWR = 8.0
         vm.lastInstrumentUpdateDate = today
         
         // Mock quadrant report
