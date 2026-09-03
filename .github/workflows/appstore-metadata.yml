@@ -1,0 +1,57 @@
+name: App Store metadata
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_version:
+        description: "Marketing version for release_notes (e.g. 1.0.6)"
+        required: true
+        default: "1.0.6"
+      upload:
+        description: "Upload to App Store Connect (false = validate only)"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+jobs:
+  metadata:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Write App Store Connect API key
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          ASC_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_KEY_CONTENT }}
+        run: |
+          if [ -z "$ASC_KEY_ID" ] || [ -z "$ASC_ISSUER_ID" ] || [ -z "$ASC_KEY_CONTENT" ]; then
+            echo "Missing GitHub secrets: APP_STORE_CONNECT_KEY_ID, APP_STORE_CONNECT_ISSUER_ID, APP_STORE_CONNECT_KEY_CONTENT"
+            exit 1
+          fi
+          KEY_PATH="$RUNNER_TEMP/AuthKey_${ASC_KEY_ID}.p8"
+          printf '%s' "$ASC_KEY_CONTENT" > "$KEY_PATH"
+          JSON_PATH="$RUNNER_TEMP/app_store_connect_api_key.json"
+          ruby -rjson -e "File.write('$JSON_PATH', JSON.pretty_generate({key_id: ENV['ASC_KEY_ID'], issuer_id: ENV['ASC_ISSUER_ID'], key_filepath: '$KEY_PATH', duration: 1200, in_house: false}))"
+          echo "APP_STORE_CONNECT_API_KEY_PATH=$JSON_PATH" >> "$GITHUB_ENV"
+
+      - name: Validate metadata
+        env:
+          APP_VERSION: ${{ inputs.app_version }}
+        run: bundle exec fastlane metadata_validate
+
+      - name: Upload metadata
+        if: inputs.upload == 'true'
+        env:
+          APP_VERSION: ${{ inputs.app_version }}
+        run: bundle exec fastlane metadata_upload

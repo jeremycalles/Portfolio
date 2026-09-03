@@ -542,39 +542,48 @@ Do not commit secrets or local signing config. The repo uses **automatic signing
 
 ## Publishing to the App Store
 
+Same split as BlindTest Easy: **Xcode Cloud** builds and uploads the binary; **fastlane** only updates listing copy.
+
 ### Prerequisites
 
-- **Apple Developer Program** membership ($99/year) — [developer.apple.com/programs](https://developer.apple.com/programs/)
-- Your Apple ID added in **Xcode → Settings → Accounts**. In the project, set your **Team** under **Signing & Capabilities** for the iOS and/or macOS target (bundle ID: **com.portfolio.app.ios**).
+- **Apple Developer Program** membership
+- App in App Store Connect with bundle ID **com.portfolio.app.ios** (iOS + macOS, universal purchase)
+- App Store Connect API key (Issuer ID, Key ID, `.p8`) with App Manager access
+- GitHub repo connected in Xcode Cloud
 
-### 1. Create the app(s) in App Store Connect
+### Xcode Cloud (binary)
 
-- **iOS:** [App Store Connect](https://appstoreconnect.apple.com) → **My Apps** → **+** → **New App** → iOS, bundle ID **com.portfolio.app.ios**, SKU (e.g. `portfolio-ios`).
-- **macOS:** Same, New App → macOS, bundle ID **com.portfolio.app.ios** (same ID as iOS for a universal purchase), SKU (e.g. `portfolio-macos`).
+In Xcode: **Product → Xcode Cloud**. Portfolio already has product **PortfolioMultiplatform** and workflow **Archive iOS & macOS** (`ecaf1938-dd31-4a93-be04-777909d6f63c`). It starts on `main` and now archives **Portfolio iOS** and **Portfolio macOS** as App Store eligible builds (same pattern as BlindTest Easy’s single archive workflow).
 
-### 2. Archive and upload
+Add these environment variables on that workflow (Xcode Cloud → Environment). Secrets except the last:
 
-1. In Xcode, select the **Portfolio iOS** (or **Portfolio macOS**) scheme and destination **Any iOS Device (arm64)** or **My Mac**.
-2. **Product → Archive**. Wait for the archive to finish.
-3. In the **Organizer**, select the new archive → **Distribute App** → **App Store Connect** → **Upload** (keep defaults: automatic signing, upload symbols).
-4. Wait a few minutes for the build to appear in App Store Connect under the app’s **TestFlight** / **App Store** tab.
+- `APP_STORE_CONNECT_KEY_ID`
+- `APP_STORE_CONNECT_ISSUER_ID`
+- `APP_STORE_CONNECT_KEY_CONTENT` (the `.p8` file contents)
+- `UPLOAD_APP_STORE_METADATA` = `1`
 
-### 3. Complete the App Store listing
+Apple’s public API cannot set Cloud secrets; that one step stays in the Xcode / App Store Connect UI.
 
-In App Store Connect, for each app:
+`ci_scripts/ci_post_clone.sh` writes a stub `Local.xcconfig` and installs fastlane. `ci_scripts/ci_pre_xcodebuild.sh` pushes metadata when the flag is `1`.
 
-- **App Information:** Category (e.g. **Finance**), subcategory if needed.
-- **Pricing and Availability:** Free or paid; countries/regions.
-- **App Privacy:** Privacy policy URL (required); state what data you collect (or that you don’t).
-- **Version Information:** Screenshots (required sizes), description, keywords, support URL, **Build** (select the uploaded build), **What’s New**.
+### fastlane (ASO / listing)
 
-### 4. Submit for review
+```bash
+./scripts/setup_fastlane.sh
+export APP_STORE_CONNECT_API_KEY_PATH="$HOME/.appstoreconnect/portfolio-api-key.json"
+bundle exec fastlane metadata_validate
+APP_VERSION=1.0.6 bundle exec fastlane metadata_upload
+```
 
-1. In the version’s **App Store** tab, complete any missing required fields.
-2. **App Review Information:** add contact and notes.
-3. **Add for Review** → accept export compliance and declarations → **Submit**.
+Copy lives in `fastlane/metadata/`. Strategy notes: [AppStore-Metadata.md](AppStore-Metadata.md). Setup: [fastlane/README.md](fastlane/README.md).
 
-**Tip:** Build number increments automatically at each build. If the build doesn’t appear under the version, wait a bit or check **TestFlight** for processing/errors.
+Screenshots in `assets/screenshots/` are still uploaded in App Store Connect (fastlane skips them).
+
+### Manual archive (fallback)
+
+**Product → Archive** → Organizer → **Distribute App** → App Store Connect. Do not add `fastlane gym` lanes unless you explicitly want local IPA builds.
+
+**Build numbers** must increase for every upload (`CURRENT_PROJECT_VERSION`). Reusing a TestFlight build number fails even if the marketing version changed.
 
 ---
 

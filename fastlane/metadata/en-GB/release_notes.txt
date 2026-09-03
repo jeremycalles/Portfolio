@@ -1,0 +1,1 @@
+Initial release. Track stocks, ETFs, funds, gold, crypto, and bank accounts in one place. Your data stays on your device with optional iCloud sync. Available on iOS and macOS.

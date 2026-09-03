@@ -1,6 +1,9 @@
 # App Store Metadata
 
-Use this copy in App Store Connect for **Promotional Text**, **Description**, and **Keywords**. App name: **Portfolio Vault**. Use for both iOS and macOS app listings (adjust wording if you use separate listings).
+> **Source of truth:** edit `fastlane/metadata/<locale>/*.txt`, then run `bundle exec fastlane metadata_upload`.
+> Setup: [fastlane/README.md](fastlane/README.md). This file keeps ASO strategy and screenshot guidance.
+
+App name: **Portfolio Vault**. One App Store Connect app (`com.portfolio.app.ios`) covers iOS and macOS (universal purchase). Apple search ranks **name + subtitle + keywords only** (160 characters per locale). The description is for conversion, not Apple ranking.
 
 ---
 
@@ -70,9 +73,9 @@ Optional swaps to test search:
 **Limit: 30 characters** • Shown under the app name in search and on the product page.
 
 ```
-Privacy-First Portfolio Tracker
+On-Device Portfolio Tracker
 ```
-**Character count: 29**
+**Character count: 27**
 
 ---
 

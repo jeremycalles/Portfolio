@@ -37,7 +37,8 @@ iOS/                     Tab UI, lock, BGTaskScheduler, walkthrough
 macOS/                   SplitView, settings window, scheduler, lock
   RefreshLoginItem/      Headless helper — Darwin notify only, no UI
 Tests/PortfolioCoreTests Swift Testing (`import Testing`). Host: iOS app.
-ci_scripts/              Xcode Cloud hooks (`ci_post_clone.sh` writes stub Local.xcconfig)
+ci_scripts/              Xcode Cloud hooks (Local.xcconfig stub + optional fastlane metadata)
+fastlane/metadata/       App Store listing copy (en-US, en-GB, fr-FR, fr-CA)
 ```
 
 There is **no** `Packages/PortfolioCore`. SPM deps: SQLite.swift, SwiftSoup. `swift-snapshot-testing` is linked but unused — do not add snapshot tests unless you actually adopt it.
@@ -106,18 +107,66 @@ Paths: iOS `Documents/PortfolioData/stocks.db`; macOS `Application Support/Portf
 
 ---
 
-## Versioning and App Store
+## CI/CD & App Store
 
-When bumping a release:
+**Default for agents:** shipping builds goes through **Xcode Cloud**. Do not add GitHub Actions workflows for IPA archive/upload. Do not add `fastlane` `build_app` / `gym` / `release` lanes unless the user explicitly asks.
 
-1. Check App Store Connect for the **next unused** `CURRENT_PROJECT_VERSION` (do not reuse a build number).
-2. Set `MARKETING_VERSION` + `CURRENT_PROJECT_VERSION` on **iOS and macOS** together.
-3. Bump **PortfolioRefreshLoginItem** to the same marketing/build as macOS (it is currently behind).
-4. Default path: **Xcode Cloud** archive → App Store Connect. `ci_scripts/ci_post_clone.sh` must keep writing `Local.xcconfig` (gitignored).
-5. Local signing: copy `Local.xcconfig.example` → `Local.xcconfig`. Do not commit secrets, `.xcconfig` overrides, or provisioning profiles.
-6. After archive, confirm the build appears in TestFlight before calling the version done.
+### Xcode Cloud (primary)
 
-Copy for listings: `AppStore-Metadata.md` (app name there still says “PortfolioMultiplatform” — store name is Portfolio Vault).
+| Step | Script / config | What it does |
+|------|-----------------|--------------|
+| After clone | `ci_scripts/ci_post_clone.sh` | Writes stub `Local.xcconfig`; installs Bundler + fastlane; writes ASC API key JSON from workflow secrets |
+| Before archive | `ci_scripts/ci_pre_xcodebuild.sh` | Optional metadata upload when `UPLOAD_APP_STORE_METADATA=1` |
+| Archive & upload | Xcode Cloud workflows (in Xcode / App Store Connect) | Archive **Portfolio iOS** and **Portfolio macOS**, **Distribute to App Store Connect** |
+
+**Workflow secrets** (Xcode Cloud → Workflow → Environment):
+
+- `APP_STORE_CONNECT_KEY_ID`, `APP_STORE_CONNECT_ISSUER_ID`, `APP_STORE_CONNECT_KEY_CONTENT` — API key for metadata upload
+- `UPLOAD_APP_STORE_METADATA` = `1` — enable only on the **iOS** archive workflow so listing copy is not pushed twice
+
+Create **one** Xcode Cloud workflow in Xcode (**Product → Xcode Cloud**) named **Archive iOS & macOS**, starting on `main`. It already exists in App Store Connect (`ecaf1938-dd31-4a93-be04-777909d6f63c`): Analyze + Archive for **Portfolio iOS** and **Portfolio macOS**, both archives `APP_STORE_ELIGIBLE` (TestFlight / App Store Connect).
+
+Do not create a second workflow for macOS unless splitting metadata secrets. Environment variables are per-workflow, not per-action; `ci_pre_xcodebuild.sh` uploads listing copy at most once per Cloud run.
+
+**Version numbers** live in `PortfolioMultiplatform.xcodeproj/project.pbxproj`:
+
+- `MARKETING_VERSION` — user-facing version (e.g. `1.0.6`)
+- `CURRENT_PROJECT_VERSION` — build number; must be **strictly greater** than every build already uploaded to App Store Connect for `com.portfolio.app.ios`
+
+Bump **iOS, macOS, and PortfolioRefreshLoginItem** together. See `.cursor/rules/app-store-version-bump.mdc`.
+
+**Agent release checklist:**
+
+1. Query App Store Connect → highest uploaded `CURRENT_PROJECT_VERSION` for `com.portfolio.app.ios`.
+2. Bump `MARKETING_VERSION` and set `CURRENT_PROJECT_VERSION` to **max uploaded + 1** (Debug + Release, all three app targets).
+3. Update fastlane defaults if present (`fastlane/Fastfile`, `Deliverfile`, `ci_scripts/ci_pre_xcodebuild.sh` fallback).
+4. Commit and push to the branch Xcode Cloud watches (usually `main`).
+5. Confirm / trigger the Xcode Cloud workflows; binary upload is handled by the workflow post-action, not fastlane.
+6. Optionally refresh `fastlane/metadata/*/release_notes.txt` before the build if `UPLOAD_APP_STORE_METADATA=1`.
+
+### fastlane (metadata only)
+
+Listing copy: `fastlane/metadata/<locale>/*.txt`. Lanes in `fastlane/Fastfile`:
+
+- `metadata_validate` — character limits
+- `metadata_upload` — push metadata to App Store Connect (no IPA, no screenshots)
+
+```bash
+export APP_STORE_CONNECT_API_KEY_PATH="$HOME/.appstoreconnect/portfolio-api-key.json"
+APP_VERSION=1.0.6 bundle exec fastlane metadata_upload
+```
+
+ASO strategy notes: `AppStore-Metadata.md`.
+
+### GitHub Actions (secondary, metadata only)
+
+`.github/workflows/appstore-metadata.yml` — **manual** metadata validate/upload via `workflow_dispatch`. Not used for binaries.
+
+### Local archive (fallback)
+
+Only when the user explicitly wants a manual upload: Xcode → **Product → Archive** → Organizer → **Distribute App** → App Store Connect.
+
+Local signing: copy `Local.xcconfig.example` → `Local.xcconfig`. Do not commit secrets, `.xcconfig` overrides, or provisioning profiles. `ci_scripts/ci_post_clone.sh` must keep writing `Local.xcconfig` (gitignored).
 
 ---
 
@@ -147,3 +196,4 @@ README (and README_fr) still describe: a `Packages/PortfolioCore` package, macOS
 4. Do not add a Swift package layer unless asked. Tests import `@testable import PortfolioMultiplatform`.
 5. Keep diffs tight. Do not “fix” README, unused strings, or version drift unless that is the task.
 6. User-facing text: `L10n` + both `.strings` files in the same change.
+7. Do not add GitHub Actions for IPA/App Store binary upload, or `fastlane` `build_app` / `gym` / `release` lanes. Xcode Cloud archives; fastlane is metadata only.

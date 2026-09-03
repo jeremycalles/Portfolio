@@ -1,0 +1,4 @@
+app_identifier("com.portfolio.app.ios")
+
+# Optional when using App Store Connect API key (recommended).
+# apple_id(ENV["FASTLANE_USER"])

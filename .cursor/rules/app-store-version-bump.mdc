@@ -1,0 +1,60 @@
+---
+description: App Store version bumps must set marketing version and a new unused build number
+alwaysApply: true
+---
+
+# App Store version bump
+
+When the user asks to bump, update, or release a version (e.g. "update to 1.0.7", "version bump", "prepare release"):
+
+## Always change both numbers
+
+In `PortfolioMultiplatform.xcodeproj/project.pbxproj` (Debug **and** Release) for **Portfolio iOS**, **Portfolio macOS**, and **PortfolioRefreshLoginItem**:
+
+- `MARKETING_VERSION` → requested user-facing version
+- `CURRENT_PROJECT_VERSION` → **new** build number (never reuse)
+
+Keep iOS, macOS, and the login item on the same marketing/build numbers.
+
+## Build number rule (critical)
+
+Apple rejects uploads when `CURRENT_PROJECT_VERSION` is **≤ any build already uploaded** for `com.portfolio.app.ios`, even if `MARKETING_VERSION` changed.
+
+Before setting `CURRENT_PROJECT_VERSION`:
+
+1. Query App Store Connect for the highest uploaded build number.
+2. Set `CURRENT_PROJECT_VERSION` to **max uploaded build + 1**.
+3. Do **not** copy the previous value from `project.pbxproj` without checking ASC.
+
+Example: if ASC already has `1.0.6 (19)`, the next bump to `1.0.7` must use build **20**, not 19.
+
+## Verify with App Store Connect API
+
+```bash
+export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+ruby -rspaceship -e "
+require 'json'
+json = JSON.parse(File.read(ENV['HOME'] + '/.appstoreconnect/portfolio-api-key.json'))
+Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.create(
+  key_id: json['key_id'], issuer_id: json['issuer_id'], filepath: json['key_filepath']
+)
+app = Spaceship::ConnectAPI::App.find('com.portfolio.app.ios')
+max = Spaceship::ConnectAPI::Build.all(app_id: app.id, sort: '-uploadedDate', limit: 20)
+  .map { |b| b.version.to_i }.max
+puts \"max_uploaded_build=#{max} next_build=#{(max || 0) + 1}\"
+"
+```
+
+If the API key is unavailable, ask the user for the latest TestFlight build number before choosing `CURRENT_PROJECT_VERSION`.
+
+## Also align tooling defaults
+
+When bumping, update `APP_VERSION` fallbacks if present:
+
+- `fastlane/Fastfile`, `fastlane/Deliverfile`
+- `ci_scripts/ci_pre_xcodebuild.sh`, `scripts/upload_app_store_metadata.sh`
+- `.github/workflows/appstore-metadata.yml` (default input only)
+
+## Release follow-up
+
+After commit: push to the branch Xcode Cloud watches (`main`) and trigger/re-run the archive workflows so the new build reaches App Store Connect. Binary upload is Xcode Cloud, not fastlane.

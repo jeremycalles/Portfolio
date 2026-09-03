@@ -1,0 +1,60 @@
+# frozen_string_literal: true
+
+require "json"
+require_relative "metadata_validate"
+
+default_platform(:ios)
+
+def deliver_options
+  options = {
+    skip_binary_upload: true,
+    skip_screenshots: true,
+    force: true,
+    run_precheck_before_submit: false,
+    precheck_include_in_app_purchases: false,
+    app_version: ENV.fetch("APP_VERSION", "1.0.6")
+  }
+
+  key_path = ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+  if key_path && File.exist?(key_path)
+    json = JSON.parse(File.read(key_path))
+    if json["key"]
+      options[:api_key_path] = key_path
+    elsif json["key_filepath"]
+      # fastlane JSON files require "key", but a separate .p8 path is easier to manage locally.
+      options[:api_key] = {
+        key_id: json["key_id"],
+        issuer_id: json["issuer_id"],
+        filepath: json["key_filepath"],
+        duration: json["duration"],
+        in_house: json["in_house"]
+      }
+    else
+      UI.user_error!("API key JSON must include either \"key\" or \"key_filepath\"")
+    end
+  end
+
+  options
+end
+
+platform :ios do
+  desc "Validate fastlane/metadata character limits"
+  lane :metadata_validate do
+    MetadataValidate.run(File.expand_path("metadata", __dir__))
+  end
+
+  desc "Download current App Store metadata into fastlane/metadata (review before commit)"
+  lane :metadata_download do
+    deliver(
+      **deliver_options,
+      overwrite_screenshots: false
+    )
+  end
+
+  desc "Upload App Store metadata only (no IPA, no screenshots)"
+  lane :metadata_upload do
+    MetadataValidate.run(File.expand_path("metadata", __dir__))
+    deliver(**deliver_options)
+    UI.success("Metadata uploaded. Check App Store Connect for the editable version.")
+  end
+end

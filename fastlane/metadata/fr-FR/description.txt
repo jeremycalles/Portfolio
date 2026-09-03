@@ -1,0 +1,23 @@
+Portfolio Vault est un suivi de portefeuille pensé pour la vie privée : actions, ETF, fonds, métaux précieux, crypto et comptes bancaires. Toutes les données restent sur votre appareil. Pas de liaison de compte, pas de serveur. Apps natives iOS et macOS à partir d’un seul code.
+
+CE QUE VOUS POUVEZ SUIVRE
+
+• Actions et ETF — Cours en temps réel (p. ex. Yahoo Finance)
+• Fonds (OPCVM) — VL fiables depuis des sources reconnues
+• Métaux précieux — Or et argent au comptant (p. ex. Veracash) et pièces physiques avec prime de marché (p. ex. AuCOFFRE)
+• Cryptomonnaies — Principales paires
+• Comptes bancaires — Positions de cash saisies manuellement
+
+FONCTIONNALITÉS
+
+• Multi-comptes — Suivez vos avoirs chez plusieurs banques et courtiers
+• Prix de revient et performance — Dates d’achat, plus/moins-values, comparaison 1J, 1S, 1M, 1A, YTD
+• Quadrants — Regroupez les instruments par catégorie (Technologie, Métaux précieux, Taux, etc.)
+• Graphiques interactifs — Tendance du portefeuille, allocation et historique par instrument
+• Valorisation en or — Voir la valeur du portefeuille en onces d’or, pour une lecture ajustée de l’inflation
+• Données intelligentes — Meilleure source selon le type d’instrument ; historique pour les tendances
+• Mises à jour en arrière-plan — Actualisation automatique des cours sur iOS et macOS
+• Mode confidentialité — Masquez les montants à l’écran ; Face ID / Touch ID / verrouillage optionnels
+• Bilingue — Anglais et français
+
+Vos données ne quittent l’appareil que pour des requêtes de marché publiques (tickers, VL). Pas d’analytics, pas de publicité.
