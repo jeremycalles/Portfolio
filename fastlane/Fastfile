@@ -5,6 +5,79 @@ require_relative "metadata_validate"
 
 default_platform(:ios)
 
+APP_IDENTIFIER = "com.portfolio.app.ios"
+DELIVER_PLATFORMS = {
+  "IOS" => "ios",
+  "MAC_OS" => "osx"
+}.freeze
+
+def configure_connect_api!
+  key_path = ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+  UI.user_error!("Set APP_STORE_CONNECT_API_KEY_PATH") unless key_path && File.exist?(key_path)
+  json = JSON.parse(File.read(key_path))
+  Spaceship::ConnectAPI.token = if json["key"]
+    Spaceship::ConnectAPI::Token.from_json_file(key_path)
+  elsif json["key_filepath"]
+    Spaceship::ConnectAPI::Token.create(
+      key_id: json["key_id"],
+      issuer_id: json["issuer_id"],
+      filepath: json["key_filepath"],
+      duration: json["duration"],
+      in_house: json["in_house"]
+    )
+  else
+    UI.user_error!("API key JSON must include either \"key\" or \"key_filepath\"")
+  end
+end
+
+def bump_patch(version_string)
+  parts = version_string.split(".")
+  parts << "0" while parts.size < 3
+  parts[-1] = (parts[-1].to_i + 1).to_s
+  parts.join(".")
+end
+
+# Promotional text is editable on READY_FOR_SALE. Description, keywords, and
+# what's new are not — those go on the Prepare for Submission version.
+def update_live_conversion_copy!
+  configure_connect_api!
+  app = Spaceship::ConnectAPI::App.find(APP_IDENTIFIER)
+  metadata = File.expand_path("metadata", __dir__)
+  DELIVER_PLATFORMS.each_key do |platform|
+    version = app.get_live_app_store_version(platform: platform)
+    next unless version
+
+    version.get_app_store_version_localizations.each do |loc|
+      promo = File.join(metadata, loc.locale, "promotional_text.txt")
+      next unless File.exist?(promo)
+
+      loc.update(attributes: { promotional_text: File.read(promo).strip })
+      UI.message("Updated live #{platform} #{loc.locale} promotional text")
+    end
+  end
+rescue => e
+  UI.important("Live promotional text update skipped: #{e.message}")
+end
+
+def ensure_editable_app_store_versions!
+  configure_connect_api!
+  app = Spaceship::ConnectAPI::App.find(APP_IDENTIFIER)
+  UI.user_error!("App #{APP_IDENTIFIER} not found") unless app
+
+  DELIVER_PLATFORMS.each_key do |platform|
+    edit = app.get_edit_app_store_version(platform: platform)
+    next if edit
+
+    latest = app.get_latest_app_store_version(platform: platform)
+    nxt = bump_patch(latest&.version_string || ENV.fetch("APP_VERSION", "1.0.7"))
+    UI.message("Creating App Store version #{nxt} (#{platform}) for editable listing copy")
+    Spaceship::ConnectAPI.post_app_store_version(
+      app_id: app.id,
+      attributes: { versionString: nxt, platform: platform }
+    )
+  end
+end
+
 def deliver_options
   options = {
     skip_binary_upload: true,
@@ -12,7 +85,10 @@ def deliver_options
     force: true,
     run_precheck_before_submit: false,
     precheck_include_in_app_purchases: false,
-    app_version: ENV.fetch("APP_VERSION", "1.0.6")
+    # Don't recreate/rename APP_VERSION: upload to the existing Prepare for
+    # Submission version (1.0.7) even if CI still passes an older fallback.
+    skip_app_version_update: true,
+    app_version: ENV.fetch("APP_VERSION", "1.0.7")
   }
 
   key_path = ENV["APP_STORE_CONNECT_API_KEY_PATH"]
@@ -54,7 +130,11 @@ platform :ios do
   desc "Upload App Store metadata only (no IPA, no screenshots)"
   lane :metadata_upload do
     MetadataValidate.run(File.expand_path("metadata", __dir__))
-    deliver(**deliver_options)
+    update_live_conversion_copy!
+    ensure_editable_app_store_versions!
+    DELIVER_PLATFORMS.each_value do |deliver_platform|
+      deliver(**deliver_options, platform: deliver_platform)
+    end
     UI.success("Metadata uploaded. Check App Store Connect for the editable version.")
   end
 end

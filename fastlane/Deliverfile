@@ -9,5 +9,6 @@ force(true)
 run_precheck_before_submit(false)
 precheck_include_in_app_purchases(false)
 
-# Version that receives release_notes.txt (override with APP_VERSION=1.0.6).
-app_version(ENV.fetch("APP_VERSION", "1.0.6"))
+# Version string is unused for creation (`skip_app_version_update` in Fastfile).
+# Indexed copy (name/subtitle/keywords) lands on the Prepare for Submission version.
+app_version(ENV.fetch("APP_VERSION", "1.0.7"))

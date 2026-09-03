@@ -1,0 +1,1 @@
+fonds,NAV,bitcoin,zilver,ISIN,vermogen,offline,privacy,munt,broker,cash,depot,belegging,obligatie

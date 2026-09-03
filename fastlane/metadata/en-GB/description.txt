@@ -1,9 +1,11 @@
-Portfolio Vault is a privacy-focused tracker for stocks, ETFs, mutual funds, precious metals, cryptocurrencies, and bank accounts. All data stays on your device. No account linking, no backend. Native apps for iOS and macOS from one codebase.
+Track stocks, ETFs, gold, and crypto on iPhone and Mac. No account, no bank login. Holdings stay on your device; only public tickers go out for prices.
+
+Portfolio Vault tracks unit trusts, precious metals, coins, and cash accounts too. Native iOS and macOS. No account linking, no backend, no ads.
 
 WHAT YOU CAN TRACK
 
 • Stocks & ETFs — Real-time prices (e.g. Yahoo Finance)
-• Mutual funds (OPCVM) — Accurate NAV from trusted sources
+• Mutual funds and unit trusts (OPCVM) — Accurate NAV from trusted sources
 • Precious metals — Gold and silver spot (e.g. Veracash) and physical coins with market premiums (e.g. AuCOFFRE)
 • Cryptocurrencies — Major pairs
 • Bank accounts — Manual cash positions
@@ -19,5 +21,6 @@ FEATURES
 • Background updates — Automatic price refresh on iOS and macOS
 • Privacy mode — Hide sensitive values on screen; Face ID / Touch ID / device lock optional
 • Bilingual — Full English and French
+• Optional iCloud backup — Copy the local database to your iCloud; the app never runs from iCloud
 
 Your data never leaves your device except public market data requests (tickers, NAVs). No analytics, no ads.

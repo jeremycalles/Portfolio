@@ -1,1 +1,1 @@
-portefeuille,actions,ETF,OPCVM,or,crypto,investissement,suivi,finance,placement,privacy,stocks
+actions,investissement,placement,CTO,bitcoin,VL,bourse,courtier,lingot,argent,patrimoine,isin,cash

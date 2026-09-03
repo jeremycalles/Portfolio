@@ -10,7 +10,21 @@ if [ "${UPLOAD_APP_STORE_METADATA:-0}" != "1" ]; then
   exit 0
 fi
 
-# Combined iOS+macOS workflows run this script before every action; upload once per build.
+# Combined workflow runs this before Analyze and Archive on both platforms.
+# Listing copy is not required for Analyze, and four concurrent uploads race.
+# Push metadata only from the iOS Archive action.
+action="$(printf '%s' "${CI_XCODEBUILD_ACTION:-}" | tr '[:upper:]' '[:lower:]')"
+platform="$(printf '%s' "${CI_PRODUCT_PLATFORM:-}" | tr '[:upper:]' '[:lower:]')"
+if [ "$action" != "archive" ]; then
+  echo "Skipping metadata upload (CI_XCODEBUILD_ACTION=${CI_XCODEBUILD_ACTION:-unset})."
+  exit 0
+fi
+if [ -n "$platform" ] && [ "$platform" != "ios" ]; then
+  echo "Skipping metadata upload on ${CI_PRODUCT_PLATFORM} archive."
+  exit 0
+fi
+
+# Safety net if iOS Archive is ever invoked twice in one run.
 LOCK_DIR="$REPO_ROOT/.xcode-cloud"
 mkdir -p "$LOCK_DIR"
 LOCK_FILE="$LOCK_DIR/metadata-uploaded"
@@ -42,10 +56,11 @@ export BUNDLE_PATH="${BUNDLE_PATH:-$REPO_ROOT/vendor/bundle}"
 if [ -z "${APP_VERSION:-}" ]; then
   APP_VERSION="$(grep -m1 'MARKETING_VERSION = ' "$REPO_ROOT/PortfolioMultiplatform.xcodeproj/project.pbxproj" | sed 's/.*MARKETING_VERSION = \([^;]*\);.*/\1/' | tr -d ' ')"
 fi
-export APP_VERSION="${APP_VERSION:-1.0.6}"
+export APP_VERSION="${APP_VERSION:-1.0.7}"
+# Never recreate a live marketing version (deliver ensure_version! would fail).
+export DELIVER_SKIP_APP_VERSION_UPDATE=true
 
 echo "=== ci_pre_xcodebuild: uploading App Store metadata for version $APP_VERSION ==="
 python3 scripts/validate_app_store_metadata.py
 bundle exec fastlane metadata_upload
-touch "$LOCK_FILE"
 touch "$LOCK_FILE"

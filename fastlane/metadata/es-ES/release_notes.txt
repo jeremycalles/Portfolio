@@ -1,0 +1,1 @@
+Primera versión. Acciones, ETF, fondos, oro, cripto y cuentas en un solo sitio. Datos en el dispositivo, copia iCloud opcional. iOS y macOS.

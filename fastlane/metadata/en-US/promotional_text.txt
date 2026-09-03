@@ -1,1 +1,1 @@
-Privacy-first portfolio tracker. Stocks, ETFs, funds, gold, crypto, bank accounts—all in one view. Your data stays on your device. iOS & macOS.
+Track stocks, ETFs, gold, and crypto on iPhone and Mac. No account, no bank login. Data stays on device. Optional iCloud backup. Coins, funds, Face ID.

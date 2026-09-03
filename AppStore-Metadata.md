@@ -1,87 +1,86 @@
 # App Store Metadata
 
 > **Source of truth:** edit `fastlane/metadata/<locale>/*.txt`, then run `bundle exec fastlane metadata_upload`.
-> Setup: [fastlane/README.md](fastlane/README.md). This file keeps ASO strategy and screenshot guidance.
+> Setup: [fastlane/README.md](fastlane/README.md).
+>
+> Name, subtitle, keywords, and description are locked on a live version. `metadata_upload` creates the next Prepare for Submission version (currently **1.0.7**) and uploads indexed copy there. Promotional text is also patched on the live listing.
 
-App name: **Portfolio Vault**. One App Store Connect app (`com.portfolio.app.ios`) covers iOS and macOS (universal purchase). Apple search ranks **name + subtitle + keywords only** (160 characters per locale). The description is for conversion, not Apple ranking.
+App name on the home screen stays **Portfolio Vault**. One App Store Connect app (`com.portfolio.app.ios`) covers iOS and macOS (universal purchase).
+
+Apple search ranks **name + subtitle + keywords only** (160 characters per locale). Do **not** repeat a word across those three fields. Description and promotional text are for conversion (and Google), not Apple ranking. Categories: **Finance / Productivity**. Do not put Yahoo, Veracash, or AuCOFFRE in keywords.
 
 ---
 
-## App Icon
-The App Store Connect marketing icon is generated from `assets/app-icon-source.jpg` into `Shared/Assets.xcassets/AppIcon.appiconset/icon-1024.png`. The same `AppIcon` asset catalog is configured for iOS and macOS builds.
+## Indexed copy (findability)
+
+### English (US) and English (Canada)
+
+| Field | Copy | Limit |
+|-------|------|-------|
+| Name | `Portfolio Vault` | 15 / 30 |
+| Subtitle | `Stocks, ETFs, Gold & Crypto` | 27 / 30 |
+| Keywords | `mutual fund,NAV,OPCVM,bitcoin,silver,holdings,brokerage,watchlist,ISIN,wealth,offline,privacy,coin` | 98 / 100 |
+
+### English (UK)
+
+Same name and subtitle. Keywords: `shares,ISA,unit trust,NAV,OPCVM,bitcoin,silver,holdings,ISIN,wealth,offline,privacy,gilt,cash,coin` (98 / 100).
+
+### French (France)
+
+| Field | Copy | Limit |
+|-------|------|-------|
+| Name | `Portfolio Vault Portefeuille` | 28 / 30 |
+| Subtitle | `PEA, OPCVM, or et crypto` | 24 / 30 |
+| Keywords | `actions,investissement,placement,CTO,bitcoin,VL,bourse,courtier,lingot,argent,patrimoine,isin,cash` | 98 / 100 |
+
+Store name adds **portefeuille** (what people type). Home screen stays Portfolio Vault.
+
+### French (Canada)
+
+Same name. Subtitle: `Actions, ETF, or et crypto` (no PEA/CTO). Keywords omit those France-specific wrappers.
+
+### Extra locales (UI stays EN+FR)
+
+de-DE, es-ES, it, nl-NL: translated name/subtitle/keywords plus a short description so the storefront is not empty. Each locale adds another 160 indexed characters.
 
 ---
 
-## Promotional Text
-**Limit: 170 characters** • Shown at the top of your listing • Can be updated anytime without a new version.
+## Promotional text
+
+**Limit: 170** • Not indexed • Editable without a new version.
 
 ```
-Privacy-first portfolio tracker. Stocks, ETFs, funds, gold, crypto, bank accounts—all in one view. Your data stays on your device. iOS & macOS.
+Track stocks, ETFs, gold, and crypto on iPhone and Mac. No account, no bank login. Data stays on device. Optional iCloud backup. Coins, funds, Face ID.
 ```
-**Character count: 119**
+
+FR: *Actions, ETF, or et crypto sur iPhone et Mac. Sans compte, sans banque. Données sur l’appareil. Sauvegarde iCloud optionnelle. Pièces d’or, OPCVM, Face ID.*
 
 ---
 
 ## Description
-**Limit: 4,000 characters** • First ~255 characters appear in search results—make them count.
 
-```
-Portfolio Vault is a privacy-focused tracker for stocks, ETFs, mutual funds, precious metals, cryptocurrencies, and bank accounts. All data stays on your device. No account linking, no backend. Native apps for iOS and macOS from one codebase.
+**Limit: 4,000** • First ~255 characters are the search-result / Google hook.
 
-WHAT YOU CAN TRACK
-
-• Stocks & ETFs — Real-time prices (e.g. Yahoo Finance)
-• Mutual funds (OPCVM) — Accurate NAV from trusted sources
-• Precious metals — Gold and silver spot (e.g. Veracash) and physical coins with market premiums (e.g. AuCOFFRE)
-• Cryptocurrencies — Major pairs
-• Bank accounts — Manual cash positions
-
-FEATURES
-
-• Multi-account support — Track holdings across several banks and brokers
-• Cost basis & performance — Purchase dates, prices, gain/loss, comparison over 1D, 1W, 1M, 1Y, YTD
-• Quadrant organization — Group instruments by category (Technology, Precious Metals, Fixed Income, etc.)
-• Interactive charts — Portfolio trend, allocation, and instrument history
-• Gold valuation — See portfolio value in gold ounces for an inflation-adjusted view
-• Smart data — Best source per instrument type; historical backfill for trends
-• Background updates — Automatic price refresh on iOS and macOS
-• Privacy mode — Hide sensitive values on screen; Face ID / Touch ID / device lock optional
-• Bilingual — Full English and French
-
-Your data never leaves your device except public market data requests (tickers, NAVs). No analytics, no ads.
-```
-
-**Character count: ~1,450** (under 4,000; extend with testimonials or more detail if needed)
+Lead with what people type (stocks, gold, crypto, no account), then WHAT YOU CAN TRACK / FEATURES. Mention OPCVM NAV, physical coins, gold ounces, Face ID, EN+FR, optional iCloud backup. Full text lives in `fastlane/metadata/<locale>/description.txt`.
 
 ---
 
-## Keywords
-**Limit: 100 characters total** • Comma-separated, **no spaces after commas** • Don’t repeat your app name or company name (Apple adds the app name to search).
-
-```
-portfolio,stocks,ETF,mutual fund,gold,crypto,investments,tracker,finance,holdings,allocation,privacy
-```
-**Character count: 97** (within 100)
-
-Optional swaps to test search:
-- Add: `precious metals,silver,NAV,cost basis` (drop `privacy,allocation` to stay under 100)
-- Or: `wealth,assets,performance,chart` in place of some of the above
-
----
-
-## Subtitle (optional)
-**Limit: 30 characters** • Shown under the app name in search and on the product page.
-
-```
-On-Device Portfolio Tracker
-```
-**Character count: 27**
-
----
-
-## What’s New (version release notes)
-Short example for a first release:
+## What’s New
 
 ```
 Initial release. Track stocks, ETFs, funds, gold, crypto, and bank accounts in one place. Your data stays on your device with optional iCloud sync. Available on iOS and macOS.
 ```
+
+---
+
+## App Icon
+
+Generated from `assets/app-icon-source.jpg` into `Shared/Assets.xcassets/AppIcon.appiconset/`. Same catalog for iOS and macOS.
+
+---
+
+## Storefronts and screenshots
+
+- Confirm **Pricing and Availability** includes FR, BE, CH, LU, CA, US, GB, and the rest of the EU. A listing in a disabled storefront does not rank.
+- Screenshots are not uploaded by `metadata_upload`. First screenshot should be the dashboard total + chart (stocks / gold / on-device), not Settings. Files live in `assets/screenshots/`.
+- Ratings are per country; French installs matter more than extra keywords.

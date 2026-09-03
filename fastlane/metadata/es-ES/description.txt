@@ -1,0 +1,15 @@
+Acciones, ETF, oro y cripto en iPhone y Mac. Sin cuenta ni inicio de sesión bancario. Las posiciones se quedan en el dispositivo; solo salen identificadores públicos para los precios.
+
+Portfolio Vault también sigue fondos (OPCVM), metales, monedas y efectivo. Apps nativas iOS y macOS. Sin vincular cuentas, sin anuncios.
+
+QUÉ PUEDE SEGUIR
+
+• Acciones y ETF — precios en tiempo real
+• Fondos (OPCVM) — VL de fuentes fiables
+• Metales preciosos — oro y plata al contado y monedas físicas
+• Criptomonedas — pares principales
+• Cuentas bancarias — efectivo manual
+
+Varias cuentas, precio de coste, gráficos, onzas de oro, actualizaciones en segundo plano, modo privacidad, Face ID / Touch ID, inglés y francés, copia iCloud opcional.
+
+Solo salen peticiones de datos de mercado públicos. Sin analítica ni anuncios.

@@ -12,9 +12,9 @@ Do not treat `README.md` as the source of truth for structure or automation — 
 
 | Target | Product | Bundle ID | Version (as of review) |
 |--------|---------|-----------|------------------------|
-| Portfolio iOS | Portfolio Vault.app | `com.portfolio.app.ios` | 1.0.6 / 19 |
-| Portfolio macOS | Portfolio Vault.app | `com.portfolio.app.ios` (same ID; universal purchase) | 1.0.6 / 19 |
-| PortfolioRefreshLoginItem | helper (LSUIElement) | `com.portfolio.app.ios.RefreshLoginItem` | 1.0.4 / 16 — bump with the Mac app |
+| Portfolio iOS | Portfolio Vault.app | `com.portfolio.app.ios` | 1.0.7 / 31 |
+| Portfolio macOS | Portfolio Vault.app | `com.portfolio.app.ios` (same ID; universal purchase) | 1.0.7 / 31 |
+| PortfolioRefreshLoginItem | helper (LSUIElement) | `com.portfolio.app.ios.RefreshLoginItem` | 1.0.7 / 31 — bump with the Mac app |
 | PortfolioCoreTests | `.xctest` hosted on **iOS** | `com.portfolio.app.tests` | — |
 
 Team: `73Y2U9Q7Q7`. Deployment: **iOS 17**, **macOS 15**. Schemes: `Portfolio iOS`, `Portfolio macOS`.
@@ -116,7 +116,7 @@ Paths: iOS `Documents/PortfolioData/stocks.db`; macOS `Application Support/Portf
 | Step | Script / config | What it does |
 |------|-----------------|--------------|
 | After clone | `ci_scripts/ci_post_clone.sh` | Writes stub `Local.xcconfig`; installs Bundler + fastlane; writes ASC API key JSON from workflow secrets |
-| Before archive | `ci_scripts/ci_pre_xcodebuild.sh` | Optional metadata upload when `UPLOAD_APP_STORE_METADATA=1` |
+| Before archive | `ci_scripts/ci_pre_xcodebuild.sh` | Metadata upload when `UPLOAD_APP_STORE_METADATA=1`, **iOS Archive only** (skips Analyze and macOS) |
 | Archive & upload | Xcode Cloud workflows (in Xcode / App Store Connect) | Archive **Portfolio iOS** and **Portfolio macOS**, **Distribute to App Store Connect** |
 
 **Workflow secrets** (Xcode Cloud → Workflow → Environment):
@@ -126,7 +126,7 @@ Paths: iOS `Documents/PortfolioData/stocks.db`; macOS `Application Support/Portf
 
 Create **one** Xcode Cloud workflow in Xcode (**Product → Xcode Cloud**) named **Archive iOS & macOS**, starting on `main`. It already exists in App Store Connect (`ecaf1938-dd31-4a93-be04-777909d6f63c`): Analyze + Archive for **Portfolio iOS** and **Portfolio macOS**, both archives `APP_STORE_ELIGIBLE` (TestFlight / App Store Connect).
 
-Do not create a second workflow for macOS unless splitting metadata secrets. Environment variables are per-workflow, not per-action; `ci_pre_xcodebuild.sh` uploads listing copy at most once per Cloud run.
+Do not create a second workflow for macOS unless splitting metadata secrets. Environment variables are per-workflow, not per-action; `ci_pre_xcodebuild.sh` skips Analyze and macOS Archive and uploads listing copy from the iOS Archive action only.
 
 **Version numbers** live in `PortfolioMultiplatform.xcodeproj/project.pbxproj`:
 
@@ -153,7 +153,7 @@ Listing copy: `fastlane/metadata/<locale>/*.txt`. Lanes in `fastlane/Fastfile`:
 
 ```bash
 export APP_STORE_CONNECT_API_KEY_PATH="$HOME/.appstoreconnect/portfolio-api-key.json"
-APP_VERSION=1.0.6 bundle exec fastlane metadata_upload
+APP_VERSION=1.0.7 bundle exec fastlane metadata_upload
 ```
 
 ASO strategy notes: `AppStore-Metadata.md`.
