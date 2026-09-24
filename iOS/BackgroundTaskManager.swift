@@ -80,19 +80,30 @@ class BackgroundTaskManager: ObservableObject {
     
     // MARK: - Task Scheduling
     
-    /// Schedule the next background refresh
+    /// Schedule the next background refresh.
+    /// Leaves an existing pending request alone. Cancelling and resubmitting on every
+    /// launch or background transition kept moving `earliestBeginDate` forward, so iOS
+    /// never reached it.
     func scheduleAppRefresh() {
-        let request = BGAppRefreshTaskRequest(identifier: Self.refreshTaskIdentifier)
-        
-        // Schedule for 3 hours from now (iOS may delay further based on system conditions)
-        request.earliestBeginDate = Date(timeIntervalSinceNow: minimumRefreshInterval)
-        
-        do {
-            BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: Self.refreshTaskIdentifier)
-            try BGTaskScheduler.shared.submit(request)
-            log("Scheduled refresh for \(request.earliestBeginDate?.description ?? "unknown")")
-        } catch {
-            log("Failed to schedule refresh: \(error.localizedDescription)", isError: true)
+        BGTaskScheduler.shared.getPendingTaskRequests { [weak self] requests in
+            guard let self else { return }
+            if requests.contains(where: { $0.identifier == Self.refreshTaskIdentifier }) {
+                return
+            }
+            let request = BGAppRefreshTaskRequest(identifier: Self.refreshTaskIdentifier)
+            request.earliestBeginDate = Date(timeIntervalSinceNow: self.minimumRefreshInterval)
+            do {
+                try BGTaskScheduler.shared.submit(request)
+                let when = request.earliestBeginDate?.description ?? "unknown"
+                Task { @MainActor in
+                    self.log("Scheduled refresh for \(when)")
+                }
+            } catch {
+                let message = error.localizedDescription
+                Task { @MainActor in
+                    self.log("Failed to schedule refresh: \(message)", isError: true)
+                }
+            }
         }
     }
     
@@ -140,8 +151,11 @@ class BackgroundTaskManager: ObservableObject {
         }
         
         log("Found \(instruments.count) instruments to refresh")
-        
-        for instrument in instruments {
+
+        // BGAppRefresh is killed after a short window. Fetch a few quotes at once
+        // instead of one-by-one with a pause, which expired before the list finished.
+        let batchSize = 4
+        for batchStart in stride(from: 0, to: instruments.count, by: batchSize) {
             if Task.isCancelled {
                 log("Cancelled with \(successCount) updated, \(failureCount) failed", isError: true)
                 if successCount > 0 {
@@ -149,35 +163,51 @@ class BackgroundTaskManager: ObservableObject {
                 }
                 return successCount > 0
             }
-            
-            let displayName = instrument.name ?? instrument.ticker ?? instrument.isin
-            
-            let result = await MarketDataService.shared.fetchData(isin: instrument.isin, ticker: instrument.ticker)
-            
-            if let price = result.value {
-                let newPrice = Price(
-                    isin: instrument.isin,
-                    date: result.date,
-                    value: price,
-                    currency: result.currency
-                )
-                await DatabaseService.shared.addPrice(newPrice)
-                
-                if result.name != nil || result.ticker != nil {
-                    var updatedInstrument = instrument
-                    if let name = result.name { updatedInstrument.name = name }
-                    if let ticker = result.ticker { updatedInstrument.ticker = ticker }
-                    await DatabaseService.shared.addOrUpdateInstrument(updatedInstrument)
+
+            let batchEnd = min(batchStart + batchSize, instruments.count)
+            let batch = Array(instruments[batchStart..<batchEnd])
+            let results = await withTaskGroup(of: (Instrument, MarketDataResult).self) { group in
+                for instrument in batch {
+                    group.addTask {
+                        let result = await MarketDataService.shared.fetchData(
+                            isin: instrument.isin,
+                            ticker: instrument.ticker
+                        )
+                        return (instrument, result)
+                    }
                 }
-                
-                log("\(displayName): \(String(format: "%.2f", price)) \(result.currency ?? "")")
-                successCount += 1
-            } else {
-                log("\(displayName): Failed to fetch price", isError: true)
-                failureCount += 1
+                var collected: [(Instrument, MarketDataResult)] = []
+                for await pair in group {
+                    collected.append(pair)
+                }
+                return collected
             }
-            
-            try? await Task.sleep(nanoseconds: 150_000_000)
+
+            for (instrument, result) in results {
+                let displayName = instrument.name ?? instrument.ticker ?? instrument.isin
+                if let price = result.value {
+                    let newPrice = Price(
+                        isin: instrument.isin,
+                        date: result.date,
+                        value: price,
+                        currency: result.currency
+                    )
+                    await DatabaseService.shared.addPrice(newPrice)
+
+                    if result.name != nil || result.ticker != nil {
+                        var updatedInstrument = instrument
+                        if let name = result.name { updatedInstrument.name = name }
+                        if let ticker = result.ticker { updatedInstrument.ticker = ticker }
+                        await DatabaseService.shared.addOrUpdateInstrument(updatedInstrument)
+                    }
+
+                    log("\(displayName): \(String(format: "%.2f", price)) \(result.currency ?? "")")
+                    successCount += 1
+                } else {
+                    log("\(displayName): Failed to fetch price", isError: true)
+                    failureCount += 1
+                }
+            }
         }
         
         UserDefaults.standard.set(Date(), forKey: "lastBackgroundRefresh")
