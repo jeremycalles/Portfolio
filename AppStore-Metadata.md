@@ -70,9 +70,7 @@ Lead with what people type (stocks, gold, crypto, no account), then WHAT YOU CAN
 ## What’s New
 
 ```
-Charts now follow your buy and sell lots, so history uses the quantities you actually held.
-
-A short walkthrough gets you started on iPhone and Mac. Scheduled price updates are more reliable on both platforms—the Mac helper wakes the app so refreshes are not dropped.
+The dashboard total is what you hold right now, in euros. The change for the selected period uses the quantities you actually held that day.
 
 Your data still stays on your device.
 ```

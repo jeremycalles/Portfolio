@@ -40,6 +40,23 @@ enum PortfolioHistoryBuilder {
         return max(0, qty)
     }
 
+    /// Quantity actually held on `date`.
+    /// Lots apply on their own dates. The gap between the live quantity and the sum of lots
+    /// is already held before the first lot, so a partial lot does not drop the rest of the position.
+    static func quantityActuallyHeld(
+        transactions: [(date: String, quantityDelta: Double)],
+        date: String,
+        liveQuantity: Double
+    ) -> Double {
+        if transactions.isEmpty { return max(0, liveQuantity) }
+        let recorded = transactions.reduce(0.0) { $0 + $1.quantityDelta }
+        var qty = liveQuantity - recorded
+        for tx in transactions where tx.date <= date {
+            qty += tx.quantityDelta
+        }
+        return max(0, qty)
+    }
+
     /// Unique sorted dates in `[cutoff, today]`, including endpoints, prices, and cashflow dates.
     static func chartDates(
         cutoff: String,

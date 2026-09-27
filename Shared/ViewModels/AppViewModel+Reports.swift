@@ -86,10 +86,10 @@ extension AppViewModel {
                 if totalQuantity > 0 {
                     let previousPrice = await comparisonPrice(forIsin: instrument.isin, latestPrice: latestPrice, comparisonDateStr: comparisonDateStr)
                     let realTotal = await db.getTotalQuantity(forIsin: instrument.isin)
-                    let previousQty = PortfolioHistoryBuilder.quantityOnDate(
+                    let previousQty = PortfolioHistoryBuilder.quantityActuallyHeld(
                         transactions: txByIsin[instrument.isin] ?? [],
                         date: comparisonDateStr,
-                        fallbackQuantity: realTotal
+                        liveQuantity: realTotal
                     )
                     let currency = instrument.currency
                     let currentValueEUR: Double? = latestPrice != nil ? await convertToEUR(value: totalQuantity * latestPrice!.value, fromCurrency: currency, onDate: latestPrice!.date) : nil
@@ -124,10 +124,10 @@ extension AppViewModel {
             if totalQuantity > 0 {
                 let previousPrice = await comparisonPrice(forIsin: instrument.isin, latestPrice: latestPrice, comparisonDateStr: comparisonDateStr)
                 let realTotal = await db.getTotalQuantity(forIsin: instrument.isin)
-                let previousQty = PortfolioHistoryBuilder.quantityOnDate(
+                let previousQty = PortfolioHistoryBuilder.quantityActuallyHeld(
                     transactions: txByIsin[instrument.isin] ?? [],
                     date: comparisonDateStr,
-                    fallbackQuantity: realTotal
+                    liveQuantity: realTotal
                 )
                 let currency = instrument.currency
                 let currentValueEUR: Double? = latestPrice != nil ? await convertToEUR(value: totalQuantity * latestPrice!.value, fromCurrency: currency, onDate: latestPrice!.date) : nil

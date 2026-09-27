@@ -1,5 +1,3 @@
-I grafici seguono ora i lotti di acquisto e vendita: la cronologia usa le quantità che avevi davvero.
-
-Una breve guida ti avvia su iPhone e Mac. Gli aggiornamenti pianificati sono più affidabili: l’helper Mac sveglia l’app così i refresh non si perdono.
+Il totale della dashboard è ciò che hai adesso, in euro. La variazione del periodo usa le quantità che avevi davvero quel giorno.
 
 I dati restano sul dispositivo.

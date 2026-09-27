@@ -1,5 +1,3 @@
-Les graphiques suivent désormais vos lots d’achat et de vente : l’historique utilise les quantités réellement détenues.
-
-Un court tutoriel vous guide sur iPhone et Mac. Les actualisations planifiées sont plus fiables : l’assistant Mac réveille l’app pour ne plus perdre les mises à jour.
+Le total du tableau de bord est ce que vous détenez maintenant, en euros. La variation de la période utilise les quantités réellement détenues ce jour-là.
 
 Vos données restent sur l’appareil.

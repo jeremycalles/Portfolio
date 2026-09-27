@@ -1,5 +1,3 @@
-Grafieken volgen nu je koop- en verkooplots, zodat de historie de hoeveelheden gebruikt die je echt had.
-
-Een korte walkthrough helpt je op iPhone en Mac. Geplande koersupdates zijn betrouwbaarder: de Mac-helper wekt de app zodat verversingen niet verloren gaan.
+Het dashboardtotaal is wat je nu aanhoudt, in euro. De wijziging voor de gekozen periode gebruikt de hoeveelheden die je die dag echt had.
 
 Je gegevens blijven op het apparaat.
