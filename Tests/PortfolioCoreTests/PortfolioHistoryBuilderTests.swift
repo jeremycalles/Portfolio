@@ -30,6 +30,19 @@ struct PortfolioHistoryBuilderTests {
         #expect(PortfolioHistoryBuilder.priceOnOrBeforeOrFirst(index: [], date: "2026-01-01") == nil)
     }
 
+    @Test("partial lots do not erase the rest of a position")
+    func quantityActuallyHeldKeepsUnrecordedQuantity() {
+        let lots = [(date: "2026-09-24", quantityDelta: 67.4778)]
+        let live = 631.6014
+        let before = PortfolioHistoryBuilder.quantityActuallyHeld(transactions: lots, date: "2026-09-20", liveQuantity: live)
+        #expect(abs(before - (live - 67.4778)) < 0.000_001)
+        #expect(abs(PortfolioHistoryBuilder.quantityActuallyHeld(transactions: lots, date: "2026-09-24", liveQuantity: live) - live) < 0.000_001)
+        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(transactions: [], date: "2026-09-20", liveQuantity: live) == live)
+        let fullLot = [(date: "2026-09-26", quantityDelta: 1644.43)]
+        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(transactions: fullLot, date: "2026-09-20", liveQuantity: 1644.43) == 0)
+        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(transactions: fullLot, date: "2026-09-26", liveQuantity: 1644.43) == 1644.43)
+    }
+
     @Test("chartDates always includes the period start and today")
     func chartDatesIncludesEndpoints() {
         let dates = PortfolioHistoryBuilder.chartDates(

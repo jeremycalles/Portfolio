@@ -141,13 +141,9 @@ class AppViewModel: ObservableObject {
         lastInstrumentUpdateDate = await getLastInstrumentUpdateDate()
         cachedPeriodTWR = await periodTWR(from: cachedPortfolioHistory)
 
-        // Period % must use the same first/last points as the trend chart.
-        let totals = await getGrandTotalsEUR()
-        if let first = cachedPortfolioHistory.first?.value, let last = cachedPortfolioHistory.last?.value {
-            cachedGrandTotalsEUR = (current: last, previous: first)
-        } else {
-            cachedGrandTotalsEUR = totals
-        }
+        // Header total is every holding marked to market now, not the last chart point.
+        // The performance series can omit quantity when lots don't rebuild the position.
+        cachedGrandTotalsEUR = await getGrandTotalsEUR()
         if let first = cachedGoldOzHistory.first?.value, let last = cachedGoldOzHistory.last?.value {
             cachedGoldTotals = (current: last, previous: first)
         } else {
