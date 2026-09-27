@@ -12,5 +12,5 @@ if [[ -z "${APP_STORE_CONNECT_API_KEY_PATH:-}" ]]; then
   exit 1
 fi
 
-export APP_VERSION="${APP_VERSION:-1.0.7}"
+export APP_VERSION="${APP_VERSION:-1.0.8}"
 bundle exec fastlane metadata_upload
