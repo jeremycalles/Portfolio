@@ -1,5 +1,3 @@
-Charts folgen jetzt Kauf- und Verkaufslosen — die Historie nutzt die Mengen, die Sie wirklich gehalten haben.
-
-Eine kurze Einführung startet auf iPhone und Mac. Geplante Kursupdates sind zuverlässiger: Der Mac-Helfer weckt die App, damit Aktualisierungen nicht verloren gehen.
+Die Summe auf dem Dashboard ist das, was Sie jetzt halten, in Euro. Die Änderung für den gewählten Zeitraum nutzt die Mengen, die Sie an diesem Tag wirklich gehalten haben.
 
 Ihre Daten bleiben auf dem Gerät.
