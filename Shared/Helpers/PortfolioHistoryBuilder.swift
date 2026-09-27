@@ -77,7 +77,21 @@ enum PortfolioHistoryBuilder {
         return dates.sorted()
     }
 
-    /// Builds a converted series. `holdings.quantity` is the live fallback when an ISIN has no lots.
+    /// True when lots do not add up to the live quantity, so the line keeps shares that have no lot.
+    static func historyUsesUnrecordedQuantity(
+        holdings: [(isin: String, quantity: Double)],
+        transactionsByIsin: [String: [(date: String, quantityDelta: Double)]]
+    ) -> Bool {
+        for holding in holdings {
+            let lots = transactionsByIsin[holding.isin] ?? []
+            if lots.isEmpty { continue }
+            let recorded = lots.reduce(0.0) { $0 + $1.quantityDelta }
+            if abs(holding.quantity - recorded) > 0.000_1 { return true }
+        }
+        return false
+    }
+
+    /// Builds a converted series. Quantity is what was actually held that day.
     /// Quantity 0 on a date skips that holding (not in the portfolio yet / already sold).
     static func series(
         dates: [String],
@@ -94,10 +108,10 @@ enum PortfolioHistoryBuilder {
             var total = 0.0
             var complete = true
             for holding in holdings {
-                let qty = quantityOnDate(
+                let qty = quantityActuallyHeld(
                     transactions: transactionsByIsin[holding.isin] ?? [],
                     date: date,
-                    fallbackQuantity: holding.quantity
+                    liveQuantity: holding.quantity
                 )
                 if qty <= 0 { continue }
                 guard let price = priceOnOrBeforeOrFirst(index: prices[holding.isin] ?? [], date: date) else {

@@ -223,7 +223,8 @@ struct DashboardView: View {
                                     sp500History: sp500History.isEmpty ? nil : sp500History,
                                     goldHistory: goldHistory.isEmpty ? nil : goldHistory,
                                     msciWorldHistory: msciWorldHistory.isEmpty ? nil : msciWorldHistory,
-                                    performancePercent: viewModel.cachedPeriodTWR
+                                    performancePercent: viewModel.cachedPeriodTWR,
+                                    marksIncompleteHistory: viewModel.cachedPortfolioHistoryIncomplete
                                 )
                             }
                             .frame(maxWidth: .infinity, maxHeight: .infinity)

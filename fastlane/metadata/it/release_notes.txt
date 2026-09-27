@@ -1,3 +1,1 @@
-Il totale della dashboard è ciò che hai adesso, in euro. La variazione del periodo usa le quantità che avevi davvero quel giorno.
-
-I dati restano sul dispositivo.
+La linea di performance ora corrisponde al denaro che detieni. La variazione in euro mantiene il proprio segno, separata dalla percentuale.

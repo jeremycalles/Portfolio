@@ -1,3 +1,1 @@
-El total del panel es lo que tienes ahora, en euros. El cambio del periodo usa las cantidades que realmente tenías ese día.
-
-Tus datos siguen en el dispositivo.
+La línea de rendimiento coincide ahora con el dinero que tienes. El cambio en euros mantiene su propio sentido, aparte del porcentaje.

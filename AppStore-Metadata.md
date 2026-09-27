@@ -70,9 +70,7 @@ Lead with what people type (stocks, gold, crypto, no account), then WHAT YOU CAN
 ## What’s New
 
 ```
-The dashboard total is what you hold right now, in euros. The change for the selected period uses the quantities you actually held that day.
-
-Your data still stays on your device.
+The performance line now matches the money you hold. The euro change keeps its own direction, separate from the performance percent.
 ```
 
 ---

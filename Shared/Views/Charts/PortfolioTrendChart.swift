@@ -15,6 +15,8 @@ struct PortfolioTrendChart: View {
     var goldHistory: [(date: Date, value: Double)]? = nil   // Optional Gold comparison
     var msciWorldHistory: [(date: Date, value: Double)]? = nil // Optional MSCI World comparison
     var performancePercent: Double? = nil
+    /// Lots do not cover every share, so part of the line is the quantity held now.
+    var marksIncompleteHistory: Bool = false
     var compact: Bool = false
     var unit: String = "EUR"  // "EUR" or "oz" for gold ounces
     var interactive: Bool = false
@@ -41,16 +43,19 @@ struct PortfolioTrendChart: View {
     private var minValue: Double { valueRange.min }
     private var maxValue: Double { valueRange.max }
 
-    private var valueChange: Double? {
+    /// Time-weighted percent for the badge. The line color follows the euro change of the series.
+    private var performanceBadge: Double? {
         if let performancePercent { return performancePercent }
-        guard let first = history.first?.value, let last = history.last?.value else {
-            return nil
-        }
+        return holdingsPercent
+    }
+
+    private var holdingsPercent: Double? {
+        guard let first = history.first?.value, let last = history.last?.value else { return nil }
         return PortfolioHistoryBuilder.percentChange(from: first, to: last)
     }
 
     private var chartColor: Color {
-        if let change = valueChange {
+        if let change = holdingsPercent {
             return change >= 0 ? .green : .red
         }
         return .blue
@@ -118,7 +123,7 @@ struct PortfolioTrendChart: View {
             let hasGold = goldHistory != nil && !(goldHistory?.isEmpty ?? true)
             let hasMsci = msciWorldHistory != nil && !(msciWorldHistory?.isEmpty ?? true)
             
-            if (valueChange != nil) || hasSp500 || hasGold || hasMsci {
+            if (performanceBadge != nil) || hasSp500 || hasGold || hasMsci {
                 HStack {
                     if hasSp500 || hasGold || hasMsci {
                         HStack(spacing: 12) {
@@ -147,7 +152,7 @@ struct PortfolioTrendChart: View {
                         }
                     }
                     Spacer()
-                    if let change = valueChange {
+                    if let change = performanceBadge {
                         HStack(spacing: 2) {
                             Image(systemName: change >= 0 ? "arrow.up.right" : "arrow.down.right")
                                 .font(.caption2)
@@ -155,7 +160,7 @@ struct PortfolioTrendChart: View {
                                 .font(compact ? .caption2 : .caption)
                                 .fontWeight(.medium)
                         }
-                        .foregroundColor(chartColor)
+                        .foregroundColor(change >= 0 ? .green : .red)
                     }
                 }
                 .padding(.horizontal, compact ? 8 : 16)
@@ -169,6 +174,10 @@ struct PortfolioTrendChart: View {
                     )
                     .foregroundStyle(by: .value("Series", PortfolioChartSeries.portfolio))
                     .interpolationMethod(.linear)
+                    .lineStyle(StrokeStyle(
+                        lineWidth: 2,
+                        dash: marksIncompleteHistory ? [5, 4] : []
+                    ))
                     AreaMark(
                         x: .value("Date", item.date),
                         y: .value("Value", item.value)
@@ -287,6 +296,13 @@ struct PortfolioTrendChart: View {
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 4))
+
+            if marksIncompleteHistory {
+                Text(L10n.chartIncompleteHoldings)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, compact ? 8 : 16)
+            }
         }
         .padding(compact ? 8 : 16)
     }

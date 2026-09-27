@@ -30,12 +30,14 @@ struct EnhancedPortfolioHeroCard: View {
         guard previousValue > 0 else { return 0 }
         return (change / previousValue) * 100
     }
-    
-    private var isPositive: Bool {
-        if viewModel.cachedPeriodTWR != nil {
-            return (viewModel.cachedPeriodTWR ?? 0) >= 0
-        }
-        return change >= 0
+
+    /// Arrow and euro amount follow the holdings change. The percent keeps its own sign.
+    private var euroIsPositive: Bool {
+        change >= 0
+    }
+
+    private var percentIsPositive: Bool {
+        changePercent >= 0
     }
     
     private var goldTotals: (current: Double, previous: Double)? {
@@ -66,7 +68,7 @@ struct EnhancedPortfolioHeroCard: View {
                 ? [Color.green.opacity(0.15), Color.green.opacity(0.05), Color.clear]
                 : [Color.red.opacity(0.15), Color.red.opacity(0.05), Color.clear]
         } else {
-            return isPositive 
+            return euroIsPositive
                 ? [Color.green.opacity(0.15), Color.green.opacity(0.05), Color.clear]
                 : [Color.red.opacity(0.15), Color.red.opacity(0.05), Color.clear]
         }
@@ -198,35 +200,39 @@ struct EnhancedPortfolioHeroCard: View {
         Group {
             if showGoldMode, goldTotals != nil, let goldChg = goldChange, let goldChgPct = goldChangePercent, goldHistory.first?.value ?? 0 > 0 {
                 changePill(
-                    isPositive: isGoldPositive,
+                    euroPositive: isGoldPositive,
+                    percentPositive: isGoldPositive,
                     amount: String(format: "%+.2f oz", goldChg),
                     percent: String(format: "%+.2f%%", goldChgPct)
                 )
             } else if !showGoldMode, previousValue > 0 {
                 changePill(
-                    isPositive: isPositive,
-                    amount: "\(isPositive ? "+" : "")\(formatCurrency(change, currency: "EUR"))",
+                    euroPositive: euroIsPositive,
+                    percentPositive: percentIsPositive,
+                    amount: "\(euroIsPositive ? "+" : "")\(formatCurrency(change, currency: "EUR"))",
                     percent: String(format: "%+.2f%%", changePercent)
                 )
             }
         }
     }
 
-    private func changePill(isPositive: Bool, amount: String, percent: String) -> some View {
+    private func changePill(euroPositive: Bool, percentPositive: Bool, amount: String, percent: String) -> some View {
         HStack(spacing: 6) {
-            Image(systemName: isPositive ? "arrow.up.right" : "arrow.down.right")
+            Image(systemName: euroPositive ? "arrow.up.right" : "arrow.down.right")
                 .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(euroPositive ? .green : .red)
             Text(amount)
                 .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(euroPositive ? .green : .red)
             Text("(\(percent))")
                 .font(.system(size: 13, weight: .medium))
+                .foregroundColor(percentPositive ? .green : .red)
         }
-        .foregroundColor(isPositive ? .green : .red)
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
         .background(
             Capsule()
-                .fill((isPositive ? Color.green : Color.red).opacity(0.15))
+                .fill((euroPositive ? Color.green : Color.red).opacity(0.15))
         )
     }
 

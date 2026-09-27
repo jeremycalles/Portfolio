@@ -130,6 +130,11 @@ extension AppViewModel {
         clearRateCache()
         let cutoffStr = AppDateFormatter.yearMonthDay.string(from: selectedPeriod.comparisonDate)
         let universe = await historyUniverse()
+        let holdings = universe.isins.map { (isin: $0, quantity: universe.fallback[$0] ?? 0) }
+        notePortfolioHistoryIncomplete(PortfolioHistoryBuilder.historyUsesUnrecordedQuantity(
+            holdings: holdings,
+            transactionsByIsin: transactionsByIsin(universe.transactions)
+        ))
         return await aggregatedValueHistory(
             isins: universe.isins,
             fallbackQuantityByIsin: universe.fallback,

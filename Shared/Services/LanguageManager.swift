@@ -421,6 +421,7 @@ struct L10n {
     static var chartClickToToggle: String { manager.localized("chart.clickToToggle") }
     static var chartNoPriceHistory: String { manager.localized("chart.noPriceHistory") }
     static var chartPortfolioLabel: String { manager.localized("chart.portfolioLabel") }
+    static var chartIncompleteHoldings: String { manager.localized("chart.incompleteHoldings") }
     static var chartSp500Comparison: String { manager.localized("chart.sp500Comparison") }
     static var chartGoldComparison: String { manager.localized("chart.goldComparison") }
     static var chartMsciWorldComparison: String { manager.localized("chart.msciWorldComparison") }

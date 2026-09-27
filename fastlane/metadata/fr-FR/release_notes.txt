@@ -1,3 +1,1 @@
-Le total du tableau de bord est ce que vous détenez maintenant, en euros. La variation de la période utilise les quantités réellement détenues ce jour-là.
-
-Vos données restent sur l’appareil.
+La courbe de performance correspond maintenant à l’argent que vous détenez. La variation en euros garde son propre sens, distinct du pourcentage.

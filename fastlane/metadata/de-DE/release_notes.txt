@@ -1,3 +1,1 @@
-Die Summe auf dem Dashboard ist das, was Sie jetzt halten, in Euro. Die Änderung für den gewählten Zeitraum nutzt die Mengen, die Sie an diesem Tag wirklich gehalten haben.
-
-Ihre Daten bleiben auf dem Gerät.
+Die Performance-Linie entspricht jetzt dem Geld, das Sie halten. Die Euro-Änderung behält ihre eigene Richtung, getrennt vom Prozentsatz.

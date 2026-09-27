@@ -132,7 +132,7 @@ struct iOSDashboardView: View {
     }
     
     private var isPositiveChange: Bool {
-        (portfolioChange?.percent ?? 0) >= 0
+        (portfolioChange?.amount ?? 0) >= 0
     }
     
     private var accentColor: Color {
@@ -199,7 +199,8 @@ struct iOSDashboardView: View {
                                 sp500History: sp500History.isEmpty ? nil : sp500History,
                                 goldHistory: goldHistory.isEmpty ? nil : goldHistory,
                                 msciWorldHistory: msciWorldHistory.isEmpty ? nil : msciWorldHistory,
-                                performancePercent: viewModel.cachedPeriodTWR
+                                performancePercent: viewModel.cachedPeriodTWR,
+                                marksIncompleteHistory: viewModel.cachedPortfolioHistoryIncomplete
                             )
                             .frame(height: 250)
                             .padding(.horizontal)
@@ -433,6 +434,7 @@ private struct iOSPortfolioPerformancePanel: View {
                         goldHistory: goldHistory.isEmpty ? nil : goldHistory,
                         msciWorldHistory: msciWorldHistory.isEmpty ? nil : msciWorldHistory,
                         performancePercent: viewModel.cachedPeriodTWR,
+                        marksIncompleteHistory: viewModel.cachedPortfolioHistoryIncomplete,
                         interactive: true,
                         privacyMode: privacyMode
                     )

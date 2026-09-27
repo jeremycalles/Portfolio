@@ -1,3 +1,1 @@
-Het dashboardtotaal is wat je nu aanhoudt, in euro. De wijziging voor de gekozen periode gebruikt de hoeveelheden die je die dag echt had.
-
-Je gegevens blijven op het apparaat.
+De prestatielijn komt nu overeen met het geld dat je aanhoudt. De euro-wijziging houdt zijn eigen richting, los van het percentage.
