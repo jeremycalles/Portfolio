@@ -56,7 +56,7 @@ export BUNDLE_PATH="${BUNDLE_PATH:-$REPO_ROOT/vendor/bundle}"
 if [ -z "${APP_VERSION:-}" ]; then
   APP_VERSION="$(grep -m1 'MARKETING_VERSION = ' "$REPO_ROOT/PortfolioMultiplatform.xcodeproj/project.pbxproj" | sed 's/.*MARKETING_VERSION = \([^;]*\);.*/\1/' | tr -d ' ')"
 fi
-export APP_VERSION="${APP_VERSION:-1.0.8}"
+export APP_VERSION="${APP_VERSION:-1.0.9}"
 # Never recreate a live marketing version (deliver ensure_version! would fail).
 export DELIVER_SKIP_APP_VERSION_UPDATE=true
 
