@@ -1,1 +1,1 @@
-La courbe de performance correspond maintenant à l’argent que vous détenez. La variation en euros garde son propre sens, distinct du pourcentage.
+Les mises à jour des cours en arrière-plan restent planifiées au lieu d’être repoussées à chaque ouverture de l’app.

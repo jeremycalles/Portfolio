@@ -1,1 +1,1 @@
-La línea de rendimiento coincide ahora con el dinero que tienes. El cambio en euros mantiene su propio sentido, aparte del porcentaje.
+Las actualizaciones de precios en segundo plano siguen programadas y no se aplazan cada vez que abres la app.
