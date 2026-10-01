@@ -1,1 +1,1 @@
-La linea di performance ora corrisponde al denaro che detieni. La variazione in euro mantiene il proprio segno, separata dalla percentuale.
+Gli aggiornamenti dei prezzi in background restano programmati e non vengono rimandati a ogni apertura dell’app.

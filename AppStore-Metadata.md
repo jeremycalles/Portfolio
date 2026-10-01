@@ -70,7 +70,7 @@ Lead with what people type (stocks, gold, crypto, no account), then WHAT YOU CAN
 ## What’s New
 
 ```
-The performance line now matches the money you hold. The euro change keeps its own direction, separate from the performance percent.
+Background price updates stay scheduled instead of being pushed back every time you open the app.
 ```
 
 ---
