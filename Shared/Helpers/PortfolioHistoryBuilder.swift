@@ -40,17 +40,20 @@ enum PortfolioHistoryBuilder {
         return max(0, qty)
     }
 
-    /// Quantity actually held on `date`.
-    /// Lots apply on their own dates. The gap between the live quantity and the sum of lots
-    /// is already held before the first lot, so a partial lot does not drop the rest of the position.
+    /// Quantity held on `date`.
+    /// A past day sums buy/sell lots dated on or before that day. No lots, or none yet, contribute 0.
+    /// The gap between those lots and the live holding is not applied to earlier days.
+    /// On `today` the live holding quantity is used, because that quantity is known now.
     static func quantityActuallyHeld(
         transactions: [(date: String, quantityDelta: Double)],
         date: String,
-        liveQuantity: Double
+        liveQuantity: Double,
+        today: String
     ) -> Double {
-        if transactions.isEmpty { return max(0, liveQuantity) }
-        let recorded = transactions.reduce(0.0) { $0 + $1.quantityDelta }
-        var qty = liveQuantity - recorded
+        if date == today {
+            return max(0, liveQuantity)
+        }
+        var qty = 0.0
         for tx in transactions where tx.date <= date {
             qty += tx.quantityDelta
         }
@@ -77,27 +80,15 @@ enum PortfolioHistoryBuilder {
         return dates.sorted()
     }
 
-    /// True when lots do not add up to the live quantity, so the line keeps shares that have no lot.
-    static func historyUsesUnrecordedQuantity(
-        holdings: [(isin: String, quantity: Double)],
-        transactionsByIsin: [String: [(date: String, quantityDelta: Double)]]
-    ) -> Bool {
-        for holding in holdings {
-            let lots = transactionsByIsin[holding.isin] ?? []
-            if lots.isEmpty { continue }
-            let recorded = lots.reduce(0.0) { $0 + $1.quantityDelta }
-            if abs(holding.quantity - recorded) > 0.000_1 { return true }
-        }
-        return false
-    }
-
     /// Builds a converted series. Quantity is what was actually held that day.
-    /// Quantity 0 on a date skips that holding (not in the portfolio yet / already sold).
+    /// Past days use buy/sell lots only. `today` uses each holding's live quantity.
+    /// Quantity 0 on a date skips that holding (nothing recorded yet / already sold).
     static func series(
         dates: [String],
         holdings: [(isin: String, quantity: Double)],
         prices: [String: [(date: String, value: Double)]],
         transactionsByIsin: [String: [(date: String, quantityDelta: Double)]] = [:],
+        today: String,
         convert: (String, Double, String) async -> Double?
     ) async -> [(date: String, value: Double)] {
         guard !holdings.isEmpty else { return [] }
@@ -111,7 +102,8 @@ enum PortfolioHistoryBuilder {
                 let qty = quantityActuallyHeld(
                     transactions: transactionsByIsin[holding.isin] ?? [],
                     date: date,
-                    liveQuantity: holding.quantity
+                    liveQuantity: holding.quantity,
+                    today: today
                 )
                 if qty <= 0 { continue }
                 guard let price = priceOnOrBeforeOrFirst(index: prices[holding.isin] ?? [], date: date) else {

@@ -315,7 +315,6 @@
 "chart.clickToToggle" = "Cliquez pour basculer entre EUR et Onces d'or";
 "chart.noPriceHistory" = "Aucun historique de prix";
 "chart.portfolioLabel" = "Portefeuille";
-"chart.incompleteHoldings" = "Pointillés : certaines quantités n’ont pas de lot d’achat ou de vente, la courbe garde donc ce que vous détenez maintenant.";
 "chart.sp500Comparison" = "S&P 500";
 "chart.goldComparison" = "Or";
 "chart.msciWorldComparison" = "MSCI World";

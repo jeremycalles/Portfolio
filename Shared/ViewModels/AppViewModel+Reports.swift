@@ -70,6 +70,7 @@ extension AppViewModel {
         var items: [QuadrantReportItem] = []
         let comparisonDate = selectedPeriod.comparisonDate
         let comparisonDateStr = AppDateFormatter.yearMonthDay.string(from: comparisonDate)
+        let todayStr = AppDateFormatter.todayString
         let allTx = await db.getAllHoldingTransactions()
         var txByIsin: [String: [(date: String, quantityDelta: Double)]] = [:]
         for tx in allTx {
@@ -89,7 +90,8 @@ extension AppViewModel {
                     let previousQty = PortfolioHistoryBuilder.quantityActuallyHeld(
                         transactions: txByIsin[instrument.isin] ?? [],
                         date: comparisonDateStr,
-                        liveQuantity: realTotal
+                        liveQuantity: realTotal,
+                        today: todayStr
                     )
                     let currency = instrument.currency
                     let currentValueEUR: Double? = latestPrice != nil ? await convertToEUR(value: totalQuantity * latestPrice!.value, fromCurrency: currency, onDate: latestPrice!.date) : nil
@@ -127,7 +129,8 @@ extension AppViewModel {
                 let previousQty = PortfolioHistoryBuilder.quantityActuallyHeld(
                     transactions: txByIsin[instrument.isin] ?? [],
                     date: comparisonDateStr,
-                    liveQuantity: realTotal
+                    liveQuantity: realTotal,
+                    today: todayStr
                 )
                 let currency = instrument.currency
                 let currentValueEUR: Double? = latestPrice != nil ? await convertToEUR(value: totalQuantity * latestPrice!.value, fromCurrency: currency, onDate: latestPrice!.date) : nil
