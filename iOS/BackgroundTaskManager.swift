@@ -30,6 +30,9 @@ class BackgroundTaskManager: ObservableObject {
     @Published private(set) var lastRefreshLogs: [BackgroundTaskLogEntry] = []
     private let logsKey = "backgroundRefreshLogs"
     private let logsMaxCount = 200
+    /// Date we last submitted. The system pending list comes back empty after a
+    /// successful submit, so another launch must not replace the request.
+    private let scheduledRefreshDateKey = "scheduledBackgroundRefreshDate"
     
     private init() {
         loadLogs()
@@ -81,35 +84,50 @@ class BackgroundTaskManager: ObservableObject {
     // MARK: - Task Scheduling
     
     /// Schedule the next background refresh.
-    /// Leaves an existing pending request alone. Cancelling and resubmitting on every
-    /// launch or background transition kept moving `earliestBeginDate` forward, so iOS
-    /// never reached it.
+    /// `getPendingTaskRequests` stays empty after a successful submit, so trusting it
+    /// made every launch submit again and move `earliestBeginDate` three hours later.
+    /// Keep the date we already submitted until that time has passed.
     func scheduleAppRefresh() {
-        BGTaskScheduler.shared.getPendingTaskRequests { [weak self] requests in
-            guard let self else { return }
-            if requests.contains(where: { $0.identifier == Self.refreshTaskIdentifier }) {
-                return
+        let now = Date()
+        if let scheduled = UserDefaults.standard.object(forKey: scheduledRefreshDateKey) as? Date, scheduled > now {
+            Task { @MainActor in
+                self.log("Keeping refresh scheduled for \(scheduled)")
             }
-            let request = BGAppRefreshTaskRequest(identifier: Self.refreshTaskIdentifier)
-            request.earliestBeginDate = Date(timeIntervalSinceNow: self.minimumRefreshInterval)
-            do {
-                try BGTaskScheduler.shared.submit(request)
-                let when = request.earliestBeginDate?.description ?? "unknown"
-                Task { @MainActor in
-                    self.log("Scheduled refresh for \(when)")
-                }
-            } catch {
-                let message = error.localizedDescription
-                Task { @MainActor in
-                    self.log("Failed to schedule refresh: \(message)", isError: true)
-                }
+            return
+        }
+
+        let request = BGAppRefreshTaskRequest(identifier: Self.refreshTaskIdentifier)
+        request.earliestBeginDate = now.addingTimeInterval(minimumRefreshInterval)
+        do {
+            try BGTaskScheduler.shared.submit(request)
+            if let when = request.earliestBeginDate {
+                UserDefaults.standard.set(when, forKey: scheduledRefreshDateKey)
             }
+            let when = request.earliestBeginDate?.description ?? "unknown"
+            Task { @MainActor in
+                self.log("Scheduled refresh for \(when). Background refresh status: \(Self.refreshStatusDescription)")
+            }
+        } catch {
+            let message = error.localizedDescription
+            Task { @MainActor in
+                self.log("Failed to schedule refresh: \(message). Background refresh status: \(Self.refreshStatusDescription)", isError: true)
+            }
+        }
+    }
+
+    private static var refreshStatusDescription: String {
+        switch UIApplication.shared.backgroundRefreshStatus {
+        case .available: return "available"
+        case .denied: return "denied"
+        case .restricted: return "restricted"
+        @unknown default: return "unknown"
         }
     }
     
     // MARK: - Task Handling
     
     private func handleAppRefresh(task: BGAppRefreshTask) {
+        UserDefaults.standard.removeObject(forKey: scheduledRefreshDateKey)
         Task { @MainActor in
             self.log("Starting background refresh")
         }
