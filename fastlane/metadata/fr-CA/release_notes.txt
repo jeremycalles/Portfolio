@@ -1,1 +1,1 @@
-Les mises à jour des cours en arrière-plan restent planifiées au lieu d’être repoussées à chaque ouverture de l’app.
+Les jours passés du graphique ne comptent que les lots d’achat et de vente datés de ce jour ou d’avant. Aujourd’hui utilise toujours la quantité que vous détenez.

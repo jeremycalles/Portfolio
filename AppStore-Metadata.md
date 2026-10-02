@@ -70,7 +70,7 @@ Lead with what people type (stocks, gold, crypto, no account), then WHAT YOU CAN
 ## What’s New
 
 ```
-Background price updates stay scheduled instead of being pushed back every time you open the app.
+Past days on the chart count only buy and sell lots dated on or before that day. Today still uses the quantity you hold now.
 ```
 
 ---

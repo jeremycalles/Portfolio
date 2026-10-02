@@ -315,7 +315,6 @@
 "chart.clickToToggle" = "Click to toggle between EUR and Gold ounces";
 "chart.noPriceHistory" = "No price history";
 "chart.portfolioLabel" = "Portfolio";
-"chart.incompleteHoldings" = "Dashed: some shares have no buy or sell lot, so this line keeps the quantity you hold now.";
 "chart.sp500Comparison" = "S&P 500";
 "chart.goldComparison" = "Gold";
 "chart.msciWorldComparison" = "MSCI World";

@@ -30,17 +30,74 @@ struct PortfolioHistoryBuilderTests {
         #expect(PortfolioHistoryBuilder.priceOnOrBeforeOrFirst(index: [], date: "2026-01-01") == nil)
     }
 
-    @Test("partial lots do not erase the rest of a position")
-    func quantityActuallyHeldKeepsUnrecordedQuantity() {
+    @Test("past days use only lots dated on or before that day")
+    func quantityActuallyHeldUsesLotsOnlyBeforeToday() {
         let lots = [(date: "2026-09-24", quantityDelta: 67.4778)]
         let live = 631.6014
-        let before = PortfolioHistoryBuilder.quantityActuallyHeld(transactions: lots, date: "2026-09-20", liveQuantity: live)
-        #expect(abs(before - (live - 67.4778)) < 0.000_001)
-        #expect(abs(PortfolioHistoryBuilder.quantityActuallyHeld(transactions: lots, date: "2026-09-24", liveQuantity: live) - live) < 0.000_001)
-        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(transactions: [], date: "2026-09-20", liveQuantity: live) == live)
+        let today = "2026-10-01"
+        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(
+            transactions: lots, date: "2026-09-20", liveQuantity: live, today: today
+        ) == 0)
+        #expect(abs(PortfolioHistoryBuilder.quantityActuallyHeld(
+            transactions: lots, date: "2026-09-24", liveQuantity: live, today: today
+        ) - 67.4778) < 0.000_001)
+        #expect(abs(PortfolioHistoryBuilder.quantityActuallyHeld(
+            transactions: lots, date: "2026-09-30", liveQuantity: live, today: today
+        ) - 67.4778) < 0.000_001)
+        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(
+            transactions: lots, date: today, liveQuantity: live, today: today
+        ) == live)
+    }
+
+    @Test("no lots contribute nothing before today and the live quantity today")
+    func quantityActuallyHeldEmptyLots() {
+        let live = 631.6014
+        let today = "2026-10-01"
+        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(
+            transactions: [], date: "2026-09-20", liveQuantity: live, today: today
+        ) == 0)
+        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(
+            transactions: [], date: today, liveQuantity: live, today: today
+        ) == live)
+        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(
+            transactions: [], date: today, liveQuantity: -2, today: today
+        ) == 0)
+    }
+
+    @Test("a lot that matches the live quantity is zero before its date")
+    func quantityActuallyHeldFullLot() {
         let fullLot = [(date: "2026-09-26", quantityDelta: 1644.43)]
-        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(transactions: fullLot, date: "2026-09-20", liveQuantity: 1644.43) == 0)
-        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(transactions: fullLot, date: "2026-09-26", liveQuantity: 1644.43) == 1644.43)
+        let today = "2026-10-01"
+        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(
+            transactions: fullLot, date: "2026-09-20", liveQuantity: 1644.43, today: today
+        ) == 0)
+        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(
+            transactions: fullLot, date: "2026-09-26", liveQuantity: 1644.43, today: today
+        ) == 1644.43)
+        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(
+            transactions: fullLot, date: today, liveQuantity: 1644.43, today: today
+        ) == 1644.43)
+    }
+
+    @Test("a sell changes past days from lots, and today still uses the live quantity")
+    func quantityActuallyHeldSellThenLive() {
+        let lots = [
+            (date: "2026-09-01", quantityDelta: 10.0),
+            (date: "2026-09-15", quantityDelta: -4.0)
+        ]
+        let today = "2026-10-01"
+        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(
+            transactions: lots, date: "2026-08-31", liveQuantity: 4, today: today
+        ) == 0)
+        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(
+            transactions: lots, date: "2026-09-10", liveQuantity: 4, today: today
+        ) == 10)
+        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(
+            transactions: lots, date: "2026-09-15", liveQuantity: 4, today: today
+        ) == 6)
+        #expect(PortfolioHistoryBuilder.quantityActuallyHeld(
+            transactions: lots, date: today, liveQuantity: 4, today: today
+        ) == 4)
     }
 
     @Test("chartDates always includes the period start and today")
@@ -98,13 +155,15 @@ struct PortfolioHistoryBuilderTests {
         let series = await PortfolioHistoryBuilder.series(
             dates: dates,
             holdings: holdings,
-            prices: prices
+            prices: prices,
+            transactionsByIsin: ["AAPL": [(date: "2025-12-01", quantityDelta: 2.0)]],
+            today: "2026-01-31"
         ) { _, native, _ in native }
 
         #expect(series.first?.date == "2026-01-01")
-        #expect(series.first?.value == 200) // 2 × first price 100, carried back to Jan 1
+        #expect(series.first?.value == 200) // 2 shares from the December lot × first price 100, carried back to Jan 1
         #expect(series.last?.date == "2026-01-31")
-        #expect(series.last?.value == 240) // 2 × 120
+        #expect(series.last?.value == 240) // today: live quantity 2 × 120
 
         let percent = PortfolioHistoryBuilder.percentChange(from: series.first!.value, to: series.last!.value)
         #expect(percent == 20.0)
@@ -125,7 +184,12 @@ struct PortfolioHistoryBuilderTests {
         let series = await PortfolioHistoryBuilder.series(
             dates: dates,
             holdings: holdings,
-            prices: prices
+            prices: prices,
+            transactionsByIsin: [
+                "AAPL": [(date: "2025-12-01", quantityDelta: 1.0)],
+                "GOLD": [(date: "2025-12-01", quantityDelta: 2.0)]
+            ],
+            today: "2026-01-31"
         ) { _, native, _ in native }
 
         // Jan 1 uses AAPL 100 + GOLD first-known 50×2 = 200, not 100 (GOLD omitted)
@@ -144,7 +208,9 @@ struct PortfolioHistoryBuilderTests {
         let series = await PortfolioHistoryBuilder.series(
             dates: dates,
             holdings: holdings,
-            prices: prices
+            prices: prices,
+            transactionsByIsin: ["USD-ETF": [(date: "2025-12-01", quantityDelta: 1.0)]],
+            today: "2026-01-15"
         ) { _, native, date in
             date == "2026-01-02" ? nil : native
         }
@@ -202,7 +268,8 @@ struct PortfolioHistoryBuilderTests {
             dates: dates,
             holdings: holdings,
             prices: ["AAPL": aapl],
-            transactionsByIsin: lots
+            transactionsByIsin: lots,
+            today: "2026-01-31"
         ) { _, native, _ in native }
 
         let start = series.first { $0.date == "2026-01-01" }
@@ -210,6 +277,41 @@ struct PortfolioHistoryBuilderTests {
         let onBuy = series.first { $0.date == "2026-01-15" }
         #expect(onBuy?.value == 110)
         #expect(series.last?.value == 120)
+    }
+
+    @Test("holdings with no lots contribute nothing until today")
+    func seriesEmptyLotsOnlyCountToday() async {
+        let holdings = [(isin: "AAPL", quantity: 2.0)]
+        let dates = ["2026-01-01", "2026-01-15", "2026-01-31"]
+        let series = await PortfolioHistoryBuilder.series(
+            dates: dates,
+            holdings: holdings,
+            prices: ["AAPL": aapl],
+            today: "2026-01-31"
+        ) { _, native, _ in native }
+
+        #expect(series.first { $0.date == "2026-01-01" }?.value == 0)
+        #expect(series.first { $0.date == "2026-01-15" }?.value == 0)
+        #expect(series.last?.value == 240) // today: 2 × carried price 120
+    }
+
+    @Test("a partial lot does not paint today's remainder onto earlier days")
+    func seriesPartialLotDoesNotPaintBackward() async {
+        let holdings = [(isin: "AAPL", quantity: 3.0)]
+        let lots = ["AAPL": [(date: "2026-01-15", quantityDelta: 1.0)]]
+        let dates = ["2026-01-02", "2026-01-15", "2026-01-30", "2026-01-31"]
+        let series = await PortfolioHistoryBuilder.series(
+            dates: dates,
+            holdings: holdings,
+            prices: ["AAPL": aapl],
+            transactionsByIsin: lots,
+            today: "2026-01-31"
+        ) { _, native, _ in native }
+
+        #expect(series.first { $0.date == "2026-01-02" }?.value == 0)
+        #expect(series.first { $0.date == "2026-01-15" }?.value == 110)
+        #expect(series.first { $0.date == "2026-01-30" }?.value == 120)
+        #expect(series.last?.value == 360)
     }
 
     @Test("TWR strips a mid-period buy out of performance")
@@ -224,7 +326,8 @@ struct PortfolioHistoryBuilderTests {
             dates: dates,
             holdings: holdings,
             prices: ["AAPL": aapl],
-            transactionsByIsin: lots
+            transactionsByIsin: lots,
+            today: "2026-01-31"
         ) { _, native, _ in native }
 
         #expect(nav.first?.value == 100)

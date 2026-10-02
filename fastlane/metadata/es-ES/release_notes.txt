@@ -1,1 +1,1 @@
-Las actualizaciones de precios en segundo plano siguen programadas y no se aplazan cada vez que abres la app.
+Los días pasados del gráfico solo cuentan los lotes de compra y venta fechados ese día o antes. Hoy se usa la cantidad que tienes ahora.

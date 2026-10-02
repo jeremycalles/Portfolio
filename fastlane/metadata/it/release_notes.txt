@@ -1,1 +1,1 @@
-Gli aggiornamenti dei prezzi in background restano programmati e non vengono rimandati a ogni apertura dell’app.
+I giorni passati del grafico contano solo i lotti di acquisto e vendita datati quel giorno o prima. Oggi si usa la quantità che detieni ora.

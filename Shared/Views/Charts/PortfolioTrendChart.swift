@@ -15,8 +15,6 @@ struct PortfolioTrendChart: View {
     var goldHistory: [(date: Date, value: Double)]? = nil   // Optional Gold comparison
     var msciWorldHistory: [(date: Date, value: Double)]? = nil // Optional MSCI World comparison
     var performancePercent: Double? = nil
-    /// Lots do not cover every share, so part of the line is the quantity held now.
-    var marksIncompleteHistory: Bool = false
     var compact: Bool = false
     var unit: String = "EUR"  // "EUR" or "oz" for gold ounces
     var interactive: Bool = false
@@ -174,10 +172,7 @@ struct PortfolioTrendChart: View {
                     )
                     .foregroundStyle(by: .value("Series", PortfolioChartSeries.portfolio))
                     .interpolationMethod(.linear)
-                    .lineStyle(StrokeStyle(
-                        lineWidth: 2,
-                        dash: marksIncompleteHistory ? [5, 4] : []
-                    ))
+                    .lineStyle(StrokeStyle(lineWidth: 2))
                     AreaMark(
                         x: .value("Date", item.date),
                         y: .value("Value", item.value)
@@ -296,13 +291,6 @@ struct PortfolioTrendChart: View {
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 4))
-
-            if marksIncompleteHistory {
-                Text(L10n.chartIncompleteHoldings)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, compact ? 8 : 16)
-            }
         }
         .padding(compact ? 8 : 16)
     }

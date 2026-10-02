@@ -34,8 +34,6 @@ class AppViewModel: ObservableObject {
     @Published private(set) var lastInstrumentUpdateDate: Date? = nil
     @Published private(set) var cachedHoldingDetailsByAccount: [Int: [HoldingDetail]] = [:]
     @Published private(set) var cachedPeriodTWR: Double? = nil
-    /// True when the chart keeps shares whose lots do not add up to the live quantity.
-    @Published private(set) var cachedPortfolioHistoryIncomplete: Bool = false
     
     // Backfill logs for single instrument
     @Published var backfillLogs: [String] = []
@@ -132,10 +130,6 @@ class AppViewModel: ObservableObject {
         currencyByIsin = dict
     }
     
-    func notePortfolioHistoryIncomplete(_ incomplete: Bool) {
-        cachedPortfolioHistoryIncomplete = incomplete
-    }
-
     /// Recomputes all cached dashboard data. Called after refreshAll(), price updates, and period changes.
     func recomputeDashboardCache() async {
         cachedPortfolioHistory = await getPortfolioValueHistory()
