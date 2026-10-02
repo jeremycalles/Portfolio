@@ -1,34 +1,34 @@
 import Foundation
 
 extension AppViewModel {
-    /// Price used as the period baseline. Falls back to the earliest known price so a
-    /// holding without history before the cutoff is counted as unchanged, not omitted
-    /// from previous totals (which inflated period %).
-    private func comparisonPrice(forIsin isin: String, latestPrice: Price?, comparisonDateStr: String) async -> Price? {
-        if selectedPeriod == .oneDay, let currentDate = latestPrice?.date {
-            return await db.getPriceBefore(forIsin: isin, date: currentDate)
-        }
-        if let price = await db.getPriceOnOrBefore(forIsin: isin, date: comparisonDateStr) {
-            return price
-        }
-        return await db.getEarliestPrice(forIsin: isin)
-    }
-
     // MARK: - Reports
     func getHoldingDetails(forAccount accountId: Int) async -> [HoldingDetail] {
+        await getAllHoldingDetailsByAccount()[accountId] ?? []
+    }
+
+    /// Resolves prices and ledgers in bulk, avoiding one database round-trip per holding.
+    func getAllHoldingDetailsByAccount() async -> [Int: [HoldingDetail]] {
         clearRateCache()
-        let accountHoldings = holdings.filter { $0.accountId == accountId }
         let comparisonDate = selectedPeriod.comparisonDate
         let comparisonDateStr = AppDateFormatter.yearMonthDay.string(from: comparisonDate)
-        let todayStr = AppDateFormatter.yearMonthDay.string(from: Date())
-        
-        var result: [HoldingDetail] = []
-        for holding in accountHoldings {
+        let todayStr = AppDateFormatter.todayString
+        let histories = await db.getPriceHistory(forIsins: Array(Set(holdings.map(\.isin))))
+        let pricesByIsin = Dictionary(grouping: histories, by: \.isin)
+        let transactions = await db.getAllHoldingTransactions()
+        let transactionsByPosition = Dictionary(grouping: transactions) { "\($0.accountId)|\($0.isin)" }
+        var result: [Int: [HoldingDetail]] = [:]
+
+        for holding in holdings {
             guard let instrument = instruments.first(where: { $0.isin == holding.isin }) else { continue }
-            
-            let latestPrice = await db.getLatestPrice(forIsin: holding.isin)
-            let previousPrice = await comparisonPrice(forIsin: holding.isin, latestPrice: latestPrice, comparisonDateStr: comparisonDateStr)
-            let txs = await db.getHoldingTransactions(accountId: holding.accountId, isin: holding.isin)
+            let priceHistory = pricesByIsin[holding.isin] ?? []
+            let latestPrice = priceHistory.last
+            let previousPrice: Price?
+            if selectedPeriod == .oneDay, let currentDate = latestPrice?.date {
+                previousPrice = priceHistory.last { $0.date < currentDate }
+            } else {
+                previousPrice = priceHistory.last { $0.date <= comparisonDateStr }
+            }
+            let txs = transactionsByPosition["\(holding.accountId)|\(holding.isin)"] ?? []
             let previousQty = PortfolioHistoryBuilder.quantityOnDate(
                 transactions: txs.map { ($0.date, $0.quantityDelta) },
                 date: comparisonDateStr,
@@ -48,7 +48,7 @@ extension AppViewModel {
                 previousValueEURConverted = await convertToEUR(value: value, fromCurrency: currency, onDate: previousPrice?.date ?? comparisonDateStr)
             }
             
-            result.append(HoldingDetail(
+            result[holding.accountId, default: []].append(HoldingDetail(
                 accountId: holding.accountId,
                 isin: holding.isin,
                 instrumentName: instrument.displayName,
@@ -66,96 +66,42 @@ extension AppViewModel {
     }
     
     func getQuadrantReport() async -> [QuadrantReportItem] {
-        clearRateCache()
-        var items: [QuadrantReportItem] = []
-        let comparisonDate = selectedPeriod.comparisonDate
-        let comparisonDateStr = AppDateFormatter.yearMonthDay.string(from: comparisonDate)
-        let todayStr = AppDateFormatter.todayString
-        let allTx = await db.getAllHoldingTransactions()
-        var txByIsin: [String: [(date: String, quantityDelta: Double)]] = [:]
-        for tx in allTx {
-            txByIsin[tx.isin, default: []].append((tx.date, tx.quantityDelta))
+        getQuadrantReport(from: await getAllHoldingDetailsByAccount())
+    }
+
+    func getQuadrantReport(
+        from detailsByAccount: [Int: [HoldingDetail]]
+    ) -> [QuadrantReportItem] {
+        let groupedByIsin = Dictionary(grouping: detailsByAccount.values.flatMap { $0 }, by: \.isin)
+        var detailsByQuadrant: [Int?: [HoldingDetail]] = [:]
+
+        for (isin, details) in groupedByIsin {
+            guard let first = details.first,
+                  let instrument = instruments.first(where: { $0.isin == isin }) else { continue }
+            let aggregate = HoldingDetail(
+                accountId: 0,
+                isin: isin,
+                instrumentName: first.instrumentName,
+                instrumentCurrency: first.instrumentCurrency,
+                ticker: first.ticker,
+                quantity: details.reduce(0) { $0 + $1.quantity },
+                currentPrice: first.currentPrice,
+                previousPrice: first.previousPrice,
+                priceDate: first.priceDate,
+                currentValueEUR: details.compactMap(\.currentValueEUR).reduce(0, +),
+                previousValueEUR: details.compactMap(\.previousValueEUR).reduce(0, +)
+            )
+            detailsByQuadrant[instrument.quadrantId, default: []].append(aggregate)
         }
-        
-        for quadrant in quadrants {
-            let quadrantInstruments = instruments.filter { $0.quadrantId == quadrant.id }
-            var holdingDetails: [HoldingDetail] = []
-            
-            for instrument in quadrantInstruments {
-                let latestPrice = await db.getLatestPrice(forIsin: instrument.isin)
-                let totalQuantity = await effectiveTotalQuantity(forIsin: instrument.isin, currentPrice: latestPrice?.value)
-                if totalQuantity > 0 {
-                    let previousPrice = await comparisonPrice(forIsin: instrument.isin, latestPrice: latestPrice, comparisonDateStr: comparisonDateStr)
-                    let realTotal = await db.getTotalQuantity(forIsin: instrument.isin)
-                    let previousQty = PortfolioHistoryBuilder.quantityActuallyHeld(
-                        transactions: txByIsin[instrument.isin] ?? [],
-                        date: comparisonDateStr,
-                        liveQuantity: realTotal,
-                        today: todayStr
-                    )
-                    let currency = instrument.currency
-                    let currentValueEUR: Double? = latestPrice != nil ? await convertToEUR(value: totalQuantity * latestPrice!.value, fromCurrency: currency, onDate: latestPrice!.date) : nil
-                    let previousValueEUR: Double? = (previousQty > 0 && previousPrice != nil) ? await convertToEUR(value: previousQty * previousPrice!.value, fromCurrency: currency, onDate: previousPrice!.date) : nil
-                    holdingDetails.append(HoldingDetail(
-                        accountId: 0,
-                        isin: instrument.isin,
-                        instrumentName: instrument.displayName,
-                        instrumentCurrency: currency,
-                        ticker: instrument.ticker,
-                        quantity: totalQuantity,
-                        currentPrice: latestPrice?.value,
-                        previousPrice: previousPrice?.value,
-                        priceDate: latestPrice?.date,
-                        currentValueEUR: currentValueEUR,
-                        previousValueEUR: previousValueEUR
-                    ))
-                }
-            }
-            
-            if !holdingDetails.isEmpty {
-                items.append(QuadrantReportItem(quadrant: quadrant, holdings: holdingDetails))
-            }
+
+        var result = quadrants.compactMap { quadrant -> QuadrantReportItem? in
+            guard let details = detailsByQuadrant[quadrant.id], !details.isEmpty else { return nil }
+            return QuadrantReportItem(quadrant: quadrant, holdings: details)
         }
-        
-        let unassignedInstruments = instruments.filter { $0.quadrantId == nil }
-        var unassignedDetails: [HoldingDetail] = []
-        
-        for instrument in unassignedInstruments {
-            let latestPrice = await db.getLatestPrice(forIsin: instrument.isin)
-            let totalQuantity = await effectiveTotalQuantity(forIsin: instrument.isin, currentPrice: latestPrice?.value)
-            if totalQuantity > 0 {
-                let previousPrice = await comparisonPrice(forIsin: instrument.isin, latestPrice: latestPrice, comparisonDateStr: comparisonDateStr)
-                let realTotal = await db.getTotalQuantity(forIsin: instrument.isin)
-                let previousQty = PortfolioHistoryBuilder.quantityActuallyHeld(
-                    transactions: txByIsin[instrument.isin] ?? [],
-                    date: comparisonDateStr,
-                    liveQuantity: realTotal,
-                    today: todayStr
-                )
-                let currency = instrument.currency
-                let currentValueEUR: Double? = latestPrice != nil ? await convertToEUR(value: totalQuantity * latestPrice!.value, fromCurrency: currency, onDate: latestPrice!.date) : nil
-                let previousValueEUR: Double? = (previousQty > 0 && previousPrice != nil) ? await convertToEUR(value: previousQty * previousPrice!.value, fromCurrency: currency, onDate: previousPrice!.date) : nil
-                unassignedDetails.append(HoldingDetail(
-                    accountId: 0,
-                    isin: instrument.isin,
-                    instrumentName: instrument.displayName,
-                    instrumentCurrency: currency,
-                    ticker: instrument.ticker,
-                    quantity: totalQuantity,
-                    currentPrice: latestPrice?.value,
-                    previousPrice: previousPrice?.value,
-                    priceDate: latestPrice?.date,
-                    currentValueEUR: currentValueEUR,
-                    previousValueEUR: previousValueEUR
-                ))
-            }
+        if let details = detailsByQuadrant[nil], !details.isEmpty {
+            result.append(QuadrantReportItem(quadrant: nil, holdings: details))
         }
-        
-        if !unassignedDetails.isEmpty {
-            items.append(QuadrantReportItem(quadrant: nil, holdings: unassignedDetails))
-        }
-        
-        return items
+        return result
     }
     
     /// Returns grand totals in EUR (all currencies converted)
@@ -187,14 +133,21 @@ extension AppViewModel {
     }
     
     func getAllHoldingsWithQuantity() async -> [(isin: String, name: String, quantity: Double)] {
-        var result: [(isin: String, name: String, quantity: Double)] = []
-        for instrument in instruments {
-            let latestPrice = await db.getLatestPrice(forIsin: instrument.isin)
-            let totalQuantity = await effectiveTotalQuantity(forIsin: instrument.isin, currentPrice: latestPrice?.value)
+        let totals = Dictionary(grouping: holdings, by: \.isin)
+            .mapValues { $0.reduce(0) { $0 + $1.quantity } }
+        let latestPrices = await db.getLatestPrices(forIsins: instruments.map(\.isin))
+        let priceByISIN = Dictionary(uniqueKeysWithValues: latestPrices.map { ($0.isin, $0.value) })
+        return instruments.compactMap { instrument in
+            let original = totals[instrument.isin] ?? 0
+            let totalQuantity = demoMode.getTotalRandomizedQuantity(
+                forIsin: instrument.isin,
+                originalTotal: original,
+                currentPrice: priceByISIN[instrument.isin]
+            )
             if totalQuantity > 0 {
-                result.append((isin: instrument.isin, name: instrument.displayName, quantity: totalQuantity))
+                return (isin: instrument.isin, name: instrument.displayName, quantity: totalQuantity)
             }
+            return nil
         }
-        return result
     }
 }

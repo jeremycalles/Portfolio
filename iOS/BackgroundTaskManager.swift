@@ -115,6 +115,16 @@ class BackgroundTaskManager: ObservableObject {
         }
     }
 
+    /// System permission for background refresh, for the Settings screen.
+    var systemRefreshStatusLabel: String {
+        switch UIApplication.shared.backgroundRefreshStatus {
+        case .available: return L10n.settingsBackgroundRefreshAvailable
+        case .denied: return L10n.settingsBackgroundRefreshDenied
+        case .restricted: return L10n.settingsBackgroundRefreshRestricted
+        @unknown default: return L10n.generalNA
+        }
+    }
+
     private static var refreshStatusDescription: String {
         switch UIApplication.shared.backgroundRefreshStatus {
         case .available: return "available"

@@ -27,7 +27,7 @@ struct iOSAllHoldingsView: View {
         .listStyle(.insetGrouped)
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: L10n.holdingsSearchPlaceholder)
         .navigationDestination(item: $selectedHolding) { item in
-            EditHoldingView(accountId: item.accountId, isin: item.isin)
+            HoldingDetailView(accountId: item.accountId, isin: item.isin, privacyMode: privacyMode)
         }
         .refreshable {
             await viewModel.startRefreshTask(showCompletionDelay: false).value
@@ -54,7 +54,7 @@ struct iOSAllHoldingsView: View {
         .listStyle(.insetGrouped)
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: L10n.holdingsSearchPlaceholder)
         .navigationDestination(item: $selectedHolding) { item in
-            EditHoldingView(accountId: item.accountId, isin: item.isin)
+            HoldingDetailView(accountId: item.accountId, isin: item.isin, privacyMode: privacyMode)
         }
         .refreshable {
             await viewModel.startRefreshTask(showCompletionDelay: false).value

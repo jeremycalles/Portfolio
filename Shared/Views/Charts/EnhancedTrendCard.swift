@@ -7,9 +7,11 @@ struct EnhancedTrendCard: View {
     let history: [(date: Date, value: Double)]
     let currentValue: Double?
     let privacyMode: Bool
+    var performancePercent: Double? = nil
     var unit: String = "EUR"  // "EUR" or "oz" for gold ounces
     
     private var changePercent: Double? {
+        if let performancePercent { return performancePercent }
         guard let first = history.first?.value,
               let last = history.last?.value else { return nil }
         return PortfolioHistoryBuilder.percentChange(from: first, to: last)
@@ -17,9 +19,9 @@ struct EnhancedTrendCard: View {
     
     private var chartColor: Color {
         if let change = changePercent {
-            return change >= 0 ? .green : .red
+            return change >= 0 ? AppTheme.gain : AppTheme.loss
         }
-        return .blue
+        return AppTheme.portfolio
     }
     
     private func formatValue(_ value: Double) -> String {
@@ -55,12 +57,12 @@ struct EnhancedTrendCard: View {
                         Text(String(format: "%.1f%%", abs(change)))
                             .font(.system(size: 11, weight: .semibold))
                     }
-                    .foregroundColor(change >= 0 ? .green : .red)
+                    .foregroundColor(change >= 0 ? AppTheme.gain : AppTheme.loss)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     .background(
                         Capsule()
-                            .fill((change >= 0 ? Color.green : Color.red).opacity(0.12))
+                            .fill((change >= 0 ? AppTheme.gain : AppTheme.loss).opacity(0.12))
                     )
                 }
             }
@@ -71,11 +73,11 @@ struct EnhancedTrendCard: View {
                 if let startValue = history.first?.value {
                     if privacyMode {
                         Text("•••")
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .font(.title3.weight(.bold))
                             .foregroundColor(.secondary)
                     } else {
                         Text(formatValue(startValue))
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .font(.title3.weight(.bold))
                     }
                 }
                 Spacer()
@@ -83,11 +85,11 @@ struct EnhancedTrendCard: View {
                 if let value = currentValue {
                     if privacyMode {
                         Text("•••")
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .font(.title3.weight(.bold))
                             .foregroundColor(.secondary)
                     } else {
                         Text(formatValue(value))
-                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .font(.title3.weight(.bold))
                     }
                 }
             }

@@ -14,7 +14,7 @@ struct EnhancedAllocationRingChart: View {
             let report = viewModel.cachedQuadrantReport
             var data: [(name: String, value: Double, color: Color)] = []
             for (index, item) in report.enumerated() {
-                let totalValue = item.totalValue.values.reduce(0, +)
+                let totalValue = item.totalValueEUR
                 if totalValue > 0 {
                     let name = item.quadrant?.name ?? L10n.instrumentsUnassigned
                     let color = colors[index % colors.count]
@@ -26,9 +26,7 @@ struct EnhancedAllocationRingChart: View {
             var data: [(name: String, value: Double, color: Color)] = []
             for (index, account) in viewModel.bankAccounts.enumerated() {
                 let details = viewModel.cachedHoldingDetailsByAccount[account.id] ?? []
-                let totalValue = details.reduce(0.0) { sum, detail in
-                    sum + (detail.currentPrice ?? 0) * detail.quantity
-                }
+                let totalValue = details.compactMap(\.currentValueEUR).reduce(0, +)
                 if totalValue > 0 {
                     let color = colors[index % colors.count]
                     data.append((name: account.displayName, value: totalValue, color: color))

@@ -129,6 +129,7 @@
 "instruments.noQuadrantsAvailable" = "Aucun quadrant disponible";
 "instruments.priceDetails" = "Détails du prix";
 "instruments.currentPrice" = "Prix";
+"instruments.validateTicker" = "Valider le ticker";
 "instruments.currency" = "Devise";
 "instruments.count" = "%d instruments";
 
@@ -189,9 +190,34 @@
 "holdings.noMatches" = "Aucune position ne correspond";
 "holdings.adjustFilters" = "Modifiez la recherche, les filtres ou le compte.";
 "holdings.weightValue" = "%@ du portefeuille";
+"holdings.transactions" = "Opérations";
+"holdings.addTransaction" = "Ajouter une opération";
+"holdings.buy" = "Achat";
+"holdings.sell" = "Vente";
+"holdings.adjustment" = "Ajustement";
+"holdings.opening" = "Solde initial";
+"holdings.unitPrice" = "Prix unitaire";
+"holdings.fees" = "Frais";
+"holdings.note" = "Note";
+"holdings.averageCost" = "PRU";
+"holdings.unrealizedPnL" = "Plus-value latente";
+"holdings.realizedPnL" = "Plus-value réalisée";
+"holdings.closePosition" = "Clôturer la position";
+"holdings.closeConfirmation" = "Clôturer cette position tout en conservant son historique d’opérations ?";
+"holdings.adjustmentDirection" = "Sens de l’ajustement";
+"holdings.increase" = "Augmenter";
+"holdings.decrease" = "Réduire";
+"holdings.deleteWithHistory" = "Supprimer avec l’historique";
+"holdings.deleteHistoryConfirmation" = "Cette action supprime définitivement la position et toutes ses opérations.";
+"holdings.noTransactions" = "Aucune opération enregistrée";
+"ledger.invalidQuantity" = "Saisissez une quantité supérieure à zéro.";
+"ledger.futureDate" = "Une opération ne peut pas être datée dans le futur.";
+"ledger.invalidOperation" = "Cette opération n’est pas valide.";
+"ledger.insufficientQuantity" = "Seulement %.4f unités sont disponibles à cette date.";
 
 // MARK: - Quadrants
 "quadrants.addQuadrant" = "Ajouter un quadrant";
+"quadrants.name" = "Nom du quadrant";
 "quadrants.quadrantDetails" = "Détails du quadrant";
 "quadrants.quadrantDetailsHint" = "Exemples : 'Actions de croissance', 'Obligations', 'Immobilier', 'Or'";
 "quadrants.quadrantAssignment" = "Assignation au quadrant";
@@ -226,6 +252,7 @@
 "settings.demoModeActive" = "Mode démo actif - les valeurs sont aléatoires";
 "settings.demoModeRandomize" = "Aléatoire";
 "settings.title" = "Paramètres";
+"settings.display" = "Affichage";
 "settings.language" = "Langue";
 "settings.languageDescription" = "Sélectionnez la langue de l'application";
 "settings.english" = "Anglais";
@@ -239,6 +266,10 @@
 "settings.database" = "Base de données";
 "settings.background" = "Arrière-plan";
 "settings.importExportHint" = "Utilisez Import/Export pour transférer manuellement votre base de données entre appareils.";
+"settings.importExportPathHint" = "Utilisez Import/Export pour transférer les données entre appareils. Le chemin indique l’emplacement de la base.";
+"settings.path" = "Chemin";
+"settings.statistics" = "Statistiques";
+"settings.accountsHint" = "Les comptes bancaires organisent vos positions. Balayez vers la gauche pour supprimer.";
 "settings.importDatabase" = "Importer la base de données";
 "settings.exportDatabase" = "Exporter la base de données";
 "settings.databaseImportExport" = "Import/Export de la base";
@@ -247,6 +278,12 @@
 "settings.backgroundRefresh" = "Actualisation en arrière-plan";
 "settings.backgroundRefreshInterval" = "Toutes les 3 heures";
 "settings.lastRefresh" = "Dernière actualisation";
+"settings.nextRefresh" = "Prochaine actualisation";
+"settings.nextRefreshDue" = "Due maintenant";
+"settings.backgroundRefreshStatus" = "Actualisation système";
+"settings.backgroundRefreshAvailable" = "Disponible";
+"settings.backgroundRefreshDenied" = "Désactivée dans Réglages";
+"settings.backgroundRefreshRestricted" = "Restreinte";
 "settings.backgroundUpdates" = "Mises à jour en arrière-plan";
 "settings.backgroundUpdatesDescription" = "Les prix sont automatiquement mis à jour en arrière-plan lorsque l'app n'est pas utilisée. Appui long pour voir les logs.";
 "settings.automaticUpdates" = "Mises à jour automatiques";
@@ -273,6 +310,12 @@
 "settings.storageLogsDescription" = "Logs des connexions à la base et des sauvegardes.";
 "settings.databaseStoredLocally" = "Stocké localement";
 "settings.backupToICloudNow" = "Sauvegarder sur iCloud maintenant";
+"settings.backup" = "Sauvegarde";
+"settings.backupCompleted" = "Sauvegarde terminée.";
+"settings.databaseImport" = "Import de la base de données";
+"settings.cannotAccessSelectedFile" = "Impossible d’accéder au fichier sélectionné.";
+"settings.importSucceededRestart" = "Base de données importée. Redémarrez l’app pour charger les nouvelles données.";
+"settings.importFailed" = "Échec de l’import : %@";
 "settings.dontAskAgain" = "Ne plus demander";
 "settings.notNow" = "Pas maintenant";
 "settings.inAppTimerActive" = "Minuteur interne actif";
@@ -318,6 +361,10 @@
 "chart.sp500Comparison" = "S&P 500";
 "chart.goldComparison" = "Or";
 "chart.msciWorldComparison" = "MSCI World";
+"chart.investedCapital" = "Capital investi";
+"chart.valueView" = "Valeur";
+"chart.percentView" = "Performance %";
+"chart.dateAxis" = "Date";
 "chart.moreItems" = "+%d autres";
 
 // MARK: - Privacy

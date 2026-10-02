@@ -1,1 +1,1 @@
-Voorbije dagen in de grafiek tellen alleen koop- en verkooplots tot en met die dag. Vandaag geldt de hoeveelheid die je nu aanhoudt.
+De positiehistorie is nu volledig gebaseerd op bewerkbare aankopen, verkopen en correcties. Nieuwe grafieken tonen geïnvesteerd kapitaal, transacties en tijdgewogen rendement. Positiedetails bevatten gemiddelde kostprijs en gerealiseerde of ongerealiseerde winst. Ook toegankelijkheid en geplande Mac-verversing zijn verbeterd.

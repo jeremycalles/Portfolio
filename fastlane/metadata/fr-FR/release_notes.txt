@@ -1,1 +1,1 @@
-Les jours passés du graphique ne comptent que les lots d’achat et de vente datés de ce jour ou d’avant. Aujourd’hui utilise toujours la quantité que vous détenez.
+L’historique des positions repose désormais entièrement sur vos achats, ventes et ajustements, tous modifiables. Les nouveaux graphiques affichent le capital investi, les opérations et la performance pondérée dans le temps. Le détail d’une position ajoute le PRU et les plus-values réalisées ou latentes. Accessibilité et actualisation Mac à froid ont aussi été renforcées.

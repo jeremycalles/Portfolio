@@ -21,11 +21,6 @@ enum PortfolioHistoryBuilder {
         return index[idx].value
     }
 
-    /// Carry-forward, then the first known price if the series starts after `date`.
-    static func priceOnOrBeforeOrFirst(index: [(date: String, value: Double)], date: String) -> Double? {
-        priceOnOrBefore(index: index, date: date) ?? index.first?.value
-    }
-
     /// Sum of signed lots with `tx.date <= date`. Empty lots → `fallbackQuantity` (legacy “always held”).
     static func quantityOnDate(
         transactions: [(date: String, quantityDelta: Double)],
@@ -40,19 +35,14 @@ enum PortfolioHistoryBuilder {
         return max(0, qty)
     }
 
-    /// Quantity held on `date`.
-    /// A past day sums buy/sell lots dated on or before that day. No lots, or none yet, contribute 0.
-    /// The gap between those lots and the live holding is not applied to earlier days.
-    /// On `today` the live holding quantity is used, because that quantity is known now.
+    /// Quantity held on `date`, derived exclusively from the transaction ledger.
+    /// `liveQuantity` and `today` remain in the signature for source compatibility.
     static func quantityActuallyHeld(
         transactions: [(date: String, quantityDelta: Double)],
         date: String,
         liveQuantity: Double,
         today: String
     ) -> Double {
-        if date == today {
-            return max(0, liveQuantity)
-        }
         var qty = 0.0
         for tx in transactions where tx.date <= date {
             qty += tx.quantityDelta
@@ -80,9 +70,8 @@ enum PortfolioHistoryBuilder {
         return dates.sorted()
     }
 
-    /// Builds a converted series. Quantity is what was actually held that day.
-    /// Past days use buy/sell lots only. `today` uses each holding's live quantity.
-    /// Quantity 0 on a date skips that holding (nothing recorded yet / already sold).
+    /// Builds a converted series from ledger quantities and known prices.
+    /// A position only enters the series on or after its first known market price.
     static func series(
         dates: [String],
         holdings: [(isin: String, quantity: Double)],
@@ -106,8 +95,9 @@ enum PortfolioHistoryBuilder {
                     today: today
                 )
                 if qty <= 0 { continue }
-                guard let price = priceOnOrBeforeOrFirst(index: prices[holding.isin] ?? [], date: date) else {
-                    continue
+                guard let price = priceOnOrBefore(index: prices[holding.isin] ?? [], date: date) else {
+                    complete = false
+                    break
                 }
                 let native = qty * price
                 if let converted = await convert(holding.isin, native, date) {

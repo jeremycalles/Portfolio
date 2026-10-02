@@ -211,10 +211,10 @@ struct HoldingsView: View {
         }
         .sheet(item: $holdingToEdit) { item in
             NavigationStack {
-                EditHoldingView(accountId: item.accountId, isin: item.isin)
+                HoldingDetailView(accountId: item.accountId, isin: item.isin)
                     .environmentObject(viewModel)
             }
-            .frame(minWidth: 420, minHeight: 380)
+            .frame(minWidth: 620, minHeight: 680)
         }
     }
 }

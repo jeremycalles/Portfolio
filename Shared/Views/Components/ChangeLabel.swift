@@ -11,7 +11,7 @@ struct ChangeLabel: View {
             Text(String(format: "%+.2f%%", change))
                 .font(.caption)
         }
-        .foregroundColor(change >= 0 ? .green : .red)
+        .foregroundColor(change >= 0 ? AppTheme.gain : AppTheme.loss)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(change >= 0 ? L10n.changeGain : L10n.changeLoss)
         .accessibilityValue(String(format: "%.2f%%", abs(change)))

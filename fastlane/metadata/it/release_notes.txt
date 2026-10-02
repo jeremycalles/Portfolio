@@ -1,1 +1,1 @@
-I giorni passati del grafico contano solo i lotti di acquisto e vendita datati quel giorno o prima. Oggi si usa la quantità che detieni ora.
+La cronologia delle posizioni ora deriva interamente da acquisti, vendite e rettifiche modificabili. I nuovi grafici mostrano capitale investito, operazioni e rendimento ponderato nel tempo. Il dettaglio della posizione aggiunge costo medio e profitti realizzati o latenti. Migliorate anche accessibilità e aggiornamenti pianificati su Mac.

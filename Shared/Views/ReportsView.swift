@@ -4,7 +4,7 @@ import Charts
 // MARK: - Quadrant Report View
 struct QuadrantReportView: View {
     @EnvironmentObject var viewModel: AppViewModel
-    @State private var report: [QuadrantReportItem] = []
+    private var report: [QuadrantReportItem] { viewModel.cachedQuadrantReport }
     
     var body: some View {
         ScrollView {
@@ -13,7 +13,7 @@ struct QuadrantReportView: View {
                     Text(L10n.reportsComparisonPeriod)
                         .font(.headline)
                     
-                    Picker("Period", selection: $viewModel.selectedPeriod) {
+                    Picker(L10n.generalComparisonPeriod, selection: $viewModel.selectedPeriod) {
                         ForEach(ReportPeriod.allCases) { period in
                             Text(period.displayName).tag(period)
                         }
@@ -33,7 +33,7 @@ struct QuadrantReportView: View {
                 if report.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "chart.pie")
-                            .font(.system(size: 48))
+                            .font(.largeTitle)
                             .foregroundColor(.secondary)
                         Text(L10n.reportsNoHoldingsToDisplay)
                             .font(.headline)
@@ -84,9 +84,6 @@ struct QuadrantReportView: View {
             .padding(.vertical)
         }
         .navigationTitle(L10n.reportsQuadrantReport)
-        .task(id: viewModel.selectedPeriod) {
-            report = await viewModel.getQuadrantReport()
-        }
     }
     
     var formattedComparisonDate: String {

@@ -43,6 +43,10 @@
 		I0BA /* Bundle+AppVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BA /* Bundle+AppVersion.swift */; };
 		I0BB /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BB /* AppLogger.swift */; };
 		I0BC /* PortfolioHistoryBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BC /* PortfolioHistoryBuilder.swift */; };
+		I0BD /* HoldingLedger.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BD /* HoldingLedger.swift */; };
+		I0BE /* PortfolioAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BE /* PortfolioAnalytics.swift */; };
+		I0BF /* HoldingDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BF /* HoldingDetailView.swift */; };
+		I0BG /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BG /* AppTheme.swift */; };
 		IV02 /* EnhancedTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = V002 /* EnhancedTrendCard.swift */; };
 		IV05 /* EnhancedAllocationRingChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = V005 /* EnhancedAllocationRingChart.swift */; };
 		IV06 /* EnhancedPortfolioHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = V006 /* EnhancedPortfolioHeroCard.swift */; };
@@ -95,6 +99,10 @@
 		M0BA /* Bundle+AppVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BA /* Bundle+AppVersion.swift */; };
 		M0BB /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BB /* AppLogger.swift */; };
 		M0BC /* PortfolioHistoryBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BC /* PortfolioHistoryBuilder.swift */; };
+		M0BD /* HoldingLedger.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BD /* HoldingLedger.swift */; };
+		M0BE /* PortfolioAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BE /* PortfolioAnalytics.swift */; };
+		M0BF /* HoldingDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BF /* HoldingDetailView.swift */; };
+		M0BG /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = S0BG /* AppTheme.swift */; };
 		MV02 /* EnhancedTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = V002 /* EnhancedTrendCard.swift */; };
 		MV05 /* EnhancedAllocationRingChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = V005 /* EnhancedAllocationRingChart.swift */; };
 		MV06 /* EnhancedPortfolioHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = V006 /* EnhancedPortfolioHeroCard.swift */; };
@@ -118,6 +126,8 @@
 		TS02 /* FormattingHelpersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF02 /* FormattingHelpersTests.swift */; };
 		TS03 /* DateFormattersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF03 /* DateFormattersTests.swift */; };
 		TS04 /* PortfolioHistoryBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF04 /* PortfolioHistoryBuilderTests.swift */; };
+		TS05 /* HoldingLedgerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF05 /* HoldingLedgerTests.swift */; };
+		TS06 /* PortfolioAnalyticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF06 /* PortfolioAnalyticsTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -205,10 +215,16 @@
 		S0BA /* Bundle+AppVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Bundle+AppVersion.swift"; path = "Shared/Helpers/Bundle+AppVersion.swift"; sourceTree = SOURCE_ROOT; };
 		S0BB /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppLogger.swift; path = Shared/Helpers/AppLogger.swift; sourceTree = SOURCE_ROOT; };
 		S0BC /* PortfolioHistoryBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PortfolioHistoryBuilder.swift; path = Shared/Helpers/PortfolioHistoryBuilder.swift; sourceTree = SOURCE_ROOT; };
+		S0BD /* HoldingLedger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HoldingLedger.swift; path = Shared/Helpers/HoldingLedger.swift; sourceTree = SOURCE_ROOT; };
+		S0BE /* PortfolioAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PortfolioAnalytics.swift; path = Shared/Helpers/PortfolioAnalytics.swift; sourceTree = SOURCE_ROOT; };
+		S0BF /* HoldingDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoldingDetailView.swift; sourceTree = "<group>"; };
+		S0BG /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppTheme.swift; path = Shared/Views/Theme/AppTheme.swift; sourceTree = SOURCE_ROOT; };
 		TF01 /* ModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ModelsTests.swift; path = Tests/PortfolioCoreTests/ModelsTests.swift; sourceTree = SOURCE_ROOT; };
 		TF02 /* FormattingHelpersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FormattingHelpersTests.swift; path = Tests/PortfolioCoreTests/FormattingHelpersTests.swift; sourceTree = SOURCE_ROOT; };
 		TF03 /* DateFormattersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DateFormattersTests.swift; path = Tests/PortfolioCoreTests/DateFormattersTests.swift; sourceTree = SOURCE_ROOT; };
 		TF04 /* PortfolioHistoryBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PortfolioHistoryBuilderTests.swift; path = Tests/PortfolioCoreTests/PortfolioHistoryBuilderTests.swift; sourceTree = SOURCE_ROOT; };
+		TF05 /* HoldingLedgerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HoldingLedgerTests.swift; path = Tests/PortfolioCoreTests/HoldingLedgerTests.swift; sourceTree = SOURCE_ROOT; };
+		TF06 /* PortfolioAnalyticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PortfolioAnalyticsTests.swift; path = Tests/PortfolioCoreTests/PortfolioAnalyticsTests.swift; sourceTree = SOURCE_ROOT; };
 		V002 /* EnhancedTrendCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EnhancedTrendCard.swift; path = Shared/Views/Charts/EnhancedTrendCard.swift; sourceTree = SOURCE_ROOT; };
 		V005 /* EnhancedAllocationRingChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EnhancedAllocationRingChart.swift; path = Shared/Views/Charts/EnhancedAllocationRingChart.swift; sourceTree = SOURCE_ROOT; };
 		V006 /* EnhancedPortfolioHeroCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EnhancedPortfolioHeroCard.swift; path = Shared/Views/Dashboard/EnhancedPortfolioHeroCard.swift; sourceTree = SOURCE_ROOT; };
@@ -311,6 +327,9 @@
 				S0BA /* Bundle+AppVersion.swift */,
 				S0BB /* AppLogger.swift */,
 				S0BC /* PortfolioHistoryBuilder.swift */,
+				S0BD /* HoldingLedger.swift */,
+				S0BE /* PortfolioAnalytics.swift */,
+				S0BG /* AppTheme.swift */,
 				S015 /* ChangeLabel.swift */,
 				V017 /* RefreshResultBanner.swift */,
 				F032 /* BackfillLogsSheet.swift */,
@@ -386,6 +405,8 @@
 				TF02 /* FormattingHelpersTests.swift */,
 				TF03 /* DateFormattersTests.swift */,
 				TF04 /* PortfolioHistoryBuilderTests.swift */,
+				TF05 /* HoldingLedgerTests.swift */,
+				TF06 /* PortfolioAnalyticsTests.swift */,
 			);
 			name = Tests;
 			path = Tests/PortfolioCoreTests;
@@ -398,6 +419,7 @@
 				S019 /* DashboardView.swift */,
 				S020 /* AllHoldingsView.swift */,
 				S028 /* EditHoldingView.swift */,
+				S0BF /* HoldingDetailView.swift */,
 				S021 /* PortfolioTrendChart.swift */,
 				S022 /* QuadrantPieChart.swift */,
 				S023 /* AccountsPieChart.swift */,
@@ -629,6 +651,10 @@
 				M0BA /* Bundle+AppVersion.swift in Sources */,
 				M0BB /* AppLogger.swift in Sources */,
 				M0BC /* PortfolioHistoryBuilder.swift in Sources */,
+				M0BD /* HoldingLedger.swift in Sources */,
+				M0BE /* PortfolioAnalytics.swift in Sources */,
+				M0BF /* HoldingDetailView.swift in Sources */,
+				M0BG /* AppTheme.swift in Sources */,
 				M015 /* ChangeLabel.swift in Sources */,
 				M016 /* AppViewModel+History.swift in Sources */,
 				M017 /* AppViewModel+PriceManagement.swift in Sources */,
@@ -681,6 +707,10 @@
 				I0BA /* Bundle+AppVersion.swift in Sources */,
 				I0BB /* AppLogger.swift in Sources */,
 				I0BC /* PortfolioHistoryBuilder.swift in Sources */,
+				I0BD /* HoldingLedger.swift in Sources */,
+				I0BE /* PortfolioAnalytics.swift in Sources */,
+				I0BF /* HoldingDetailView.swift in Sources */,
+				I0BG /* AppTheme.swift in Sources */,
 				I017 /* ChangeLabel.swift in Sources */,
 				I018 /* AppViewModel+History.swift in Sources */,
 				I019 /* AppViewModel+PriceManagement.swift in Sources */,
@@ -726,6 +756,8 @@
 				TS02 /* FormattingHelpersTests.swift in Sources */,
 				TS03 /* DateFormattersTests.swift in Sources */,
 				TS04 /* PortfolioHistoryBuilderTests.swift in Sources */,
+				TS05 /* HoldingLedgerTests.swift in Sources */,
+				TS06 /* PortfolioAnalyticsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -904,7 +936,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 51;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 73Y2U9Q7Q7;
@@ -945,7 +977,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 51;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 73Y2U9Q7Q7;
@@ -985,7 +1017,7 @@
 				CODE_SIGN_ENTITLEMENTS = iOS/iOS.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 51;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 73Y2U9Q7Q7;
 				ENABLE_PREVIEWS = YES;
@@ -1023,7 +1055,7 @@
 				CODE_SIGN_ENTITLEMENTS = iOS/iOS.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 51;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 73Y2U9Q7Q7;
 				ENABLE_PREVIEWS = YES;
@@ -1099,7 +1131,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 51;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 73Y2U9Q7Q7;
 				ENABLE_APP_SANDBOX = YES;
@@ -1131,7 +1163,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 51;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 73Y2U9Q7Q7;
 				ENABLE_APP_SANDBOX = YES;

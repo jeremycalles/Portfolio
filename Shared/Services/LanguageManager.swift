@@ -101,6 +101,7 @@ struct L10n {
     static var generalSubtotal: String { manager.localized("general.subtotal") }
     static var generalGrandTotal: String { manager.localized("general.grandTotal") }
     static var generalPerformance: String { manager.localized("general.performance") }
+    static var generalNA: String { manager.localized("general.na") }
     static var generalNa: String { manager.localized("general.na") }
     static var generalBuild: String { manager.localized("general.build") }
     static var changeGain: String { manager.localized("change.gain") }
@@ -124,8 +125,11 @@ struct L10n {
     static var period1Day: String { manager.localized("period.1day") }
     static var period1Week: String { manager.localized("period.1week") }
     static var period1Month: String { manager.localized("period.1month") }
+    static var period3Months: String { manager.localized("period.3months") }
+    static var period6Months: String { manager.localized("period.6months") }
     static var period1Year: String { manager.localized("period.1year") }
     static var periodYearToDate: String { manager.localized("period.yearToDate") }
+    static var periodAll: String { manager.localized("period.all") }
     
     // Dashboard
     static var dashboardPortfolioSummary: String { manager.localized("dashboard.portfolioSummary") }
@@ -191,6 +195,7 @@ struct L10n {
     static var instrumentsNoQuadrantsAvailable: String { manager.localized("instruments.noQuadrantsAvailable") }
     static var instrumentsPriceDetails: String { manager.localized("instruments.priceDetails") }
     static var instrumentsCurrentPrice: String { manager.localized("instruments.currentPrice") }
+    static var instrumentsValidateTicker: String { manager.localized("instruments.validateTicker") }
     static var instrumentsCurrency: String { manager.localized("instruments.currency") }
     static func instrumentsCount(_ count: Int) -> String {
         String(format: manager.localized("instruments.count"), count)
@@ -259,11 +264,41 @@ struct L10n {
     static func holdingsWeightValue(_ weight: String) -> String {
         String(format: manager.localized("holdings.weightValue"), weight)
     }
+    static var holdingsTransactions: String { manager.localized("holdings.transactions") }
+    static var holdingsAddTransaction: String { manager.localized("holdings.addTransaction") }
+    static var holdingsBuy: String { manager.localized("holdings.buy") }
+    static var holdingsSell: String { manager.localized("holdings.sell") }
+    static var holdingsAdjustment: String { manager.localized("holdings.adjustment") }
+    static var holdingsOpening: String { manager.localized("holdings.opening") }
+    static var holdingsUnitPrice: String { manager.localized("holdings.unitPrice") }
+    static var holdingsFees: String { manager.localized("holdings.fees") }
+    static var holdingsNote: String { manager.localized("holdings.note") }
+    static var holdingsAverageCost: String { manager.localized("holdings.averageCost") }
+    static var holdingsUnrealizedPnL: String { manager.localized("holdings.unrealizedPnL") }
+    static var holdingsRealizedPnL: String { manager.localized("holdings.realizedPnL") }
+    static var holdingsClosePosition: String { manager.localized("holdings.closePosition") }
+    static var holdingsCloseConfirmation: String { manager.localized("holdings.closeConfirmation") }
+    static var holdingsAdjustmentDirection: String { manager.localized("holdings.adjustmentDirection") }
+    static var holdingsIncrease: String { manager.localized("holdings.increase") }
+    static var holdingsDecrease: String { manager.localized("holdings.decrease") }
+    static var holdingsDeleteWithHistory: String { manager.localized("holdings.deleteWithHistory") }
+    static var holdingsDeleteHistoryConfirmation: String { manager.localized("holdings.deleteHistoryConfirmation") }
+    static var holdingsNoTransactions: String { manager.localized("holdings.noTransactions") }
+    static var ledgerInvalidQuantity: String { manager.localized("ledger.invalidQuantity") }
+    static var ledgerFutureDate: String { manager.localized("ledger.futureDate") }
+    static var ledgerInvalidOperation: String { manager.localized("ledger.invalidOperation") }
+    static func ledgerInsufficientQuantity(_ available: Double) -> String {
+        String(format: manager.localized("ledger.insufficientQuantity"), available)
+    }
     
     // Quadrants
     static var quadrantsAddQuadrant: String { manager.localized("quadrants.addQuadrant") }
+    static var quadrantsName: String { manager.localized("quadrants.name") }
     static var quadrantsQuadrantDetails: String { manager.localized("quadrants.quadrantDetails") }
     static var quadrantsQuadrantAssignment: String { manager.localized("quadrants.quadrantAssignment") }
+    static var quadrantsDetailsHint: String { manager.localized("quadrants.quadrantDetailsHint") }
+    static var quadrantsAssignmentHint: String { manager.localized("quadrants.quadrantAssignmentHint") }
+    static var quadrantsCategorizeHint: String { manager.localized("quadrants.categorizeHint") }
     static func quadrantsCount(_ count: Int) -> String {
         String(format: manager.localized("quadrants.quadrantsCount"), count)
     }
@@ -294,6 +329,7 @@ struct L10n {
     static var statsTotalHoldings: String { manager.localized("stats.totalHoldings") }
     // Settings
     static var settingsTitle: String { manager.localized("settings.title") }
+    static var settingsDisplay: String { manager.localized("settings.display") }
     static var settingsDemoMode: String { manager.localized("settings.demoMode") }
     static var settingsDemoModeDescription: String { manager.localized("settings.demoModeDescription") }
     static var settingsDemoModeEnable: String { manager.localized("settings.demoModeEnable") }
@@ -312,6 +348,10 @@ struct L10n {
     static var settingsDatabase: String { manager.localized("settings.database") }
     static var settingsBackground: String { manager.localized("settings.background") }
     static var settingsImportExportHint: String { manager.localized("settings.importExportHint") }
+    static var settingsImportExportPathHint: String { manager.localized("settings.importExportPathHint") }
+    static var settingsPath: String { manager.localized("settings.path") }
+    static var settingsStatistics: String { manager.localized("settings.statistics") }
+    static var settingsAccountsHint: String { manager.localized("settings.accountsHint") }
     static var settingsImportDatabase: String { manager.localized("settings.importDatabase") }
     static var settingsExportDatabase: String { manager.localized("settings.exportDatabase") }
     static var settingsDatabaseImportExport: String { manager.localized("settings.databaseImportExport") }
@@ -320,6 +360,12 @@ struct L10n {
     static var settingsBackgroundRefresh: String { manager.localized("settings.backgroundRefresh") }
     static var settingsBackgroundRefreshInterval: String { manager.localized("settings.backgroundRefreshInterval") }
     static var settingsLastRefresh: String { manager.localized("settings.lastRefresh") }
+    static var settingsNextRefresh: String { manager.localized("settings.nextRefresh") }
+    static var settingsNextRefreshDue: String { manager.localized("settings.nextRefreshDue") }
+    static var settingsBackgroundRefreshStatus: String { manager.localized("settings.backgroundRefreshStatus") }
+    static var settingsBackgroundRefreshAvailable: String { manager.localized("settings.backgroundRefreshAvailable") }
+    static var settingsBackgroundRefreshDenied: String { manager.localized("settings.backgroundRefreshDenied") }
+    static var settingsBackgroundRefreshRestricted: String { manager.localized("settings.backgroundRefreshRestricted") }
     static var settingsBackgroundUpdates: String { manager.localized("settings.backgroundUpdates") }
     static var settingsBackgroundUpdatesDescription: String { manager.localized("settings.backgroundUpdatesDescription") }
     static var settingsAutomaticUpdates: String { manager.localized("settings.automaticUpdates") }
@@ -345,6 +391,14 @@ struct L10n {
     static var settingsStorageLogsDescription: String { manager.localized("settings.storageLogsDescription") }
     static var settingsDatabaseStoredLocally: String { manager.localized("settings.databaseStoredLocally") }
     static var settingsBackupToICloudNow: String { manager.localized("settings.backupToICloudNow") }
+    static var settingsBackup: String { manager.localized("settings.backup") }
+    static var settingsBackupCompleted: String { manager.localized("settings.backupCompleted") }
+    static var settingsDatabaseImport: String { manager.localized("settings.databaseImport") }
+    static var settingsCannotAccessSelectedFile: String { manager.localized("settings.cannotAccessSelectedFile") }
+    static var settingsImportSucceededRestart: String { manager.localized("settings.importSucceededRestart") }
+    static func settingsImportFailed(_ detail: String) -> String {
+        String(format: manager.localized("settings.importFailed"), detail)
+    }
     static var settingsDontAskAgain: String { manager.localized("settings.dontAskAgain") }
     static var settingsNotNow: String { manager.localized("settings.notNow") }
     static var settingsInAppTimerActive: String { manager.localized("settings.inAppTimerActive") }
@@ -424,6 +478,10 @@ struct L10n {
     static var chartSp500Comparison: String { manager.localized("chart.sp500Comparison") }
     static var chartGoldComparison: String { manager.localized("chart.goldComparison") }
     static var chartMsciWorldComparison: String { manager.localized("chart.msciWorldComparison") }
+    static var chartInvestedCapital: String { manager.localized("chart.investedCapital") }
+    static var chartValueView: String { manager.localized("chart.valueView") }
+    static var chartPercentView: String { manager.localized("chart.percentView") }
+    static var chartDateAxis: String { manager.localized("chart.dateAxis") }
     static func chartMoreItems(_ count: Int) -> String {
         String(format: manager.localized("chart.moreItems"), count)
     }

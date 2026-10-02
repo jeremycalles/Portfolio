@@ -1,30 +1,34 @@
 import SwiftUI
-import Charts
 
 // MARK: - Quick Stats Row
 struct QuickStatsRow: View {
     @EnvironmentObject var viewModel: AppViewModel
-    let privacyMode: Bool
-    @State private var statsData: [QuickStatData] = []
+    private var statsData: [QuickStatData] {
+        computeStats(
+            from: viewModel.cachedHoldingsWithQuantity,
+            returns: viewModel.cachedHoldingTWR
+        )
+    }
     
-    private func computeStats(from allHoldings: [(isin: String, name: String, quantity: Double)], histories: [String: [(date: Date, value: Double)]]) -> [QuickStatData] {
+    private func computeStats(
+        from allHoldings: [(isin: String, name: String, quantity: Double)],
+        returns: [String: Double]
+    ) -> [QuickStatData] {
         var stats: [QuickStatData] = []
         guard !allHoldings.isEmpty else { return stats }
         
-        var holdingChanges: [(name: String, change: Double, value: Double)] = []
+        var holdingChanges: [(name: String, change: Double)] = []
         for holding in allHoldings {
-            let history = histories[holding.isin] ?? []
-            if let first = history.first?.value, let last = history.last?.value, first > 0 {
-                let changePercent = ((last - first) / first) * 100
-                holdingChanges.append((name: holding.name, change: changePercent, value: last))
+            if let changePercent = returns[holding.isin] {
+                holdingChanges.append((name: holding.name, change: changePercent))
             }
         }
         
         // Best Performer
         if let best = holdingChanges.max(by: { $0.change < $1.change }) {
             stats.append(QuickStatData(
-                icon: "arrow.up.right.circle.fill",
-                iconColor: .green,
+                icon: "arrow.up.right",
+                iconColor: AppTheme.gain,
                 title: L10n.statsBestPerformer,
                 value: String(format: "%+.1f%%", best.change),
                 detail: best.name
@@ -34,33 +38,13 @@ struct QuickStatsRow: View {
         // Worst Performer
         if let worst = holdingChanges.min(by: { $0.change < $1.change }) {
             stats.append(QuickStatData(
-                icon: "arrow.down.right.circle.fill",
-                iconColor: .red,
+                icon: "arrow.down.right",
+                iconColor: AppTheme.loss,
                 title: L10n.statsWorstPerformer,
                 value: String(format: "%+.1f%%", worst.change),
                 detail: worst.name
             ))
         }
-        
-        // Largest Position
-        if let largest = holdingChanges.max(by: { $0.value < $1.value }) {
-            stats.append(QuickStatData(
-                icon: "chart.pie.fill",
-                iconColor: .blue,
-                title: L10n.statsLargestPosition,
-                value: privacyMode ? L10n.privacyHidden : formatCurrency(largest.value, currency: "EUR"),
-                detail: largest.name
-            ))
-        }
-        
-        // Total Holdings
-        stats.append(QuickStatData(
-            icon: "list.bullet.rectangle.fill",
-            iconColor: .purple,
-            title: L10n.statsTotalHoldings,
-            value: "\(allHoldings.count)",
-            detail: L10n.accountsAcrossAllAccounts
-        ))
         
         return stats
     }
@@ -68,23 +52,13 @@ struct QuickStatsRow: View {
     var body: some View {
         Group {
             if !statsData.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(statsData) { stat in
-                            QuickStatCard(data: stat)
-                        }
+                HStack(alignment: .top, spacing: 12) {
+                    ForEach(statsData) { stat in
+                        QuickStatCard(data: stat)
                     }
-                    .padding(.horizontal)
                 }
+                .padding(.horizontal)
             }
-        }
-        .task(id: viewModel.selectedPeriod) {
-            let allHoldings = await viewModel.getAllHoldingsWithQuantity()
-            var histories: [String: [(date: Date, value: Double)]] = [:]
-            for h in allHoldings {
-                histories[h.isin] = await viewModel.getHoldingValueHistory(isin: h.isin, quantity: h.quantity)
-            }
-            statsData = computeStats(from: allHoldings, histories: histories)
         }
     }
 }
@@ -100,32 +74,38 @@ struct QuickStatData: Identifiable {
 }
 
 // MARK: - Quick Stat Card
+/// Mirrors the hero card hierarchy: title → value → accent row.
 struct QuickStatCard: View {
     let data: QuickStatData
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                Image(systemName: data.icon)
-                    .font(.system(size: 16))
-                    .foregroundColor(data.iconColor)
-                
-                Text(data.title)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+            Text(data.title)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, minHeight: 36, alignment: .topLeading)
             
             Text(data.value)
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(.title3.bold())
                 .lineLimit(1)
+                .minimumScaleFactor(0.8)
             
-            Text(data.detail)
-                .font(.caption2)
-                .foregroundColor(.secondary)
-                .lineLimit(1)
+            HStack(spacing: 6) {
+                Image(systemName: data.icon)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(data.iconColor)
+                
+                Text(data.detail)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
         }
-        .frame(width: 140)
-        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 16)
         .modifier(GlassEffectFallback(cornerRadius: 16, interactive: false))
     }
 }
@@ -133,7 +113,7 @@ struct QuickStatCard: View {
 // MARK: - Previews
 
 #Preview("QuickStatsRow") {
-    QuickStatsRow(privacyMode: false)
+    QuickStatsRow()
         .environmentObject(AppViewModel.preview)
         .padding()
 }

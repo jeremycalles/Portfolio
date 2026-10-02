@@ -160,7 +160,7 @@ struct iOSDashboardView: View {
                 )
                 
                 // MARK: - Quick Stats Row
-                QuickStatsRow(privacyMode: privacyMode)
+                QuickStatsRow()
                 
                 // MARK: - Modern Period Selector
                 ModernPeriodSelector(
@@ -196,6 +196,8 @@ struct iOSDashboardView: View {
                         ZStack {
                             PortfolioTrendChart(
                                 history: history,
+                                investedCapitalHistory: viewModel.cachedInvestedCapitalHistory,
+                                transactionEvents: viewModel.cachedTransactionEvents,
                                 sp500History: sp500History.isEmpty ? nil : sp500History,
                                 goldHistory: goldHistory.isEmpty ? nil : goldHistory,
                                 msciWorldHistory: msciWorldHistory.isEmpty ? nil : msciWorldHistory,
@@ -276,7 +278,7 @@ struct iOSDashboardView: View {
                     privacyMode: privacyMode
                 )
 
-                QuickStatsRow(privacyMode: privacyMode)
+                QuickStatsRow()
 
                 iOSDashboardGlassControlBar(
                     selectedPeriod: $viewModel.selectedPeriod,
@@ -429,6 +431,8 @@ private struct iOSPortfolioPerformancePanel: View {
                 ZStack {
                     PortfolioTrendChart(
                         history: history,
+                        investedCapitalHistory: viewModel.cachedInvestedCapitalHistory,
+                        transactionEvents: viewModel.cachedTransactionEvents,
                         sp500History: sp500History.isEmpty ? nil : sp500History,
                         goldHistory: goldHistory.isEmpty ? nil : goldHistory,
                         msciWorldHistory: msciWorldHistory.isEmpty ? nil : msciWorldHistory,
