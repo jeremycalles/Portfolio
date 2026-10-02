@@ -1,31 +1,26 @@
 import SwiftUI
-import Charts
 
 // MARK: - Quick Stats Row
 struct QuickStatsRow: View {
     @EnvironmentObject var viewModel: AppViewModel
-    let privacyMode: Bool
     private var statsData: [QuickStatData] {
         computeStats(
             from: viewModel.cachedHoldingsWithQuantity,
-            histories: viewModel.cachedHoldingHistories,
             returns: viewModel.cachedHoldingTWR
         )
     }
     
     private func computeStats(
         from allHoldings: [(isin: String, name: String, quantity: Double)],
-        histories: [String: [(date: Date, value: Double)]],
         returns: [String: Double]
     ) -> [QuickStatData] {
         var stats: [QuickStatData] = []
         guard !allHoldings.isEmpty else { return stats }
         
-        var holdingChanges: [(name: String, change: Double, value: Double)] = []
+        var holdingChanges: [(name: String, change: Double)] = []
         for holding in allHoldings {
-            let history = histories[holding.isin] ?? []
-            if let last = history.last?.value, let changePercent = returns[holding.isin] {
-                holdingChanges.append((name: holding.name, change: changePercent, value: last))
+            if let changePercent = returns[holding.isin] {
+                holdingChanges.append((name: holding.name, change: changePercent))
             }
         }
         
@@ -50,26 +45,6 @@ struct QuickStatsRow: View {
                 detail: worst.name
             ))
         }
-        
-        // Largest Position
-        if let largest = holdingChanges.max(by: { $0.value < $1.value }) {
-            stats.append(QuickStatData(
-                icon: "chart.pie.fill",
-                iconColor: .blue,
-                title: L10n.statsLargestPosition,
-                value: privacyMode ? L10n.privacyHidden : formatCurrency(largest.value, currency: "EUR"),
-                detail: largest.name
-            ))
-        }
-        
-        // Total Holdings
-        stats.append(QuickStatData(
-            icon: "list.bullet.rectangle.fill",
-            iconColor: .purple,
-            title: L10n.statsTotalHoldings,
-            value: "\(allHoldings.count)",
-            detail: L10n.accountsAcrossAllAccounts
-        ))
         
         return stats
     }
@@ -134,7 +109,7 @@ struct QuickStatCard: View {
 // MARK: - Previews
 
 #Preview("QuickStatsRow") {
-    QuickStatsRow(privacyMode: false)
+    QuickStatsRow()
         .environmentObject(AppViewModel.preview)
         .padding()
 }

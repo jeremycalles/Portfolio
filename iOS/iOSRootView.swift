@@ -160,7 +160,7 @@ struct iOSDashboardView: View {
                 )
                 
                 // MARK: - Quick Stats Row
-                QuickStatsRow(privacyMode: privacyMode)
+                QuickStatsRow()
                 
                 // MARK: - Modern Period Selector
                 ModernPeriodSelector(
@@ -278,7 +278,7 @@ struct iOSDashboardView: View {
                     privacyMode: privacyMode
                 )
 
-                QuickStatsRow(privacyMode: privacyMode)
+                QuickStatsRow()
 
                 iOSDashboardGlassControlBar(
                     selectedPeriod: $viewModel.selectedPeriod,
