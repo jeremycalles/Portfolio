@@ -5,9 +5,6 @@ import Charts
 struct iOSDashboardAccountsSectionEnhanced: View {
     @EnvironmentObject var viewModel: AppViewModel
     let privacyMode: Bool
-    @State private var accountHistories: [Int: [(date: Date, value: Double)]] = [:]
-    @State private var accountDetails: [Int: [HoldingDetail]] = [:]
-    
     var body: some View {
         LazyVGrid(columns: [GridItem(.flexible())], spacing: 12) {
             if viewModel.bankAccounts.isEmpty {
@@ -17,26 +14,21 @@ struct iOSDashboardAccountsSectionEnhanced: View {
                     .padding()
             } else {
                 ForEach(viewModel.bankAccounts) { account in
-                    let history = accountHistories[account.id] ?? []
-                    let details = accountDetails[account.id] ?? []
+                    let history = viewModel.cachedAccountHistories[account.id] ?? []
+                    let details = viewModel.cachedHoldingDetailsByAccount[account.id] ?? []
                     let totalValue = details.compactMap { $0.currentValueEUR }.reduce(0, +)
                     
                     EnhancedTrendCard(
-                        title: "\(account.displayName) (\(details.count) holdings)",
+                        title: "\(account.displayName) (\(L10n.accountsHoldingsCount(details.count)))",
                         history: history,
                         currentValue: totalValue,
-                        privacyMode: privacyMode
+                        privacyMode: privacyMode,
+                        performancePercent: viewModel.cachedAccountTWR[account.id]
                     )
                 }
             }
         }
         .padding(.horizontal)
-        .task(id: viewModel.selectedPeriod) {
-            for account in viewModel.bankAccounts {
-                accountHistories[account.id] = await viewModel.getAccountValueHistory(accountId: account.id)
-                accountDetails[account.id] = await viewModel.getHoldingDetails(forAccount: account.id)
-            }
-        }
     }
 }
 

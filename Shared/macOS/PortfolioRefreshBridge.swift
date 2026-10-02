@@ -17,6 +17,7 @@ enum PortfolioRefreshBridge {
 
     static let refreshIntervalSecondsKey = "refreshIntervalSeconds"
     static let backgroundRefreshEnabledKey = "backgroundRefreshEnabled"
+    static let pendingRefreshRequestDateKey = "pendingRefreshRequestDate"
 
     /// Darwin notify name so the helper can reschedule when the main app updates the shared defaults.
     static let refreshPrefsDarwinNotification = "com.portfolio.app.refreshPrefsChanged" as CFString

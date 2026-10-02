@@ -1,1 +1,1 @@
-Los días pasados del gráfico solo cuentan los lotes de compra y venta fechados ese día o antes. Hoy se usa la cantidad que tienes ahora.
+El historial de posiciones ahora se basa por completo en compras, ventas y ajustes editables. Los nuevos gráficos muestran capital invertido, operaciones y rentabilidad ponderada por tiempo. El detalle de cada posición añade coste medio y ganancias realizadas o latentes. También mejoramos la accesibilidad y las actualizaciones programadas en Mac.

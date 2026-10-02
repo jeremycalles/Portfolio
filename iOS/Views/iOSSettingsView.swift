@@ -77,7 +77,7 @@ struct iOSSettingsView: View {
                     }
                 }
             } header: {
-                Text("Display")
+                Text(L10n.settingsDisplay)
             } footer: {
                 Text(L10n.settingsDemoModeDescription)
             }
@@ -105,7 +105,7 @@ struct iOSSettingsView: View {
                             isBackingUp = false
                             switch result {
                             case .success:
-                                backupAlertMessage = "Backup completed."
+                                backupAlertMessage = L10n.settingsBackupCompleted
                             case .failure(let error):
                                 backupAlertMessage = error.localizedDescription
                             }
@@ -140,7 +140,7 @@ struct iOSSettingsView: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                LabeledContent("Path") {
+                LabeledContent(L10n.settingsPath) {
                     Text(DatabaseService.shared.getDatabasePath().components(separatedBy: "/").suffix(2).joined(separator: "/"))
                         .font(.caption)
                         .foregroundColor(.secondary)
@@ -148,10 +148,10 @@ struct iOSSettingsView: View {
             } header: {
                 Text(L10n.settingsDatabase)
             } footer: {
-                Text("Import/Export to transfer data between devices. Path shows the database location.")
+                Text(L10n.settingsImportExportPathHint)
             }
             
-            Section("Data Management") {
+            Section(L10n.settingsDataManagement) {
                 Button {
                     Task {
                         await viewModel.updateAllPrices()
@@ -209,6 +209,12 @@ struct iOSSettingsView: View {
                     showingBackgroundLogs = true
                 }
                 
+                HStack {
+                    Text(L10n.settingsBackgroundRefreshStatus)
+                    Spacer()
+                    Text(BackgroundTaskManager.shared.systemRefreshStatusLabel)
+                        .foregroundColor(.secondary)
+                }
                 if let lastRefresh = BackgroundTaskManager.shared.timeSinceLastRefresh() {
                     HStack {
                         Text(L10n.settingsLastRefresh)
@@ -220,7 +226,7 @@ struct iOSSettingsView: View {
             } header: {
                 Text(L10n.settingsBackgroundUpdates)
             } footer: {
-                Text("Prices are automatically updated in the background when the app is not in use. Long-press to view logs.")
+                Text(L10n.settingsBackgroundUpdatesDescription)
             }
             
             Section {
@@ -235,7 +241,7 @@ struct iOSSettingsView: View {
                         }
                         Spacer()
                         let holdingsCount = viewModel.holdings.filter { $0.accountId == account.id }.count
-                        Text("\(holdingsCount) holdings")
+                        Text(L10n.accountsHoldingsCount(holdingsCount))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -259,7 +265,7 @@ struct iOSSettingsView: View {
             } header: {
                 Text(L10n.navBankAccounts)
             } footer: {
-                Text("Bank accounts are used to organize your holdings. Swipe left to delete.")
+                Text(L10n.settingsAccountsHint)
             }
             
             Section {
@@ -284,7 +290,7 @@ struct iOSSettingsView: View {
                 Button {
                     showingAddQuadrantSheet = true
                 } label: {
-                    Label("Add Quadrant", systemImage: "plus.circle")
+                    Label(L10n.quadrantsAddQuadrant, systemImage: "plus.circle")
                         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         .contentShape(Rectangle())
                 }
@@ -292,18 +298,18 @@ struct iOSSettingsView: View {
             } header: {
                 Text(L10n.navQuadrants)
             } footer: {
-                Text("Quadrants categorize instruments for portfolio analysis. Assign via Instruments tab.")
+                Text(L10n.quadrantsCategorizeHint)
             }
             
-            Section("Statistics") {
-                LabeledContent("Instruments", value: "\(viewModel.instruments.count)")
+            Section(L10n.settingsStatistics) {
+                LabeledContent(L10n.instrumentsTitle, value: "\(viewModel.instruments.count)")
                 LabeledContent(L10n.navHoldings, value: "\(viewModel.holdings.count)")
                 LabeledContent(L10n.navQuadrants, value: "\(viewModel.quadrants.count)")
                 LabeledContent(L10n.navBankAccounts, value: "\(viewModel.bankAccounts.count)")
             }
             
-            Section("About") {
-                LabeledContent("Version", value: Bundle.appShortVersion)
+            Section(L10n.settingsAbout) {
+                LabeledContent(L10n.settingsVersion, value: Bundle.appShortVersion)
                 HStack {
                     Text(L10n.appName)
                     Spacer()
@@ -325,17 +331,17 @@ struct iOSSettingsView: View {
                     importDatabase(from: url)
                 }
             case .failure(let error):
-                importMessage = "Import failed: \(error.localizedDescription)"
+                importMessage = L10n.settingsImportFailed(error.localizedDescription)
                 showingAlert = true
             }
         }
         
-        .alert("Database Import", isPresented: $showingAlert) {
-            Button("OK") { }
+        .alert(L10n.settingsDatabaseImport, isPresented: $showingAlert) {
+            Button(L10n.generalOk) { }
         } message: {
             Text(importMessage ?? "")
         }
-        .alert("Backup", isPresented: $showingBackupAlert) {
+        .alert(L10n.settingsBackup, isPresented: $showingBackupAlert) {
             Button(L10n.generalOk) { }
         } message: {
             Text(backupAlertMessage ?? "")
@@ -370,7 +376,7 @@ struct iOSSettingsView: View {
         Task {
             guard url.startAccessingSecurityScopedResource() else {
                 await MainActor.run {
-                    importMessage = "Cannot access the selected file"
+                    importMessage = L10n.settingsCannotAccessSelectedFile
                     showingAlert = true
                 }
                 return
@@ -387,14 +393,14 @@ struct iOSSettingsView: View {
                 try FileManager.default.copyItem(at: url, to: destURL)
                 await DatabaseService.shared.reconnectToDatabase()
                 await MainActor.run {
-                    importMessage = "Database imported successfully! Please restart the app to load the new data."
+                    importMessage = L10n.settingsImportSucceededRestart
                     showingAlert = true
                 }
                 await viewModel.refreshAll()
             } catch {
                 await DatabaseService.shared.reconnectToDatabase()
                 await MainActor.run {
-                    importMessage = "Import failed: \(error.localizedDescription)"
+                    importMessage = L10n.settingsImportFailed(error.localizedDescription)
                     showingAlert = true
                 }
             }
@@ -433,7 +439,7 @@ struct LanguagePickerSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
+                    Button(L10n.generalDone) {
                         dismiss()
                     }
                 }
@@ -457,24 +463,24 @@ struct AddQuadrantSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Quadrant Name", text: $quadrantName)
+                    TextField(L10n.quadrantsName, text: $quadrantName)
                         .textInputAutocapitalization(.words)
                 } header: {
-                    Text("Quadrant Details")
+                    Text(L10n.quadrantsQuadrantDetails)
                 } footer: {
-                    Text("Examples: 'Growth Stocks', 'Bonds', 'Real Estate', 'Gold'")
+                    Text(L10n.quadrantsDetailsHint)
                 }
             }
             .navigationTitle(L10n.quadrantsAddQuadrant)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button(L10n.generalCancel) {
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    Button(L10n.generalAdd) {
                         let name = quadrantName.trimmingCharacters(in: .whitespaces)
                         Task { await viewModel.addQuadrant(name: name) }
                         dismiss()
@@ -503,26 +509,26 @@ struct AddBankAccountSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Bank Name", text: $bankName)
+                    TextField(L10n.accountsBankName, text: $bankName)
                         .textInputAutocapitalization(.words)
-                    TextField("Account Name", text: $accountName)
+                    TextField(L10n.accountsAccountName, text: $accountName)
                         .textInputAutocapitalization(.words)
                 } header: {
-                    Text("Account Details")
+                    Text(L10n.settingsAccountDetails)
                 } footer: {
-                    Text("Example: Bank = 'Degiro', Account = 'CTO' or 'PEA'")
+                    Text(L10n.settingsAccountDetailsHint)
                 }
             }
             .navigationTitle(L10n.accountsAddAccount)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button(L10n.generalCancel) {
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
+                    Button(L10n.generalAdd) {
                         let bank = bankName.trimmingCharacters(in: .whitespaces)
                         let account = accountName.trimmingCharacters(in: .whitespaces)
                         Task { await viewModel.addBankAccount(bank: bank, account: account) }
@@ -549,10 +555,10 @@ struct BackgroundLogsView: View {
                             Image(systemName: "doc.text.magnifyingglass")
                                 .font(.system(size: 48))
                                 .foregroundColor(.secondary.opacity(0.5))
-                            Text("No logs available")
+                            Text(L10n.settingsNoLogsAvailable)
                                 .font(.headline)
                                 .foregroundColor(.secondary)
-                            Text("Logs will appear here after the first background refresh occurs.")
+                            Text(L10n.settingsLogsDescription)
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
@@ -580,11 +586,11 @@ struct BackgroundLogsView: View {
                 }
                 .padding(.vertical)
             }
-            .navigationTitle("Background Refresh Logs")
+            .navigationTitle(L10n.settingsBackgroundRefreshLogs)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
+                    Button(L10n.generalDone) {
                         dismiss()
                     }
                 }

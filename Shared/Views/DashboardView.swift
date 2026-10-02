@@ -30,13 +30,8 @@ enum DashboardViewMode: String, CaseIterable, Identifiable {
 struct DashboardView: View {
     @EnvironmentObject var viewModel: AppViewModel
     @State private var viewMode: DashboardViewMode = .quadrants
-    @State private var privacyMode: Bool = false
+    @AppStorage("privacyMode") private var privacyMode = false
     @State private var quadrantGoldMode: Set<Int> = []
-    @State private var quadrantHistories: [Int: [(date: Date, value: Double)]] = [:]
-    @State private var goldQuadrantHistories: [Int: [(date: Date, value: Double)]] = [:]
-    @State private var holdingsWithQuantity: [(isin: String, name: String, quantity: Double)] = []
-    @State private var holdingHistories: [String: [(date: Date, value: Double)]] = [:]
-    @State private var accountHistories: [Int: [(date: Date, value: Double)]] = [:]
     
     private static let lastUpdateFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -220,10 +215,14 @@ struct DashboardView: View {
                             Group {
                                 PortfolioTrendChart(
                                     history: history,
+                                    investedCapitalHistory: viewModel.cachedInvestedCapitalHistory,
+                                    transactionEvents: viewModel.cachedTransactionEvents,
                                     sp500History: sp500History.isEmpty ? nil : sp500History,
                                     goldHistory: goldHistory.isEmpty ? nil : goldHistory,
                                     msciWorldHistory: msciWorldHistory.isEmpty ? nil : msciWorldHistory,
-                                    performancePercent: viewModel.cachedPeriodTWR
+                                    performancePercent: viewModel.cachedPeriodTWR,
+                                    interactive: true,
+                                    privacyMode: privacyMode
                                 )
                             }
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -263,8 +262,8 @@ struct DashboardView: View {
                             
                             GroupBox(title) {
                                 let history: [(date: Date, value: Double)] = isGoldMode
-                                    ? (goldQuadrantHistories[quadrant.id] ?? [])
-                                    : (quadrantHistories[quadrant.id] ?? [])
+                                    ? (viewModel.cachedGoldQuadrantHistories[quadrant.id] ?? [])
+                                    : (viewModel.cachedQuadrantHistories[quadrant.id] ?? [])
                                 
                                 if history.isEmpty {
                                     Text(isGoldMode ? L10n.chartNoGoldPriceData : L10n.generalNoData)
@@ -272,7 +271,12 @@ struct DashboardView: View {
                                         .frame(height: 150)
                                         .frame(maxWidth: .infinity)
                                 } else {
-                                    PortfolioTrendChart(history: history, compact: true, unit: isGoldMode ? "oz" : "EUR")
+                                    PortfolioTrendChart(
+                                        history: history,
+                                        performancePercent: isGoldMode ? nil : viewModel.cachedQuadrantTWR[quadrant.id],
+                                        compact: true,
+                                        unit: isGoldMode ? "oz" : "EUR"
+                                    )
                                         .frame(height: 150)
                                 }
                             }
@@ -296,9 +300,9 @@ struct DashboardView: View {
                         GridItem(.flexible()),
                         GridItem(.flexible())
                     ], spacing: 16) {
-                        ForEach(holdingsWithQuantity, id: \.isin) { holding in
+                        ForEach(viewModel.cachedHoldingsWithQuantity, id: \.isin) { holding in
                             GroupBox(holding.name) {
-                                let history = holdingHistories[holding.isin] ?? []
+                                let history = viewModel.cachedHoldingHistories[holding.isin] ?? []
                                 
                                 if history.isEmpty {
                                     Text(L10n.generalNoData)
@@ -306,7 +310,11 @@ struct DashboardView: View {
                                         .frame(height: 150)
                                         .frame(maxWidth: .infinity)
                                 } else {
-                                    PortfolioTrendChart(history: history, compact: true)
+                                    PortfolioTrendChart(
+                                        history: history,
+                                        performancePercent: viewModel.cachedHoldingTWR[holding.isin],
+                                        compact: true
+                                    )
                                         .frame(height: 150)
                                 }
                             }
@@ -315,7 +323,9 @@ struct DashboardView: View {
                     .padding(.horizontal)
                     
                 case .accounts:
-                    let accountsWithData = viewModel.bankAccounts.filter { (accountHistories[$0.id] ?? []).isEmpty == false }
+                    let accountsWithData = viewModel.bankAccounts.filter {
+                        (viewModel.cachedAccountHistories[$0.id] ?? []).isEmpty == false
+                    }
                     
                     if accountsWithData.isEmpty {
                         Text(L10n.dashboardNoAccountsWithData)
@@ -329,8 +339,12 @@ struct DashboardView: View {
                         ], spacing: 16) {
                             ForEach(accountsWithData) { account in
                                 GroupBox(account.displayName) {
-                                    let history = accountHistories[account.id] ?? []
-                                    PortfolioTrendChart(history: history, compact: true)
+                                    let history = viewModel.cachedAccountHistories[account.id] ?? []
+                                    PortfolioTrendChart(
+                                        history: history,
+                                        performancePercent: viewModel.cachedAccountTWR[account.id],
+                                        compact: true
+                                    )
                                         .frame(height: 150)
                                 }
                             }
@@ -344,20 +358,6 @@ struct DashboardView: View {
             .padding(.vertical)
         }
         .navigationTitle(L10n.navDashboard)
-        .task(id: viewModel.selectedPeriod) {
-            for q in viewModel.quadrants {
-                quadrantHistories[q.id] = await viewModel.getQuadrantValueHistory(quadrantId: q.id)
-                goldQuadrantHistories[q.id] = await viewModel.getQuadrantValueHistoryInGold(quadrantId: q.id)
-            }
-            holdingsWithQuantity = await viewModel.getAllHoldingsWithQuantity()
-            holdingHistories = [:]
-            for h in holdingsWithQuantity {
-                holdingHistories[h.isin] = await viewModel.getHoldingValueHistory(isin: h.isin, quantity: h.quantity)
-            }
-            for account in viewModel.bankAccounts {
-                accountHistories[account.id] = await viewModel.getAccountValueHistory(accountId: account.id)
-            }
-        }
     }
 }
 

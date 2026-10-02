@@ -14,10 +14,7 @@ struct AccountsPieChart: View {
         
         for (index, account) in viewModel.bankAccounts.enumerated() {
             let details = viewModel.cachedHoldingDetailsByAccount[account.id] ?? []
-            // Sum all holdings values for this account
-            let totalValue = details.reduce(0.0) { sum, detail in
-                sum + (detail.currentPrice ?? 0) * detail.quantity
-            }
+            let totalValue = details.compactMap(\.currentValueEUR).reduce(0, +)
             if totalValue > 0 {
                 let color = colors[index % colors.count]
                 data.append((name: account.displayName, value: totalValue, color: color))

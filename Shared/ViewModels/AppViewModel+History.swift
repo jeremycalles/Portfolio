@@ -5,13 +5,42 @@ extension AppViewModel {
 
     /// Builds an ascending-sorted price index for each ISIN, loading all data from DB once.
     private func buildPriceIndex(for isins: [String]) async -> [String: [(date: String, value: Double)]] {
-        var index: [String: [(date: String, value: Double)]] = [:]
-        index.reserveCapacity(isins.count)
-        for isin in isins {
-            let history = await db.getPriceHistory(forIsin: isin)
-            index[isin] = history.map { ($0.date, $0.value) }.reversed()
+        let unique = Array(Set(isins))
+        let prices = await db.getPriceHistory(forIsins: unique)
+        var index = Dictionary(uniqueKeysWithValues: unique.map { ($0, [(date: String, value: Double)]()) })
+        for price in prices {
+            index[price.isin, default: []].append((price.date, price.value))
         }
         return index
+    }
+
+    private func cashflowData(
+        transactions: [HoldingTransaction]
+    ) async -> (cashflows: [PortfolioCashflow], events: [PortfolioChartEvent]) {
+        let priceIndex = await buildPriceIndex(for: Array(Set(transactions.map(\.isin))))
+        var cashflows: [PortfolioCashflow] = []
+        var events: [PortfolioChartEvent] = []
+        cashflows.reserveCapacity(transactions.count)
+        events.reserveCapacity(transactions.count)
+
+        for transaction in transactions {
+            let fallbackPrice = PortfolioHistoryBuilder.priceOnOrBefore(
+                index: priceIndex[transaction.isin] ?? [],
+                date: transaction.date
+            )
+            guard let price = transaction.unitPrice ?? fallbackPrice, price > 0 else { continue }
+            // A fee increases a contribution and reduces the proceeds of a withdrawal.
+            let native = transaction.quantityDelta * price + max(0, transaction.fees ?? 0)
+            guard let amountEUR = await convertToEUR(
+                value: native,
+                fromCurrency: getInstrumentCurrency(forIsin: transaction.isin),
+                onDate: transaction.date
+            ) else { continue }
+            let cashflow = PortfolioCashflow(date: transaction.date, amountEUR: amountEUR)
+            cashflows.append(cashflow)
+            events.append(PortfolioChartEvent(transaction: transaction, amountEUR: amountEUR))
+        }
+        return (cashflows, events)
     }
 
     private func transactionsByIsin(_ transactions: [HoldingTransaction]) -> [String: [(date: String, quantityDelta: Double)]] {
@@ -20,6 +49,13 @@ extension AppViewModel {
             result[tx.isin, default: []].append((tx.date, tx.quantityDelta))
         }
         return result
+    }
+
+    private func historyCutoff(for transactions: [HoldingTransaction]) -> String {
+        if selectedPeriod == .all {
+            return transactions.map(\.date).min() ?? AppDateFormatter.todayString
+        }
+        return AppDateFormatter.yearMonthDay.string(from: selectedPeriod.comparisonDate)
     }
 
     private func aggregatedValueHistory(
@@ -97,45 +133,100 @@ extension AppViewModel {
     }
 
     func periodTWR(from history: [(date: Date, value: Double)]) async -> Double? {
-        guard !history.isEmpty else { return nil }
-        let cutoffStr = AppDateFormatter.yearMonthDay.string(from: selectedPeriod.comparisonDate)
-        let todayStr = AppDateFormatter.todayString
-        let txs = await db.getAllHoldingTransactions()
-        let intra = txs.filter { $0.date > cutoffStr && $0.date <= todayStr }
-        let isins = Array(Set(intra.map(\.isin)))
-        let priceIndex = await buildPriceIndex(for: isins)
+        await periodTWR(from: history, transactions: await db.getAllHoldingTransactions())
+    }
 
-        var cfByDate: [String: Double] = [:]
-        for tx in intra {
-            let price = PortfolioHistoryBuilder.priceOnOrBeforeOrFirst(
-                index: priceIndex[tx.isin] ?? [],
-                date: tx.date
-            )
-            guard let price, price > 0 else { continue }
-            let native = tx.quantityDelta * price
-            if let eur = await convertToEUR(
-                value: native,
-                fromCurrency: getInstrumentCurrency(forIsin: tx.isin),
-                onDate: tx.date
-            ) {
-                cfByDate[tx.date, default: 0] += eur
-            }
-        }
+    private func periodTWR(
+        from history: [(date: Date, value: Double)],
+        transactions: [HoldingTransaction]
+    ) async -> Double? {
+        guard !history.isEmpty else { return nil }
+        let cutoffStr = historyCutoff(for: transactions)
+        let todayStr = AppDateFormatter.todayString
+        let intra = transactions.filter { $0.date > cutoffStr && $0.date <= todayStr }
+        let flows = await cashflowData(transactions: intra).cashflows
         let nav = history.map { (AppDateFormatter.yearMonthDay.string(from: $0.date), $0.value) }
-        let cashflows = cfByDate.map { (date: $0.key, amountEUR: $0.value) }
+        let cashflows = flows.map { (date: $0.date, amountEUR: $0.amountEUR) }
         return PortfolioHistoryBuilder.timeWeightedReturn(nav: nav, cashflows: cashflows)
+    }
+
+    func getHoldingTWR(isin: String, history: [(date: Date, value: Double)]) async -> Double? {
+        let transactions = await db.getHoldingTransactions(forIsin: isin)
+        return await periodTWR(from: history, transactions: transactions)
+    }
+
+    func getAccountTWR(accountId: Int, history: [(date: Date, value: Double)]) async -> Double? {
+        let transactions = await db.getAllHoldingTransactions().filter { $0.accountId == accountId }
+        return await periodTWR(from: history, transactions: transactions)
+    }
+
+    func getQuadrantTWR(quadrantId: Int?, history: [(date: Date, value: Double)]) async -> Double? {
+        let matchingISINs = Set(instruments.filter { $0.quadrantId == quadrantId }.map(\.isin))
+        let transactions = await db.getAllHoldingTransactions().filter { matchingISINs.contains($0.isin) }
+        return await periodTWR(from: history, transactions: transactions)
+    }
+
+    /// Computes all top-level chart series from one portfolio history and one set of
+    /// transaction cashflows. The resulting value can be published atomically.
+    func makeDashboardSnapshot() async -> DashboardSnapshot {
+        clearRateCache()
+        let portfolio = await getPortfolioValueHistory()
+        guard !portfolio.isEmpty else { return DashboardSnapshot() }
+
+        let transactions = await db.getAllHoldingTransactions()
+        let flowData = await cashflowData(transactions: transactions)
+        let cutoff = historyCutoff(for: transactions)
+        let today = AppDateFormatter.todayString
+        let periodFlows = flowData.cashflows.filter { $0.date > cutoff && $0.date <= today }
+        let benchmarkIDs = [SP500IndexIsin, GoldIndexIsin, MSCIWorldIndexIsin, "VERACASH:GOLD_SPOT"]
+        let indices = await buildPriceIndex(for: benchmarkIDs)
+        let derived = await PortfolioAnalytics.deriveDashboardSeries(
+            portfolio: portfolio,
+            allCashflows: flowData.cashflows,
+            periodCashflows: periodFlows,
+            sp500Index: indices[SP500IndexIsin] ?? [],
+            goldIndex: indices[GoldIndexIsin] ?? [],
+            msciWorldIndex: indices[MSCIWorldIndexIsin] ?? []
+        )
+        let goldOunces = portfolio.compactMap { point -> (date: Date, value: Double)? in
+            let date = AppDateFormatter.yearMonthDay.string(from: point.date)
+            guard let gramPrice = PortfolioHistoryBuilder.priceOnOrBefore(
+                index: indices["VERACASH:GOLD_SPOT"] ?? [],
+                date: date
+            ), gramPrice > 0 else { return nil }
+            return (point.date, point.value / (gramPrice * 31.1034768))
+        }
+        let firstDate = AppDateFormatter.yearMonthDay.string(from: portfolio[0].date)
+        let netFlowsAfterFirstPoint = flowData.cashflows
+            .filter { $0.date > firstDate && $0.date <= today }
+            .reduce(0) { $0 + $1.amountEUR }
+        let gainEUR = portfolio[portfolio.count - 1].value - portfolio[0].value - netFlowsAfterFirstPoint
+
+        return DashboardSnapshot(
+            portfolio: portfolio,
+            investedCapital: derived.investedCapital,
+            sp500: derived.sp500,
+            gold: derived.gold,
+            msciWorld: derived.msciWorld,
+            goldOunces: goldOunces,
+            events: flowData.events.filter {
+                let date = AppDateFormatter.yearMonthDay.string(from: $0.date)
+                return date >= cutoff && date <= today
+            },
+            timeWeightedReturn: derived.timeWeightedReturn,
+            gainEUR: gainEUR
+        )
     }
 
     // MARK: - Portfolio History
     func getPortfolioValueHistory() async -> [(date: Date, value: Double)] {
         clearRateCache()
-        let cutoffStr = AppDateFormatter.yearMonthDay.string(from: selectedPeriod.comparisonDate)
         let universe = await historyUniverse()
         return await aggregatedValueHistory(
             isins: universe.isins,
             fallbackQuantityByIsin: universe.fallback,
             transactions: universe.transactions,
-            cutoffStr: cutoffStr
+            cutoffStr: historyCutoff(for: universe.transactions)
         )
     }
 
@@ -150,7 +241,7 @@ extension AppViewModel {
         goldHistory.reserveCapacity(eurHistory.count)
         for point in eurHistory {
             let dateStr = AppDateFormatter.yearMonthDay.string(from: point.date)
-            if let gramPrice = PortfolioHistoryBuilder.priceOnOrBeforeOrFirst(index: goldIndex, date: dateStr), gramPrice > 0 {
+            if let gramPrice = PortfolioHistoryBuilder.priceOnOrBefore(index: goldIndex, date: dateStr), gramPrice > 0 {
                 let goldOuncePrice = gramPrice * 31.1034768
                 let goldOz = point.value / goldOuncePrice
                 goldHistory.append((date: point.date, value: goldOz))
@@ -162,22 +253,15 @@ extension AppViewModel {
     /// Benchmark comparison helper: scales initial portfolio value by benchmark performance.
     private func benchmarkComparisonHistory(benchmarkIsin: String) async -> [(date: Date, value: Double)] {
         let portfolioHistory = await getPortfolioValueHistory()
-        guard let first = portfolioHistory.first, first.value > 0 else { return [] }
-        let (date0, value0) = (first.date, first.value)
-        let date0Str = AppDateFormatter.yearMonthDay.string(from: date0)
-
+        let transactions = await db.getAllHoldingTransactions()
+        let cutoff = historyCutoff(for: transactions)
+        let flows = await cashflowData(transactions: transactions).cashflows.filter { $0.date > cutoff }
         let benchIndex = (await buildPriceIndex(for: [benchmarkIsin]))[benchmarkIsin] ?? []
-        guard let benchAtStart = PortfolioHistoryBuilder.priceOnOrBeforeOrFirst(index: benchIndex, date: date0Str), benchAtStart > 0 else { return [] }
-
-        var result: [(date: Date, value: Double)] = []
-        result.reserveCapacity(portfolioHistory.count)
-        for point in portfolioHistory {
-            let dateStr = AppDateFormatter.yearMonthDay.string(from: point.date)
-            guard let benchValue = PortfolioHistoryBuilder.priceOnOrBeforeOrFirst(index: benchIndex, date: dateStr), benchValue > 0 else { continue }
-            let scaled = value0 * (benchValue / benchAtStart)
-            result.append((date: point.date, value: scaled))
-        }
-        return result
+        return PortfolioAnalytics.benchmarkSeries(
+            portfolio: portfolioHistory,
+            benchmark: benchIndex,
+            cashflows: flows
+        )
     }
 
     /// S&P 500 comparison: same-date series as portfolio history, values = initial portfolio value scaled by S&P performance.
@@ -197,19 +281,22 @@ extension AppViewModel {
 
     func getQuadrantValueHistory(quadrantId: Int?) async -> [(date: Date, value: Double)] {
         clearRateCache()
-        let cutoffStr = AppDateFormatter.yearMonthDay.string(from: selectedPeriod.comparisonDate)
         let universe = await historyUniverse(instrumentFilter: { $0.quadrantId == quadrantId })
         return await aggregatedValueHistory(
             isins: universe.isins,
             fallbackQuantityByIsin: universe.fallback,
             transactions: universe.transactions,
-            cutoffStr: cutoffStr
+            cutoffStr: historyCutoff(for: universe.transactions)
         )
     }
 
     /// Convert quadrant value history from EUR to gold ounces using Veracash gold spot price
     func getQuadrantValueHistoryInGold(quadrantId: Int?) async -> [(date: Date, value: Double)] {
         let eurHistory = await getQuadrantValueHistory(quadrantId: quadrantId)
+        return await valueHistoryInGold(eurHistory)
+    }
+
+    func valueHistoryInGold(_ eurHistory: [(date: Date, value: Double)]) async -> [(date: Date, value: Double)] {
         if eurHistory.isEmpty { return [] }
 
         let goldIndex = (await buildPriceIndex(for: ["VERACASH:GOLD_SPOT"]))["VERACASH:GOLD_SPOT"] ?? []
@@ -234,7 +321,7 @@ extension AppViewModel {
                 lastKnownGoldPrice = price
             } else if let lastPrice = lastKnownGoldPrice {
                 goldOuncePrice = lastPrice
-            } else if let gramPrice = PortfolioHistoryBuilder.priceOnOrBeforeOrFirst(index: goldIndex, date: dateStr), gramPrice > 0 {
+            } else if let gramPrice = PortfolioHistoryBuilder.priceOnOrBefore(index: goldIndex, date: dateStr), gramPrice > 0 {
                 let ouncePrice = gramPrice * 31.1034768
                 goldOuncePrice = ouncePrice
                 lastKnownGoldPrice = ouncePrice
@@ -253,7 +340,6 @@ extension AppViewModel {
 
     func getHoldingValueHistory(isin: String, quantity: Double) async -> [(date: Date, value: Double)] {
         clearRateCache()
-        let cutoffStr = AppDateFormatter.yearMonthDay.string(from: selectedPeriod.comparisonDate)
         let txs = await db.getHoldingTransactions(forIsin: isin)
         let dbQty = await db.getTotalQuantity(forIsin: isin)
         let fallback = dbQty > 0 ? dbQty : quantity
@@ -261,19 +347,32 @@ extension AppViewModel {
             isins: [isin],
             fallbackQuantityByIsin: [isin: fallback],
             transactions: txs,
-            cutoffStr: cutoffStr
+            cutoffStr: historyCutoff(for: txs)
+        )
+    }
+
+    func getPositionValueHistory(accountId: Int, isin: String) async -> [(date: Date, value: Double)] {
+        clearRateCache()
+        let transactions = await db.getHoldingTransactions(accountId: accountId, isin: isin)
+        let liveQuantity = holdings.first {
+            $0.accountId == accountId && $0.isin == isin
+        }?.quantity ?? HoldingLedger.quantity(transactions: transactions)
+        return await aggregatedValueHistory(
+            isins: [isin],
+            fallbackQuantityByIsin: [isin: liveQuantity],
+            transactions: transactions,
+            cutoffStr: historyCutoff(for: transactions)
         )
     }
 
     func getAccountValueHistory(accountId: Int) async -> [(date: Date, value: Double)] {
         clearRateCache()
-        let cutoffStr = AppDateFormatter.yearMonthDay.string(from: selectedPeriod.comparisonDate)
         let universe = await historyUniverse(accountId: accountId)
         return await aggregatedValueHistory(
             isins: universe.isins,
             fallbackQuantityByIsin: universe.fallback,
             transactions: universe.transactions,
-            cutoffStr: cutoffStr
+            cutoffStr: historyCutoff(for: universe.transactions)
         )
     }
 }

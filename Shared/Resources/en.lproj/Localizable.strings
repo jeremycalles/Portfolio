@@ -129,6 +129,7 @@
 "instruments.noQuadrantsAvailable" = "No quadrants available";
 "instruments.priceDetails" = "Price Details";
 "instruments.currentPrice" = "Price";
+"instruments.validateTicker" = "Validate ticker";
 "instruments.currency" = "Currency";
 "instruments.count" = "%d instruments";
 
@@ -189,9 +190,34 @@
 "holdings.noMatches" = "No holdings match";
 "holdings.adjustFilters" = "Adjust search, filters, or account selection.";
 "holdings.weightValue" = "%@ of portfolio";
+"holdings.transactions" = "Transactions";
+"holdings.addTransaction" = "Add Transaction";
+"holdings.buy" = "Buy";
+"holdings.sell" = "Sell";
+"holdings.adjustment" = "Adjustment";
+"holdings.opening" = "Opening balance";
+"holdings.unitPrice" = "Unit Price";
+"holdings.fees" = "Fees";
+"holdings.note" = "Note";
+"holdings.averageCost" = "Average Cost";
+"holdings.unrealizedPnL" = "Unrealized P&L";
+"holdings.realizedPnL" = "Realized P&L";
+"holdings.closePosition" = "Close Position";
+"holdings.closeConfirmation" = "Close this position while keeping its transaction history?";
+"holdings.adjustmentDirection" = "Adjustment direction";
+"holdings.increase" = "Increase";
+"holdings.decrease" = "Decrease";
+"holdings.deleteWithHistory" = "Delete with History";
+"holdings.deleteHistoryConfirmation" = "This permanently deletes the position and every transaction.";
+"holdings.noTransactions" = "No transactions recorded";
+"ledger.invalidQuantity" = "Enter a quantity greater than zero.";
+"ledger.futureDate" = "A transaction cannot be dated in the future.";
+"ledger.invalidOperation" = "This transaction is not valid.";
+"ledger.insufficientQuantity" = "Only %.4f units are available on this date.";
 
 // MARK: - Quadrants
 "quadrants.addQuadrant" = "Add Quadrant";
+"quadrants.name" = "Quadrant Name";
 "quadrants.quadrantDetails" = "Quadrant Details";
 "quadrants.quadrantDetailsHint" = "Examples: 'Growth Stocks', 'Bonds', 'Real Estate', 'Gold'";
 "quadrants.quadrantAssignment" = "Quadrant Assignment";
@@ -221,6 +247,7 @@
 
 // MARK: - Settings
 "settings.title" = "Settings";
+"settings.display" = "Display";
 "settings.demoMode" = "Demo Mode";
 "settings.demoModeDescription" = "Anonymize portfolio values with randomized quantities for presentations";
 "settings.demoModeEnable" = "Enable Demo Mode";
@@ -239,6 +266,10 @@
 "settings.database" = "Database";
 "settings.background" = "Background";
 "settings.importExportHint" = "Use Import/Export to manually transfer your database between devices.";
+"settings.importExportPathHint" = "Use Import/Export to transfer data between devices. The path shows the database location.";
+"settings.path" = "Path";
+"settings.statistics" = "Statistics";
+"settings.accountsHint" = "Bank accounts organize your holdings. Swipe left to delete.";
 "settings.importDatabase" = "Import Database from File";
 "settings.exportDatabase" = "Export Database";
 "settings.databaseImportExport" = "Database Import/Export";
@@ -247,6 +278,12 @@
 "settings.backgroundRefresh" = "Background Refresh";
 "settings.backgroundRefreshInterval" = "Every 3 hours";
 "settings.lastRefresh" = "Last refresh";
+"settings.nextRefresh" = "Next refresh";
+"settings.nextRefreshDue" = "Due now";
+"settings.backgroundRefreshStatus" = "System background refresh";
+"settings.backgroundRefreshAvailable" = "Available";
+"settings.backgroundRefreshDenied" = "Off in Settings";
+"settings.backgroundRefreshRestricted" = "Restricted";
 "settings.backgroundUpdates" = "Background Updates";
 "settings.backgroundUpdatesDescription" = "Prices are automatically updated in the background when the app is not in use. Long-press to view logs.";
 "settings.automaticUpdates" = "Automatic Updates";
@@ -273,6 +310,12 @@
 "settings.storageLogsDescription" = "Logs for database connection and backup events.";
 "settings.databaseStoredLocally" = "Stored locally";
 "settings.backupToICloudNow" = "Backup to iCloud now";
+"settings.backup" = "Backup";
+"settings.backupCompleted" = "Backup completed.";
+"settings.databaseImport" = "Database Import";
+"settings.cannotAccessSelectedFile" = "Cannot access the selected file.";
+"settings.importSucceededRestart" = "Database imported successfully. Restart the app to load the new data.";
+"settings.importFailed" = "Import failed: %@";
 "settings.dontAskAgain" = "Don't ask again";
 "settings.notNow" = "Not now";
 "settings.inAppTimerActive" = "In-app timer active";
@@ -318,6 +361,10 @@
 "chart.sp500Comparison" = "S&P 500";
 "chart.goldComparison" = "Gold";
 "chart.msciWorldComparison" = "MSCI World";
+"chart.investedCapital" = "Invested capital";
+"chart.valueView" = "Value";
+"chart.percentView" = "Performance %";
+"chart.dateAxis" = "Date";
 "chart.moreItems" = "+%d more";
 
 // MARK: - Privacy

@@ -14,8 +14,7 @@ struct QuadrantPieChart: View {
         var data: [(name: String, value: Double, color: Color)] = []
         
         for (index, item) in report.enumerated() {
-            // Sum all currency values for this quadrant (simplified - assumes single currency or converts)
-            let totalValue = item.totalValue.values.reduce(0, +)
+            let totalValue = item.totalValueEUR
             if totalValue > 0 {
                 let name = item.quadrant?.name ?? L10n.instrumentsUnassigned
                 let color = colors[index % colors.count]

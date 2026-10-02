@@ -37,7 +37,7 @@ struct BackfillLogsSheet: View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Text("Backfill Logs")
+                Text("\(L10n.settingsBackfillData) — \(L10n.settingsLogs)")
                     .font(.headline)
                 Spacer()
                 Button {

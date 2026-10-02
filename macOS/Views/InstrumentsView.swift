@@ -255,21 +255,21 @@ struct EditInstrumentSheet: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Instrument")
+                    Text(L10n.holdingsInstrument)
                         .font(.headline)
                     
-                    labeledRow("Name") {
-                        TextField("Name", text: $name)
+                    labeledRow(L10n.instrumentsName) {
+                        TextField(L10n.instrumentsName, text: $name)
                             .textFieldStyle(.roundedBorder)
                     }
-                    labeledRow("ISIN") {
+                    labeledRow(L10n.instrumentsIsin) {
                         Text(instrument.isin)
                             .font(.body.monospaced())
                             .foregroundColor(.secondary)
                     }
-                    labeledRow("Ticker") {
+                    labeledRow(L10n.instrumentsTicker) {
                         HStack(spacing: 8) {
-                            TextField("Ticker", text: $ticker)
+                            TextField(L10n.instrumentsTicker, text: $ticker)
                                 .textFieldStyle(.roundedBorder)
                                 .onChange(of: ticker) { _, _ in
                                     tickerValidationMessage = nil
@@ -290,7 +290,7 @@ struct EditInstrumentSheet: View {
                             }
                             .buttonStyle(.borderless)
                             .disabled(isValidatingTicker)
-                            .help("Validate ticker")
+                            .help(L10n.instrumentsValidateTicker)
                             if isValidatingTicker {
                                 ProgressView()
                                     .scaleEffect(0.6)
@@ -305,7 +305,7 @@ struct EditInstrumentSheet: View {
                                 .foregroundColor(valid ? .green : .red)
                         }
                     }
-                    labeledRow("Currency") {
+                    labeledRow(L10n.instrumentsCurrency) {
                         Picker("", selection: $currency) {
                             ForEach(currencies, id: \.self) { Text($0).tag($0) }
                         }
@@ -313,7 +313,7 @@ struct EditInstrumentSheet: View {
                         .labelsHidden()
                         .frame(maxWidth: 120)
                     }
-                    labeledRow("Quadrant") {
+                    labeledRow(L10n.instrumentsQuadrants) {
                         Picker("", selection: $quadrantId) {
                             Text(L10n.instrumentsUnassigned).tag(nil as Int?)
                             ForEach(viewModel.quadrants) { q in
@@ -328,21 +328,21 @@ struct EditInstrumentSheet: View {
                     Divider()
                         .padding(.vertical, 4)
                     
-                    Text("Latest Price")
+                    Text(L10n.instrumentsCurrentPrice)
                         .font(.headline)
                     
                     if hasLatestPrice {
-                        labeledRow("Date") {
+                        labeledRow(L10n.reportsDate) {
                             DatePicker("", selection: $latestPriceDate, displayedComponents: .date)
                                 .labelsHidden()
                         }
-                        labeledRow("Value") {
-                            TextField("Value", text: $latestPriceText)
+                        labeledRow(L10n.instrumentsCurrentPrice) {
+                            TextField(L10n.instrumentsCurrentPrice, text: $latestPriceText)
                                 .textFieldStyle(.roundedBorder)
                                 .frame(maxWidth: 120)
                         }
                     } else {
-                        Text("No price")
+                        Text(L10n.chartNoPriceHistory)
                             .foregroundColor(.secondary)
                     }
                 }

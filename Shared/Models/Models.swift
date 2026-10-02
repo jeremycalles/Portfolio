@@ -79,7 +79,20 @@ struct Holding: Identifiable, Codable {
     var lastUpdated: String?
 }
 
-// MARK: - Holding Transaction (buy +, sell −)
+// MARK: - Holding Transaction
+enum HoldingTransactionKind: String, Codable, CaseIterable {
+    case buy
+    case sell
+    case opening
+    case adjustment
+
+    var isPurchase: Bool {
+        self == .buy || self == .opening || self == .adjustment
+    }
+}
+
+/// A dated position operation. Positive deltas add units and negative deltas remove them.
+/// Transactions are the source of truth; `Holding.quantity` is a derived cache.
 struct HoldingTransaction: Identifiable, Codable {
     var id: Int?
     let accountId: Int
@@ -88,6 +101,14 @@ struct HoldingTransaction: Identifiable, Codable {
     let quantityDelta: Double
     let unitPrice: Double?
     let createdAt: String?
+    var kind: HoldingTransactionKind = .adjustment
+    var fees: Double? = nil
+    var note: String? = nil
+
+    var absoluteQuantity: Double { abs(quantityDelta) }
+    var isEstimatedOpening: Bool {
+        kind == .opening && note == HoldingLedger.estimatedOpeningNote
+    }
 }
 
 // MARK: - Holding with Details (for display)
@@ -135,8 +156,11 @@ enum ReportPeriod: String, CaseIterable, Identifiable {
     case oneDay = "1Day"
     case oneWeek = "1Week"
     case oneMonth = "1Month"
+    case threeMonths = "3Months"
+    case sixMonths = "6Months"
     case oneYear = "1Year"
     case yearToDate = "1Jan"
+    case all = "All"
     
     var id: String { rawValue }
     
@@ -145,8 +169,11 @@ enum ReportPeriod: String, CaseIterable, Identifiable {
         case .oneDay: return L10n.period1Day
         case .oneWeek: return L10n.period1Week
         case .oneMonth: return L10n.period1Month
+        case .threeMonths: return L10n.period3Months
+        case .sixMonths: return L10n.period6Months
         case .oneYear: return L10n.period1Year
         case .yearToDate: return L10n.periodYearToDate
+        case .all: return L10n.periodAll
         }
     }
     
@@ -161,10 +188,16 @@ enum ReportPeriod: String, CaseIterable, Identifiable {
             return calendar.date(byAdding: .day, value: -7, to: today) ?? today
         case .oneMonth:
             return calendar.date(byAdding: .month, value: -1, to: today) ?? today
+        case .threeMonths:
+            return calendar.date(byAdding: .month, value: -3, to: today) ?? today
+        case .sixMonths:
+            return calendar.date(byAdding: .month, value: -6, to: today) ?? today
         case .oneYear:
             return calendar.date(byAdding: .year, value: -1, to: today) ?? today
         case .yearToDate:
             return calendar.date(from: DateComponents(year: calendar.component(.year, from: today), month: 1, day: 1)) ?? today
+        case .all:
+            return Date(timeIntervalSince1970: 0)
         }
     }
 }

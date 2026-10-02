@@ -110,6 +110,7 @@ private final class RefreshLoginItemDelegate: NSObject, NSApplicationDelegate {
 
     /// Darwin notify is delivered only to a running process. If the main app was quit, wake it first.
     private func requestRefreshFromMainApp() {
+        persistPendingRefreshRequest()
         let running = NSRunningApplication.runningApplications(
             withBundleIdentifier: PortfolioRefreshBridge.mainAppBundleIdentifier
         )
@@ -133,10 +134,28 @@ private final class RefreshLoginItemDelegate: NSObject, NSApplicationDelegate {
 
         if FileManager.default.fileExists(atPath: parentURL.path) {
             NSWorkspace.shared.openApplication(at: parentURL, configuration: configuration) { [weak self] _, error in
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                    self?.postRefreshRequest()
-                    if error != nil, let url = PortfolioRefreshBridge.refreshURL {
+                guard let self else { return }
+                if error != nil, let url = PortfolioRefreshBridge.refreshURL {
+                    DispatchQueue.main.async {
                         NSWorkspace.shared.open(url)
+                    }
+                    return
+                }
+                // Darwin notifications are ephemeral. Retry while the parent app
+                // completes its cold launch; its persisted request gate prevents duplicates.
+                for delay in [2.0, 4.0, 7.0] {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                        self.postRefreshRequest()
+                    }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+                    let running = NSRunningApplication.runningApplications(
+                        withBundleIdentifier: PortfolioRefreshBridge.mainAppBundleIdentifier
+                    )
+                    if running.isEmpty, let url = PortfolioRefreshBridge.refreshURL {
+                        NSWorkspace.shared.open(url)
+                    } else {
+                        self.postRefreshRequest()
                     }
                 }
             }
@@ -146,6 +165,12 @@ private final class RefreshLoginItemDelegate: NSObject, NSApplicationDelegate {
         if let url = PortfolioRefreshBridge.refreshURL {
             NSWorkspace.shared.open(url)
         }
+    }
+
+    private func persistPendingRefreshRequest() {
+        guard let defaults = UserDefaults(suiteName: PortfolioRefreshBridge.appGroupIdentifier) else { return }
+        defaults.set(Date(), forKey: PortfolioRefreshBridge.pendingRefreshRequestDateKey)
+        defaults.synchronize()
     }
 
     private func postRefreshRequest() {

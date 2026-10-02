@@ -1,1 +1,1 @@
-Vergangene Tage in der Grafik zählen nur Kauf- und Verkaufslose bis einschließlich dieses Tages. Heute gilt die Menge, die Sie jetzt halten.
+Der Positionsverlauf basiert jetzt vollständig auf bearbeitbaren Käufen, Verkäufen und Anpassungen. Neue Diagramme zeigen investiertes Kapital, Transaktionsmarken und zeitgewichtete Rendite. Positionsdetails enthalten Einstandskurs sowie realisierte und unrealisierte Gewinne. Barrierefreiheit und geplante Mac-Aktualisierungen wurden ebenfalls verbessert.

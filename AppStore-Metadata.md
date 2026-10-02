@@ -70,7 +70,7 @@ Lead with what people type (stocks, gold, crypto, no account), then WHAT YOU CAN
 ## What’s New
 
 ```
-Past days on the chart count only buy and sell lots dated on or before that day. Today still uses the quantity you hold now.
+Position history is now fully transaction-driven, with editable buys, sells and adjustments. New charts show invested capital, transaction markers and time-weighted performance. Position details add average cost and realized/unrealized gains. We also improved accessibility and made scheduled Mac refreshes more reliable after a cold launch.
 ```
 
 ---

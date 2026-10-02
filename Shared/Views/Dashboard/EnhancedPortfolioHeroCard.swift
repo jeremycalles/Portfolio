@@ -22,7 +22,7 @@ struct EnhancedPortfolioHeroCard: View {
     }()
     
     private var change: Double {
-        currentValue - previousValue
+        viewModel.cachedPeriodGainEUR ?? (currentValue - previousValue)
     }
     
     private var changePercent: Double {
@@ -65,12 +65,12 @@ struct EnhancedPortfolioHeroCard: View {
     private var gradientColors: [Color] {
         if showGoldMode {
             return isGoldPositive 
-                ? [Color.green.opacity(0.15), Color.green.opacity(0.05), Color.clear]
-                : [Color.red.opacity(0.15), Color.red.opacity(0.05), Color.clear]
+                ? [AppTheme.gain.opacity(0.15), AppTheme.gain.opacity(0.05), Color.clear]
+                : [AppTheme.loss.opacity(0.15), AppTheme.loss.opacity(0.05), Color.clear]
         } else {
             return euroIsPositive
-                ? [Color.green.opacity(0.15), Color.green.opacity(0.05), Color.clear]
-                : [Color.red.opacity(0.15), Color.red.opacity(0.05), Color.clear]
+                ? [AppTheme.gain.opacity(0.15), AppTheme.gain.opacity(0.05), Color.clear]
+                : [AppTheme.loss.opacity(0.15), AppTheme.loss.opacity(0.05), Color.clear]
         }
     }
     
@@ -147,7 +147,7 @@ struct EnhancedPortfolioHeroCard: View {
     private var emptyState: some View {
         VStack(spacing: 8) {
             Image(systemName: "chart.line.uptrend.xyaxis")
-                .font(.system(size: 48))
+                .font(.largeTitle)
                 .foregroundColor(.secondary.opacity(0.5))
             Text(L10n.dashboardNoHoldings)
                 .font(.headline)
@@ -173,19 +173,19 @@ struct EnhancedPortfolioHeroCard: View {
         VStack(alignment: .leading, spacing: 8) {
             if privacyMode {
                 Text("••••••")
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .font(.largeTitle.bold())
             } else if showGoldMode, let gold = goldTotals {
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text(String(format: "%.2f", gold.current))
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                        .font(.largeTitle.bold())
                         .contentTransition(.numericText())
                     Text("oz")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.title3.weight(.semibold))
                         .foregroundColor(.yellow)
                 }
             } else {
                 Text(formatCurrency(currentValue, currency: "EUR"))
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .font(.largeTitle.bold())
                     .contentTransition(.numericText())
             }
 
@@ -219,20 +219,20 @@ struct EnhancedPortfolioHeroCard: View {
     private func changePill(euroPositive: Bool, percentPositive: Bool, amount: String, percent: String) -> some View {
         HStack(spacing: 6) {
             Image(systemName: euroPositive ? "arrow.up.right" : "arrow.down.right")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(euroPositive ? .green : .red)
+                .font(.caption2.weight(.semibold))
+                .foregroundColor(euroPositive ? AppTheme.gain : AppTheme.loss)
             Text(amount)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(euroPositive ? .green : .red)
+                .font(.caption.weight(.semibold))
+                .foregroundColor(euroPositive ? AppTheme.gain : AppTheme.loss)
             Text("(\(percent))")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(percentPositive ? .green : .red)
+                .font(.caption.weight(.medium))
+                .foregroundColor(percentPositive ? AppTheme.gain : AppTheme.loss)
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
         .background(
             Capsule()
-                .fill((euroPositive ? Color.green : Color.red).opacity(0.15))
+                .fill((euroPositive ? AppTheme.gain : AppTheme.loss).opacity(0.15))
         )
     }
 

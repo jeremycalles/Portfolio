@@ -43,6 +43,7 @@ enum HoldingsFilterMode: String, CaseIterable, Identifiable {
 // MARK: - All Holdings View (Overview)
 struct AllHoldingsView: View {
     @EnvironmentObject var viewModel: AppViewModel
+    @AppStorage("privacyMode") private var privacyMode = false
     @State private var expandedAccounts: Set<Int> = []
     @State private var holdingToEdit: HoldingEditItem?
     @State private var searchText = ""
@@ -313,10 +314,10 @@ struct AllHoldingsView: View {
         .navigationTitle(L10n.navAllHoldings)
         .sheet(item: $holdingToEdit) { item in
             NavigationStack {
-                EditHoldingView(accountId: item.accountId, isin: item.isin)
+                HoldingDetailView(accountId: item.accountId, isin: item.isin, privacyMode: privacyMode)
                     .environmentObject(viewModel)
             }
-            .frame(minWidth: 420, minHeight: 380)
+            .frame(minWidth: 620, minHeight: 680)
         }
         .onAppear {
             // Expand all accounts by default

@@ -10,6 +10,6 @@ QUÉ PUEDE SEGUIR
 • Criptomonedas — pares principales
 • Cuentas bancarias — efectivo manual
 
-Varias cuentas, precio de coste, lotes de compra/venta para el historial, guía inicial, onzas de oro, actualizaciones fiables en segundo plano, modo privacidad, Face ID / Touch ID, inglés y francés, copia iCloud opcional.
+Varias cuentas, registro de operaciones editable, coste medio, ganancias realizadas y latentes, capital invertido y rentabilidad ponderada por tiempo en gráficos interactivos, onzas de oro, actualizaciones fiables en segundo plano, modo privacidad, Face ID / Touch ID y copia iCloud opcional.
 
 Solo salen peticiones de datos de mercado públicos. Sin analítica ni anuncios.

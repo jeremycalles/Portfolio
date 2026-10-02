@@ -15,8 +15,8 @@ FEATURES
 • Multi-account support — Track holdings across several banks and brokers
 • Cost basis & performance — Purchase dates, prices, gain/loss, comparison over 1D, 1W, 1M, 1Y, YTD
 • Quadrant organization — Group instruments by category (Technology, Precious Metals, Fixed Income, etc.)
-• Interactive charts — Portfolio trend, allocation, and instrument history
-• Buy & sell lots — Charts use historical quantities, not only today’s position
+• Performance charts — Compare value, invested capital, transactions, benchmarks, and time-weighted return
+• Transaction ledger & P&L — Edit buys, sells, and adjustments; see average cost and realized/unrealized gains
 • Guided walkthrough — Short onboarding on iPhone and Mac
 • Gold valuation — See portfolio value in gold ounces for an inflation-adjusted view
 • Smart data — Best source per instrument type; historical backfill for trends

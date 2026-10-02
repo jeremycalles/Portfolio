@@ -130,7 +130,7 @@ struct iOSInstrumentDetailView: View {
             }
             
             Section {
-                Picker("Quadrant", selection: $selectedQuadrantId) {
+                Picker(L10n.instrumentsQuadrants, selection: $selectedQuadrantId) {
                     Text(L10n.instrumentsUnassigned).tag(nil as Int?)
                     ForEach(viewModel.quadrants) { quadrant in
                         Text(quadrant.name).tag(quadrant.id as Int?)
@@ -142,14 +142,14 @@ struct iOSInstrumentDetailView: View {
                     }
                 }
             } header: {
-                Text("Quadrant Assignment")
+                Text(L10n.quadrantsQuadrantAssignment)
             } footer: {
-                Text("Quadrants help organize your portfolio into categories for reporting")
+                Text(L10n.quadrantsAssignmentHint)
             }
             
             Section {
                 if priceHistory.isEmpty {
-                    Text("No price history")
+                    Text(L10n.chartNoPriceHistory)
                         .foregroundColor(.secondary)
                 } else {
                     ForEach(priceHistory, id: \.id) { price in
@@ -183,31 +183,31 @@ struct iOSInstrumentDetailView: View {
                 }
             } header: {
                 HStack {
-                    Text("Price History")
+                    Text(L10n.navPriceHistory)
                     Spacer()
                     Menu {
-                        Button("1 Month (Daily)") {
+                        Button(L10n.actionBackfill1Month) {
                             Task {
                                 await viewModel.backfillSingleInstrument(instrument, period: "1mo", interval: "1d")
                                 await refreshPriceHistory()
                                 showingBackfillLogs = true
                             }
                         }
-                        Button("1 Year (Monthly)") {
+                        Button(L10n.actionBackfill1Year) {
                             Task {
                                 await viewModel.backfillSingleInstrument(instrument, period: "1y", interval: "1mo")
                                 await refreshPriceHistory()
                                 showingBackfillLogs = true
                             }
                         }
-                        Button("2 Years (Monthly)") {
+                        Button(L10n.actionBackfill2Years) {
                             Task {
                                 await viewModel.backfillSingleInstrument(instrument, period: "2y", interval: "1mo")
                                 await refreshPriceHistory()
                                 showingBackfillLogs = true
                             }
                         }
-                        Button("5 Years (Monthly)") {
+                        Button(L10n.actionBackfill5Years) {
                             Task {
                                 await viewModel.backfillSingleInstrument(instrument, period: "5y", interval: "1mo")
                                 await refreshPriceHistory()
@@ -317,11 +317,11 @@ struct iOSInstrumentEditSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Instrument") {
-                    TextField("Name", text: $name)
-                    LabeledContent("ISIN", value: instrument.isin)
+                Section(L10n.holdingsInstrument) {
+                    TextField(L10n.instrumentsName, text: $name)
+                    LabeledContent(L10n.instrumentsIsin, value: instrument.isin)
                     HStack {
-                        TextField("Ticker", text: $ticker)
+                        TextField(L10n.instrumentsTicker, text: $ticker)
                             .keyboardType(.asciiCapable)
                             .onChange(of: ticker) { _, _ in
                                 tickerValidationMessage = nil
@@ -352,10 +352,10 @@ struct iOSInstrumentEditSheet: View {
                             .font(.caption)
                             .foregroundColor(valid ? .green : .red)
                     }
-                    Picker("Currency", selection: $currency) {
+                    Picker(L10n.instrumentsCurrency, selection: $currency) {
                         ForEach(currencies, id: \.self) { Text($0).tag($0) }
                     }
-                    Picker("Quadrant", selection: $quadrantId) {
+                    Picker(L10n.instrumentsQuadrants, selection: $quadrantId) {
                         Text(L10n.instrumentsUnassigned).tag(nil as Int?)
                         ForEach(viewModel.quadrants) { q in
                             Text(q.name).tag(q.id as Int?)
@@ -363,13 +363,13 @@ struct iOSInstrumentEditSheet: View {
                     }
                 }
                 
-                Section("Latest Price") {
+                Section(L10n.instrumentsCurrentPrice) {
                     if hasLatestPrice {
-                        DatePicker("Date", selection: $latestPriceDate, displayedComponents: .date)
-                        TextField("Value", text: $latestPriceText)
+                        DatePicker(L10n.reportsDate, selection: $latestPriceDate, displayedComponents: .date)
+                        TextField(L10n.instrumentsCurrentPrice, text: $latestPriceText)
                             .keyboardType(.decimalPad)
                     } else {
-                        Text("No price")
+                        Text(L10n.chartNoPriceHistory)
                             .foregroundColor(.secondary)
                     }
                 }

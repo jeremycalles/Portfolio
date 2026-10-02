@@ -177,8 +177,7 @@ class MacOSSchedulerManager: ObservableObject {
         switch loginItemService.status {
         case .enabled:
             isInstalled = true
-            // SMAppService enabled means the helper should run; process may still be restarting.
-            isRunning = true
+            isRunning = isLoginItemHelperRunning()
         case .requiresApproval:
             isInstalled = true
             isRunning = false
@@ -513,6 +512,18 @@ class MacOSSchedulerManager: ObservableObject {
         formatter.unitsStyle = .abbreviated
         return formatter.localizedString(for: lastRefresh, relativeTo: Date())
     }
+
+    /// When the helper should wake the app next, based on the last successful refresh.
+    func nextRefreshDescription() -> String {
+        guard let lastRefresh = UserDefaults.standard.object(forKey: "lastBackgroundRefresh") as? Date else {
+            return L10n.settingsNextRefreshDue
+        }
+        let next = lastRefresh.addingTimeInterval(TimeInterval(selectedInterval.rawValue))
+        guard next > Date() else { return L10n.settingsNextRefreshDue }
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        return formatter.localizedString(for: next, relativeTo: Date())
+    }
 }
 
 // MARK: - Background Refresh Settings View
@@ -554,6 +565,17 @@ struct BackgroundRefreshSettingsView: View {
                         title: L10n.settingsLastRefresh,
                         subtitle: lastRefresh,
                         icon: "clock.fill",
+                        iconColor: .gray
+                    ) {
+                        EmptyView()
+                    }
+                }
+
+                if manager.isInstalled || manager.timerEnabled {
+                    PremiumSettingsRow(
+                        title: L10n.settingsNextRefresh,
+                        subtitle: manager.nextRefreshDescription(),
+                        icon: "calendar.badge.clock",
                         iconColor: .gray
                     ) {
                         EmptyView()

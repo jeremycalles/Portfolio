@@ -5,17 +5,26 @@ import Charts
 struct QuickStatsRow: View {
     @EnvironmentObject var viewModel: AppViewModel
     let privacyMode: Bool
-    @State private var statsData: [QuickStatData] = []
+    private var statsData: [QuickStatData] {
+        computeStats(
+            from: viewModel.cachedHoldingsWithQuantity,
+            histories: viewModel.cachedHoldingHistories,
+            returns: viewModel.cachedHoldingTWR
+        )
+    }
     
-    private func computeStats(from allHoldings: [(isin: String, name: String, quantity: Double)], histories: [String: [(date: Date, value: Double)]]) -> [QuickStatData] {
+    private func computeStats(
+        from allHoldings: [(isin: String, name: String, quantity: Double)],
+        histories: [String: [(date: Date, value: Double)]],
+        returns: [String: Double]
+    ) -> [QuickStatData] {
         var stats: [QuickStatData] = []
         guard !allHoldings.isEmpty else { return stats }
         
         var holdingChanges: [(name: String, change: Double, value: Double)] = []
         for holding in allHoldings {
             let history = histories[holding.isin] ?? []
-            if let first = history.first?.value, let last = history.last?.value, first > 0 {
-                let changePercent = ((last - first) / first) * 100
+            if let last = history.last?.value, let changePercent = returns[holding.isin] {
                 holdingChanges.append((name: holding.name, change: changePercent, value: last))
             }
         }
@@ -24,7 +33,7 @@ struct QuickStatsRow: View {
         if let best = holdingChanges.max(by: { $0.change < $1.change }) {
             stats.append(QuickStatData(
                 icon: "arrow.up.right.circle.fill",
-                iconColor: .green,
+                iconColor: AppTheme.gain,
                 title: L10n.statsBestPerformer,
                 value: String(format: "%+.1f%%", best.change),
                 detail: best.name
@@ -35,7 +44,7 @@ struct QuickStatsRow: View {
         if let worst = holdingChanges.min(by: { $0.change < $1.change }) {
             stats.append(QuickStatData(
                 icon: "arrow.down.right.circle.fill",
-                iconColor: .red,
+                iconColor: AppTheme.loss,
                 title: L10n.statsWorstPerformer,
                 value: String(format: "%+.1f%%", worst.change),
                 detail: worst.name
@@ -78,14 +87,6 @@ struct QuickStatsRow: View {
                 }
             }
         }
-        .task(id: viewModel.selectedPeriod) {
-            let allHoldings = await viewModel.getAllHoldingsWithQuantity()
-            var histories: [String: [(date: Date, value: Double)]] = [:]
-            for h in allHoldings {
-                histories[h.isin] = await viewModel.getHoldingValueHistory(isin: h.isin, quantity: h.quantity)
-            }
-            statsData = computeStats(from: allHoldings, histories: histories)
-        }
     }
 }
 
@@ -107,7 +108,7 @@ struct QuickStatCard: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
                 Image(systemName: data.icon)
-                    .font(.system(size: 16))
+                    .font(.body)
                     .foregroundColor(data.iconColor)
                 
                 Text(data.title)
@@ -116,7 +117,7 @@ struct QuickStatCard: View {
             }
             
             Text(data.value)
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(.headline)
                 .lineLimit(1)
             
             Text(data.detail)

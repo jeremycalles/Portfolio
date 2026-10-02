@@ -139,20 +139,38 @@ struct PortfolioApp: App {
 #if os(macOS)
 final class MacOSRefreshRequestObserver {
     static let shared = MacOSRefreshRequestObserver()
+    private let sharedDefaults = UserDefaults(suiteName: PortfolioRefreshBridge.appGroupIdentifier)
     
     private init() {
         CFNotificationCenterAddObserver(
             CFNotificationCenterGetDarwinNotifyCenter(),
             Unmanaged.passUnretained(self).toOpaque(),
-            { _, _, _, _, _ in
-                Task { @MainActor in
-                    await MacOSSchedulerManager.shared.performBackgroundRefresh()
-                }
+            { _, observer, _, _, _ in
+                guard let observer else { return }
+                let instance = Unmanaged<MacOSRefreshRequestObserver>
+                    .fromOpaque(observer)
+                    .takeUnretainedValue()
+                instance.consumePendingRequest()
             },
             PortfolioRefreshBridge.refreshRequestDarwinNotification,
             nil,
             .deliverImmediately
         )
+        // A helper can wake the app before the Darwin observer exists. The request
+        // is persisted in the shared app-group defaults so a cold launch cannot lose it.
+        consumePendingRequest()
+    }
+
+    private func consumePendingRequest() {
+        guard let requestedAt = sharedDefaults?.object(
+            forKey: PortfolioRefreshBridge.pendingRefreshRequestDateKey
+        ) as? Date else { return }
+        sharedDefaults?.removeObject(forKey: PortfolioRefreshBridge.pendingRefreshRequestDateKey)
+        sharedDefaults?.synchronize()
+        guard Date().timeIntervalSince(requestedAt) < 30 * 60 else { return }
+        Task { @MainActor in
+            await MacOSSchedulerManager.shared.performBackgroundRefresh()
+        }
     }
     
     deinit {

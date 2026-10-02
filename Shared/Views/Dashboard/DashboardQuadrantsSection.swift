@@ -7,16 +7,13 @@ struct iOSDashboardQuadrantsSectionEnhanced: View {
     let privacyMode: Bool
     @State private var quadrantGoldMode: Set<Int> = []
     @State private var unassignedGoldMode: Bool = false
-    @State private var quadrantHistories: [Int: [(date: Date, value: Double)]] = [:]
-    @State private var goldQuadrantHistories: [Int: [(date: Date, value: Double)]] = [:]
-    @State private var unassignedHistory: [(date: Date, value: Double)] = []
-    @State private var unassignedGoldHistory: [(date: Date, value: Double)] = []
-    
     var body: some View {
         LazyVGrid(columns: [GridItem(.flexible())], spacing: 12) {
             ForEach(viewModel.quadrants) { quadrant in
                 let isGoldMode = quadrantGoldMode.contains(quadrant.id)
-                let history = isGoldMode ? (goldQuadrantHistories[quadrant.id] ?? []) : (quadrantHistories[quadrant.id] ?? [])
+                let history = isGoldMode
+                    ? (viewModel.cachedGoldQuadrantHistories[quadrant.id] ?? [])
+                    : (viewModel.cachedQuadrantHistories[quadrant.id] ?? [])
                 let currentValue = history.last?.value
                 let title = isGoldMode ? "\(quadrant.name) (oz Au)" : quadrant.name
                 
@@ -25,6 +22,7 @@ struct iOSDashboardQuadrantsSectionEnhanced: View {
                     history: history,
                     currentValue: currentValue,
                     privacyMode: privacyMode,
+                    performancePercent: isGoldMode ? nil : viewModel.cachedQuadrantTWR[quadrant.id],
                     unit: isGoldMode ? "oz" : "EUR"
                 )
                 .onTapGesture {
@@ -39,7 +37,9 @@ struct iOSDashboardQuadrantsSectionEnhanced: View {
                 }
             }
             
-            let unassigned = unassignedGoldMode ? unassignedGoldHistory : unassignedHistory
+            let unassigned = unassignedGoldMode
+                ? viewModel.cachedUnassignedGoldHistory
+                : viewModel.cachedUnassignedHistory
             if !unassigned.isEmpty {
                 let title = unassignedGoldMode ? "\(L10n.instrumentsUnassigned) (oz Au)" : L10n.instrumentsUnassigned
                 EnhancedTrendCard(
@@ -57,14 +57,6 @@ struct iOSDashboardQuadrantsSectionEnhanced: View {
             }
         }
         .padding(.horizontal)
-        .task(id: viewModel.selectedPeriod) {
-            for q in viewModel.quadrants {
-                quadrantHistories[q.id] = await viewModel.getQuadrantValueHistory(quadrantId: q.id)
-                goldQuadrantHistories[q.id] = await viewModel.getQuadrantValueHistoryInGold(quadrantId: q.id)
-            }
-            unassignedHistory = await viewModel.getQuadrantValueHistory(quadrantId: nil)
-            unassignedGoldHistory = await viewModel.getQuadrantValueHistoryInGold(quadrantId: nil)
-        }
     }
 }
 
