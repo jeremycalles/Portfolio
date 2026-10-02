@@ -27,7 +27,7 @@ struct QuickStatsRow: View {
         // Best Performer
         if let best = holdingChanges.max(by: { $0.change < $1.change }) {
             stats.append(QuickStatData(
-                icon: "arrow.up.right.circle.fill",
+                icon: "arrow.up.right",
                 iconColor: AppTheme.gain,
                 title: L10n.statsBestPerformer,
                 value: String(format: "%+.1f%%", best.change),
@@ -38,7 +38,7 @@ struct QuickStatsRow: View {
         // Worst Performer
         if let worst = holdingChanges.min(by: { $0.change < $1.change }) {
             stats.append(QuickStatData(
-                icon: "arrow.down.right.circle.fill",
+                icon: "arrow.down.right",
                 iconColor: AppTheme.loss,
                 title: L10n.statsWorstPerformer,
                 value: String(format: "%+.1f%%", worst.change),
@@ -52,14 +52,12 @@ struct QuickStatsRow: View {
     var body: some View {
         Group {
             if !statsData.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(statsData) { stat in
-                            QuickStatCard(data: stat)
-                        }
+                HStack(alignment: .top, spacing: 12) {
+                    ForEach(statsData) { stat in
+                        QuickStatCard(data: stat)
                     }
-                    .padding(.horizontal)
                 }
+                .padding(.horizontal)
             }
         }
     }
@@ -76,32 +74,38 @@ struct QuickStatData: Identifiable {
 }
 
 // MARK: - Quick Stat Card
+/// Mirrors the hero card hierarchy: title → value → accent row.
 struct QuickStatCard: View {
     let data: QuickStatData
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                Image(systemName: data.icon)
-                    .font(.body)
-                    .foregroundColor(data.iconColor)
-                
-                Text(data.title)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+            Text(data.title)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, minHeight: 36, alignment: .topLeading)
             
             Text(data.value)
-                .font(.headline)
+                .font(.title3.bold())
                 .lineLimit(1)
+                .minimumScaleFactor(0.8)
             
-            Text(data.detail)
-                .font(.caption2)
-                .foregroundColor(.secondary)
-                .lineLimit(1)
+            HStack(spacing: 6) {
+                Image(systemName: data.icon)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(data.iconColor)
+                
+                Text(data.detail)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
         }
-        .frame(width: 140)
-        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 16)
         .modifier(GlassEffectFallback(cornerRadius: 16, interactive: false))
     }
 }
