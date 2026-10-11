@@ -50,6 +50,7 @@
 
 // MARK: - Dashboard
 "dashboard.portfolioSummary" = "Portfolio Summary";
+"dashboard.heroGoldHint" = "Switches between euros and gold ounces.";
 "dashboard.portfolioTrend" = "Portfolio Trend";
 "dashboard.portfolioValue" = "Portfolio Value";
 "dashboard.portfolioValueGold" = "Portfolio Value (Gold)";
@@ -110,6 +111,14 @@
 "period.5years" = "5 Years";
 "period.all" = "All";
 "period.yearToDate" = "1 January";
+"period.short.1day" = "1D";
+"period.short.1week" = "1W";
+"period.short.1month" = "1M";
+"period.short.3months" = "3M";
+"period.short.6months" = "6M";
+"period.short.1year" = "1Y";
+"period.short.yearToDate" = "YTD";
+"period.short.all" = "All";
 
 // MARK: - Instruments
 "instruments.title" = "Instruments";
@@ -286,6 +295,14 @@
 "settings.backgroundRefreshRestricted" = "Restricted";
 "settings.backgroundUpdates" = "Background Updates";
 "settings.backgroundUpdatesDescription" = "Prices are automatically updated in the background when the app is not in use. Long-press to view logs.";
+"settings.backgroundRefreshLowPower" = "Paused (Low Power Mode)";
+"settings.backgroundLastRun" = "Last background run";
+"settings.backgroundRunComplete" = "Complete";
+"settings.backgroundRunPartial" = "Partial";
+"settings.backgroundRunExpired" = "Stopped by iOS";
+"settings.backgroundUpdatesLimits" = "iOS decides when background updates run, at most every few hours. They stop if you swipe the app away in the app switcher or turn on Low Power Mode.";
+"settings.backgroundRefreshOffHint" = "Background App Refresh is off for Portfolio Vault, so prices only update while the app is open. Turn it on in Settings > General > Background App Refresh.";
+"settings.openSystemSettings" = "Open Settings";
 "settings.automaticUpdates" = "Automatic Updates";
 "settings.automaticUpdatesDescription" = "Refresh prices on the schedule you choose, even when the app is closed, using the embedded helper enabled in Login Items.";
 "settings.statusActive" = "Active";

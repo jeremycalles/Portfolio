@@ -911,7 +911,7 @@ private struct PriceChangeBadge: View {
         HStack(spacing: 4) {
             Image(systemName: change >= 0 ? "arrow.up.right" : "arrow.down.right")
                 .font(.caption2.weight(.bold))
-            Text(String(format: "%+.2f%%", change))
+            Text(formatPercentChange(change))
                 .font(.caption.weight(.semibold))
         }
         .foregroundColor(change >= 0 ? .green : .red)

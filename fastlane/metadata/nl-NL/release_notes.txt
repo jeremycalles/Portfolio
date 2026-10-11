@@ -1,1 +1,5 @@
-De positiehistorie is nu volledig gebaseerd op bewerkbare aankopen, verkopen en correcties. Nieuwe grafieken tonen geïnvesteerd kapitaal, transacties en tijdgewogen rendement. Positiedetails bevatten gemiddelde kostprijs en gerealiseerde of ongerealiseerde winst. Ook toegankelijkheid en geplande Mac-verversing zijn verbeterd.
+De positiehistorie is nu volledig gebaseerd op bewerkbare aankopen, verkopen en correcties, met grafieken voor geïnvesteerd kapitaal en tijdgewogen rendement. Positiedetails bevatten gemiddelde kostprijs en gerealiseerde of ongerealiseerde winst.
+
+Een overzichtelijker dashboard: de periodekeuze zit nu in de portefeuillekaart, en waarde, verandering, beste en slechtste posities en de grafiek volgen die. Percentages en bedragen volgen de notatie van je regio, en verdelingskleuren lijken niet meer op winst- en verlieskleuren.
+
+Koersupdates op de achtergrond zijn betrouwbaarder en fondskoersen van de Financial Times werken weer. Instellingen laat nu zien wanneer Ververs op achtergrond uit staat.

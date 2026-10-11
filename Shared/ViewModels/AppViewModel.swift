@@ -61,6 +61,11 @@ class AppViewModel: ObservableObject {
     private static let ledgerMigrationVersion = 1
     
     init() {
+        #if os(iOS)
+        // A background launch for BGAppRefresh has ~30s; the scene's `.active`
+        // phase refreshes once the user opens the app.
+        if UIApplication.shared.applicationState == .background { return }
+        #endif
         Task { await refreshAll() }
     }
     

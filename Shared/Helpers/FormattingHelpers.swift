@@ -20,14 +20,26 @@ func formatQuantity(_ value: Double) -> String {
     }
 }
 
-func formatCompactCurrency(_ value: Double) -> String {
-    if value >= 1_000_000 {
-        return String(format: "%.1fM", value / 1_000_000)
-    } else if value >= 1_000 {
-        return String(format: "%.0fK", value / 1_000)
-    } else {
-        return String(format: "%.0f", value)
-    }
+/// Compact amount for axes and ring centers ("13,2 k", "1,2 M").
+/// Three significant digits so neighbouring axis ticks stay distinct
+/// (the old "%.0fK" printed 13K for 12 500, 13 000 and 13 500).
+func formatCompactCurrency(_ value: Double, locale: Locale = .autoupdatingCurrent) -> String {
+    value.formatted(.number.notation(.compactName).precision(.significantDigits(1...3)).locale(locale))
+}
+
+/// Signed, locale-aware percent from a value in percent units (1.24 → "+1,24 %" in French).
+func formatPercentChange(_ percent: Double, fractionDigits: Int = 2, locale: Locale = .autoupdatingCurrent) -> String {
+    (percent / 100).formatted(
+        .percent
+            .precision(.fractionLength(fractionDigits))
+            .sign(strategy: .always(includingZero: false))
+            .locale(locale)
+    )
+}
+
+/// Unsigned, locale-aware percent from a value in percent units.
+func formatPercent(_ percent: Double, fractionDigits: Int = 2, locale: Locale = .autoupdatingCurrent) -> String {
+    (percent / 100).formatted(.percent.precision(.fractionLength(fractionDigits)).locale(locale))
 }
 
 // MARK: - Decimal Parsing

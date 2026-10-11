@@ -10,8 +10,21 @@ enum AppTheme {
     }
 
     enum Radius {
+        static let chip: CGFloat = 8
         static let control: CGFloat = 10
         static let card: CGFloat = 18
+        static let hero: CGFloat = 24
+    }
+
+    /// Text styles built on Dynamic Type. Amounts use monospaced digits so columns line up.
+    enum Typography {
+        static let hero = Font.system(.largeTitle, design: .rounded).weight(.bold).monospacedDigit()
+        static let value = Font.title3.weight(.semibold).monospacedDigit()
+        static let rowValue = Font.body.weight(.semibold).monospacedDigit()
+        static let sectionTitle = Font.headline
+        static let control = Font.subheadline.weight(.semibold)
+        static let label = Font.caption
+        static let caption = Font.caption2
     }
 
     // Blue/amber remain distinguishable for common red-green color deficiencies.
@@ -23,6 +36,32 @@ enum AppTheme {
     static let sp500 = Color.orange
     static let gold = Color(red: 0.72, green: 0.48, blue: 0.05)
     static let msciWorld = Color.cyan
+
+    /// Selected state for pills and segmented controls. Neutral on purpose:
+    /// blue and orange already mean gain and loss.
+    /// Concrete colors, not `.primary`: on glass `.primary` picks up vibrancy and
+    /// turned the selected pill pale grey behind white text.
+    #if os(iOS)
+    static let selection = Color(uiColor: .label)
+    static let onSelection = Color(uiColor: .systemBackground)
+    #else
+    static let selection = Color(nsColor: .labelColor)
+    static let onSelection = Color(nsColor: .windowBackgroundColor)
+    #endif
+
+    /// Allocation colors (quadrants, accounts). No blue or orange, so a slice is never
+    /// read as a gain or a loss. Picked by stable id so a quadrant keeps its color
+    /// when its rank changes.
+    static let allocationPalette: [Color] = [.purple, .teal, .yellow, .pink, .mint, .indigo, .brown, .gray]
+
+    static func allocationColor(id: Int?) -> Color {
+        guard let id else { return .gray }
+        return allocationPalette[abs(id) % allocationPalette.count]
+    }
+
+    static func changeColor(_ change: Double) -> Color {
+        change >= 0 ? gain : loss
+    }
 }
 
 struct PortfolioCardModifier: ViewModifier {
@@ -86,5 +125,55 @@ struct PortfolioEmptyStateView: View {
         } description: {
             if let message { Text(message) }
         }
+    }
+}
+
+/// Lays children out left to right and wraps whole children onto the next line.
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+    var lineSpacing: CGFloat = 4
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let rows = arrange(width: proposal.width ?? .infinity, subviews: subviews)
+        let width = rows.map(\.width).max() ?? 0
+        let height = rows.map(\.height).reduce(0, +) + lineSpacing * CGFloat(max(rows.count - 1, 0))
+        return CGSize(width: width, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var y = bounds.minY
+        for row in arrange(width: bounds.width, subviews: subviews) {
+            var x = bounds.minX
+            for index in row.indices {
+                let size = subviews[index].sizeThatFits(.unspecified)
+                subviews[index].place(at: CGPoint(x: x, y: y + (row.height - size.height) / 2), proposal: ProposedViewSize(size))
+                x += size.width + spacing
+            }
+            y += row.height + lineSpacing
+        }
+    }
+
+    private struct Row {
+        var indices: [Int] = []
+        var width: CGFloat = 0
+        var height: CGFloat = 0
+    }
+
+    private func arrange(width maxWidth: CGFloat, subviews: Subviews) -> [Row] {
+        var rows: [Row] = []
+        var current = Row()
+        for index in subviews.indices {
+            let size = subviews[index].sizeThatFits(.unspecified)
+            let needed = current.indices.isEmpty ? size.width : current.width + spacing + size.width
+            if needed > maxWidth, !current.indices.isEmpty {
+                rows.append(current)
+                current = Row()
+            }
+            current.width = current.indices.isEmpty ? size.width : current.width + spacing + size.width
+            current.height = max(current.height, size.height)
+            current.indices.append(index)
+        }
+        if !current.indices.isEmpty { rows.append(current) }
+        return rows
     }
 }

@@ -45,15 +45,28 @@ actor MarketDataService {
         return request
     }
     
+    /// Set for iOS background refresh, which has about 30 seconds in total.
+    /// Task-local so child tasks in a refresh batch inherit it.
+    @TaskLocal static var isBackgroundBudget = false
+    private static let backgroundRequestTimeout: TimeInterval = 8
+
     /// Executes a URLRequest with automatic retry on HTTP 429.
     /// Uses exponential backoff: 1s, 2s, 4s (up to maxRetries).
+    /// Under the background budget: short timeout, no retries.
     private func performRequest(_ request: URLRequest, maxRetries: Int = 3) async throws -> (Data, URLResponse) {
+        var request = request
+        var maxRetries = maxRetries
+        if Self.isBackgroundBudget {
+            request.timeoutInterval = min(request.timeoutInterval, Self.backgroundRequestTimeout)
+            maxRetries = 0
+        }
         var lastError: Error?
         for attempt in 0...maxRetries {
+            try Task.checkCancellation()
             if attempt > 0 {
                 let delay = UInt64(pow(2.0, Double(attempt - 1))) * 1_000_000_000
                 log("[HTTP] Rate limited (429), retrying in \(Int(pow(2.0, Double(attempt - 1))))s...")
-                try? await Task.sleep(nanoseconds: delay)
+                try await Task.sleep(nanoseconds: delay)
             }
             do {
                 let (data, response) = try await session.data(for: request)
@@ -592,12 +605,14 @@ actor MarketDataService {
                 var price: Double?
                 var currency = "EUR"
                 for i in 0..<labelElements.count {
-                    guard i < valueElements.count else { break }
-                    let labelText = try labelElements.get(i).text()
-                    let valueText = try valueElements.get(i).text()
-                    log("[FT] Label[\(i)]: '\(labelText)' = '\(valueText)'")
-                    
+                    let label = labelElements.get(i)
+                    let labelText = try label.text()
                     guard labelText.contains("Price (") else { continue }
+                    // Pair the label with the value in its own row. FT now emits more
+                    // labels than values, so matching by index read the volume ("11.02k").
+                    guard let valueElement = try label.parent()?.select("span.mod-ui-data-list__value").first() else { continue }
+                    let valueText = try valueElement.text()
+                    log("[FT] Label[\(i)]: '\(labelText)' = '\(valueText)'")
                     let cleanValue = valueText.replacingOccurrences(of: ",", with: "")
                     price = Double(cleanValue)
                     if labelText.contains("USD") { currency = "USD" }

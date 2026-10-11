@@ -123,7 +123,7 @@ struct PortfolioTrendChart: View {
 
     private func formatValue(_ value: Double) -> String {
         if displayMode == .percent {
-            return String(format: "%+.1f%%", value)
+            return formatPercentChange(value, fractionDigits: 1)
         }
         if unit == "oz" {
             // Gold ounces format
@@ -142,12 +142,27 @@ struct PortfolioTrendChart: View {
 
     private func formatScrubbedValue(_ value: Double) -> String {
         if displayMode == .percent {
-            return String(format: "%+.2f%%", value)
+            return formatPercentChange(value)
         }
         if unit == "oz" {
             return String(format: "%.3f oz", value)
         }
         return formatCurrency(value, currency: "EUR")
+    }
+
+    private func legendItem(_ title: String, color: Color, isLine: Bool = false) -> some View {
+        HStack(spacing: 4) {
+            if isLine {
+                Capsule().fill(color).frame(width: 10, height: 3)
+            } else {
+                Circle().fill(color).frame(width: 6, height: 6)
+            }
+            Text(title)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+                .lineLimit(1)
+        }
+        .fixedSize()
     }
 
     var body: some View {
@@ -168,49 +183,40 @@ struct PortfolioTrendChart: View {
             let hasInvested = investedCapitalHistory?.isEmpty == false
             
             if (performanceBadge != nil) || hasInvested || hasSp500 || hasGold || hasMsci {
-                HStack {
+                HStack(alignment: .firstTextBaseline) {
                     if hasInvested || hasSp500 || hasGold || hasMsci {
-                        HStack(spacing: 12) {
-                            HStack(spacing: 4) {
-                                Circle().fill(chartColor).frame(width: 6, height: 6)
-                                Text(L10n.chartPortfolioLabel).font(.caption2).foregroundColor(.secondary)
-                            }
-                            if investedCapitalHistory?.isEmpty == false {
-                                HStack(spacing: 4) {
-                                    Capsule().fill(AppTheme.investedCapital).frame(width: 10, height: 3)
-                                    Text(L10n.chartInvestedCapital).font(.caption2).foregroundColor(.secondary)
-                                }
+                        // Wrap whole items onto a new line instead of hyphenating labels.
+                        FlowLayout(spacing: 12, lineSpacing: 4) {
+                            legendItem(L10n.chartPortfolioLabel, color: chartColor)
+                            if hasInvested {
+                                legendItem(L10n.chartInvestedCapital, color: AppTheme.investedCapital, isLine: true)
                             }
                             if hasSp500 {
-                                HStack(spacing: 4) {
-                                    Circle().fill(AppTheme.sp500).frame(width: 6, height: 6)
-                                    Text(L10n.chartSp500Comparison).font(.caption2).foregroundColor(.secondary)
-                                }
+                                legendItem(L10n.chartSp500Comparison, color: AppTheme.sp500)
                             }
                             if hasGold {
-                                HStack(spacing: 4) {
-                                    Circle().fill(AppTheme.gold).frame(width: 6, height: 6)
-                                    Text(L10n.chartGoldComparison).font(.caption2).foregroundColor(.secondary)
-                                }
+                                legendItem(L10n.chartGoldComparison, color: AppTheme.gold)
                             }
                             if hasMsci {
-                                HStack(spacing: 4) {
-                                    Circle().fill(AppTheme.msciWorld).frame(width: 6, height: 6)
-                                    Text(L10n.chartMsciWorldComparison).font(.caption2).foregroundColor(.secondary)
-                                }
+                                legendItem(L10n.chartMsciWorldComparison, color: AppTheme.msciWorld)
                             }
                         }
                     }
-                    Spacer()
+                    Spacer(minLength: 8)
                     if let change = performanceBadge {
                         HStack(spacing: 2) {
                             Image(systemName: change >= 0 ? "arrow.up.right" : "arrow.down.right")
                                 .font(.caption2)
-                            Text(String(format: "%+.2f%%", change))
+                            Text(formatPercentChange(change))
                                 .font(compact ? .caption2 : .caption)
                                 .fontWeight(.medium)
+                                .monospacedDigit()
                         }
-                        .foregroundColor(change >= 0 ? AppTheme.gain : AppTheme.loss)
+                        .foregroundColor(AppTheme.changeColor(change))
+                        .fixedSize()
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(change >= 0 ? L10n.changeGain : L10n.changeLoss)
+                        .accessibilityValue(formatPercent(abs(change)))
                     }
                 }
                 .padding(.horizontal, compact ? 8 : 16)

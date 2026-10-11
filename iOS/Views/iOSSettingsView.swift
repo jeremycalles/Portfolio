@@ -213,7 +213,20 @@ struct iOSSettingsView: View {
                     Text(L10n.settingsBackgroundRefreshStatus)
                     Spacer()
                     Text(BackgroundTaskManager.shared.systemRefreshStatusLabel)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(BackgroundTaskManager.shared.isSystemRefreshBlocked ? .orange : .secondary)
+                }
+                if BackgroundTaskManager.shared.isSystemRefreshBlocked {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label(L10n.settingsBackgroundRefreshOffHint, systemImage: "exclamationmark.triangle.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(.orange)
+                        Button(L10n.settingsOpenSystemSettings) {
+                            if let url = URL(string: UIApplication.openSettingsURLString) {
+                                UIApplication.shared.open(url)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 4)
                 }
                 if let lastRefresh = BackgroundTaskManager.shared.timeSinceLastRefresh() {
                     HStack {
@@ -223,10 +236,18 @@ struct iOSSettingsView: View {
                             .foregroundColor(.secondary)
                     }
                 }
+                if let lastRun = BackgroundTaskManager.shared.lastRunSummary {
+                    HStack {
+                        Text(L10n.settingsBackgroundLastRun)
+                        Spacer()
+                        Text(lastRun)
+                            .foregroundColor(.secondary)
+                    }
+                }
             } header: {
                 Text(L10n.settingsBackgroundUpdates)
             } footer: {
-                Text(L10n.settingsBackgroundUpdatesDescription)
+                Text("\(L10n.settingsBackgroundUpdatesDescription)\n\n\(L10n.settingsBackgroundUpdatesLimits)")
             }
             
             Section {

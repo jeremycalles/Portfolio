@@ -1,1 +1,5 @@
-Der Positionsverlauf basiert jetzt vollständig auf bearbeitbaren Käufen, Verkäufen und Anpassungen. Neue Diagramme zeigen investiertes Kapital, Transaktionsmarken und zeitgewichtete Rendite. Positionsdetails enthalten Einstandskurs sowie realisierte und unrealisierte Gewinne. Barrierefreiheit und geplante Mac-Aktualisierungen wurden ebenfalls verbessert.
+Der Positionsverlauf basiert jetzt vollständig auf bearbeitbaren Käufen, Verkäufen und Anpassungen, mit Diagrammen für investiertes Kapital und zeitgewichtete Rendite. Positionsdetails enthalten Einstandskurs sowie realisierte und unrealisierte Gewinne.
+
+Ein aufgeräumteres Dashboard: Die Zeitraumauswahl sitzt jetzt in der Portfoliokarte, und Wert, Veränderung, beste und schlechteste Positionen sowie das Diagramm folgen ihr. Prozente und Beträge folgen dem Format Ihrer Region, und Aufteilungsfarben verwechseln sich nicht mehr mit Gewinn- und Verlustfarben.
+
+Kursaktualisierungen im Hintergrund sind zuverlässiger, und Fondskurse der Financial Times funktionieren wieder. Die Einstellungen zeigen jetzt an, wenn die Hintergrundaktualisierung ausgeschaltet ist.

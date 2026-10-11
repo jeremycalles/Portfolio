@@ -1,1 +1,5 @@
-La cronologia delle posizioni ora deriva interamente da acquisti, vendite e rettifiche modificabili. I nuovi grafici mostrano capitale investito, operazioni e rendimento ponderato nel tempo. Il dettaglio della posizione aggiunge costo medio e profitti realizzati o latenti. Migliorate anche accessibilità e aggiornamenti pianificati su Mac.
+La cronologia delle posizioni ora deriva interamente da acquisti, vendite e rettifiche modificabili, con grafici del capitale investito e del rendimento ponderato nel tempo. Il dettaglio della posizione aggiunge costo medio e profitti realizzati o latenti.
+
+Una dashboard più pulita: il selettore del periodo è ora nella scheda del portafoglio, e valore, variazione, posizioni migliori e peggiori e grafico lo seguono. Percentuali e importi seguono il formato della tua regione, e i colori di ripartizione non si confondono più con quelli di guadagni e perdite.
+
+Gli aggiornamenti dei prezzi in background sono più affidabili e i prezzi dei fondi dal Financial Times funzionano di nuovo. Le Impostazioni ora indicano quando l’aggiornamento in background è disattivato.

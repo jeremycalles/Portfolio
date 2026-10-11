@@ -1,48 +1,48 @@
-# fastlane — App Store listing copy only
+fastlane documentation
+----
 
-Xcode Cloud archives and uploads the **binary**. These lanes never build an IPA.
+# Installation
 
-## Local setup
-
-```sh
-./scripts/setup_fastlane.sh
-```
-
-Create `~/.appstoreconnect/portfolio-api-key.json` (never commit this):
-
-```json
-{
-  "key_id": "XXXXXXXXXX",
-  "issuer_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-  "key_filepath": "/Users/YOU/.appstoreconnect/AuthKey_XXXXXXXXXX.p8",
-  "duration": 1200,
-  "in_house": false
-}
-```
+Make sure you have the latest version of the Xcode command line tools installed:
 
 ```sh
-export APP_STORE_CONNECT_API_KEY_PATH="$HOME/.appstoreconnect/portfolio-api-key.json"
-bundle exec fastlane metadata_validate
-APP_VERSION=1.0.6 bundle exec fastlane metadata_upload
+xcode-select --install
 ```
 
-## Lanes
+For _fastlane_ installation instructions, see [Installing _fastlane_](https://docs.fastlane.tools/#installing-fastlane)
 
-| Lane | What it does |
-|------|----------------|
-| `metadata_validate` | Character limits + no spaces after commas in keywords |
-| `metadata_download` | Pull current App Store Connect copy into `fastlane/metadata/` |
-| `metadata_upload` | Push listing copy (no IPA, no screenshots) |
+# Available Actions
 
-Edit `fastlane/metadata/<locale>/*.txt`. Screenshots stay in `assets/screenshots/` and are uploaded in App Store Connect (or `deliver` with screenshots enabled).
+## iOS
 
-## Xcode Cloud
+### ios metadata_validate
 
-`ci_scripts/ci_post_clone.sh` installs Bundler. `ci_scripts/ci_pre_xcodebuild.sh` runs `metadata_upload` when `UPLOAD_APP_STORE_METADATA=1`.
+```sh
+[bundle exec] fastlane ios metadata_validate
+```
 
-Workflow environment (secret except the last):
+Validate fastlane/metadata character limits
 
-- `APP_STORE_CONNECT_KEY_ID`
-- `APP_STORE_CONNECT_ISSUER_ID`
-- `APP_STORE_CONNECT_KEY_CONTENT` (contents of the `.p8`)
-- `UPLOAD_APP_STORE_METADATA` = `1` (iOS archive workflow only)
+### ios metadata_download
+
+```sh
+[bundle exec] fastlane ios metadata_download
+```
+
+Download current App Store metadata into fastlane/metadata (review before commit)
+
+### ios metadata_upload
+
+```sh
+[bundle exec] fastlane ios metadata_upload
+```
+
+Upload App Store metadata only (no IPA, no screenshots)
+
+----
+
+This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.
+
+More information about _fastlane_ can be found on [fastlane.tools](https://fastlane.tools).
+
+The documentation of _fastlane_ can be found on [docs.fastlane.tools](https://docs.fastlane.tools).
