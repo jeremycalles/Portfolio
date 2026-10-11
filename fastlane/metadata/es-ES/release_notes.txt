@@ -1,1 +1,5 @@
-El historial de posiciones ahora se basa por completo en compras, ventas y ajustes editables. Los nuevos gráficos muestran capital invertido, operaciones y rentabilidad ponderada por tiempo. El detalle de cada posición añade coste medio y ganancias realizadas o latentes. También mejoramos la accesibilidad y las actualizaciones programadas en Mac.
+El historial de posiciones ahora se basa por completo en compras, ventas y ajustes editables, con gráficos de capital invertido y rentabilidad ponderada por tiempo. El detalle de cada posición añade coste medio y ganancias realizadas o latentes.
+
+Un panel más claro: el selector de periodo está ahora dentro de la tarjeta de la cartera, y el valor, su variación, las mejores y peores posiciones y el gráfico lo siguen. Porcentajes e importes siguen el formato de tu región, y los colores de reparto ya no se confunden con los de ganancias y pérdidas.
+
+Las actualizaciones de precios en segundo plano son más fiables y los precios de fondos del Financial Times vuelven a funcionar. Ajustes ahora indica cuándo la actualización en segundo plano está desactivada.

@@ -38,70 +38,75 @@ struct EnhancedTrendCard: View {
         }
     }
     
+    /// Tight y-domain so a sparkline shows movement; an area from zero flattened it.
+    private var yDomain: ClosedRange<Double> {
+        let values = history.map(\.value)
+        guard let low = values.min(), let high = values.max() else { return 0...1 }
+        let pad = max((high - low) * 0.1, abs(high) * 0.001, 0.0001)
+        return (low - pad)...(high + pad)
+    }
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Header with title and change badge
-            HStack {
+        VStack(alignment: .leading, spacing: AppTheme.Spacing.small) {
+            HStack(alignment: .firstTextBaseline) {
                 Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
+                    .font(AppTheme.Typography.sectionTitle)
                     .lineLimit(1)
                 
                 Spacer()
                 
-                // Change badge
                 if let change = changePercent {
                     HStack(spacing: 3) {
                         Image(systemName: change >= 0 ? "arrow.up.right" : "arrow.down.right")
-                            .font(.system(size: 9, weight: .bold))
-                        Text(String(format: "%.1f%%", abs(change)))
-                            .font(.system(size: 11, weight: .semibold))
+                            .font(AppTheme.Typography.caption.weight(.bold))
+                        Text(formatPercentChange(change, fractionDigits: 1))
+                            .font(AppTheme.Typography.label.weight(.semibold))
+                            .monospacedDigit()
                     }
-                    .foregroundColor(change >= 0 ? AppTheme.gain : AppTheme.loss)
+                    .foregroundColor(AppTheme.changeColor(change))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(
-                        Capsule()
-                            .fill((change >= 0 ? AppTheme.gain : AppTheme.loss).opacity(0.12))
-                    )
+                    .background(Capsule().fill(AppTheme.changeColor(change).opacity(0.12)))
+                    .fixedSize()
                 }
             }
             
-            // Start value (left) and current value (right)
-            HStack {
-                // Value at starting date of the graph (left)
-                if let startValue = history.first?.value {
-                    if privacyMode {
-                        Text("•••")
-                            .font(.title3.weight(.bold))
-                            .foregroundColor(.secondary)
-                    } else {
-                        Text(formatValue(startValue))
-                            .font(.title3.weight(.bold))
-                    }
-                }
-                Spacer()
-                // Current price (right)
+            // Current value leads; the period's start value is secondary context.
+            VStack(alignment: .leading, spacing: 2) {
                 if let value = currentValue {
-                    if privacyMode {
-                        Text("•••")
-                            .font(.title3.weight(.bold))
-                            .foregroundColor(.secondary)
-                    } else {
-                        Text(formatValue(value))
-                            .font(.title3.weight(.bold))
-                    }
+                    Text(privacyMode ? "•••" : formatValue(value))
+                        .font(AppTheme.Typography.value)
+                        .foregroundStyle(privacyMode ? .secondary : .primary)
+                }
+                if let startValue = history.first?.value, !privacyMode {
+                    Text("\(L10n.summaryFrom) \(formatValue(startValue))")
+                        .font(AppTheme.Typography.label)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
                 }
             }
             
-            // Chart
             if history.isEmpty {
                 Text(unit == "oz" ? L10n.chartNoGoldPriceData : L10n.generalNoData)
                     .foregroundColor(.secondary)
-                    .frame(height: 80)
+                    .frame(height: 56)
                     .frame(maxWidth: .infinity)
             } else {
                 Chart(history, id: \.date) { item in
+                    AreaMark(
+                        x: .value("Date", item.date),
+                        yStart: .value("Base", yDomain.lowerBound),
+                        yEnd: .value("Value", item.value)
+                    )
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [chartColor.opacity(0.18), chartColor.opacity(0.0)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .interpolationMethod(.linear)
+
                     LineMark(
                         x: .value("Date", item.date),
                         y: .value("Value", item.value)
@@ -109,27 +114,17 @@ struct EnhancedTrendCard: View {
                     .foregroundStyle(chartColor)
                     .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
                     .interpolationMethod(.linear)
-                    
-                    AreaMark(
-                        x: .value("Date", item.date),
-                        y: .value("Value", item.value)
-                    )
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [chartColor.opacity(0.2), chartColor.opacity(0.02)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .interpolationMethod(.linear)
                 }
+                .chartYScale(domain: yDomain)
                 .chartYAxis(.hidden)
                 .chartXAxis(.hidden)
-                .frame(height: 80)
+                .frame(height: 56)
+                .accessibilityHidden(true)
             }
         }
-        .padding(16)
-        .modifier(GlassEffectFallback(cornerRadius: 16, interactive: false))
+        .padding(AppTheme.Spacing.large)
+        .modifier(GlassEffectFallback(cornerRadius: AppTheme.Radius.card, interactive: false))
+        .accessibilityElement(children: .combine)
     }
 }
 

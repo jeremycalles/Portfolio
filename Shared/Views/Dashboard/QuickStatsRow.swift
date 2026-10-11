@@ -27,10 +27,11 @@ struct QuickStatsRow: View {
         // Best Performer
         if let best = holdingChanges.max(by: { $0.change < $1.change }) {
             stats.append(QuickStatData(
-                icon: "arrow.up.right",
-                iconColor: AppTheme.gain,
+                // Sign decides the arrow: the best holding can still be down.
+                icon: best.change >= 0 ? "arrow.up.right" : "arrow.down.right",
+                iconColor: AppTheme.changeColor(best.change),
                 title: L10n.statsBestPerformer,
-                value: String(format: "%+.1f%%", best.change),
+                value: formatPercentChange(best.change, fractionDigits: 1),
                 detail: best.name
             ))
         }
@@ -38,10 +39,11 @@ struct QuickStatsRow: View {
         // Worst Performer
         if let worst = holdingChanges.min(by: { $0.change < $1.change }) {
             stats.append(QuickStatData(
-                icon: "arrow.down.right",
-                iconColor: AppTheme.loss,
+                // Sign decides the arrow: the best holding can still be down.
+                icon: worst.change >= 0 ? "arrow.up.right" : "arrow.down.right",
+                iconColor: AppTheme.changeColor(worst.change),
                 title: L10n.statsWorstPerformer,
-                value: String(format: "%+.1f%%", worst.change),
+                value: formatPercentChange(worst.change, fractionDigits: 1),
                 detail: worst.name
             ))
         }
@@ -81,14 +83,15 @@ struct QuickStatCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(data.title)
-                .font(.subheadline)
+                .font(AppTheme.Typography.label)
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
-                .frame(maxWidth: .infinity, minHeight: 36, alignment: .topLeading)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
             
             Text(data.value)
-                .font(.title3.bold())
+                .font(AppTheme.Typography.value)
+                .foregroundStyle(data.iconColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
             
@@ -104,9 +107,9 @@ struct QuickStatCard: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 16)
-        .modifier(GlassEffectFallback(cornerRadius: 16, interactive: false))
+        .padding(AppTheme.Spacing.large)
+        .modifier(GlassEffectFallback(cornerRadius: AppTheme.Radius.card, interactive: false))
+        .accessibilityElement(children: .combine)
     }
 }
 

@@ -8,27 +8,25 @@ struct EnhancedAllocationRingChart: View {
     let isQuadrants: Bool
     
     private var chartData: [(name: String, value: Double, color: Color)] {
-        let colors: [Color] = [.blue, .green, .orange, .purple, .pink, .cyan, .yellow, .mint, .indigo, .teal]
-        
         if isQuadrants {
             let report = viewModel.cachedQuadrantReport
             var data: [(name: String, value: Double, color: Color)] = []
-            for (index, item) in report.enumerated() {
+            for item in report {
                 let totalValue = item.totalValueEUR
                 if totalValue > 0 {
                     let name = item.quadrant?.name ?? L10n.instrumentsUnassigned
-                    let color = colors[index % colors.count]
+                    let color = AppTheme.allocationColor(id: item.quadrant?.id)
                     data.append((name: name, value: totalValue, color: color))
                 }
             }
             return data
         } else {
             var data: [(name: String, value: Double, color: Color)] = []
-            for (index, account) in viewModel.bankAccounts.enumerated() {
+            for account in viewModel.bankAccounts {
                 let details = viewModel.cachedHoldingDetailsByAccount[account.id] ?? []
                 let totalValue = details.compactMap(\.currentValueEUR).reduce(0, +)
                 if totalValue > 0 {
-                    let color = colors[index % colors.count]
+                    let color = AppTheme.allocationColor(id: account.id)
                     data.append((name: account.displayName, value: totalValue, color: color))
                 }
             }

@@ -1,1 +1,5 @@
-Position history is now fully transaction-driven, with editable buys, sells and adjustments. New charts show invested capital, transaction markers and time-weighted performance. Position details add average cost and realized/unrealized gains. We also improved accessibility and made scheduled Mac refreshes more reliable after a cold launch.
+Position history is now fully transaction-driven, with editable buys, sells and adjustments, and charts for invested capital and time-weighted performance. Position details add average cost and realized/unrealized gains.
+
+A cleaner dashboard: the period picker now sits inside the portfolio card, so the value, its change, your best and worst performers and the chart all follow it. Percentages and amounts follow your region's format, and allocation colors no longer clash with gain and loss colors.
+
+Background price updates are more reliable, and fund prices from the Financial Times work again. Settings now tells you when Background App Refresh is off.

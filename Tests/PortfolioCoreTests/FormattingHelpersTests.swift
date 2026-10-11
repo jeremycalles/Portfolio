@@ -29,24 +29,48 @@ struct FormattingHelpersTests {
 
     // MARK: - formatCompactCurrency
 
+    private let us = Locale(identifier: "en_US")
+    private let fr = Locale(identifier: "fr_FR")
+
     @Test("formatCompactCurrency formats millions with M suffix")
     func formatCompactMillions() {
-        #expect(formatCompactCurrency(1_000_000) == "1.0M")
-        #expect(formatCompactCurrency(2_500_000) == "2.5M")
+        #expect(formatCompactCurrency(1_000_000, locale: us) == "1M")
+        #expect(formatCompactCurrency(2_500_000, locale: us) == "2.5M")
     }
 
     @Test("formatCompactCurrency formats thousands with K suffix")
     func formatCompactThousands() {
-        #expect(formatCompactCurrency(1_000) == "1K")
-        #expect(formatCompactCurrency(50_000) == "50K")
-        #expect(formatCompactCurrency(999_999) == "1000K")
+        #expect(formatCompactCurrency(1_000, locale: us) == "1K")
+        #expect(formatCompactCurrency(50_000, locale: us) == "50K")
+        #expect(formatCompactCurrency(999_999, locale: us) == "1M")
+    }
+
+    @Test("formatCompactCurrency keeps neighbouring axis ticks distinct")
+    func formatCompactAxisTicks() {
+        let ticks = [12_500.0, 13_000, 13_500].map { formatCompactCurrency($0, locale: us) }
+        #expect(ticks == ["12.5K", "13K", "13.5K"])
     }
 
     @Test("formatCompactCurrency formats small values without suffix")
     func formatCompactSmall() {
-        #expect(formatCompactCurrency(999) == "999")
-        #expect(formatCompactCurrency(0) == "0")
-        #expect(formatCompactCurrency(42) == "42")
+        #expect(formatCompactCurrency(999, locale: us) == "999")
+        #expect(formatCompactCurrency(0, locale: us) == "0")
+        #expect(formatCompactCurrency(42, locale: us) == "42")
+    }
+
+    // MARK: - formatPercentChange
+
+    @Test("formatPercentChange always shows the sign")
+    func formatPercentChangeSign() {
+        #expect(formatPercentChange(1.24, locale: us) == "+1.24%")
+        #expect(formatPercentChange(-3.5, fractionDigits: 1, locale: us) == "-3.5%")
+    }
+
+    @Test("formatPercentChange follows the locale's decimal separator")
+    func formatPercentChangeFrench() {
+        let text = formatPercentChange(1.24, locale: fr)
+        #expect(text.hasPrefix("+1,24"))
+        #expect(text.hasSuffix("%"))
     }
 
     // MARK: - parseDecimal

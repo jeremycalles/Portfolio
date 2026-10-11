@@ -50,6 +50,7 @@
 
 // MARK: - Dashboard
 "dashboard.portfolioSummary" = "Résumé du portefeuille";
+"dashboard.heroGoldHint" = "Bascule entre euros et onces d'or.";
 "dashboard.portfolioTrend" = "Tendance du portefeuille";
 "dashboard.portfolioValue" = "Valeur du portefeuille";
 "dashboard.portfolioValueGold" = "Valeur du portefeuille (Or)";
@@ -110,6 +111,14 @@
 "period.5years" = "5 Ans";
 "period.all" = "Tout";
 "period.yearToDate" = "1er Janvier";
+"period.short.1day" = "1J";
+"period.short.1week" = "1S";
+"period.short.1month" = "1M";
+"period.short.3months" = "3M";
+"period.short.6months" = "6M";
+"period.short.1year" = "1A";
+"period.short.yearToDate" = "YTD";
+"period.short.all" = "Tout";
 
 // MARK: - Instruments
 "instruments.title" = "Instruments";
@@ -286,6 +295,14 @@
 "settings.backgroundRefreshRestricted" = "Restreinte";
 "settings.backgroundUpdates" = "Mises à jour en arrière-plan";
 "settings.backgroundUpdatesDescription" = "Les prix sont automatiquement mis à jour en arrière-plan lorsque l'app n'est pas utilisée. Appui long pour voir les logs.";
+"settings.backgroundRefreshLowPower" = "En pause (mode économie d'énergie)";
+"settings.backgroundLastRun" = "Dernière exécution en arrière-plan";
+"settings.backgroundRunComplete" = "Terminée";
+"settings.backgroundRunPartial" = "Partielle";
+"settings.backgroundRunExpired" = "Interrompue par iOS";
+"settings.backgroundUpdatesLimits" = "iOS choisit quand lancer les mises à jour en arrière-plan, au plus toutes les quelques heures. Elles s'arrêtent si vous fermez l'app depuis le sélecteur d'apps ou activez le mode économie d'énergie.";
+"settings.backgroundRefreshOffHint" = "L'actualisation en arrière-plan est désactivée pour Portfolio Vault : les prix ne sont mis à jour que lorsque l'app est ouverte. Activez-la dans Réglages > Général > Actualisation en arrière-plan.";
+"settings.openSystemSettings" = "Ouvrir les Réglages";
 "settings.automaticUpdates" = "Mises à jour automatiques";
 "settings.automaticUpdatesDescription" = "Actualiser les prix selon l’intervalle choisi, même lorsque l’app est fermée, via l’assistant intégré activé dans Ouverture.";
 "settings.statusActive" = "Actif";

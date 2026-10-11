@@ -8,15 +8,13 @@ struct AccountsPieChart: View {
     var compact: Bool = false
     
     private var accountData: [(name: String, value: Double, color: Color)] {
-        let colors: [Color] = [.blue, .green, .orange, .purple, .pink, .cyan, .yellow, .mint, .indigo, .teal]
-        
         var data: [(name: String, value: Double, color: Color)] = []
         
-        for (index, account) in viewModel.bankAccounts.enumerated() {
+        for account in viewModel.bankAccounts {
             let details = viewModel.cachedHoldingDetailsByAccount[account.id] ?? []
             let totalValue = details.compactMap(\.currentValueEUR).reduce(0, +)
             if totalValue > 0 {
-                let color = colors[index % colors.count]
+                let color = AppTheme.allocationColor(id: account.id)
                 data.append((name: account.displayName, value: totalValue, color: color))
             }
         }

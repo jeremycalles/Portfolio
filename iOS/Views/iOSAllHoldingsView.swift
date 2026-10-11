@@ -383,7 +383,7 @@ struct iOSAllHoldingsView: View {
     
     private func allocationText(for detail: HoldingDetail, totalValue: Double) -> String {
         guard totalValue > 0, let value = detail.currentValueEUR else { return L10n.generalNa }
-        return String(format: "%.1f%%", (value / totalValue) * 100)
+        return formatPercent((value / totalValue) * 100, fractionDigits: 1)
     }
 }
 

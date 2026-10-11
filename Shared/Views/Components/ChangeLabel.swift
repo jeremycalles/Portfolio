@@ -8,13 +8,13 @@ struct ChangeLabel: View {
         HStack(spacing: 2) {
             Image(systemName: change >= 0 ? "arrow.up.right" : "arrow.down.right")
                 .font(.caption2)
-            Text(String(format: "%+.2f%%", change))
+            Text(formatPercentChange(change))
                 .font(.caption)
         }
         .foregroundColor(change >= 0 ? AppTheme.gain : AppTheme.loss)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(change >= 0 ? L10n.changeGain : L10n.changeLoss)
-        .accessibilityValue(String(format: "%.2f%%", abs(change)))
+        .accessibilityValue(formatPercent(abs(change)))
     }
 }
 

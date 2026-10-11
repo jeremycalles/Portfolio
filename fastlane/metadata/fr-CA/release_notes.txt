@@ -1,1 +1,5 @@
-L’historique des positions repose désormais entièrement sur vos achats, ventes et ajustements, tous modifiables. Les nouveaux graphiques affichent le capital investi, les opérations et la performance pondérée dans le temps. Le détail d’une position ajoute le coût moyen et les gains réalisés ou latents. Accessibilité et actualisation Mac à froid ont aussi été renforcées.
+L’historique des positions repose désormais entièrement sur vos achats, ventes et ajustements, tous modifiables, avec des graphiques du capital investi et de la performance pondérée dans le temps. Le détail d’une position ajoute le coût moyen et les gains réalisés ou latents.
+
+Un tableau de bord plus clair : le choix de la période est désormais intégré à la carte du portefeuille, et la valeur, sa variation, les meilleures et pires performances ainsi que le graphique le suivent. Pourcentages et montants respectent le format de votre région, et les couleurs de répartition ne se confondent plus avec celles des gains et pertes.
+
+Les mises à jour des prix en arrière-plan sont plus fiables et les cours des fonds issus du Financial Times fonctionnent à nouveau. Les Réglages indiquent maintenant quand l’actualisation en arrière-plan est désactivée.

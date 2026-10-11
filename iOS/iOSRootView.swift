@@ -123,21 +123,6 @@ struct iOSDashboardView: View {
     let privacyMode: Bool
     @State private var viewMode: DashboardViewMode = .quadrants
     
-    private var portfolioChange: (amount: Double, percent: Double)? {
-        let history = viewModel.cachedPortfolioHistory
-        guard let first = history.first?.value, let last = history.last?.value else { return nil }
-        let percent = viewModel.cachedPeriodTWR ?? PortfolioHistoryBuilder.percentChange(from: first, to: last)
-        guard let percent else { return nil }
-        return (last - first, percent)
-    }
-    
-    private var isPositiveChange: Bool {
-        (portfolioChange?.amount ?? 0) >= 0
-    }
-    
-    private var accentColor: Color {
-        isPositiveChange ? .green : .red
-    }
     
     var body: some View {
         if #available(iOS 26.0, *) {
@@ -153,20 +138,17 @@ struct iOSDashboardView: View {
                 // MARK: - Enhanced Hero Portfolio Card
                 let totals = viewModel.cachedGrandTotalsEUR
 
+                // Period chips sit inside the hero: they drive its change figure,
+                // best/worst and the chart below.
                 EnhancedPortfolioHeroCard(
                     currentValue: totals.current,
                     previousValue: totals.previous,
-                    privacyMode: privacyMode
+                    privacyMode: privacyMode,
+                    selectedPeriod: $viewModel.selectedPeriod
                 )
                 
                 // MARK: - Quick Stats Row
                 QuickStatsRow()
-                
-                // MARK: - Modern Period Selector
-                ModernPeriodSelector(
-                    selectedPeriod: $viewModel.selectedPeriod,
-                    accentColor: accentColor
-                )
                 
                 // MARK: - Portfolio Trend Chart (Total Performance) – same as macOS
                 VStack(alignment: .leading, spacing: 12) {
@@ -272,21 +254,21 @@ struct iOSDashboardView: View {
             VStack(spacing: 16) {
                 let totals = viewModel.cachedGrandTotalsEUR
 
+                // Period chips sit inside the hero: they drive its change figure,
+                // best/worst and the performance chart.
                 EnhancedPortfolioHeroCard(
                     currentValue: totals.current,
                     previousValue: totals.previous,
-                    privacyMode: privacyMode
+                    privacyMode: privacyMode,
+                    selectedPeriod: $viewModel.selectedPeriod
                 )
 
                 QuickStatsRow()
 
-                iOSDashboardGlassControlBar(
-                    selectedPeriod: $viewModel.selectedPeriod,
-                    selectedMode: $viewMode,
-                    accentColor: accentColor
-                )
-
                 iOSPortfolioPerformancePanel(privacyMode: privacyMode)
+
+                // View mode only switches the breakdown below, so it lives here.
+                iOSDashboardModeBar(selectedMode: $viewMode)
 
                 if viewMode == .quadrants || viewMode == .accounts {
                     EnhancedAllocationRingChart(
@@ -323,67 +305,36 @@ struct iOSDashboardView: View {
 }
 
 @available(iOS 26.0, *)
-private struct iOSDashboardGlassControlBar: View {
-    @Binding var selectedPeriod: ReportPeriod
+private struct iOSDashboardModeBar: View {
     @Binding var selectedMode: DashboardViewMode
-    let accentColor: Color
-    @Namespace private var periodAnimation
     @Namespace private var modeAnimation
 
     var body: some View {
-        VStack(spacing: 10) {
-            HStack(spacing: 6) {
-                ForEach(ReportPeriod.allCases.filter { $0 != .oneDay }) { period in
-                    Button {
-                        HapticService.impact(.light)
-                        withAnimation(.spring(response: 0.28, dampingFraction: 0.78)) {
-                            selectedPeriod = period
-                        }
-                    } label: {
-                        Text(period.displayName)
-                            .font(.system(size: 13, weight: .semibold))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.75)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .foregroundStyle(selectedPeriod == period ? .white : .primary)
-                            .background {
-                                if selectedPeriod == period {
-                                    Capsule()
-                                        .fill(accentColor.gradient)
-                                        .matchedGeometryEffect(id: "period", in: periodAnimation)
-                                }
-                            }
+        HStack(spacing: 6) {
+            ForEach(DashboardViewMode.allCases) { mode in
+                Button {
+                    HapticService.impact(.light)
+                    withAnimation(.spring(response: 0.28, dampingFraction: 0.78)) {
+                        selectedMode = mode
                     }
-                    .buttonStyle(.plain)
-                }
-            }
-
-            HStack(spacing: 6) {
-                ForEach(DashboardViewMode.allCases) { mode in
-                    Button {
-                        HapticService.impact(.light)
-                        withAnimation(.spring(response: 0.28, dampingFraction: 0.78)) {
-                            selectedMode = mode
-                        }
-                    } label: {
-                        Label(mode.displayName, systemImage: selectedMode == mode ? "\(mode.icon).fill" : mode.icon)
-                            .font(.system(size: 13, weight: .semibold))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.75)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .foregroundStyle(selectedMode == mode ? .white : .primary)
-                            .background {
-                                if selectedMode == mode {
-                                    Capsule()
-                                        .fill(Color.accentColor.gradient)
-                                        .matchedGeometryEffect(id: "mode", in: modeAnimation)
-                                }
+                } label: {
+                    Label(mode.displayName, systemImage: selectedMode == mode ? "\(mode.icon).fill" : mode.icon)
+                        .font(AppTheme.Typography.control)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .foregroundStyle(selectedMode == mode ? AppTheme.onSelection : .primary)
+                        .background {
+                            if selectedMode == mode {
+                                Capsule()
+                                    .fill(AppTheme.selection)
+                                    .matchedGeometryEffect(id: "mode", in: modeAnimation)
                             }
-                    }
-                    .buttonStyle(.plain)
+                        }
                 }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(selectedMode == mode ? .isSelected : [])
             }
         }
         .padding(6)

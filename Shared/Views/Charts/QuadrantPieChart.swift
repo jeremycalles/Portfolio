@@ -9,15 +9,13 @@ struct QuadrantPieChart: View {
     
     private var quadrantData: [(name: String, value: Double, color: Color)] {
         let report = viewModel.cachedQuadrantReport
-        let colors: [Color] = [.blue, .green, .orange, .purple, .pink, .cyan, .yellow, .mint, .indigo, .teal]
-        
         var data: [(name: String, value: Double, color: Color)] = []
         
-        for (index, item) in report.enumerated() {
+        for item in report {
             let totalValue = item.totalValueEUR
             if totalValue > 0 {
                 let name = item.quadrant?.name ?? L10n.instrumentsUnassigned
-                let color = colors[index % colors.count]
+                let color = AppTheme.allocationColor(id: item.quadrant?.id)
                 data.append((name: name, value: totalValue, color: color))
             }
         }

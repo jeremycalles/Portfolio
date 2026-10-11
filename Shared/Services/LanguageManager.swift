@@ -130,6 +130,14 @@ struct L10n {
     static var period1Year: String { manager.localized("period.1year") }
     static var periodYearToDate: String { manager.localized("period.yearToDate") }
     static var periodAll: String { manager.localized("period.all") }
+    static var periodShort1Day: String { manager.localized("period.short.1day") }
+    static var periodShort1Week: String { manager.localized("period.short.1week") }
+    static var periodShort1Month: String { manager.localized("period.short.1month") }
+    static var periodShort3Months: String { manager.localized("period.short.3months") }
+    static var periodShort6Months: String { manager.localized("period.short.6months") }
+    static var periodShort1Year: String { manager.localized("period.short.1year") }
+    static var periodShortYearToDate: String { manager.localized("period.short.yearToDate") }
+    static var periodShortAll: String { manager.localized("period.short.all") }
     
     // Dashboard
     static var dashboardPortfolioSummary: String { manager.localized("dashboard.portfolioSummary") }
@@ -368,6 +376,15 @@ struct L10n {
     static var settingsBackgroundRefreshRestricted: String { manager.localized("settings.backgroundRefreshRestricted") }
     static var settingsBackgroundUpdates: String { manager.localized("settings.backgroundUpdates") }
     static var settingsBackgroundUpdatesDescription: String { manager.localized("settings.backgroundUpdatesDescription") }
+    static var settingsBackgroundRefreshLowPower: String { manager.localized("settings.backgroundRefreshLowPower") }
+    static var settingsBackgroundLastRun: String { manager.localized("settings.backgroundLastRun") }
+    static var settingsBackgroundRunComplete: String { manager.localized("settings.backgroundRunComplete") }
+    static var settingsBackgroundRunPartial: String { manager.localized("settings.backgroundRunPartial") }
+    static var settingsBackgroundRunExpired: String { manager.localized("settings.backgroundRunExpired") }
+    static var settingsBackgroundUpdatesLimits: String { manager.localized("settings.backgroundUpdatesLimits") }
+    static var settingsBackgroundRefreshOffHint: String { manager.localized("settings.backgroundRefreshOffHint") }
+    static var settingsOpenSystemSettings: String { manager.localized("settings.openSystemSettings") }
+    static var dashboardHeroGoldHint: String { manager.localized("dashboard.heroGoldHint") }
     static var settingsAutomaticUpdates: String { manager.localized("settings.automaticUpdates") }
     static var settingsAutomaticUpdatesDescription: String { manager.localized("settings.automaticUpdatesDescription") }
     static var settingsStatusActive: String { manager.localized("settings.statusActive") }

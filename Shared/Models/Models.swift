@@ -177,6 +177,20 @@ enum ReportPeriod: String, CaseIterable, Identifiable {
         }
     }
     
+    /// Chip label for compact period pickers ("1W", "YTD"); full name stays in `displayName`.
+    var shortName: String {
+        switch self {
+        case .oneDay: return L10n.periodShort1Day
+        case .oneWeek: return L10n.periodShort1Week
+        case .oneMonth: return L10n.periodShort1Month
+        case .threeMonths: return L10n.periodShort3Months
+        case .sixMonths: return L10n.periodShort6Months
+        case .oneYear: return L10n.periodShort1Year
+        case .yearToDate: return L10n.periodShortYearToDate
+        case .all: return L10n.periodShortAll
+        }
+    }
+    
     var comparisonDate: Date {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
