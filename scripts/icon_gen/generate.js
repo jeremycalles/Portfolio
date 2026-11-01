@@ -45,6 +45,16 @@ async function generateIcons() {
                 .toFile(path.join(appIconSetPath, filename));
         }
 
+        // The unlock screen uses the same artwork as the app icon.
+        const logoSetPath = path.join(projectRoot, 'Shared/Assets.xcassets/PortfolioLogo.imageset');
+        fs.mkdirSync(logoSetPath, { recursive: true });
+        await sharp(sourceIconPath)
+            .resize(512, 512, { fit: 'cover' })
+            .flatten({ background: '#000000' })
+            .removeAlpha()
+            .png()
+            .toFile(path.join(logoSetPath, 'portfolio-logo.png'));
+
         console.log('All icons generated successfully.');
 
     } catch (error) {

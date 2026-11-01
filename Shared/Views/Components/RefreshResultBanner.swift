@@ -63,12 +63,7 @@ struct RefreshResultBanner: View {
                     Text(subtitleText)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    if result.successCount == 0, let err = result.lastError, !err.isEmpty {
-                        Text(err)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(2)
-                    }
+
                 }
                 
                 Spacer()
@@ -84,6 +79,8 @@ struct RefreshResultBanner: View {
                             .foregroundStyle(accentColor.opacity(0.8))
                     }
                     .buttonStyle(.plain)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .accessibilityLabel(L10n.designRefreshDetails)
                 }
                 
                 Button(action: onDismiss) {
@@ -92,6 +89,8 @@ struct RefreshResultBanner: View {
                         .foregroundStyle(.secondary.opacity(0.6))
                 }
                 .buttonStyle(.plain)
+                .frame(minWidth: 44, minHeight: 44)
+                .accessibilityLabel(L10n.designClose)
             }
             
             // Expandable error details: failed instrument names + per-instrument failure reasons (debug)

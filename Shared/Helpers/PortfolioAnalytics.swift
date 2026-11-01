@@ -41,9 +41,22 @@ struct DashboardSnapshot {
     var events: [PortfolioChartEvent] = []
     var timeWeightedReturn: Double?
     var gainEUR: Double?
+    var cashflows: [PortfolioCashflow] = []
+    var hasCompleteCashflows = true
 }
 
 enum PortfolioAnalytics {
+    static func returnSeries(
+        _ history: [(date: Date, value: Double)],
+        cashflows: [PortfolioCashflow]
+    ) -> [(date: Date, value: Double)] {
+        PortfolioHistoryBuilder.timeWeightedReturnSeries(
+            nav: history.map { (AppDateFormatter.yearMonthDay.string(from: $0.date), $0.value) },
+            cashflows: cashflows.map { ($0.date, $0.amountEUR) }
+        ).compactMap { point in
+            AppDateFormatter.yearMonthDay.date(from: point.date).map { ($0, point.value) }
+        }
+    }
     /// Runs CPU-only dashboard derivations on the cooperative executor instead of
     /// blocking the main actor that publishes the finished snapshot.
     nonisolated static func deriveDashboardSeries(

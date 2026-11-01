@@ -1,266 +1,119 @@
 import SwiftUI
 
-// MARK: - Enhanced Portfolio Hero Card
 struct EnhancedPortfolioHeroCard: View {
-    @EnvironmentObject var viewModel: AppViewModel
+    @EnvironmentObject private var viewModel: AppViewModel
+    @Environment(\.dynamicTypeSize) private var typeSize
     let currentValue: Double
     let previousValue: Double
     let privacyMode: Bool
-    /// When set, the period chips render inside the card.
     var selectedPeriod: Binding<ReportPeriod>? = nil
-    @State private var showGoldMode: Bool = false
-    
-    private static let relativeDateTimeFormatter: RelativeDateTimeFormatter = {
-        let f = RelativeDateTimeFormatter()
-        f.unitsStyle = .short
-        f.dateTimeStyle = .named
-        return f
-    }()
-    
-    private var change: Double {
-        viewModel.cachedPeriodGainEUR ?? (currentValue - previousValue)
-    }
-    
-    private var changePercent: Double {
-        if let twr = viewModel.cachedPeriodTWR { return twr }
-        guard previousValue > 0 else { return 0 }
-        return (change / previousValue) * 100
-    }
+    @State private var goldMode = false
 
-    /// The euro amount follows the holdings change; the percent keeps its own sign.
-    private var euroIsPositive: Bool {
-        change >= 0
-    }
-
-    
-    private var goldTotals: (current: Double, previous: Double)? {
-        viewModel.cachedGoldTotals
-    }
-    
-    private var goldHistory: [(date: Date, value: Double)] {
-        viewModel.cachedGoldOzHistory
-    }
-    
-    private var goldChange: Double? {
-        guard let first = goldHistory.first?.value, let last = goldHistory.last?.value else { return nil }
-        return last - first
-    }
-    
-    private var goldChangePercent: Double? {
-        guard let first = goldHistory.first?.value, let last = goldHistory.last?.value else { return nil }
-        return PortfolioHistoryBuilder.percentChange(from: first, to: last)
-    }
-    
-    private var isGoldPositive: Bool {
-        (goldChange ?? 0) >= 0
-    }
-    
-    /// Capped at now: a timestamp a moment ahead read "in 0 s".
-    private var lastRefreshDate: Date? {
-        (viewModel.getLastRefreshDate() ?? viewModel.lastInstrumentUpdateDate).map { min($0, Date()) }
-    }
-
-    private var isStale: Bool {
-        guard let date = lastRefreshDate else { return true }
-        return Date().timeIntervalSince(date) > 24 * 60 * 60
-    }
+    private var details: [HoldingDetail] { viewModel.cachedHoldingDetailsByAccount.values.flatMap { $0 } }
+    private var isPartial: Bool { details.contains { $0.currentValueEUR == nil } }
+    private var dates: [String] { details.compactMap(\.priceDate).sorted() }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppTheme.Spacing.small) {
-            if currentValue == 0 {
-                emptyState
-            } else {
-                headerRow
-                valueRow
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top) {
+                Text(goldMode ? L10n.dashboardPortfolioValueGold : isPartial ? L10n.designKnownValue : L10n.dashboardPortfolioValue)
+                    .font(.subheadline).foregroundStyle(.secondary)
+                Spacer()
+                Menu {
+                    Button(L10n.designCurrencyEUR) { goldMode = false }
+                    Button(L10n.designGoldUnits) { goldMode = true }
+                        .disabled(viewModel.cachedGoldTotals == nil || viewModel.demoMode.isDemoModeEnabled)
+                } label: {
+                    Label(goldMode ? "oz" : "EUR", systemImage: "chevron.down")
+                        .font(.subheadline).frame(minHeight: 44)
+                }
             }
-            if let selectedPeriod {
-                Divider()
-                    .padding(.top, AppTheme.Spacing.xSmall)
-                PeriodChips(selectedPeriod: selectedPeriod)
+            Text(value)
+                .font(AppTheme.Typography.hero)
+                .minimumScaleFactor(0.75)
+                .lineLimit(typeSize.isAccessibilitySize ? 2 : 1)
+            if !goldMode {
+                let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 16)) : AnyLayout(HStackLayout(alignment: .top, spacing: 20))
+                layout {
+                    metric(L10n.designInvestmentReturn, value: viewModel.cachedPeriodTWR.map { formatPercentChange($0) }, change: viewModel.cachedPeriodTWR)
+                    metric(L10n.designGain, value: viewModel.cachedPeriodGainEUR.map { formatCurrency($0, currency: "EUR") }, change: viewModel.cachedPeriodGainEUR)
+                }
             }
-        }
-        .padding(.horizontal, AppTheme.Spacing.large)
-        .padding(.top, 14)
-        .padding(.bottom, selectedPeriod == nil ? 14 : AppTheme.Spacing.small)
-        .modifier(GlassEffectFallback(cornerRadius: AppTheme.Radius.hero, interactive: false))
-        .padding(.horizontal)
-    }
-
-    /// "Portfolio value" on the left, freshness on the right; orange once older than a day.
-    private var headerRow: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(showGoldMode ? L10n.dashboardPortfolioValueGold : L10n.dashboardPortfolioValue)
-            Spacer(minLength: AppTheme.Spacing.small)
-            if let date = lastRefreshDate {
+            if let selectedPeriod { PeriodChips(selectedPeriod: selectedPeriod) }
+            if let oldest = dates.first {
                 Label {
-                    Text(Self.relativeDateTimeFormatter.localizedString(for: date, relativeTo: Date()))
-                } icon: {
-                    if isStale { Image(systemName: "exclamationmark.triangle.fill") }
-                }
-                .labelStyle(.titleAndIcon)
-                .foregroundStyle(isStale ? Color.orange : Color.secondary)
-                .accessibilityLabel("\(L10n.summaryLastUpdate) \(Self.relativeDateTimeFormatter.localizedString(for: date, relativeTo: Date()))")
+                    Text("\(L10n.designOldestQuote): \(AppDateFormatter.displayDate(oldest))")
+                } icon: { Image(systemName: "clock") }
+                .font(.caption).foregroundStyle(.secondary)
+            }
+            if let checked = viewModel.getLastRefreshDate() {
+                Text("\(L10n.designLastChecked): \(checked.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened).locale(Locale(identifier: LanguageManager.shared.currentLanguage.rawValue))))")
+                    .font(.caption).foregroundStyle(.secondary)
             }
         }
-        .font(AppTheme.Typography.label)
-        .foregroundStyle(.secondary)
-        .lineLimit(1)
+        .padding(.horizontal, 20).padding(.vertical, 8)
     }
 
-    /// Total on the left, change on the right (percent first, amount below), using
-    /// the width the old stacked layout left empty.
-    private var valueRow: some View {
-        HStack(alignment: .lastTextBaseline, spacing: AppTheme.Spacing.medium) {
-            valueText
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                .layoutPriority(1)
-                .contentTransition(.numericText())
-                // Long-press keeps the euro / gold-ounce switch without a hidden tap target.
-                .onLongPressGesture {
-                    HapticService.impact(.medium)
-                    withAnimation(.easeInOut(duration: 0.2)) { showGoldMode.toggle() }
-                }
-                .accessibilityAddTraits(.isButton)
-                .accessibilityHint(L10n.dashboardHeroGoldHint)
-                .accessibilityAction { showGoldMode.toggle() }
-            Spacer(minLength: 0)
-            if !privacyMode {
-                changeBlock
-            }
+    private var value: String {
+        if privacyMode { return L10n.privacyHiddenLong }
+        if !details.isEmpty && details.allSatisfy({ $0.currentValueEUR == nil }) { return L10n.generalNA }
+        if goldMode && !viewModel.demoMode.isDemoModeEnabled, let gold = viewModel.cachedGoldTotals {
+            return "\(gold.current.formatted(.number.precision(.fractionLength(2)))) oz"
         }
+        return formatCurrency(currentValue, currency: "EUR")
     }
 
-    @ViewBuilder
-    private var valueText: some View {
-        if privacyMode {
-            Text("••••••")
-                .font(AppTheme.Typography.hero)
-        } else if showGoldMode, let gold = goldTotals {
-            (Text(gold.current.formatted(.number.precision(.fractionLength(2))))
-                .font(AppTheme.Typography.hero)
-             + Text(" oz")
-                .font(.title3.weight(.semibold))
-                .foregroundColor(AppTheme.gold))
-        } else {
-            Text(Self.amountWithSmallCents(formatCurrency(currentValue, currency: "EUR")))
-        }
-    }
-
-    /// Keeps the cents but sets them smaller, so the total stays readable at a glance.
-    private static func amountWithSmallCents(_ formatted: String) -> AttributedString {
-        var attributed = AttributedString(formatted)
-        attributed.font = AppTheme.Typography.hero
-        let separator = Locale.current.decimalSeparator ?? "."
-        if let sepRange = formatted.range(of: separator, options: .backwards) {
-            let tail = formatted[sepRange.lowerBound...]
-            let digits = tail.dropFirst(separator.count).prefix { $0.isNumber }
-            let lower = formatted.distance(from: formatted.startIndex, to: sepRange.lowerBound)
-            let length = separator.count + digits.count
-            let start = attributed.index(attributed.startIndex, offsetByCharacters: lower)
-            let end = attributed.index(start, offsetByCharacters: length)
-            attributed[start..<end].font = Font.system(.title2, design: .rounded).weight(.semibold).monospacedDigit()
-        }
-        return attributed
-    }
-
-    @ViewBuilder
-    private var changeBlock: some View {
-        if showGoldMode, goldTotals != nil, let goldChg = goldChange, let goldChgPct = goldChangePercent, goldHistory.first?.value ?? 0 > 0 {
-            changeStack(
-                percent: goldChgPct,
-                amount: "\(goldChg >= 0 ? "+" : "")\(goldChg.formatted(.number.precision(.fractionLength(2)))) oz",
-                amountPositive: isGoldPositive
-            )
-        } else if !showGoldMode, previousValue > 0 {
-            changeStack(
-                percent: changePercent,
-                amount: "\(euroIsPositive ? "+" : "")\(formatCurrency(change, currency: "EUR"))",
-                amountPositive: euroIsPositive
-            )
-        }
-    }
-
-    /// Percent leads (the figure people compare across periods); amount follows smaller.
-    /// The amount keeps its own sign color: TWR and euro change can disagree.
-    private func changeStack(percent: Double, amount: String, amountPositive: Bool) -> some View {
-        VStack(alignment: .trailing, spacing: 2) {
-            HStack(spacing: 3) {
-                Image(systemName: percent >= 0 ? "arrow.up.right" : "arrow.down.right")
-                    .font(AppTheme.Typography.label.weight(.bold))
-                Text(formatPercentChange(percent))
-                    .font(AppTheme.Typography.rowValue)
-            }
-            .foregroundStyle(AppTheme.changeColor(percent))
-            Text(amount)
-                .font(AppTheme.Typography.label.weight(.medium))
-                .monospacedDigit()
-                .foregroundStyle(amountPositive ? AppTheme.gain : AppTheme.loss)
-        }
-        .lineLimit(1)
-        .fixedSize()
-        .accessibilityElement(children: .combine)
-    }
-
-    private var emptyState: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "chart.line.uptrend.xyaxis")
-                .font(.largeTitle)
-                .foregroundColor(.secondary.opacity(0.5))
-            Text(L10n.dashboardNoHoldings)
-                .font(.headline)
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 24)
+    private func metric(_ title: String, value: String?, change: Double?) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title).font(.caption).foregroundStyle(.secondary)
+            Text(privacyMode || viewModel.demoMode.isDemoModeEnabled ? L10n.privacyHiddenLong : (value ?? L10n.generalNA))
+                .font(AppTheme.Typography.value)
+                .foregroundStyle(privacyMode || viewModel.demoMode.isDemoModeEnabled ? Color.secondary : change.map(AppTheme.changeColor) ?? .secondary)
+        }.frame(maxWidth: .infinity, alignment: .leading).accessibilityElement(children: .combine)
     }
 }
 
-// MARK: - Period Chips
-/// Compact period picker. Lives inside the hero card because it drives the change
-/// figure, best/worst and the performance chart below.
 struct PeriodChips: View {
     @Binding var selectedPeriod: ReportPeriod
-    @Namespace private var animation
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private let primary: [ReportPeriod] = [.oneWeek, .oneMonth, .oneYear, .yearToDate]
 
     var body: some View {
-        HStack(spacing: AppTheme.Spacing.xSmall) {
-            ForEach(ReportPeriod.allCases.filter { $0 != .oneDay }) { period in
-                let isSelected = selectedPeriod == period
-                Button {
-                    HapticService.impact(.light)
-                    withAnimation(.spring(response: 0.28, dampingFraction: 0.78)) {
-                        selectedPeriod = period
-                    }
-                } label: {
-                    Text(period.shortName)
-                        .font(AppTheme.Typography.control)
-                        .lineLimit(1)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 7)
-                        .foregroundStyle(isSelected ? AppTheme.onSelection : .primary)
-                        .background {
-                            if isSelected {
-                                Capsule()
-                                    .fill(AppTheme.selection)
-                                    .matchedGeometryEffect(id: "period", in: animation)
-                            }
-                        }
-                        .contentShape(Capsule())
+        if typeSize.isAccessibilitySize {
+            periodMenu
+        } else {
+            HStack(spacing: 4) {
+                ForEach(primary) { period in
+                    Button {
+                        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.15)) { selectedPeriod = period }
+                    } label: {
+                        Text(period.shortName).font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                            .foregroundStyle(selectedPeriod == period ? AppTheme.onSelection : .primary)
+                            .background(selectedPeriod == period ? AppTheme.selection : .clear, in: RoundedRectangle(cornerRadius: 10))
+                    }.buttonStyle(.plain)
+                        .accessibilityLabel(period.displayName)
+                        .accessibilityAddTraits(selectedPeriod == period ? .isSelected : [])
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel(period.displayName)
-                .accessibilityAddTraits(isSelected ? .isSelected : [])
+                periodMenu
             }
         }
     }
-}
 
-// MARK: - Previews
-
-#Preview("EnhancedPortfolioHeroCard") {
-    EnhancedPortfolioHeroCard(currentValue: 222_337.35, previousValue: 217_629.60, privacyMode: false, selectedPeriod: .constant(.oneWeek))
-        .environmentObject(AppViewModel.preview)
-        .frame(width: 400)
-        .padding()
+    private var periodMenu: some View {
+        Menu {
+            Picker(L10n.designPeriod, selection: $selectedPeriod) {
+                ForEach(ReportPeriod.allCases) { Text($0.displayName).tag($0) }
+            }
+        } label: {
+            if typeSize.isAccessibilitySize || !primary.contains(selectedPeriod) {
+                Label(typeSize.isAccessibilitySize ? selectedPeriod.displayName : selectedPeriod.shortName, systemImage: "chevron.down")
+                    .font(.subheadline).frame(minWidth: 44, minHeight: 44)
+            } else {
+                Image(systemName: "ellipsis").frame(width: 44, height: 44)
+                    .accessibilityLabel(L10n.designPeriod)
+            }
+        }
+    }
 }

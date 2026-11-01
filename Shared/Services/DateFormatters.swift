@@ -30,6 +30,13 @@ enum AppDateFormatter {
         return f
     }()
 
+    /// Localized UI rendering; persisted dates keep their canonical format.
+    static func displayDate(_ stored: String) -> String {
+        guard let date = yearMonthDay.date(from: stored) else { return stored }
+        let locale = Locale(identifier: LanguageManager.shared.currentLanguage.rawValue)
+        return date.formatted(.dateTime.day().month(.abbreviated).year().locale(locale))
+    }
+
     /// Returns today's date as "yyyy-MM-dd".
     static var todayString: String {
         yearMonthDay.string(from: Date())

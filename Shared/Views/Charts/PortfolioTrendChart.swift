@@ -29,19 +29,39 @@ struct PortfolioTrendChart: View {
     var unit: String = "EUR"  // "EUR" or "oz" for gold ounces
     var interactive: Bool = false
     var privacyMode: Bool = false
+    var cashflows: [PortfolioCashflow]? = nil
+    var startsWithReturn = false
+    var hasCompleteCashflows = true
+    @ObservedObject private var demoMode = DemoModeManager.shared
+    private var sensitiveHidden: Bool { privacyMode || demoMode.isDemoModeEnabled }
+    @State private var showsComparisons = false
+    @State private var didSetInitialMode = false
+    @State private var showingExplanation = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var scrubbedPoint: (date: Date, value: Double)?
     @State private var scrubbedXPosition: CGFloat?
     @State private var displayMode: PortfolioChartDisplayMode = .value
 
     private func displayed(_ items: [(date: Date, value: Double)]?) -> [(date: Date, value: Double)] {
         guard let items else { return [] }
-        return displayMode == .value ? items : PortfolioAnalytics.rebasedPercent(items)
+        guard displayMode == .percent else { return items }
+        if let cashflows { return hasCompleteCashflows ? PortfolioAnalytics.returnSeries(items, cashflows: cashflows) : [] }
+        return PortfolioAnalytics.rebasedPercent(items)
+    }
+
+    private var displayedInvested: [(date: Date, value: Double)] {
+        displayMode == .value ? (investedCapitalHistory ?? []) : []
+    }
+
+    private var visibleTransactionEvents: [PortfolioChartEvent] {
+        guard let start = history.first?.date, let end = history.last?.date else { return [] }
+        return transactionEvents.filter { $0.date >= start && $0.date <= end }
     }
 
     private var displayedHistory: [(date: Date, value: Double)] { displayed(history) }
 
     private var portfolioCapitalSpread: [(date: Date, portfolio: Double, capital: Double)] {
-        let capital = displayed(investedCapitalHistory)
+        let capital = displayedInvested
         guard !capital.isEmpty else { return [] }
         return displayedHistory.compactMap { point in
             guard let capitalValue = nearestValue(in: capital, to: point.date) else { return nil }
@@ -59,10 +79,10 @@ struct PortfolioTrendChart: View {
             }
         }
         scan(displayedHistory)
-        scan(displayed(investedCapitalHistory))
-        scan(displayed(sp500History))
-        scan(displayed(goldHistory))
-        scan(displayed(msciWorldHistory))
+        scan(displayedInvested)
+        scan(displayed(showsComparisons ? sp500History : nil))
+        scan(displayed(showsComparisons ? goldHistory : nil))
+        scan(displayed(showsComparisons ? msciWorldHistory : nil))
         guard lo.isFinite, hi.isFinite else { return (0, 1) }
         if abs(hi - lo) < 1e-9 { return (lo - 1, hi + 1) }
         return (lo, hi)
@@ -73,7 +93,9 @@ struct PortfolioTrendChart: View {
 
     /// Time-weighted percent for the badge. The line color follows the euro change of the series.
     private var performanceBadge: Double? {
+        if cashflows != nil && !hasCompleteCashflows { return nil }
         if let performancePercent { return performancePercent }
+        if let cashflows { return PortfolioAnalytics.returnSeries(history, cashflows: cashflows).last?.value }
         return holdingsPercent
     }
 
@@ -123,7 +145,7 @@ struct PortfolioTrendChart: View {
 
     private func formatValue(_ value: Double) -> String {
         if displayMode == .percent {
-            return formatPercentChange(value, fractionDigits: 1)
+            return formatPercentChange(value, fractionDigits: abs(maxValue - minValue) < 1 ? 2 : 1)
         }
         if unit == "oz" {
             // Gold ounces format
@@ -166,21 +188,59 @@ struct PortfolioTrendChart: View {
     }
 
     var body: some View {
+        Group {
+            if sensitiveHidden { PrivateValuesPlaceholder() }
+            else { visibleChart }
+        }
+        .onAppear {
+            if !didSetInitialMode {
+                if startsWithReturn, cashflows != nil { displayMode = .percent }
+                didSetInitialMode = true
+            }
+        }
+        .onChange(of: displayMode) { _, _ in clearScrubbedPoint() }
+        .onChange(of: history.count) { _, _ in clearScrubbedPoint() }
+    }
+
+    private var visibleChart: some View {
         VStack(alignment: .leading, spacing: compact ? 4 : 8) {
             if !compact {
                 Picker(L10n.dashboardViewMode, selection: $displayMode) {
                     ForEach(PortfolioChartDisplayMode.allCases) { mode in
-                        Text(mode.title).tag(mode)
+                        Text(mode == .value ? L10n.chartValueView : (cashflows == nil ? L10n.designValueChange : L10n.designInvestmentReturn)).tag(mode)
                     }
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal, 16)
             }
+            if !compact {
+                HStack {
+                    Button { showingExplanation = true } label: {
+                        Label(cashflows == nil ? L10n.designValueChange : L10n.designReturnAdjusted, systemImage: "info.circle")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.plain)
+                    .frame(minHeight: 44)
+                    Spacer()
+                    if sp500History?.isEmpty == false || goldHistory?.isEmpty == false || msciWorldHistory?.isEmpty == false {
+                        Button { showsComparisons.toggle(); clearScrubbedPoint() } label: {
+                            Label(L10n.designCompare, systemImage: showsComparisons ? "checkmark.circle.fill" : "plus.circle")
+                                .font(.caption)
+                        }
+                        .frame(minHeight: 44)
+                        .accessibilityAddTraits(showsComparisons ? .isSelected : [])
+                    }
+                }
+                .padding(.horizontal, 8)
+            }
+            if displayMode == .percent && displayedHistory.isEmpty {
+                Text(L10n.designReturnUnavailable).font(.caption).foregroundStyle(.secondary).padding(.horizontal, 16)
+            }
             // Legend and % on the same line
-            let hasSp500 = sp500History != nil && !(sp500History?.isEmpty ?? true)
-            let hasGold = goldHistory != nil && !(goldHistory?.isEmpty ?? true)
-            let hasMsci = msciWorldHistory != nil && !(msciWorldHistory?.isEmpty ?? true)
-            let hasInvested = investedCapitalHistory?.isEmpty == false
+            let hasSp500 = showsComparisons && sp500History != nil && !(sp500History?.isEmpty ?? true)
+            let hasGold = showsComparisons && goldHistory != nil && !(goldHistory?.isEmpty ?? true)
+            let hasMsci = showsComparisons && msciWorldHistory != nil && !(msciWorldHistory?.isEmpty ?? true)
+            let hasInvested = !displayedInvested.isEmpty
             
             if (performanceBadge != nil) || hasInvested || hasSp500 || hasGold || hasMsci {
                 HStack(alignment: .firstTextBaseline) {
@@ -248,7 +308,7 @@ struct PortfolioTrendChart: View {
                     .interpolationMethod(.linear)
                     .lineStyle(StrokeStyle(lineWidth: 0))
                 }
-                let invested = displayed(investedCapitalHistory)
+                let invested = displayedInvested
                 if !invested.isEmpty {
                     ForEach(Array(invested.enumerated()), id: \.offset) { _, item in
                         LineMark(
@@ -260,7 +320,7 @@ struct PortfolioTrendChart: View {
                         .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
                     }
                 }
-                let sp = displayed(sp500History)
+                let sp = displayed(showsComparisons ? sp500History : nil)
                 if !sp.isEmpty {
                     ForEach(Array(sp.enumerated()), id: \.offset) { _, item in
                         LineMark(
@@ -271,7 +331,7 @@ struct PortfolioTrendChart: View {
                         .interpolationMethod(.linear)
                     }
                 }
-                let gd = displayed(goldHistory)
+                let gd = displayed(showsComparisons ? goldHistory : nil)
                 if !gd.isEmpty {
                     ForEach(Array(gd.enumerated()), id: \.offset) { _, item in
                         LineMark(
@@ -282,7 +342,7 @@ struct PortfolioTrendChart: View {
                         .interpolationMethod(.linear)
                     }
                 }
-                let mw = displayed(msciWorldHistory)
+                let mw = displayed(showsComparisons ? msciWorldHistory : nil)
                 if !mw.isEmpty {
                     ForEach(Array(mw.enumerated()), id: \.offset) { _, item in
                         LineMark(
@@ -293,7 +353,7 @@ struct PortfolioTrendChart: View {
                         .interpolationMethod(.linear)
                     }
                 }
-                ForEach(transactionEvents) { event in
+                ForEach(visibleTransactionEvents) { event in
                     if let eventY = nearestValue(in: displayedHistory, to: event.date) {
                         PointMark(
                             x: .value("Transaction", event.date),
@@ -337,7 +397,7 @@ struct PortfolioTrendChart: View {
                 }
             }
             .chartXAxis {
-                AxisMarks(values: .automatic(desiredCount: compact ? 3 : 5)) { value in
+                AxisMarks(values: .automatic(desiredCount: compact ? 3 : 4)) { value in
                     AxisGridLine()
                     AxisValueLabel(format: xAxisFormat)
                 }
@@ -364,13 +424,15 @@ struct PortfolioTrendChart: View {
                     }
                 }
             }
-            .clipShape(RoundedRectangle(cornerRadius: 4))
         }
         .padding(compact ? 8 : 16)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(L10n.dashboardPortfolioTrend)
         .accessibilityValue(accessibilitySummary)
         .accessibilityChartDescriptor(self)
+        .alert(L10n.designInvestmentReturn, isPresented: $showingExplanation) {
+            Button(L10n.generalOk, role: .cancel) { }
+        } message: { Text(L10n.designReturnExplanation) }
     }
 
     private func scrubbedCallout(for point: (date: Date, value: Double)) -> some View {
@@ -378,15 +440,15 @@ struct PortfolioTrendChart: View {
             Text(Self.shortDateFormatter.string(from: point.date))
                 .font(.caption2)
                 .foregroundStyle(Color.secondary)
-            if privacyMode {
+            if sensitiveHidden {
                 Text("••••••")
                     .font(.caption.weight(.semibold))
             } else {
                 calloutLine(L10n.chartPortfolioLabel, value: point.value, color: chartColor)
-                calloutSeriesLine(L10n.chartInvestedCapital, series: displayed(investedCapitalHistory), date: point.date, color: AppTheme.investedCapital)
-                calloutSeriesLine(L10n.chartSp500Comparison, series: displayed(sp500History), date: point.date, color: AppTheme.sp500)
-                calloutSeriesLine(L10n.chartGoldComparison, series: displayed(goldHistory), date: point.date, color: AppTheme.gold)
-                calloutSeriesLine(L10n.chartMsciWorldComparison, series: displayed(msciWorldHistory), date: point.date, color: AppTheme.msciWorld)
+                calloutSeriesLine(L10n.chartInvestedCapital, series: displayedInvested, date: point.date, color: AppTheme.investedCapital)
+                calloutSeriesLine(L10n.chartSp500Comparison, series: displayed(showsComparisons ? sp500History : nil), date: point.date, color: AppTheme.sp500)
+                calloutSeriesLine(L10n.chartGoldComparison, series: displayed(showsComparisons ? goldHistory : nil), date: point.date, color: AppTheme.gold)
+                calloutSeriesLine(L10n.chartMsciWorldComparison, series: displayed(showsComparisons ? msciWorldHistory : nil), date: point.date, color: AppTheme.msciWorld)
             }
         }
         .padding(.horizontal, 10)
@@ -442,39 +504,42 @@ struct PortfolioTrendChart: View {
 
     @ViewBuilder
     private func chartInteractionSurface(proxy: ChartProxy, geometry: GeometryProxy) -> some View {
-        let surface = Rectangle()
-            .fill(.clear)
-            .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { value in
-                        updateScrubbedPoint(at: value.location.x, proxy: proxy, geometry: geometry)
-                    }
-                    .onEnded { _ in clearScrubbedPoint() }
-            )
+        let surface = Rectangle().fill(.clear).contentShape(Rectangle())
         #if os(macOS)
-        surface.onContinuousHover { phase in
-            switch phase {
-            case .active(let location):
-                updateScrubbedPoint(at: location.x, proxy: proxy, geometry: geometry)
-            case .ended:
-                clearScrubbedPoint()
-            }
-        }
-        #else
         surface
+            .gesture(DragGesture(minimumDistance: 0)
+                .onChanged { updateScrubbedPoint(at: $0.location.x, proxy: proxy, geometry: geometry) }
+                .onEnded { _ in clearScrubbedPoint() })
+            .onContinuousHover { phase in
+                switch phase {
+                case .active(let location): updateScrubbedPoint(at: location.x, proxy: proxy, geometry: geometry)
+                case .ended: clearScrubbedPoint()
+                }
+            }
+        #else
+        // A normal drag continues to scroll the page; holding first explores the chart.
+        surface.gesture(
+            LongPressGesture(minimumDuration: 0.25)
+                .sequenced(before: DragGesture(minimumDistance: 0))
+                .onChanged { value in
+                    if case .second(true, let drag?) = value {
+                        updateScrubbedPoint(at: drag.location.x, proxy: proxy, geometry: geometry)
+                    }
+                }
+                .onEnded { _ in clearScrubbedPoint() }
+        )
         #endif
     }
 
     private func clearScrubbedPoint() {
-        withAnimation(.easeOut(duration: 0.18)) {
+        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.18)) {
             scrubbedPoint = nil
             scrubbedXPosition = nil
         }
     }
 
     private var paddedYDomain: ClosedRange<Double> {
-        let padding = max(abs(maxValue - minValue) * 0.06, displayMode == .percent ? 1 : 0.01)
+        let padding = max(abs(maxValue - minValue) * 0.06, 0.01)
         return (minValue - padding)...(maxValue + padding)
     }
 
@@ -499,6 +564,7 @@ struct PortfolioTrendChart: View {
     }
 
     private var accessibilitySummary: String {
+        if sensitiveHidden { return L10n.designValuesHidden }
         guard let first = displayedHistory.first, let last = displayedHistory.last else {
             return L10n.dashboardNoHistoricalData
         }
@@ -527,7 +593,7 @@ extension PortfolioTrendChart: AXChartDescriptorRepresentable {
         let series = AXDataSeriesDescriptor(
             name: L10n.chartPortfolioLabel,
             isContinuous: true,
-            dataPoints: displayedHistory.map {
+            dataPoints: (sensitiveHidden ? [] : displayedHistory).map {
                 AXDataPoint(x: $0.date.timeIntervalSinceReferenceDate, y: $0.value)
             }
         )

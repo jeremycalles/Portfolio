@@ -222,7 +222,9 @@ struct DashboardView: View {
                                     msciWorldHistory: msciWorldHistory.isEmpty ? nil : msciWorldHistory,
                                     performancePercent: viewModel.cachedPeriodTWR,
                                     interactive: true,
-                                    privacyMode: privacyMode
+                                    privacyMode: privacyMode,
+                                    cashflows: viewModel.cachedCashflows,
+                                hasCompleteCashflows: viewModel.cachedHasCompleteCashflows
                                 )
                             }
                             .frame(maxWidth: .infinity, maxHeight: .infinity)

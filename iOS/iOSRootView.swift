@@ -1,435 +1,221 @@
 import SwiftUI
-import Charts
 
 let iOSWalkthroughStorageKey = "portfolio_ios_walkthrough_hidden"
 
-// MARK: - iOS Root View with TabView Navigation
 struct iOSRootView: View {
-    @EnvironmentObject var viewModel: AppViewModel
-    @State private var selectedTab = 0
-    @State private var showsWalkthrough = false
+    @EnvironmentObject private var viewModel: AppViewModel
+    @StateObject private var demoMode = DemoModeManager.shared
     @AppStorage("privacyMode") private var privacyMode = false
-    @AppStorage(iOSWalkthroughStorageKey) private var hasHiddenWalkthrough = false
-    
+    @State private var selectedTab = 0
+
     var body: some View {
         TabView(selection: $selectedTab) {
-            // Dashboard Tab
-            dashboardNavigationStack
-            .tabItem {
-                Label(L10n.navDashboard, systemImage: "chart.pie.fill")
-            }
-            .tag(0)
-            
-            // Reports Tab
             NavigationStack {
-                iOSQuadrantReportView(privacyMode: privacyMode)
-                    .navigationTitle(L10n.navReports)
+                iOSDashboardView(privacyMode: privacyMode, selectedTab: $selectedTab)
+                    .navigationTitle(L10n.designOverview)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .portfolioPrivacyToolbar()
             }
-            .tabItem {
-                Label(L10n.navReports, systemImage: "square.grid.2x2.fill")
-            }
-            .tag(1)
-            
-            // Holdings Tab
+            .tabItem { Label(L10n.designOverview, systemImage: "chart.line.uptrend.xyaxis") }.tag(0)
             NavigationStack {
                 iOSAllHoldingsView(privacyMode: privacyMode)
                     .navigationTitle(L10n.navHoldings)
+                    .portfolioPrivacyToolbar()
             }
-            .tabItem {
-                Label(L10n.navHoldings, systemImage: "list.bullet.rectangle.fill")
-            }
-            .tag(2)
-            
-            // Instruments Tab
+            .tabItem { Label(L10n.navHoldings, systemImage: "wallet.bifold") }.tag(1)
             NavigationStack {
-                iOSInstrumentsView()
-                    .navigationTitle(L10n.navInstruments)
+                iOSQuadrantReportView(privacyMode: privacyMode)
+                    .navigationTitle(L10n.designAllocation)
+                    .portfolioPrivacyToolbar()
             }
-            .tabItem {
-                Label(L10n.navInstruments, systemImage: "doc.text.fill")
-            }
-            .tag(3)
-            
-            // Settings Tab
+            .tabItem { Label(L10n.designAllocation, systemImage: "chart.pie") }.tag(2)
             NavigationStack {
                 iOSSettingsView(privacyMode: $privacyMode)
                     .navigationTitle(L10n.settingsTitle)
+                    .portfolioPrivacyToolbar()
             }
-            .tabItem {
-                Label(L10n.navSettings, systemImage: "gear")
+            .tabItem { Label(L10n.navSettings, systemImage: "gearshape") }.tag(3)
+        }
+        .tint(AppTheme.portfolio)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            if demoMode.isDemoModeEnabled {
+                Label(L10n.designDemoBanner, systemImage: "theatermasks")
+                    .font(.caption).frame(maxWidth: .infinity).padding(8)
+                    .background(AppTheme.surface)
             }
-            .tag(4)
         }
-        .onAppear {
-            showsWalkthrough = !hasHiddenWalkthrough
+        .onChange(of: demoMode.isDemoModeEnabled) { _, _ in
+            Task { await viewModel.refreshAll() }
         }
-        .fullScreenCover(isPresented: $showsWalkthrough) {
-            iOSWalkthroughView {
-                showsWalkthrough = false
-            }
-            .interactiveDismissDisabled()
-        }
-        .alert(L10n.generalError, isPresented: .constant(viewModel.errorMessage != nil)) {
-            Button(L10n.generalOk) {
-                viewModel.dismissError()
-            }
-        } message: {
-            Text(viewModel.errorMessage ?? "")
-        }
-        .refreshResultOverlay(result: viewModel.refreshResult, onDismiss: { viewModel.dismissRefreshResult() })
+        .alert(L10n.generalError, isPresented: Binding(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.dismissError() } }
+        )) {
+            Button(L10n.generalOk) { viewModel.dismissError() }
+        } message: { Text(viewModel.errorMessage ?? "") }
+        .refreshResultOverlay(result: viewModel.refreshResult, onDismiss: viewModel.dismissRefreshResult)
     }
+}
 
-    @ViewBuilder
-    private var dashboardNavigationStack: some View {
-        if #available(iOS 26.0, *) {
-            NavigationStack {
-                iOSDashboardView(privacyMode: privacyMode)
-                    .navigationTitle(L10n.navDashboard)
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItemGroup(placement: .primaryAction) {
-                            Button {
-                                privacyMode.toggle()
-                            } label: {
-                                Image(systemName: privacyMode ? "eye.slash.fill" : "eye.fill")
-                            }
-                            .accessibilityLabel(L10n.settingsPrivacyMode)
-
-                            Button {
-                                Task {
-                                    await viewModel.startRefreshTask(showCompletionDelay: false).value
-                                }
-                            } label: {
-                                Image(systemName: "arrow.clockwise")
-                            }
-                            .disabled(viewModel.isLoading)
-                            .accessibilityLabel(L10n.actionUpdateAllPrices)
-                        }
-                    }
-            }
-        } else {
-            NavigationStack {
-                iOSDashboardView(privacyMode: privacyMode)
-                    .navigationTitle("")
-                    .navigationBarTitleDisplayMode(.inline)
+private struct IOSPrivacyToolbar: ViewModifier {
+    @AppStorage("privacyMode") private var privacyMode = false
+    func body(content: Content) -> some View {
+        content.toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button { privacyMode.toggle() } label: {
+                    Image(systemName: privacyMode ? "eye.slash" : "eye")
+                }
+                .accessibilityLabel(privacyMode ? L10n.designShowValues : L10n.designHideValues)
+                .accessibilityValue(privacyMode ? L10n.designValuesHidden : L10n.designShowValues)
             }
         }
     }
 }
 
-// MARK: - iOS Dashboard View
+extension View {
+    func portfolioPrivacyToolbar() -> some View { modifier(IOSPrivacyToolbar()) }
+}
+
 struct iOSDashboardView: View {
-    @EnvironmentObject var viewModel: AppViewModel
+    @EnvironmentObject private var viewModel: AppViewModel
+    @Environment(\.dynamicTypeSize) private var typeSize
     let privacyMode: Bool
-    @State private var viewMode: DashboardViewMode = .quadrants
-    
-    
-    var body: some View {
-        if #available(iOS 26.0, *) {
-            liquidGlassBody
-        } else {
-            legacyBody
-        }
+    @Binding var selectedTab: Int
+    @State private var showingAdd = false
+    @State private var showingBackup = false
+    @State private var showingChart = false
+
+    private var details: [HoldingDetail] {
+        viewModel.cachedHoldingDetailsByAccount.values.flatMap { $0 }
+            .sorted { ($0.currentValueEUR ?? 0) > ($1.currentValueEUR ?? 0) }
     }
 
-    private var legacyBody: some View {
+    var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
-                // MARK: - Enhanced Hero Portfolio Card
-                let totals = viewModel.cachedGrandTotalsEUR
-
-                // Period chips sit inside the hero: they drive its change figure,
-                // best/worst and the chart below.
-                EnhancedPortfolioHeroCard(
-                    currentValue: totals.current,
-                    previousValue: totals.previous,
-                    privacyMode: privacyMode,
-                    selectedPeriod: $viewModel.selectedPeriod
-                )
-                
-                // MARK: - Quick Stats Row
-                QuickStatsRow()
-                
-                // MARK: - Portfolio Trend Chart (Total Performance) – same as macOS
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(L10n.generalPerformance)
-                        .font(.headline)
-                        .padding(.horizontal)
-                    
-                    let history = viewModel.cachedPortfolioHistory
-                    let sp500History = viewModel.cachedSP500History
-                    let goldHistory = viewModel.cachedGoldHistory
-                    let msciWorldHistory = viewModel.cachedMSCIWorldHistory
-                    if history.isEmpty {
-                        HStack {
-                            Spacer()
-                            VStack(spacing: 8) {
-                                Image(systemName: "chart.xyaxis.line")
-                                    .font(.system(size: 32))
-                                    .foregroundColor(.secondary.opacity(0.5))
-                                Text(L10n.dashboardNoDataAvailable)
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            }
-                            Spacer()
-                        }
-                        .frame(height: 200)
-                    } else {
-                        ZStack {
-                            PortfolioTrendChart(
-                                history: history,
-                                investedCapitalHistory: viewModel.cachedInvestedCapitalHistory,
-                                transactionEvents: viewModel.cachedTransactionEvents,
-                                sp500History: sp500History.isEmpty ? nil : sp500History,
-                                goldHistory: goldHistory.isEmpty ? nil : goldHistory,
-                                msciWorldHistory: msciWorldHistory.isEmpty ? nil : msciWorldHistory,
-                                performancePercent: viewModel.cachedPeriodTWR
-                            )
-                            .frame(height: 250)
-                            .padding(.horizontal)
-                            .blur(radius: privacyMode ? 8 : 0)
-                            if privacyMode {
-                                Image(systemName: "eye.slash.fill")
-                                    .font(.system(size: 32))
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    }
-                }
-                .padding(.vertical, 16)
-                .background(
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(Color(.systemBackground))
-                        .shadow(color: .black.opacity(0.06), radius: 12, x: 0, y: 4)
-                )
-                .padding(.horizontal)
-                
-                // MARK: - Icon-Based View Mode Selector
-                IconViewModeSelector(selectedMode: $viewMode)
-                
-                // MARK: - Enhanced Allocation Ring Chart
-                if viewMode == .quadrants || viewMode == .accounts {
-                    EnhancedAllocationRingChart(
-                        privacyMode: privacyMode,
-                        isQuadrants: viewMode == .quadrants
-                    )
-                }
-                
-                // MARK: - Content based on view mode with Enhanced Trend Cards
-                switch viewMode {
-                case .quadrants:
-                    iOSDashboardQuadrantsSectionEnhanced(privacyMode: privacyMode)
-                case .holdings:
-                    iOSDashboardHoldingsSectionEnhanced(privacyMode: privacyMode)
-                case .accounts:
-                    iOSDashboardAccountsSectionEnhanced(privacyMode: privacyMode)
-                }
-                
-                Spacer(minLength: 20)
-            }
-            .padding(.top, 0)
-        }
-        .background(Color(.systemGroupedBackground))
-        .refreshable {
-            await viewModel.startRefreshTask(showCompletionDelay: false).value
-        }
-        .overlay {
-            if viewModel.isLoading {
-                VStack {
-                    ProgressView()
-                    Text(viewModel.statusMessage)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                .padding()
-                .background(.ultraThinMaterial)
-                .cornerRadius(12)
-            }
-        }
-    }
-
-    @available(iOS 26.0, *)
-    private var liquidGlassBody: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                let totals = viewModel.cachedGrandTotalsEUR
-
-                // Period chips sit inside the hero: they drive its change figure,
-                // best/worst and the performance chart.
-                EnhancedPortfolioHeroCard(
-                    currentValue: totals.current,
-                    previousValue: totals.previous,
-                    privacyMode: privacyMode,
-                    selectedPeriod: $viewModel.selectedPeriod
-                )
-
-                QuickStatsRow()
-
-                iOSPortfolioPerformancePanel(privacyMode: privacyMode)
-
-                // View mode only switches the breakdown below, so it lives here.
-                iOSDashboardModeBar(selectedMode: $viewMode)
-
-                if viewMode == .quadrants || viewMode == .accounts {
-                    EnhancedAllocationRingChart(
-                        privacyMode: privacyMode,
-                        isQuadrants: viewMode == .quadrants
-                    )
-                }
-
-                switch viewMode {
-                case .quadrants:
-                    iOSDashboardQuadrantsSectionEnhanced(privacyMode: privacyMode)
-                case .holdings:
-                    iOSDashboardHoldingsSectionEnhanced(privacyMode: privacyMode)
-                case .accounts:
-                    iOSDashboardAccountsSectionEnhanced(privacyMode: privacyMode)
-                }
-
-                Spacer(minLength: 24)
-            }
-            .padding(.top, 8)
-        }
-        .background(Color(.systemGroupedBackground))
-        .refreshable {
-            await viewModel.startRefreshTask(showCompletionDelay: false).value
-        }
-        .overlay {
-            if viewModel.isLoading {
-                iOSLoadingStatusCapsule(message: viewModel.statusMessage)
-                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
-            }
-        }
-        .animation(.easeInOut(duration: 0.18), value: viewModel.isLoading)
-    }
-}
-
-@available(iOS 26.0, *)
-private struct iOSDashboardModeBar: View {
-    @Binding var selectedMode: DashboardViewMode
-    @Namespace private var modeAnimation
-
-    var body: some View {
-        HStack(spacing: 6) {
-            ForEach(DashboardViewMode.allCases) { mode in
-                Button {
-                    HapticService.impact(.light)
-                    withAnimation(.spring(response: 0.28, dampingFraction: 0.78)) {
-                        selectedMode = mode
-                    }
-                } label: {
-                    Label(mode.displayName, systemImage: selectedMode == mode ? "\(mode.icon).fill" : mode.icon)
-                        .font(AppTheme.Typography.control)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.85)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .foregroundStyle(selectedMode == mode ? AppTheme.onSelection : .primary)
-                        .background {
-                            if selectedMode == mode {
-                                Capsule()
-                                    .fill(AppTheme.selection)
-                                    .matchedGeometryEffect(id: "mode", in: modeAnimation)
-                            }
-                        }
-                }
-                .buttonStyle(.plain)
-                .accessibilityAddTraits(selectedMode == mode ? .isSelected : [])
-            }
-        }
-        .padding(6)
-        .portfolioGlassSurface(cornerRadius: 22, interactive: true)
-        .padding(.horizontal)
-    }
-}
-
-@available(iOS 26.0, *)
-private struct iOSPortfolioPerformancePanel: View {
-    @EnvironmentObject var viewModel: AppViewModel
-    let privacyMode: Bool
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(L10n.generalPerformance)
-                    .font(.headline)
-                Spacer()
-                Image(systemName: "waveform.path.ecg")
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.horizontal, 16)
-
-            let history = viewModel.cachedPortfolioHistory
-            let sp500History = viewModel.cachedSP500History
-            let goldHistory = viewModel.cachedGoldHistory
-            let msciWorldHistory = viewModel.cachedMSCIWorldHistory
-
-            if history.isEmpty {
-                HStack {
-                    Spacer()
-                    VStack(spacing: 8) {
-                        Image(systemName: "chart.xyaxis.line")
-                            .font(.system(size: 32))
-                            .foregroundColor(.secondary.opacity(0.5))
-                        Text(L10n.dashboardNoDataAvailable)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                    Spacer()
-                }
-                .frame(height: 200)
+            if viewModel.holdings.isEmpty {
+                iOSWalkthroughView(onAdd: { showingAdd = true }, onRestore: { showingBackup = true })
             } else {
-                ZStack {
-                    PortfolioTrendChart(
-                        history: history,
-                        investedCapitalHistory: viewModel.cachedInvestedCapitalHistory,
-                        transactionEvents: viewModel.cachedTransactionEvents,
-                        sp500History: sp500History.isEmpty ? nil : sp500History,
-                        goldHistory: goldHistory.isEmpty ? nil : goldHistory,
-                        msciWorldHistory: msciWorldHistory.isEmpty ? nil : msciWorldHistory,
-                        performancePercent: viewModel.cachedPeriodTWR,
-                        interactive: true,
-                        privacyMode: privacyMode
+                VStack(spacing: 20) {
+                    EnhancedPortfolioHeroCard(
+                        currentValue: viewModel.cachedGrandTotalsEUR.current,
+                        previousValue: viewModel.cachedGrandTotalsEUR.previous,
+                        privacyMode: privacyMode,
+                        selectedPeriod: $viewModel.selectedPeriod
                     )
-                    .frame(height: 250)
-                    .blur(radius: privacyMode ? 8 : 0)
-
-                    if privacyMode {
-                        Image(systemName: "eye.slash.fill")
-                            .font(.system(size: 32))
-                            .foregroundColor(.secondary)
+                    if details.contains(where: { $0.currentValueEUR == nil }) {
+                        NavigationLink {
+                            iOSAllHoldingsView(privacyMode: privacyMode, initialFilter: .missingPrice)
+                                .navigationTitle(L10n.designReviewPrices)
+                        } label: {
+                            Label(L10n.designUnavailablePrices, systemImage: "exclamationmark.triangle")
+                                .font(.subheadline).foregroundStyle(.primary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .portfolioCard()
+                        }
+                        .buttonStyle(.plain).padding(.horizontal)
                     }
+                    performancePanel
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text(L10n.designYourHoldings).font(.headline)
+                            Spacer()
+                            Button(L10n.designSeeAll) { selectedTab = 1 }.frame(minHeight: 44)
+                        }
+                        ForEach(Array(details.prefix(3))) { detail in
+                            NavigationLink {
+                                HoldingDetailView(accountId: detail.accountId, isin: detail.isin, privacyMode: privacyMode)
+                            } label: {
+                                iOSHoldingRow(detail: detail, privacyMode: privacyMode)
+                            }
+                            .buttonStyle(.plain)
+                            if detail.id != details.prefix(3).last?.id { Divider() }
+                        }
+                    }
+                    .portfolioCard().padding(.horizontal)
+                    Button { selectedTab = 2 } label: {
+                        HStack {
+                            Label(L10n.designAllocation, systemImage: "chart.pie")
+                            Spacer()
+                            Image(systemName: "chevron.right").foregroundStyle(.secondary)
+                        }.frame(minHeight: 44).portfolioCard()
+                    }.buttonStyle(.plain).padding(.horizontal)
+                    Label(L10n.designStoredLocally, systemImage: "lock.shield")
+                        .font(.caption).foregroundStyle(.secondary).padding(.bottom)
                 }
+                .padding(.top, 8)
             }
         }
-        .padding(.vertical, 16)
-        .portfolioGlassSurface(cornerRadius: 22)
-        .padding(.horizontal)
-    }
-}
-
-@available(iOS 26.0, *)
-private struct iOSLoadingStatusCapsule: View {
-    let message: String
-
-    var body: some View {
-        HStack(spacing: 10) {
-            ProgressView()
-            Text(message)
-                .font(.caption.weight(.medium))
-                .foregroundColor(.secondary)
+        .background(Color(.systemGroupedBackground))
+        .toolbar {
+            ToolbarItemGroup(placement: .primaryAction) {
+                Button { Task { await viewModel.startRefreshTask(showCompletionDelay: false).value } } label: {
+                    if viewModel.isLoading { ProgressView() } else { Image(systemName: "arrow.clockwise") }
+                }
+                .accessibilityLabel(L10n.actionUpdateAllPrices).disabled(viewModel.isLoading)
+                Button { showingAdd = true } label: { Image(systemName: "plus") }
+                    .accessibilityLabel(L10n.holdingsAddHolding)
+                    .disabled(viewModel.demoMode.isDemoModeEnabled)
+            }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .portfolioGlassSurface(cornerRadius: 16, interactive: true)
+        .refreshable { await viewModel.startRefreshTask(showCompletionDelay: false).value }
+        .sheet(isPresented: $showingAdd) { AddHoldingSheet() }
+        .sheet(isPresented: $showingBackup) { NavigationStack { iOSBackupView() } }
+        .sheet(isPresented: $showingChart) {
+            NavigationStack {
+                ScrollView {
+                    PeriodChips(selectedPeriod: $viewModel.selectedPeriod).padding()
+                    portfolioChart.frame(height: typeSize.isAccessibilitySize ? 580 : 440)
+                }
+                .navigationTitle(L10n.designInvestmentReturn)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L10n.generalDone) { showingChart = false } } }
+                .portfolioPrivacyToolbar()
+            }
+        }
+    }
+
+    private var performancePanel: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(L10n.designInvestmentReturn).font(.headline)
+                Spacer()
+                Button { showingChart = true } label: { Image(systemName: "arrow.up.left.and.arrow.down.right") }
+                    .frame(minWidth: 44, minHeight: 44).accessibilityLabel(L10n.designExpandChart)
+            }.padding(.horizontal, 16)
+            if viewModel.cachedPortfolioHistory.isEmpty {
+                ContentUnavailableView {
+                    Label(L10n.dashboardNoHistoricalData, systemImage: "chart.xyaxis.line")
+                } description: { Text(L10n.designNoHistoryAction) } actions: {
+                    Button(L10n.designDownloadHistory) {
+                        Task { await viewModel.backfillHistorical(period: "1y", interval: "1mo") }
+                    }.disabled(viewModel.isLoading)
+                }
+            } else {
+                portfolioChart.frame(height: privacyMode || viewModel.demoMode.isDemoModeEnabled ? 160 : typeSize.isAccessibilitySize ? 430 : 310)
+            }
+        }.padding(.vertical, 8).background(AppTheme.surface, in: RoundedRectangle(cornerRadius: 18))
+            .padding(.horizontal)
+    }
+
+    private var portfolioChart: some View {
+        PortfolioTrendChart(
+            history: viewModel.cachedPortfolioHistory,
+            investedCapitalHistory: viewModel.cachedInvestedCapitalHistory,
+            transactionEvents: viewModel.cachedTransactionEvents,
+            sp500History: viewModel.cachedSP500History,
+            goldHistory: viewModel.cachedGoldHistory,
+            msciWorldHistory: viewModel.cachedMSCIWorldHistory,
+            performancePercent: viewModel.cachedPeriodTWR,
+            interactive: true,
+            privacyMode: privacyMode,
+            cashflows: viewModel.cachedCashflows,
+            startsWithReturn: true,
+            hasCompleteCashflows: viewModel.cachedHasCompleteCashflows
+        )
     }
 }
-
-// MARK: - Previews
 
 #Preview("iOSRootView") {
-    iOSRootView()
-        .environmentObject(AppViewModel.preview)
-        .environmentObject(IOSLockManager.shared)
-        .environmentObject(LanguageManager.shared)
+    iOSRootView().environmentObject(AppViewModel.preview)
+        .environmentObject(IOSLockManager.shared).environmentObject(LanguageManager.shared)
 }

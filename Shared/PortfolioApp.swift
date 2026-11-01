@@ -31,6 +31,9 @@ struct PortfolioApp: App {
                 .environmentObject(viewModel)
                 .environmentObject(languageManager)
                 .environmentObject(IOSLockManager.shared)
+                .tint(AppTheme.portfolio)
+                .accentColor(AppTheme.portfolio)
+                .environment(\.locale, Locale(identifier: languageManager.currentLanguage.rawValue))
                 .id(languageManager.refreshID)  // Force view refresh on language change
         }
         .onChange(of: scenePhase) { _, newPhase in

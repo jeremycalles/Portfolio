@@ -37,6 +37,9 @@ class AppViewModel: ObservableObject {
     @Published private(set) var cachedHoldingDetailsByAccount: [Int: [HoldingDetail]] = [:]
     @Published private(set) var cachedPeriodTWR: Double? = nil
     @Published private(set) var cachedPeriodGainEUR: Double? = nil
+    @Published private(set) var cachedCashflows: [PortfolioCashflow] = []
+    @Published private(set) var cachedHasCompleteCashflows = true
+    @Published private(set) var cachedPositionTWR: [String: Double] = [:]
     @Published private(set) var cachedHoldingsWithQuantity: [(isin: String, name: String, quantity: Double)] = []
     @Published private(set) var cachedHoldingHistories: [String: [(date: Date, value: Double)]] = [:]
     @Published private(set) var cachedHoldingTWR: [String: Double] = [:]
@@ -138,6 +141,13 @@ class AppViewModel: ObservableObject {
         await recomputeDashboardCache()
     }
     
+    func reloadAfterRestore() async {
+        // The imported database may predate the ledger even on a current install.
+        await db.reconcileHoldingTransactions()
+        clearRateCache()
+        await refreshAll()
+    }
+
     private func rebuildCurrencyIndex() {
         var dict: [String: String] = [:]
         dict.reserveCapacity(instruments.count)
@@ -161,6 +171,8 @@ class AppViewModel: ObservableObject {
         cachedTransactionEvents = snapshot.events
         cachedPeriodTWR = snapshot.timeWeightedReturn
         cachedPeriodGainEUR = snapshot.gainEUR
+        cachedCashflows = snapshot.cashflows
+        cachedHasCompleteCashflows = snapshot.hasCompleteCashflows
         cachedHoldingDetailsByAccount = await getAllHoldingDetailsByAccount()
         cachedQuadrantReport = getQuadrantReport(from: cachedHoldingDetailsByAccount)
         lastInstrumentUpdateDate = await getLastInstrumentUpdateDate()
@@ -177,6 +189,17 @@ class AppViewModel: ObservableObject {
         }
 
         cachedHoldingsWithQuantity = await getAllHoldingsWithQuantity()
+        var positionReturns: [String: Double] = [:]
+        for holding in holdings {
+            let history = await getPositionValueHistory(accountId: holding.accountId, isin: holding.isin)
+            let transactions = await db.getHoldingTransactions(accountId: holding.accountId, isin: holding.isin)
+            let flowData = await cashflowData(transactions: transactions)
+            if flowData.isComplete {
+                positionReturns[HoldingEditItem(accountId: holding.accountId, isin: holding.isin).id] =
+                    PortfolioAnalytics.returnSeries(history, cashflows: flowData.cashflows).last?.value
+            }
+        }
+        cachedPositionTWR = positionReturns
         cachedHoldingHistories = [:]
         cachedHoldingTWR = [:]
         for holding in cachedHoldingsWithQuantity {
@@ -278,7 +301,7 @@ class AppViewModel: ObservableObject {
     }
     
     func deleteInstrument(_ isin: String) async {
-        await db.deleteInstrument(isin)
+        guard await db.deleteInstrument(isin) else { errorMessage = L10n.errorDeleteFailed; return }
         await refreshInstruments()
         await refreshHoldings()
         await recomputeDashboardCache()
@@ -287,11 +310,13 @@ class AppViewModel: ObservableObject {
     func assignQuadrant(instrumentIsin: String, quadrantId: Int?) async {
         await db.assignQuadrant(instrumentIsin: instrumentIsin, quadrantId: quadrantId)
         await refreshInstruments()
+        await recomputeDashboardCache()
     }
     
     func updateInstrument(_ instrument: Instrument) async {
-        await db.addOrUpdateInstrument(instrument)
+        guard await db.addOrUpdateInstrument(instrument) else { errorMessage = L10n.errorSaveFailed; return }
         await refreshInstruments()
+        await recomputeDashboardCache()
     }
     
     /// Validates the ticker by fetching market data for the given ISIN and optional ticker.
@@ -306,7 +331,8 @@ class AppViewModel: ObservableObject {
     }
     
     func deletePrice(isin: String, date: String) async {
-        await db.deletePrice(isin: isin, date: date)
+        guard await db.deletePrice(isin: isin, date: date) else { errorMessage = L10n.errorDeleteFailed; return }
+        await recomputeDashboardCache()
     }
     
     // MARK: - Quadrants
@@ -349,7 +375,7 @@ class AppViewModel: ObservableObject {
     }
     
     func deleteBankAccount(id: Int) async {
-        await db.deleteBankAccount(id: id)
+        guard await db.deleteBankAccount(id: id) else { errorMessage = L10n.errorDeleteFailed; return }
         await refreshBankAccounts()
         await refreshHoldings()
         await recomputeDashboardCache()
@@ -357,10 +383,7 @@ class AppViewModel: ObservableObject {
     
     // MARK: - Holdings
     func addHolding(accountId: Int, isin: String, quantity: Double, purchaseDate: String?, purchasePrice: Double?) async {
-        if holdings.contains(where: { $0.accountId == accountId && $0.isin == isin }) {
-            await updateHolding(accountId: accountId, isin: isin, quantity: quantity, purchaseDate: purchaseDate, purchasePrice: purchasePrice)
-            return
-        }
+        // Add always records a purchase. Balance corrections are an explicit action.
         await recordBuy(
             accountId: accountId,
             isin: isin,
@@ -391,6 +414,7 @@ class AppViewModel: ObservableObject {
                 purchasePrice: purchasePrice
             )
             await refreshHoldings()
+            await recomputeDashboardCache()
         }
     }
     
@@ -414,8 +438,7 @@ class AppViewModel: ObservableObject {
 
     /// Permanently deletes both the live cache and every operation for a position.
     func deleteHoldingWithHistory(accountId: Int, isin: String) async {
-        await db.deleteHoldingTransactions(accountId: accountId, isin: isin)
-        await db.deleteHolding(accountIdValue: accountId, instrumentIsin: isin)
+        guard await db.deletePositionWithHistory(accountId: accountId, isin: isin) else { errorMessage = L10n.errorDeleteFailed; return }
         await refreshHoldings()
         await recomputeDashboardCache()
     }
@@ -508,7 +531,7 @@ class AppViewModel: ObservableObject {
             return
         }
 
-        await db.addHoldingTransaction(
+        let saved = await db.addHoldingTransaction(
             accountId: accountId,
             isin: isin,
             date: date,
@@ -518,7 +541,7 @@ class AppViewModel: ObservableObject {
             fees: fees,
             note: note
         )
-        await db.synchronizeHoldingFromTransactions(accountId: accountId, isin: isin)
+        guard saved else { errorMessage = L10n.errorSaveFailed; return }
         await refreshHoldings()
         await backfillHistoryIfNeeded(isin: isin, oldestDate: min(date, existing.first?.date ?? date))
         await recomputeDashboardCache()
@@ -543,8 +566,7 @@ class AppViewModel: ObservableObject {
             errorMessage = ledgerValidationMessage(error)
             return
         }
-        await db.updateHoldingTransaction(transaction)
-        await db.synchronizeHoldingFromTransactions(accountId: transaction.accountId, isin: transaction.isin)
+        guard await db.updateHoldingTransaction(transaction) else { errorMessage = L10n.errorSaveFailed; return }
         await refreshHoldings()
         let oldestDate = existing.filter { $0.id != id }.map(\.date).min().map {
             min($0, transaction.date)
@@ -562,8 +584,7 @@ class AppViewModel: ObservableObject {
             errorMessage = ledgerValidationMessage(error)
             return
         }
-        await db.deleteHoldingTransaction(id: id)
-        await db.synchronizeHoldingFromTransactions(accountId: transaction.accountId, isin: transaction.isin)
+        guard await db.deleteHoldingTransaction(id: id) else { errorMessage = L10n.errorSaveFailed; return }
         await refreshHoldings()
         await recomputeDashboardCache()
     }

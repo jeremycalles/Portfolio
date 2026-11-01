@@ -14,12 +14,13 @@ extension AppViewModel {
         return index
     }
 
-    private func cashflowData(
+    func cashflowData(
         transactions: [HoldingTransaction]
-    ) async -> (cashflows: [PortfolioCashflow], events: [PortfolioChartEvent]) {
+    ) async -> (cashflows: [PortfolioCashflow], events: [PortfolioChartEvent], isComplete: Bool) {
         let priceIndex = await buildPriceIndex(for: Array(Set(transactions.map(\.isin))))
         var cashflows: [PortfolioCashflow] = []
         var events: [PortfolioChartEvent] = []
+        var isComplete = true
         cashflows.reserveCapacity(transactions.count)
         events.reserveCapacity(transactions.count)
 
@@ -28,19 +29,19 @@ extension AppViewModel {
                 index: priceIndex[transaction.isin] ?? [],
                 date: transaction.date
             )
-            guard let price = transaction.unitPrice ?? fallbackPrice, price > 0 else { continue }
+            guard let price = transaction.unitPrice ?? fallbackPrice, price.isFinite, price >= 0 else { isComplete = false; continue }
             // A fee increases a contribution and reduces the proceeds of a withdrawal.
             let native = transaction.quantityDelta * price + max(0, transaction.fees ?? 0)
             guard let amountEUR = await convertToEUR(
                 value: native,
                 fromCurrency: getInstrumentCurrency(forIsin: transaction.isin),
                 onDate: transaction.date
-            ) else { continue }
+            ) else { isComplete = false; continue }
             let cashflow = PortfolioCashflow(date: transaction.date, amountEUR: amountEUR)
             cashflows.append(cashflow)
             events.append(PortfolioChartEvent(transaction: transaction, amountEUR: amountEUR))
         }
-        return (cashflows, events)
+        return (cashflows, events, isComplete)
     }
 
     private func transactionsByIsin(_ transactions: [HoldingTransaction]) -> [String: [(date: String, quantityDelta: Double)]] {
@@ -144,7 +145,9 @@ extension AppViewModel {
         let cutoffStr = historyCutoff(for: transactions)
         let todayStr = AppDateFormatter.todayString
         let intra = transactions.filter { $0.date > cutoffStr && $0.date <= todayStr }
-        let flows = await cashflowData(transactions: intra).cashflows
+        let data = await cashflowData(transactions: intra)
+        guard data.isComplete else { return nil }
+        let flows = data.cashflows
         let nav = history.map { (AppDateFormatter.yearMonthDay.string(from: $0.date), $0.value) }
         let cashflows = flows.map { (date: $0.date, amountEUR: $0.amountEUR) }
         return PortfolioHistoryBuilder.timeWeightedReturn(nav: nav, cashflows: cashflows)
@@ -204,17 +207,19 @@ extension AppViewModel {
 
         return DashboardSnapshot(
             portfolio: portfolio,
-            investedCapital: derived.investedCapital,
-            sp500: derived.sp500,
-            gold: derived.gold,
-            msciWorld: derived.msciWorld,
+            investedCapital: flowData.isComplete ? derived.investedCapital : [],
+            sp500: flowData.isComplete ? derived.sp500 : [],
+            gold: flowData.isComplete ? derived.gold : [],
+            msciWorld: flowData.isComplete ? derived.msciWorld : [],
             goldOunces: goldOunces,
             events: flowData.events.filter {
                 let date = AppDateFormatter.yearMonthDay.string(from: $0.date)
                 return date >= cutoff && date <= today
             },
-            timeWeightedReturn: derived.timeWeightedReturn,
-            gainEUR: gainEUR
+            timeWeightedReturn: flowData.isComplete ? derived.timeWeightedReturn : nil,
+            gainEUR: flowData.isComplete && gainEUR.isFinite ? gainEUR : nil,
+            cashflows: flowData.cashflows,
+            hasCompleteCashflows: flowData.isComplete
         )
     }
 

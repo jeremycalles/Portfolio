@@ -18,7 +18,7 @@ struct EnhancedTrendCard: View {
     }
     
     private var chartColor: Color {
-        if let change = changePercent {
+        if !privacyMode, let change = changePercent {
             return change >= 0 ? AppTheme.gain : AppTheme.loss
         }
         return AppTheme.portfolio
@@ -55,7 +55,7 @@ struct EnhancedTrendCard: View {
                 
                 Spacer()
                 
-                if let change = changePercent {
+                if !privacyMode, let change = changePercent {
                     HStack(spacing: 3) {
                         Image(systemName: change >= 0 ? "arrow.up.right" : "arrow.down.right")
                             .font(AppTheme.Typography.caption.weight(.bold))
@@ -86,7 +86,9 @@ struct EnhancedTrendCard: View {
                 }
             }
             
-            if history.isEmpty {
+            if privacyMode {
+                Label(L10n.designValuesHidden, systemImage: "eye.slash").foregroundStyle(.secondary)
+            } else if history.isEmpty {
                 Text(unit == "oz" ? L10n.chartNoGoldPriceData : L10n.generalNoData)
                     .foregroundColor(.secondary)
                     .frame(height: 56)
@@ -145,7 +147,7 @@ struct GlassEffectFallback: ViewModifier {
             }
         } else {
             content
-                .background(.ultraThinMaterial)
+                .background(AppTheme.surface)
                 .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
         }
         #else

@@ -27,6 +27,10 @@ struct AccountsPieChart: View {
     }
     
     var body: some View {
+        if privacyMode { PrivateValuesPlaceholder() } else { chartContent }
+    }
+
+    private var chartContent: some View {
         VStack(spacing: compact ? 8 : 12) {
             if accountData.isEmpty {
                 Text(L10n.generalNoData)

@@ -7,6 +7,8 @@ struct EditHoldingView: View {
     let accountId: Int
     let isin: String
     
+    @State private var isSaving = false
+    @AppStorage("privacyMode") private var privacyMode = false
     @State private var quantityText = ""
     @State private var purchasePriceText = ""
     @State private var purchaseDate = Date()
@@ -25,10 +27,11 @@ struct EditHoldingView: View {
     }
     
     private var isValid: Bool {
-        parseDecimal(quantityText).map { $0 > 0 } ?? false
+        parseDecimal(quantityText).map { $0.isFinite && $0 > 0 } == true && (!includePurchaseInfo || purchasePriceText.isEmpty || parseDecimal(purchasePriceText).map { $0.isFinite && $0 >= 0 } == true)
     }
     
     var body: some View {
+        PrivacyProtectedEditor {
         Form {
             #if os(macOS)
             Section {
@@ -66,6 +69,8 @@ struct EditHoldingView: View {
                 Text(L10n.holdingsPurchaseDetailsHint)
             }
         }
+        .disabled(isSaving || viewModel.demoMode.isDemoModeEnabled)
+        }
         #if os(macOS)
         .formStyle(.grouped)
         .frame(minWidth: 400)
@@ -87,12 +92,13 @@ struct EditHoldingView: View {
                 Button(L10n.generalSave) {
                     save()
                 }
-                .disabled(!isValid)
+                .disabled(!isValid || isSaving || privacyMode || viewModel.demoMode.isDemoModeEnabled)
                 #if os(macOS)
                 .keyboardShortcut(.defaultAction)
                 #endif
             }
         }
+        .interactiveDismissDisabled(isSaving)
         .onAppear {
             if let h = existingHolding {
                 quantityText = String(format: "%.4f", h.quantity)
@@ -111,8 +117,14 @@ struct EditHoldingView: View {
         guard let quantity = parseDecimal(quantityText), quantity > 0 else { return }
         let purchaseDateStr: String? = includePurchaseInfo ? AppDateFormatter.yearMonthDay.string(from: purchaseDate) : nil
         let purchasePrice: Double? = includePurchaseInfo ? parseDecimal(purchasePriceText) : nil
-        Task { await viewModel.updateHolding(accountId: accountId, isin: isin, quantity: quantity, purchaseDate: purchaseDateStr, purchasePrice: purchasePrice) }
-        dismiss()
+        guard !isSaving else { return }
+        isSaving = true
+        viewModel.dismissError()
+        Task {
+            await viewModel.updateHolding(accountId: accountId, isin: isin, quantity: quantity, purchaseDate: purchaseDateStr, purchasePrice: purchasePrice)
+            isSaving = false
+            if viewModel.errorMessage == nil { dismiss() }
+        }
     }
 }
 

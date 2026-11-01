@@ -61,6 +61,10 @@ struct EnhancedAllocationRingChart: View {
     }
     
     var body: some View {
+        if privacyMode { PrivateValuesPlaceholder() } else { chartContent }
+    }
+
+    private var chartContent: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(isQuadrants ? L10n.dashboardQuadrantAllocation : L10n.dashboardAccountAllocation)
                 .font(.headline)

@@ -1,429 +1,188 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-// MARK: - iOS Settings View
 struct iOSSettingsView: View {
-    @EnvironmentObject var viewModel: AppViewModel
-    @EnvironmentObject var languageManager: LanguageManager
-    @EnvironmentObject var lockManager: IOSLockManager
+    @EnvironmentObject private var viewModel: AppViewModel
+    @EnvironmentObject private var languageManager: LanguageManager
+    @EnvironmentObject private var lockManager: IOSLockManager
     @StateObject private var demoMode = DemoModeManager.shared
     @Binding var privacyMode: Bool
-    @State private var showingImportPicker = false
-    
-    @State private var importMessage: String?
-    @State private var showingAlert = false
-    @State private var showingBackupAlert = false
-    @State private var backupAlertMessage: String?
-    @State private var isBackingUp = false
-    @State private var showingBackgroundLogs = false
-    @State private var showingStorageLogs = false
-    @State private var showingAddAccountSheet = false
-    @State private var showingAddQuadrantSheet = false
-    @State private var showingLanguagePicker = false
+    @State private var showingLanguage = false
+
     var body: some View {
         List {
-            Section {
-                Button {
-                    showingLanguagePicker = true
-                } label: {
-                    HStack {
-                        Label(L10n.settingsLanguage, systemImage: "globe")
-                        Spacer()
-                        Text(languageManager.currentLanguage.displayName)
-                            .foregroundColor(.secondary)
-                        Image(systemName: "chevron.up.chevron.down")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                    .contentShape(Rectangle())
+            Section(L10n.designPrivacySecurity) {
+                Toggle(isOn: $privacyMode) { Label(L10n.settingsPrivacyMode, systemImage: "eye.slash") }
+                Toggle(isOn: $lockManager.isTouchIDProtectionEnabled) {
+                    Label(L10n.designAppLock, systemImage: "lock.shield")
                 }
-                .buttonStyle(.plain)
-            } header: {
-                Text(L10n.settingsLanguage)
-            } footer: {
-                Text(L10n.settingsLanguageDescription)
+                Text(L10n.designAppLockDescription).font(.caption).foregroundStyle(.secondary)
             }
-            
             Section {
-                Toggle(isOn: $privacyMode) {
-                    Label(L10n.settingsPrivacyMode, systemImage: privacyMode ? "eye.slash" : "eye")
+                NavigationLink { iOSBackupView() } label: {
+                    Label(L10n.designBackupRestore, systemImage: "externaldrive")
                 }
-                
+            } footer: { Text(L10n.designStoredLocally) }
+            Section(L10n.designAppearanceLanguage) {
+                Button { showingLanguage = true } label: {
+                    LabeledContent(L10n.settingsLanguage, value: languageManager.currentLanguage.displayName)
+                }.foregroundStyle(.primary)
                 Toggle(isOn: $demoMode.isDemoModeEnabled) {
                     Label(L10n.settingsDemoModeEnable, systemImage: "theatermasks")
                 }
-                
                 if demoMode.isDemoModeEnabled {
-                    HStack {
-                        Text(L10n.settingsDemoModeActive)
-                            .font(.caption)
-                            .foregroundColor(.orange)
-                        
-                        Spacer()
-                        
-                        Button {
-                            demoMode.regenerateSeed()
-                            Task { await viewModel.refreshAll() }
-                        } label: {
-                            HStack {
-                                Label(L10n.settingsDemoModeRandomize, systemImage: "arrow.clockwise")
-                                    .font(.caption)
-                            }
-                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
+                    Text(L10n.settingsDemoModeDescription).font(.caption).foregroundStyle(.secondary)
+                    Button(L10n.settingsDemoModeRandomize) {
+                        demoMode.regenerateSeed()
+                        Task { await viewModel.recomputeDashboardCache() }
                     }
                 }
-            } header: {
-                Text(L10n.settingsDisplay)
-            } footer: {
-                Text(L10n.settingsDemoModeDescription)
             }
-            
-            Section {
-                Toggle(isOn: $lockManager.isTouchIDProtectionEnabled) {
-                    Label(L10n.settingsTouchIDProtectionEnable, systemImage: "faceid")
-                }
-            } header: {
-                Text(L10n.settingsTouchIDProtection)
-            } footer: {
-                Text(L10n.settingsTouchIDProtectionDescription)
-            }
-            
-            Section {
-                HStack {
-                    Image(systemName: "internaldrive")
-                        .foregroundColor(.blue)
-                    Text(L10n.settingsDatabaseStoredLocally)
-                }
-                if DatabaseService.shared.iCloudBackupAvailable {
-                    Button {
-                        isBackingUp = true
-                        DatabaseService.shared.backupDatabaseToICloud { result in
-                            isBackingUp = false
-                            switch result {
-                            case .success:
-                                backupAlertMessage = L10n.settingsBackupCompleted
-                            case .failure(let error):
-                                backupAlertMessage = error.localizedDescription
-                            }
-                            showingBackupAlert = true
-                        }
-                    } label: {
-                        Label(L10n.settingsBackupToICloudNow, systemImage: "icloud.and.arrow.up")
-                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(isBackingUp)
-                }
-                Button {
-                    showingImportPicker = true
-                } label: {
-                    Label(L10n.settingsImportDatabase, systemImage: "square.and.arrow.down")
-                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                ShareLink(item: URL(fileURLWithPath: DatabaseService.shared.getDatabasePath())) {
-                    Label(L10n.settingsExportDatabase, systemImage: "square.and.arrow.up")
-                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                        .contentShape(Rectangle())
-                }
-                Button {
-                    showingStorageLogs = true
-                } label: {
-                    Label(L10n.settingsStorageLogs, systemImage: "doc.text.magnifyingglass")
-                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                LabeledContent(L10n.settingsPath) {
-                    Text(DatabaseService.shared.getDatabasePath().components(separatedBy: "/").suffix(2).joined(separator: "/"))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            } header: {
-                Text(L10n.settingsDatabase)
-            } footer: {
-                Text(L10n.settingsImportExportPathHint)
-            }
-            
             Section(L10n.settingsDataManagement) {
-                Button {
-                    Task {
-                        await viewModel.updateAllPrices()
-                    }
-                } label: {
-                    HStack {
-                        Label(L10n.actionUpdateAllPrices, systemImage: "arrow.clockwise")
-                        if viewModel.isLoading {
-                            Spacer()
-                            ProgressView()
-                        }
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .disabled(viewModel.isLoading)
-                
-                Button {
-                    Task {
-                        await viewModel.backfillHistorical(period: "1y", interval: "1mo")
-                    }
-                } label: {
-                    Label(L10n.actionBackfillHistorical1Year, systemImage: "clock.arrow.circlepath")
-                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .disabled(viewModel.isLoading)
-                
-                Button {
-                    Task {
-                        await viewModel.backfillHistorical(period: "1mo", interval: "1d")
-                    }
-                } label: {
-                    Label(L10n.actionBackfill1Month, systemImage: "clock.arrow.circlepath")
-                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .disabled(viewModel.isLoading)
+                NavigationLink(L10n.designManageAccounts) { iOSAccountsManagementView() }
+                NavigationLink(L10n.designManageCategories) { iOSCategoriesManagementView() }
+                NavigationLink(L10n.designManageInstruments) { iOSInstrumentsView() }
             }
-            
             Section {
-                HStack {
-                    Label(L10n.settingsBackgroundRefresh, systemImage: "arrow.clockwise.icloud")
-                    Spacer()
-                    Text(L10n.settingsBackgroundRefreshInterval)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                .contentShape(Rectangle())
-                .onLongPressGesture {
-                    showingBackgroundLogs = true
-                }
-                
-                HStack {
-                    Text(L10n.settingsBackgroundRefreshStatus)
-                    Spacer()
-                    Text(BackgroundTaskManager.shared.systemRefreshStatusLabel)
-                        .foregroundColor(BackgroundTaskManager.shared.isSystemRefreshBlocked ? .orange : .secondary)
-                }
-                if BackgroundTaskManager.shared.isSystemRefreshBlocked {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Label(L10n.settingsBackgroundRefreshOffHint, systemImage: "exclamationmark.triangle.fill")
-                            .font(.subheadline)
-                            .foregroundStyle(.orange)
-                        Button(L10n.settingsOpenSystemSettings) {
-                            if let url = URL(string: UIApplication.openSettingsURLString) {
-                                UIApplication.shared.open(url)
-                            }
-                        }
-                    }
-                    .padding(.vertical, 4)
-                }
-                if let lastRefresh = BackgroundTaskManager.shared.timeSinceLastRefresh() {
-                    HStack {
-                        Text(L10n.settingsLastRefresh)
-                        Spacer()
-                        Text(lastRefresh)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                if let lastRun = BackgroundTaskManager.shared.lastRunSummary {
-                    HStack {
-                        Text(L10n.settingsBackgroundLastRun)
-                        Spacer()
-                        Text(lastRun)
-                            .foregroundColor(.secondary)
-                    }
-                }
-            } header: {
-                Text(L10n.settingsBackgroundUpdates)
-            } footer: {
-                Text("\(L10n.settingsBackgroundUpdatesDescription)\n\n\(L10n.settingsBackgroundUpdatesLimits)")
-            }
-            
-            Section {
-                ForEach(viewModel.bankAccounts) { account in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(account.bankName)
-                                .font(.headline)
-                            Text(account.accountName)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        Spacer()
-                        let holdingsCount = viewModel.holdings.filter { $0.accountId == account.id }.count
-                        Text(L10n.accountsHoldingsCount(holdingsCount))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button(role: .destructive) {
-                            Task { await viewModel.deleteBankAccount(id: account.id) }
-                        } label: {
-                            Label(L10n.generalDelete, systemImage: "trash")
-                        }
-                    }
-                }
-                
-                Button {
-                    showingAddAccountSheet = true
-                } label: {
-                    Label(L10n.accountsAddAccount, systemImage: "plus.circle")
-                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-            } header: {
-                Text(L10n.navBankAccounts)
-            } footer: {
-                Text(L10n.settingsAccountsHint)
-            }
-            
-            Section {
-                ForEach(viewModel.quadrants) { quadrant in
-                    HStack {
-                        Text(quadrant.name)
-                        Spacer()
-                        let instrumentCount = viewModel.instruments.filter { $0.quadrantId == quadrant.id }.count
-                        Text("\(instrumentCount) instruments")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button(role: .destructive) {
-                            Task { await viewModel.deleteQuadrant(id: quadrant.id) }
-                        } label: {
-                            Label(L10n.generalDelete, systemImage: "trash")
-                        }
-                    }
-                }
-                
-                Button {
-                    showingAddQuadrantSheet = true
-                } label: {
-                    Label(L10n.quadrantsAddQuadrant, systemImage: "plus.circle")
-                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-            } header: {
-                Text(L10n.navQuadrants)
-            } footer: {
-                Text(L10n.quadrantsCategorizeHint)
-            }
-            
-            Section(L10n.settingsStatistics) {
-                LabeledContent(L10n.instrumentsTitle, value: "\(viewModel.instruments.count)")
-                LabeledContent(L10n.navHoldings, value: "\(viewModel.holdings.count)")
-                LabeledContent(L10n.navQuadrants, value: "\(viewModel.quadrants.count)")
-                LabeledContent(L10n.navBankAccounts, value: "\(viewModel.bankAccounts.count)")
-            }
-            
-            Section(L10n.settingsAbout) {
+                NavigationLink(L10n.designAdvanced) { iOSAdvancedSettingsView() }
                 LabeledContent(L10n.settingsVersion, value: Bundle.appShortVersion)
-                HStack {
-                    Text(L10n.appName)
-                    Spacer()
-                    Text(L10n.appTagline)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
             }
         }
-        .listStyle(.insetGrouped)
-        .fileImporter(
-            isPresented: $showingImportPicker,
-            allowedContentTypes: [.database, .data],
-            allowsMultipleSelection: false
-        ) { result in
-            switch result {
-            case .success(let urls):
-                if let url = urls.first {
-                    importDatabase(from: url)
-                }
-            case .failure(let error):
-                importMessage = L10n.settingsImportFailed(error.localizedDescription)
-                showingAlert = true
-            }
-        }
-        
-        .alert(L10n.settingsDatabaseImport, isPresented: $showingAlert) {
-            Button(L10n.generalOk) { }
-        } message: {
-            Text(importMessage ?? "")
-        }
-        .alert(L10n.settingsBackup, isPresented: $showingBackupAlert) {
-            Button(L10n.generalOk) { }
-        } message: {
-            Text(backupAlertMessage ?? "")
-        }
-        .sheet(isPresented: $showingStorageLogs) {
-            StorageLogsView()
-        }
-        .sheet(isPresented: $showingBackgroundLogs) {
-            BackgroundLogsView()
-        }
-        .sheet(isPresented: $showingAddAccountSheet) {
-            AddBankAccountSheet()
-        }
-        .sheet(isPresented: $showingAddQuadrantSheet) {
-            AddQuadrantSheet()
-        }
-        .sheet(isPresented: $showingLanguagePicker) {
-            LanguagePickerSheet(
-                selectedLanguage: Binding(
-                    get: { languageManager.currentLanguage },
-                    set: { languageManager.currentLanguage = $0 }
-                )
-            )
+        .sheet(isPresented: $showingLanguage) {
+            LanguagePickerSheet(selectedLanguage: $languageManager.currentLanguage)
         }
     }
-    
-    private func importDatabase(from url: URL) {
-        let destPath = DatabaseService.shared.getDatabasePath()
-        let destURL = URL(fileURLWithPath: destPath)
-        let destDir = destURL.deletingLastPathComponent()
-        
-        Task {
-            guard url.startAccessingSecurityScopedResource() else {
-                await MainActor.run {
-                    importMessage = L10n.settingsCannotAccessSelectedFile
-                    showingAlert = true
+}
+
+struct iOSAdvancedSettingsView: View {
+    @EnvironmentObject private var viewModel: AppViewModel
+    @State private var showingBackgroundLogs = false
+    @State private var showingStorageLogs = false
+    var body: some View {
+        List {
+            Section(L10n.settingsDataManagement) {
+                Button(L10n.actionUpdateAllPrices) { Task { await viewModel.updateAllPrices() } }
+                Button(L10n.actionBackfillHistorical1Year) {
+                    Task { await viewModel.backfillHistorical(period: "1y", interval: "1mo") }
                 }
-                return
+                Button(L10n.actionBackfill1Month) {
+                    Task { await viewModel.backfillHistorical(period: "1mo", interval: "1d") }
+                }
+            }.disabled(viewModel.isLoading)
+            Section {
+                LabeledContent(L10n.settingsBackgroundRefresh, value: L10n.settingsBackgroundRefreshInterval)
+                LabeledContent(L10n.settingsBackgroundRefreshStatus, value: BackgroundTaskManager.shared.systemRefreshStatusLabel)
+                if let last = BackgroundTaskManager.shared.timeSinceLastRefresh() {
+                    LabeledContent(L10n.designLastChecked, value: last)
+                }
+                if BackgroundTaskManager.shared.isSystemRefreshBlocked {
+                    Text(L10n.settingsBackgroundRefreshOffHint).foregroundStyle(.secondary)
+                    Button(L10n.settingsOpenSystemSettings) {
+                        if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
+                    }
+                }
+            } header: { Text(L10n.settingsBackgroundUpdates) }
+              footer: { Text(L10n.settingsBackgroundUpdatesLimits) }
+            Section {
+                Button(L10n.settingsBackgroundRefreshLogs) { showingBackgroundLogs = true }
+                Button(L10n.settingsStorageLogs) { showingStorageLogs = true }
             }
-            defer { url.stopAccessingSecurityScopedResource() }
-            do {
-                await DatabaseService.shared.closeConnection()
-                try FileManager.default.createDirectory(at: destDir, withIntermediateDirectories: true)
-                if FileManager.default.fileExists(atPath: destPath) {
-                    let backupPath = destPath + ".backup"
-                    try? FileManager.default.removeItem(atPath: backupPath)
-                    try FileManager.default.moveItem(atPath: destPath, toPath: backupPath)
+        }
+        .navigationTitle(L10n.designAdvanced)
+        .sheet(isPresented: $showingBackgroundLogs) { BackgroundLogsView() }
+        .sheet(isPresented: $showingStorageLogs) { StorageLogsView() }
+    }
+}
+
+struct iOSBackupView: View {
+    @EnvironmentObject private var viewModel: AppViewModel
+    @State private var showingPicker = false
+    @State private var pendingImport: URL?
+    @State private var confirmRestore = false
+    @State private var exportURL: URL?
+    @State private var recoveryURL: URL?
+    @State private var message: String?
+    @State private var isBusy = false
+
+    var body: some View {
+        List {
+            Section {
+                if let exportURL {
+                    ShareLink(item: exportURL) { Label(L10n.designExportBackup, systemImage: "square.and.arrow.up") }
+                } else {
+                    Button(L10n.designExportBackup) { Task { await prepareExport() } }
                 }
-                try FileManager.default.copyItem(at: url, to: destURL)
-                await DatabaseService.shared.reconnectToDatabase()
-                await MainActor.run {
-                    importMessage = L10n.settingsImportSucceededRestart
-                    showingAlert = true
+                Button { showingPicker = true } label: {
+                    Label(L10n.designRestoreBackup, systemImage: "square.and.arrow.down")
                 }
-                await viewModel.refreshAll()
-            } catch {
-                await DatabaseService.shared.reconnectToDatabase()
-                await MainActor.run {
-                    importMessage = L10n.settingsImportFailed(error.localizedDescription)
-                    showingAlert = true
+                if let recoveryURL {
+                    Button {
+                        pendingImport = recoveryURL
+                        confirmRestore = true
+                    } label: { Label(L10n.designRestoreRecovery, systemImage: "clock.arrow.circlepath") }
+                    ShareLink(item: recoveryURL) { Label(L10n.designExportRecovery, systemImage: "square.and.arrow.up") }
                 }
+            } footer: { Text(L10n.designBackupHint) }
+            if DatabaseService.shared.iCloudBackupAvailable {
+                Section {
+                    Button(L10n.settingsBackupToICloudNow) {
+                        isBusy = true
+                        DatabaseService.shared.backupDatabaseToICloud { result in
+                            isBusy = false
+                            switch result {
+                            case .success: message = L10n.settingsBackupCompleted
+                            case .failure: message = L10n.errorSaveFailed
+                            }
+                        }
+                    }
+                }
+            }
+            if isBusy { ProgressView(L10n.designSaving) }
+            if let message { Text(message).font(.callout).accessibilityAddTraits(.updatesFrequently) }
+        }
+        .disabled(isBusy || viewModel.isLoading || viewModel.demoMode.isDemoModeEnabled)
+        .navigationTitle(L10n.designBackupRestore)
+        .task { await prepareExport() }
+        .fileImporter(isPresented: $showingPicker, allowedContentTypes: [.database, .data]) { result in
+            switch result {
+            case .success(let url): pendingImport = url; confirmRestore = true
+            case .failure: message = L10n.settingsCannotAccessSelectedFile
+            }
+        }
+        .confirmationDialog(L10n.designRestoreWarning, isPresented: $confirmRestore, titleVisibility: .visible) {
+            Button(L10n.designRestoreConfirm, role: .destructive) {
+                if let url = pendingImport { Task { await restore(url) } }
+            }
+            Button(L10n.generalCancel, role: .cancel) { pendingImport = nil }
+        }
+    }
+
+    private func prepareExport() async {
+        isBusy = true
+        defer { isBusy = false }
+        do {
+            exportURL = try await viewModel.db.exportSnapshot()
+            recoveryURL = viewModel.db.recoveryBackupURL
+        } catch { message = L10n.errorSaveFailed }
+    }
+
+    private func restore(_ url: URL) async {
+        isBusy = true
+        defer { isBusy = false; pendingImport = nil }
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+        do {
+            try await viewModel.db.restoreSnapshot(from: url)
+            await viewModel.reloadAfterRestore()
+            exportURL = try? await viewModel.db.exportSnapshot()
+            recoveryURL = viewModel.db.recoveryBackupURL
+            message = L10n.designRestoreSuccess
+        } catch {
+            recoveryURL = viewModel.db.recoveryBackupURL
+            switch error {
+            case DatabaseActor.BackupError.invalidFile: message = L10n.designInvalidBackup
+            case DatabaseActor.BackupError.recoveryRequired: message = L10n.designRecoveryRequired
+            default: message = L10n.designRestoreFailed
             }
         }
     }
@@ -475,6 +234,7 @@ struct AddQuadrantSheet: View {
     @Environment(\.dismiss) var dismiss
     
     @State private var quadrantName = ""
+    @State private var isSaving = false
     
     private var isValid: Bool {
         !quadrantName.trimmingCharacters(in: .whitespaces).isEmpty
@@ -492,21 +252,27 @@ struct AddQuadrantSheet: View {
                     Text(L10n.quadrantsDetailsHint)
                 }
             }
+            .interactiveDismissDisabled(isSaving)
             .navigationTitle(L10n.quadrantsAddQuadrant)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(L10n.generalCancel) {
                         dismiss()
-                    }
+                    }.disabled(isSaving)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(L10n.generalAdd) {
                         let name = quadrantName.trimmingCharacters(in: .whitespaces)
-                        Task { await viewModel.addQuadrant(name: name) }
-                        dismiss()
+                        isSaving = true
+                        viewModel.dismissError()
+                        Task {
+                            await viewModel.addQuadrant(name: name)
+                            isSaving = false
+                            if viewModel.errorMessage == nil { dismiss() }
+                        }
                     }
-                    .disabled(!isValid)
+                    .disabled(!isValid || isSaving || viewModel.demoMode.isDemoModeEnabled)
                 }
             }
         }
@@ -520,6 +286,7 @@ struct AddBankAccountSheet: View {
     
     @State private var bankName = ""
     @State private var accountName = ""
+    @State private var isSaving = false
     
     private var isValid: Bool {
         !bankName.trimmingCharacters(in: .whitespaces).isEmpty &&
@@ -540,22 +307,28 @@ struct AddBankAccountSheet: View {
                     Text(L10n.settingsAccountDetailsHint)
                 }
             }
+            .interactiveDismissDisabled(isSaving)
             .navigationTitle(L10n.accountsAddAccount)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(L10n.generalCancel) {
                         dismiss()
-                    }
+                    }.disabled(isSaving)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(L10n.generalAdd) {
                         let bank = bankName.trimmingCharacters(in: .whitespaces)
                         let account = accountName.trimmingCharacters(in: .whitespaces)
-                        Task { await viewModel.addBankAccount(bank: bank, account: account) }
-                        dismiss()
+                        isSaving = true
+                        viewModel.dismissError()
+                        Task {
+                            await viewModel.addBankAccount(bank: bank, account: account)
+                            isSaving = false
+                            if viewModel.errorMessage == nil { dismiss() }
+                        }
                     }
-                    .disabled(!isValid)
+                    .disabled(!isValid || isSaving || viewModel.demoMode.isDemoModeEnabled)
                 }
             }
         }

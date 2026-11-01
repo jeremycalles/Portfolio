@@ -365,12 +365,55 @@ struct PortfolioHistoryBuilderTests {
             (date: "2026-01-01", value: 100.0),
             (date: "2026-01-31", value: 120.0)
         ]
-        #expect(PortfolioHistoryBuilder.timeWeightedReturn(nav: nav, cashflows: []) == 20)
+        #expect(abs((PortfolioHistoryBuilder.timeWeightedReturn(nav: nav, cashflows: []) ?? 0) - 20) < 0.000001)
     }
 
     @Test("percentChange returns nil when the start value is zero")
     func percentChangeNilOnZero() {
         #expect(PortfolioHistoryBuilder.percentChange(from: 0, to: 50) == nil)
         #expect(PortfolioHistoryBuilder.percentChange(from: 100, to: 90) == -10)
+    }
+}
+
+@Suite("Cashflow-adjusted return curve")
+struct ReturnCurveTests {
+    @Test("Deposits and withdrawals at unchanged prices leave return at zero")
+    func unchangedMarket() {
+        let nav: [(date: String, value: Double)] = [("2026-01-01", 100), ("2026-01-02", 250), ("2026-01-03", 50)]
+        let flows: [(date: String, amountEUR: Double)] = [("2026-01-02", 150), ("2026-01-03", -200)]
+        let curve = PortfolioHistoryBuilder.timeWeightedReturnSeries(nav: nav, cashflows: flows)
+        #expect(curve.map(\.value) == [0, 0, 0])
+        #expect(curve.last?.value == PortfolioHistoryBuilder.timeWeightedReturn(nav: nav, cashflows: flows))
+    }
+
+    @Test("Returns compound around a contribution")
+    func compounding() throws {
+        let nav: [(date: String, value: Double)] = [("2026-01-01", 100), ("2026-01-02", 210), ("2026-01-03", 231)]
+        let curve = PortfolioHistoryBuilder.timeWeightedReturnSeries(nav: nav, cashflows: [("2026-01-02", 100)])
+        #expect(abs(try #require(curve.last?.value) - 21) < 0.000001)
+    }
+
+    @Test("Zero start, full withdrawal and reopening preserve earned return")
+    func fundingLifecycle() throws {
+        let nav: [(date: String, value: Double)] = [("2026-01-01", 0), ("2026-01-02", 100), ("2026-01-03", 110), ("2026-01-04", 0), ("2026-01-05", 200), ("2026-01-06", 220)]
+        let flows: [(date: String, amountEUR: Double)] = [("2026-01-02", 100), ("2026-01-04", -110), ("2026-01-05", 200)]
+        let curve = PortfolioHistoryBuilder.timeWeightedReturnSeries(nav: nav, cashflows: flows)
+        #expect(curve.first?.date == "2026-01-02")
+        #expect(abs(try #require(curve.first { $0.date == "2026-01-04" }?.value) - 10) < 0.000001)
+        #expect(abs(try #require(curve.last?.value) - 21) < 0.000001)
+    }
+
+    @Test("Flows between sparse observations are not lost")
+    func sparseDates() throws {
+        let value = PortfolioHistoryBuilder.timeWeightedReturn(nav: [("2026-01-01", 100), ("2026-01-05", 160)], cashflows: [("2026-01-03", 50)])
+        #expect(abs(try #require(value) - 10) < 0.000001)
+    }
+
+    @Test("Total loss is valid; unexplained funding and invalid NAV are unavailable")
+    func invalidOrLost() {
+        #expect(PortfolioHistoryBuilder.timeWeightedReturn(nav: [("2026-01-01", 100), ("2026-01-02", 0)], cashflows: []) == -100)
+        #expect(PortfolioHistoryBuilder.timeWeightedReturn(nav: [("2026-01-01", 0), ("2026-01-02", 100)], cashflows: []) == nil)
+        #expect(PortfolioHistoryBuilder.timeWeightedReturn(nav: [("2026-01-01", 100), ("2026-01-02", .nan)], cashflows: []) == nil)
+        #expect(PortfolioHistoryBuilder.timeWeightedReturn(nav: [("2026-01-01", 100), ("2026-01-02", 50)], cashflows: [("2026-01-02", 100)]) == nil)
     }
 }

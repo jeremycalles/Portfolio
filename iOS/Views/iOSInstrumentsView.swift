@@ -1,105 +1,45 @@
 import SwiftUI
 
-// MARK: - iOS Instruments View
 struct iOSInstrumentsView: View {
-    @EnvironmentObject var viewModel: AppViewModel
-    @State private var showingAddSheet = false
-    @State private var newIsin = ""
-    @State private var selectedInstrument: Instrument?
-    
+    @EnvironmentObject private var viewModel: AppViewModel
+    @State private var showingAdd = false
+    @State private var search = ""
+    @State private var deleting: Instrument?
+    private var instruments: [Instrument] {
+        viewModel.instruments.filter { search.isEmpty || [$0.displayName, $0.isin, $0.ticker ?? ""].joined(separator: " ").localizedCaseInsensitiveContains(search) }
+            .sorted { $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending }
+    }
     var body: some View {
         List {
-            ForEach(viewModel.instruments) { instrument in
-                Button {
-                    selectedInstrument = instrument
-                } label: {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(instrument.displayName)
-                                .font(.headline)
-                            HStack {
-                                Text(instrument.isin)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                if let ticker = instrument.ticker, ticker != "N/A" {
-                                    Text(ticker)
-                                        .font(.caption)
-                                        .foregroundColor(.blue)
-                                }
-                            }
-                        }
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                    .padding(.vertical, 4)
-                    .contentShape(Rectangle())
+            ForEach(instruments) { instrument in
+                NavigationLink { iOSInstrumentDetailView(instrument: instrument) } label: {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(instrument.displayName).font(.headline)
+                        Text(instrument.isin).font(.caption).foregroundStyle(.secondary)
+                    }.padding(.vertical, 6)
                 }
-                .buttonStyle(.plain)
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button(role: .destructive) { deleting = instrument } label: { Label(L10n.generalDelete, systemImage: "trash") }
+                        .disabled(viewModel.demoMode.isDemoModeEnabled)
+                }
             }
-            .onDelete { indexSet in
-                for index in indexSet {
-                    Task { await viewModel.deleteInstrument(viewModel.instruments[index].isin) }
+            if instruments.isEmpty {
+                ContentUnavailableView {
+                    Label(search.isEmpty ? L10n.instrumentsTitle : L10n.designNoMatches, systemImage: "doc.text.magnifyingglass")
+                } description: { Text(L10n.designNoInstruments) } actions: {
+                    Button(L10n.designNewInstrument) { showingAdd = true }.disabled(viewModel.demoMode.isDemoModeEnabled)
                 }
             }
         }
-        .listStyle(.insetGrouped)
-        .navigationDestination(item: $selectedInstrument) { instrument in
-            iOSInstrumentDetailView(instrument: instrument)
-        }
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showingAddSheet = true
-                } label: {
-                    Image(systemName: "plus")
-                }
-            }
-        }
-        .sheet(isPresented: $showingAddSheet) {
-            NavigationStack {
-                Form {
-                    Section("Add Instrument") {
-                        TextField("ISIN", text: $newIsin)
-                            .textInputAutocapitalization(.characters)
-                    }
-                }
-                .navigationTitle(L10n.instrumentsAddInstrument)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") {
-                            showingAddSheet = false
-                            newIsin = ""
-                        }
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Add") {
-                            let isinToAdd = newIsin.trimmingCharacters(in: .whitespaces)
-                            showingAddSheet = false
-                            newIsin = ""
-                            if !isinToAdd.isEmpty {
-                                Task {
-                                    await viewModel.addInstrument(isin: isinToAdd)
-                                }
-                            }
-                        }
-                        .disabled(newIsin.isEmpty)
-                    }
-                }
-            }
-        }
-        .overlay {
-            if viewModel.isLoading {
-                ProgressView(viewModel.statusMessage)
-                    .padding()
-                    .background(.ultraThinMaterial)
-                    .cornerRadius(8)
-                    .allowsHitTesting(false)
-            }
+        .navigationTitle(L10n.navInstruments)
+        .searchable(text: $search, prompt: L10n.designInstrumentSearch)
+        .toolbar { ToolbarItem(placement: .primaryAction) {
+            Button { showingAdd = true } label: { Image(systemName: "plus") }
+                .accessibilityLabel(L10n.designNewInstrument).disabled(viewModel.demoMode.isDemoModeEnabled)
+        } }
+        .sheet(isPresented: $showingAdd) { InstrumentSetupSheet() }
+        .confirmationDialog(L10n.designDeleteInstrumentWarning, isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } }), titleVisibility: .visible) {
+            if let instrument = deleting { Button(L10n.generalDelete, role: .destructive) { Task { await viewModel.deleteInstrument(instrument.isin) } } }
         }
     }
 }
@@ -107,25 +47,30 @@ struct iOSInstrumentsView: View {
 // MARK: - iOS Instrument Detail View
 struct iOSInstrumentDetailView: View {
     @EnvironmentObject var viewModel: AppViewModel
-    let instrument: Instrument
+    private let initialInstrument: Instrument
+    init(instrument: Instrument) { self.initialInstrument = instrument }
+    private var instrument: Instrument {
+        viewModel.instruments.first { $0.isin == initialInstrument.isin } ?? initialInstrument
+    }
     @State private var selectedQuadrantId: Int?
     @State private var showingAddPriceSheet = false
     @State private var showingEditPriceSheet = false
     @State private var showingEditInstrumentSheet = false
     @State private var showingBackfillLogs = false
     @State private var priceToEdit: Price?
+    @State private var priceToDelete: Price?
     @State private var priceHistory: [Price] = []
     
     var body: some View {
         List {
-            Section("Details") {
-                LabeledContent("ISIN", value: instrument.isin)
-                LabeledContent("Name", value: instrument.name ?? "N/A")
+            Section(L10n.designPositionDetails) {
+                LabeledContent(L10n.designIdentifier, value: instrument.isin)
+                LabeledContent(L10n.instrumentsName, value: instrument.name ?? "N/A")
                 if let ticker = instrument.ticker {
-                    LabeledContent("Ticker", value: ticker)
+                    LabeledContent(L10n.instrumentsTicker, value: ticker)
                 }
                 if let currency = instrument.currency {
-                    LabeledContent("Currency", value: currency)
+                    LabeledContent(L10n.instrumentsCurrency, value: currency)
                 }
             }
             
@@ -136,6 +81,7 @@ struct iOSInstrumentDetailView: View {
                         Text(quadrant.name).tag(quadrant.id as Int?)
                     }
                 }
+                .disabled(viewModel.demoMode.isDemoModeEnabled)
                 .onChange(of: selectedQuadrantId) { _, newValue in
                     if newValue != instrument.quadrantId {
                         Task { await viewModel.assignQuadrant(instrumentIsin: instrument.isin, quadrantId: newValue) }
@@ -158,7 +104,7 @@ struct iOSInstrumentDetailView: View {
                             showingEditPriceSheet = true
                         } label: {
                             HStack {
-                                Text(price.date)
+                                Text(AppDateFormatter.displayDate(price.date))
                                     .foregroundColor(.primary)
                                 Spacer()
                                 Text(formatCurrency(price.value, currency: instrument.currency ?? "EUR"))
@@ -169,15 +115,13 @@ struct iOSInstrumentDetailView: View {
                                     .foregroundColor(.secondary)
                             }
                         }
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        .disabled(viewModel.demoMode.isDemoModeEnabled)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button(role: .destructive) {
-                                Task {
-                                    await viewModel.deletePrice(isin: instrument.isin, date: price.date)
-                                    await refreshPriceHistory()
-                                }
+                                priceToDelete = price
                             } label: {
                                 Label(L10n.generalDelete, systemImage: "trash")
-                            }
+                            }.disabled(viewModel.demoMode.isDemoModeEnabled)
                         }
                     }
                 }
@@ -218,16 +162,27 @@ struct iOSInstrumentDetailView: View {
                         Image(systemName: "clock.arrow.circlepath")
                             .foregroundColor(.accentColor)
                     }
-                    .disabled(viewModel.isLoading)
+                    .disabled(viewModel.isLoading || viewModel.demoMode.isDemoModeEnabled)
+                    .accessibilityLabel(L10n.designDownloadHistory)
                     
                     Button {
                         showingAddPriceSheet = true
                     } label: {
                         Image(systemName: "plus.circle.fill")
                             .foregroundColor(.accentColor)
-                    }
+                    }.disabled(viewModel.demoMode.isDemoModeEnabled)
+                        .accessibilityLabel(L10n.actionAddPrice)
                 }
             }
+        }
+        .confirmationDialog(L10n.generalDelete, isPresented: Binding(get: { priceToDelete != nil }, set: { if !$0 { priceToDelete = nil } }), titleVisibility: .visible) {
+            if let price = priceToDelete {
+                Button(L10n.generalDelete, role: .destructive) {
+                    Task { await viewModel.deletePrice(isin: instrument.isin, date: price.date); await refreshPriceHistory() }
+                }
+            }
+        } message: {
+            if let price = priceToDelete { Text(L10n.reportsDeleteConfirmation(AppDateFormatter.displayDate(price.date))) }
         }
         .navigationTitle(instrument.displayName)
         .listStyle(.insetGrouped)
@@ -235,7 +190,7 @@ struct iOSInstrumentDetailView: View {
             ToolbarItem(placement: .primaryAction) {
                 Button(L10n.generalEdit) {
                     showingEditInstrumentSheet = true
-                }
+                }.disabled(viewModel.demoMode.isDemoModeEnabled)
             }
         }
         .onAppear {
@@ -247,8 +202,9 @@ struct iOSInstrumentDetailView: View {
                 instrument: instrument,
                 onDismiss: { showingEditInstrumentSheet = false },
                 onSave: { updated in
-                    Task { await viewModel.updateInstrument(updated) }
-                    showingEditInstrumentSheet = false
+                    viewModel.dismissError()
+                    await viewModel.updateInstrument(updated)
+                    return viewModel.errorMessage == nil
                 }
             )
             .environmentObject(viewModel)
@@ -258,11 +214,10 @@ struct iOSInstrumentDetailView: View {
                 instrument: instrument,
                 existingPrice: nil,
                 onSave: { date, value, currency in
-                    Task {
-                        await viewModel.addManualPrice(isin: instrument.isin, date: date, value: value, currency: currency)
+                        let saved = await viewModel.addManualPrice(isin: instrument.isin, date: date, value: value, currency: currency)
                         await refreshPriceHistory()
+                        return saved
                     }
-                }
             )
         }
         .sheet(isPresented: $showingEditPriceSheet) {
@@ -271,13 +226,9 @@ struct iOSInstrumentDetailView: View {
                     instrument: instrument,
                     existingPrice: price,
                     onSave: { date, value, currency in
-                        Task {
-                            if date != price.date {
-                                await viewModel.deletePrice(isin: instrument.isin, date: price.date)
-                            }
-                            await viewModel.addManualPrice(isin: instrument.isin, date: date, value: value, currency: currency)
-                            await refreshPriceHistory()
-                        }
+                        let saved = await viewModel.addManualPrice(isin: instrument.isin, date: date, value: value, currency: currency, replacingDate: price.date)
+                        await refreshPriceHistory()
+                        return saved
                     }
                 )
             }
@@ -294,144 +245,50 @@ struct iOSInstrumentDetailView: View {
 
 // MARK: - iOS Instrument Edit Sheet
 struct iOSInstrumentEditSheet: View {
-    @EnvironmentObject var viewModel: AppViewModel
     @Environment(\.dismiss) private var dismiss
     let instrument: Instrument
     let onDismiss: () -> Void
-    let onSave: (Instrument) -> Void
-    
-    @State private var name: String = ""
-    @State private var ticker: String = ""
-    @State private var currency: String = "EUR"
-    @State private var quadrantId: Int? = nil
-    @State private var latestPriceDate: Date = Date()
-    @State private var latestPriceText: String = ""
-    @State private var hasLatestPrice: Bool = false
-    @State private var isValidatingTicker: Bool = false
-    @State private var tickerValidationMessage: String? = nil
-    @State private var tickerIsValid: Bool? = nil
-    
-    @State private var latestPrice: Price?
-    private let currencies = ["EUR", "USD", "GBP", "CHF", "JPY"]
-    
+    let onSave: (Instrument) async -> Bool
+    @State private var name = ""
+    @State private var ticker = ""
+    @State private var isSaving = false
+    @State private var saveFailed = false
+
     var body: some View {
         NavigationStack {
             Form {
-                Section(L10n.holdingsInstrument) {
+                Section(L10n.designPositionDetails) {
+                    LabeledContent(L10n.designIdentifier, value: instrument.isin)
                     TextField(L10n.instrumentsName, text: $name)
-                    LabeledContent(L10n.instrumentsIsin, value: instrument.isin)
-                    HStack {
-                        TextField(L10n.instrumentsTicker, text: $ticker)
-                            .keyboardType(.asciiCapable)
-                            .onChange(of: ticker) { _, _ in
-                                tickerValidationMessage = nil
-                                tickerIsValid = nil
-                            }
-                        Button {
-                            tickerValidationMessage = nil
-                            tickerIsValid = nil
-                            isValidatingTicker = true
-                            Task {
-                                let (isValid, message) = await viewModel.validateTicker(isin: instrument.isin, ticker: ticker.isEmpty ? nil : ticker)
-                                tickerIsValid = isValid
-                                tickerValidationMessage = message
-                                isValidatingTicker = false
-                            }
-                        } label: {
-                            Image(systemName: "arrow.clockwise")
-                        }
-                        .disabled(isValidatingTicker)
-                        if isValidatingTicker {
-                            ProgressView()
-                                .scaleEffect(0.8)
-                        }
-                    }
-                    .listRowSeparator(tickerValidationMessage != nil ? .hidden : .automatic)
-                    if let message = tickerValidationMessage, let valid = tickerIsValid {
-                        Text(message)
-                            .font(.caption)
-                            .foregroundColor(valid ? .green : .red)
-                    }
-                    Picker(L10n.instrumentsCurrency, selection: $currency) {
-                        ForEach(currencies, id: \.self) { Text($0).tag($0) }
-                    }
-                    Picker(L10n.instrumentsQuadrants, selection: $quadrantId) {
-                        Text(L10n.instrumentsUnassigned).tag(nil as Int?)
-                        ForEach(viewModel.quadrants) { q in
-                            Text(q.name).tag(q.id as Int?)
-                        }
-                    }
+                    TextField(L10n.instrumentsTicker, text: $ticker)
+                        .textInputAutocapitalization(.characters).autocorrectionDisabled()
+                    LabeledContent(L10n.instrumentsCurrency, value: instrument.currency ?? L10n.generalNA)
                 }
-                
-                Section(L10n.instrumentsCurrentPrice) {
-                    if hasLatestPrice {
-                        DatePicker(L10n.reportsDate, selection: $latestPriceDate, displayedComponents: .date)
-                        TextField(L10n.instrumentsCurrentPrice, text: $latestPriceText)
-                            .keyboardType(.decimalPad)
-                    } else {
-                        Text(L10n.chartNoPriceHistory)
-                            .foregroundColor(.secondary)
-                    }
-                }
+                if saveFailed { Text(L10n.errorSaveFailed).foregroundStyle(.red) }
             }
+            .disabled(isSaving)
             .navigationTitle(L10n.instrumentsEditInstrument)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.generalCancel) {
-                        onDismiss()
-                    }
-                }
+                ToolbarItem(placement: .cancellationAction) { Button(L10n.generalCancel, action: onDismiss).disabled(isSaving) }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(L10n.generalSave) {
+                    Button(isSaving ? L10n.designSaving : L10n.generalSave) {
+                        isSaving = true
                         Task {
-                            isValidatingTicker = true
-                            tickerValidationMessage = nil
-                            tickerIsValid = nil
-                            let (isValid, message) = await viewModel.validateTicker(isin: instrument.isin, ticker: ticker.isEmpty ? nil : ticker)
-                            tickerIsValid = isValid
-                            tickerValidationMessage = message
-                            isValidatingTicker = false
-                            guard isValid else { return }
-                            let updated = Instrument(
-                                isin: instrument.isin,
-                                ticker: ticker.isEmpty ? nil : ticker,
-                                name: name.isEmpty ? nil : name,
-                                currency: currency,
-                                quadrantId: quadrantId
-                            )
-                            if hasLatestPrice, let value = parseDecimal(latestPriceText), value > 0 {
-                                let newDateStr = AppDateFormatter.yearMonthDay.string(from: latestPriceDate)
-                                if let old = latestPrice, old.date != newDateStr {
-                                    Task { await viewModel.deletePrice(isin: instrument.isin, date: old.date) }
-                                }
-                                Task { await viewModel.addManualPrice(isin: instrument.isin, date: newDateStr, value: value, currency: currency) }
-                            }
-                            onSave(updated)
+                            let cleanTicker = ticker.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+                            let updated = Instrument(isin: instrument.isin, ticker: cleanTicker.isEmpty ? nil : cleanTicker,
+                                name: name.trimmingCharacters(in: .whitespacesAndNewlines), currency: instrument.currency, quadrantId: instrument.quadrantId)
+                            if await onSave(updated) { dismiss() } else { saveFailed = true }
+                            isSaving = false
                         }
-                    }
-                    .disabled(isValidatingTicker)
+                    }.disabled(isSaving || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
-            .task(id: instrument.isin) {
-                let price = await DatabaseService.shared.getLatestPrice(forIsin: instrument.isin)
-                latestPrice = price
-                if let p = price {
-                    hasLatestPrice = true
-                    latestPriceDate = AppDateFormatter.yearMonthDay.date(from: p.date) ?? Date()
-                    latestPriceText = String(format: "%.4f", p.value)
-                }
-            }
-            .onAppear {
-                name = instrument.name ?? ""
-                ticker = instrument.ticker ?? ""
-                currency = instrument.currency ?? "EUR"
-                quadrantId = instrument.quadrantId
-            }
+            .interactiveDismissDisabled(isSaving)
+            .onAppear { name = instrument.displayName; ticker = instrument.ticker ?? "" }
         }
     }
 }
-
 
 // MARK: - Previews
 

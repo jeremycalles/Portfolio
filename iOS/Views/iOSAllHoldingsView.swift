@@ -1,445 +1,219 @@
 import SwiftUI
 
-// MARK: - iOS All Holdings View
 struct iOSAllHoldingsView: View {
-    @EnvironmentObject var viewModel: AppViewModel
+    @EnvironmentObject private var viewModel: AppViewModel
+    @Environment(\.dynamicTypeSize) private var typeSize
     let privacyMode: Bool
-    @State private var showingAddHoldingSheet = false
-    @State private var selectedHolding: HoldingEditItem?
+    @State private var showingAdd = false
+    @State private var showingFilters = false
     @State private var searchText = ""
-    @State private var selectedAccountId = -1
-    @State private var filterMode: HoldingsFilterMode = .all
-    @State private var sortMode: HoldingsSortMode = .account
-    @State private var showingFilterSheet = false
-    
-    var body: some View {
-        if #available(iOS 26.0, *) {
-            liquidGlassBody
-        } else {
-            legacyBody
-        }
+    @State private var selectedAccountId: Int
+    @State private var filterMode: HoldingsFilterMode
+    @State private var sortMode: HoldingsSortMode = .valueDescending
+    @State private var groupByAccount = false
+    @State private var closingPosition: HoldingEditItem?
+
+    init(privacyMode: Bool, initialFilter: HoldingsFilterMode = .all, accountId: Int? = nil) {
+        self.privacyMode = privacyMode
+        _filterMode = State(initialValue: initialFilter)
+        _selectedAccountId = State(initialValue: accountId ?? -1)
     }
 
-    private var legacyBody: some View {
-        List {
-            holdingsRows(showFilterRows: true)
-        }
-        .listStyle(.insetGrouped)
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: L10n.holdingsSearchPlaceholder)
-        .navigationDestination(item: $selectedHolding) { item in
-            HoldingDetailView(accountId: item.accountId, isin: item.isin, privacyMode: privacyMode)
-        }
-        .refreshable {
-            await viewModel.startRefreshTask(showCompletionDelay: false).value
-        }
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                addHoldingButton
+    private var allDetails: [HoldingDetail] { viewModel.cachedHoldingDetailsByAccount.values.flatMap { $0 } }
+    private var visibleDetails: [HoldingDetail] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return allDetails.filter { detail in
+            let account = viewModel.bankAccounts.first { $0.id == detail.accountId }?.displayName ?? ""
+            let matchesSearch = query.isEmpty || [detail.instrumentName, detail.isin, detail.ticker ?? "", account].joined(separator: " ").localizedCaseInsensitiveContains(query)
+            let matchesAccount = selectedAccountId == -1 || detail.accountId == selectedAccountId
+            let change = viewModel.cachedPositionTWR[detail.id]
+            let matchesFilter: Bool
+            switch filterMode {
+            case .all: matchesFilter = true
+            case .gains: matchesFilter = change.map { $0 > 0 } ?? false
+            case .losses: matchesFilter = change.map { $0 < 0 } ?? false
+            case .missingPrice: matchesFilter = detail.currentValueEUR == nil
+            }
+            return matchesSearch && matchesAccount && matchesFilter
+        }.sorted { a, b in
+            switch sortMode {
+            case .account:
+                if a.accountId != b.accountId { return a.accountId < b.accountId }
+                return a.instrumentName.localizedStandardCompare(b.instrumentName) == .orderedAscending
+            case .name: return a.instrumentName.localizedStandardCompare(b.instrumentName) == .orderedAscending
+            case .valueDescending: return (a.currentValueEUR ?? -.infinity) > (b.currentValueEUR ?? -.infinity)
+            case .valueAscending: return (a.currentValueEUR ?? .infinity) < (b.currentValueEUR ?? .infinity)
+            case .performanceDescending: return (viewModel.cachedPositionTWR[a.id] ?? -.infinity) > (viewModel.cachedPositionTWR[b.id] ?? -.infinity)
+            case .performanceAscending: return (viewModel.cachedPositionTWR[a.id] ?? .infinity) < (viewModel.cachedPositionTWR[b.id] ?? .infinity)
             }
         }
-        .sheet(isPresented: $showingAddHoldingSheet) {
-            AddHoldingSheet()
-        }
     }
 
-    @available(iOS 26.0, *)
-    private var liquidGlassBody: some View {
-        let allDetails = getAllHoldingDetails()
-        let visibleDetails = filteredAndSortedDetails(from: allDetails)
-        let visibleValue = visibleDetails.compactMap { $0.currentValueEUR }.reduce(0, +)
+    var body: some View {
+        List {
+            Section {
+                Picker(L10n.designPeriod, selection: $viewModel.selectedPeriod) {
+                    ForEach(ReportPeriod.allCases) { Text($0.displayName).tag($0) }
+                }
+                Button { showingFilters = true } label: {
+                    let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout())
+                    layout {
+                        Label(L10n.holdingsFilter, systemImage: "line.3.horizontal.decrease")
+                        if !typeSize.isAccessibilitySize { Spacer() }
+                        Text(filterMode == .all ? sortMode.displayName : filterMode.displayName)
+                            .font(.subheadline).foregroundStyle(Color.secondary)
+                    }
+                }
+            } footer: { Text(L10n.holdingsShowingCount(visibleDetails.count, allDetails.count)) }
 
-        return List {
-            holdingsRows(showFilterRows: false)
+            if allDetails.isEmpty {
+                ContentUnavailableView {
+                    Label(L10n.accountsNoHoldingsYet, systemImage: "wallet.bifold")
+                } description: { Text(L10n.designWelcomeMessage) } actions: {
+                    Button(L10n.designFirstHolding) { showingAdd = true }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(viewModel.demoMode.isDemoModeEnabled)
+                }
+            } else if visibleDetails.isEmpty {
+                ContentUnavailableView {
+                    Label(L10n.holdingsNoMatches, systemImage: "magnifyingglass")
+                } actions: { Button(L10n.designResetFilters, action: resetFilters) }
+            } else if groupByAccount {
+                ForEach(viewModel.bankAccounts) { account in
+                    let rows = visibleDetails.filter { $0.accountId == account.id }
+                    if !rows.isEmpty {
+                        Section(account.displayName) { ForEach(rows, content: holdingRow) }
+                    }
+                }
+            } else {
+                Section { ForEach(visibleDetails, content: holdingRow) }
+            }
         }
         .listStyle(.insetGrouped)
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: L10n.holdingsSearchPlaceholder)
-        .navigationDestination(item: $selectedHolding) { item in
-            HoldingDetailView(accountId: item.accountId, isin: item.isin, privacyMode: privacyMode)
-        }
-        .refreshable {
-            await viewModel.startRefreshTask(showCompletionDelay: false).value
-        }
+        .searchable(text: $searchText, prompt: L10n.holdingsSearchPlaceholder)
+        .refreshable { await viewModel.startRefreshTask(showCompletionDelay: false).value }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
-                Button {
-                    showingFilterSheet = true
-                } label: {
-                    Image(systemName: "line.3.horizontal.decrease.circle")
-                }
-                .accessibilityLabel(L10n.holdingsFilter)
-
-                addHoldingButton
+                Menu {
+                    NavigationLink(L10n.designClosedPositions) { iOSClosedPositionsView() }
+                    NavigationLink(L10n.designManageInstruments) { iOSInstrumentsView().navigationTitle(L10n.navInstruments) }
+                    NavigationLink(L10n.designManageAccounts) { iOSAccountsManagementView() }
+                } label: { Image(systemName: "ellipsis.circle") }
+                .accessibilityLabel(L10n.generalManage)
+                Button { showingAdd = true } label: { Image(systemName: "plus") }
+                    .accessibilityLabel(L10n.holdingsAddHolding)
+                    .disabled(viewModel.demoMode.isDemoModeEnabled)
             }
         }
-        .safeAreaInset(edge: .bottom) {
-            iOSHoldingsFilterBar(
-                visibleCount: visibleDetails.count,
-                totalCount: allDetails.count,
-                visibleValue: privacyMode ? nil : visibleValue,
-                accountName: selectedAccountName,
-                filterName: filterMode.displayName,
-                sortName: sortMode.displayName,
-                onTap: { showingFilterSheet = true }
-            )
-            .padding(.horizontal)
-            .padding(.bottom, 8)
-        }
-        .sheet(isPresented: $showingAddHoldingSheet) {
-            AddHoldingSheet()
-        }
-        .sheet(isPresented: $showingFilterSheet) {
+        .sheet(isPresented: $showingAdd) { AddHoldingSheet() }
+        .sheet(isPresented: $showingFilters) {
             NavigationStack {
                 Form {
-                    holdingsFilterControls
-                }
-                .navigationTitle(L10n.holdingsFilter)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button(L10n.generalDone) {
-                            showingFilterSheet = false
-                        }
+                    Picker(L10n.accountsSelectAccount, selection: $selectedAccountId) {
+                        Text(L10n.holdingsAllAccounts).tag(-1)
+                        ForEach(viewModel.bankAccounts) { Text($0.displayName).tag($0.id) }
                     }
+                    Picker(L10n.holdingsFilter, selection: $filterMode) {
+                        ForEach(HoldingsFilterMode.allCases) { Text($0.displayName).tag($0) }
+                    }
+                    Picker(L10n.holdingsSort, selection: $sortMode) {
+                        ForEach(HoldingsSortMode.allCases) { Text($0.displayName).tag($0) }
+                    }
+                    Toggle(L10n.designGroupByAccount, isOn: $groupByAccount)
+                    Button(L10n.designResetFilters, action: resetFilters)
                 }
-            }
-            .presentationDetents([.medium, .large])
+                .navigationTitle(L10n.holdingsFilter).navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L10n.generalDone) { showingFilters = false } } }
+            }.presentationDetents([.medium, .large])
         }
-    }
-
-    @ViewBuilder
-    private func holdingsRows(showFilterRows: Bool) -> some View {
-        let allDetails = getAllHoldingDetails()
-        let visibleDetails = filteredAndSortedDetails(from: allDetails)
-        let totalPortfolioValue = allDetails.compactMap { $0.currentValueEUR }.reduce(0, +)
-        let visibleAccountIds = Set(visibleDetails.map(\.accountId))
-
-        if showFilterRows {
-            Section {
-                Picker(L10n.generalComparisonPeriod, selection: $viewModel.selectedPeriod) {
-                    ForEach(ReportPeriod.allCases) { period in
-                        Text(period.displayName).tag(period)
-                    }
+        .confirmationDialog(L10n.holdingsCloseConfirmation, isPresented: Binding(
+            get: { closingPosition != nil }, set: { if !$0 { closingPosition = nil } }
+        ), titleVisibility: .visible) {
+            if let position = closingPosition {
+                Button(L10n.holdingsClosePosition, role: .destructive) {
+                    Task { await viewModel.deleteHolding(accountId: position.accountId, isin: position.isin) }
                 }
-            }
-            
-            Section {
-                holdingsFilterControls
-                
-                Text(L10n.holdingsShowingCount(visibleDetails.count, allDetails.count))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-        }
-        
-        // Hint when Add is disabled (no instruments or no bank accounts)
-        if viewModel.instruments.isEmpty || viewModel.bankAccounts.isEmpty {
-            Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    if viewModel.instruments.isEmpty {
-                        Text(L10n.accountsAddInstrumentFirst)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                    if viewModel.bankAccounts.isEmpty {
-                        Text(L10n.accountsAddBankAccountFirst)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.vertical, 8)
-            }
-        }
-        
-        // Holdings grouped by account
-        ForEach(viewModel.bankAccounts) { account in
-            let details = filteredAndSortedDetails(for: account)
-            if !details.isEmpty {
-                Section(account.displayName) {
-                    ForEach(details) { holding in
-                        Button {
-                            selectedHolding = HoldingEditItem(accountId: account.id, isin: holding.isin)
-                        } label: {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    HStack {
-                                        Text(holding.instrumentName)
-                                            .font(.headline)
-                                        Spacer()
-                                        if let change = holding.changePercentEUR {
-                                            ChangeLabel(change: change)
-                                        }
-                                    }
-                                    
-                                    HStack {
-                                        Text(L10n.holdingsQuantityUnits(formatQuantity(holding.quantity)))
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                        Spacer()
-                                        if !privacyMode, let value = holding.currentValueEUR {
-                                            Text(formatCurrency(value, currency: "EUR"))
-                                                .fontWeight(.medium)
-                                        } else if privacyMode {
-                                            Text("••••••")
-                                                .foregroundColor(.secondary)
-                                        }
-                                    }
-                                    
-                                    Text(L10n.holdingsWeightValue(allocationText(for: holding, totalValue: totalPortfolioValue)))
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                }
-                                Image(systemName: "chevron.right")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                            .padding(.vertical, 4)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button(role: .destructive) {
-                                Task { await viewModel.deleteHolding(accountId: account.id, isin: holding.isin) }
-                            } label: {
-                                Label(L10n.generalDelete, systemImage: "trash")
-                            }
-                        }
-                    }
-                    
-                    // Account Total (EUR)
-                    let totalValue = details.compactMap { $0.currentValueEUR }.reduce(0, +)
-                    let totalPreviousValue = details.compactMap { $0.previousValueEUR }.reduce(0, +)
-                    let changePercent: Double? = totalPreviousValue > 0 ? ((totalValue - totalPreviousValue) / totalPreviousValue) * 100 : nil
-                    
-                    HStack {
-                        Text(L10n.summaryTotalEur)
-                            .fontWeight(.semibold)
-                        Spacer()
-                        if !privacyMode {
-                            Text(formatCurrency(totalValue, currency: "EUR"))
-                                .fontWeight(.bold)
-                        } else {
-                            Text("••••••")
-                                .foregroundColor(.secondary)
-                        }
-                        if let change = changePercent {
-                            ChangeLabel(change: change)
-                        }
-                    }
-                }
-            }
-        }
-        
-        if !viewModel.holdings.isEmpty && visibleAccountIds.isEmpty {
-            Section {
-                VStack(spacing: 12) {
-                    Image(systemName: "line.3.horizontal.decrease.circle")
-                        .font(.system(size: 40))
-                        .foregroundColor(.secondary.opacity(0.5))
-                    Text(L10n.holdingsNoMatches)
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                    Text(L10n.holdingsAdjustFilters)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary.opacity(0.8))
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 40)
-            }
-        }
-        
-        // Empty state
-        if viewModel.holdings.isEmpty {
-            Section {
-                VStack(spacing: 12) {
-                    Image(systemName: "tray")
-                        .font(.system(size: 40))
-                        .foregroundColor(.secondary.opacity(0.5))
-                    Text(L10n.accountsNoHoldingsYet)
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                    Text(L10n.accountsTapToAddHolding)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary.opacity(0.8))
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 40)
             }
         }
     }
 
-    @ViewBuilder
-    private var holdingsFilterControls: some View {
-        Picker(L10n.generalComparisonPeriod, selection: $viewModel.selectedPeriod) {
-            ForEach(ReportPeriod.allCases) { period in
-                Text(period.displayName).tag(period)
-            }
-        }
-        
-        Picker(L10n.accountsSelectAccount, selection: $selectedAccountId) {
-            Text(L10n.holdingsAllAccounts).tag(-1)
-            ForEach(viewModel.bankAccounts) { account in
-                Text(account.displayName).tag(account.id)
-            }
-        }
-        
-        Picker(L10n.holdingsFilter, selection: $filterMode) {
-            ForEach(HoldingsFilterMode.allCases) { filter in
-                Text(filter.displayName).tag(filter)
-            }
-        }
-        
-        Picker(L10n.holdingsSort, selection: $sortMode) {
-            ForEach(HoldingsSortMode.allCases) { sort in
-                Text(sort.displayName).tag(sort)
+    private func holdingRow(_ detail: HoldingDetail) -> some View {
+        NavigationLink {
+            HoldingDetailView(accountId: detail.accountId, isin: detail.isin, privacyMode: privacyMode)
+        } label: { iOSHoldingRow(detail: detail, privacyMode: privacyMode) }
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            if !viewModel.demoMode.isDemoModeEnabled {
+                Button(role: .destructive) { closingPosition = HoldingEditItem(accountId: detail.accountId, isin: detail.isin) } label: {
+                    Label(L10n.holdingsClosePosition, systemImage: "archivebox")
+                }
             }
         }
     }
 
-    private var addHoldingButton: some View {
-        Button {
-            showingAddHoldingSheet = true
-        } label: {
-            Image(systemName: "plus")
-        }
-        .disabled(viewModel.bankAccounts.isEmpty || viewModel.instruments.isEmpty)
-    }
-
-    private var selectedAccountName: String {
-        guard selectedAccountId != -1,
-              let account = viewModel.bankAccounts.first(where: { $0.id == selectedAccountId }) else {
-            return L10n.holdingsAllAccounts
-        }
-        return account.displayName
-    }
-    
-    private func getAllHoldingDetails() -> [HoldingDetail] {
-        viewModel.bankAccounts.flatMap { viewModel.cachedHoldingDetailsByAccount[$0.id] ?? [] }
-    }
-    
-    private func filteredAndSortedDetails(for account: BankAccount) -> [HoldingDetail] {
-        let details = viewModel.cachedHoldingDetailsByAccount[account.id] ?? []
-        return filteredAndSortedDetails(from: details, account: account)
-    }
-    
-    private func filteredAndSortedDetails(from details: [HoldingDetail], account: BankAccount? = nil) -> [HoldingDetail] {
-        let filtered = details.filter { detail in
-            let accountForDetail = account ?? viewModel.bankAccounts.first { $0.id == detail.accountId }
-            return matchesAccount(detail)
-                && matchesSearch(detail, account: accountForDetail)
-                && matchesFilter(detail)
-        }
-        return sorted(filtered)
-    }
-    
-    private func matchesAccount(_ detail: HoldingDetail) -> Bool {
-        selectedAccountId == -1 || detail.accountId == selectedAccountId
-    }
-    
-    private func matchesSearch(_ detail: HoldingDetail, account: BankAccount?) -> Bool {
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard query.isEmpty == false else { return true }
-        return [
-            detail.instrumentName,
-            detail.ticker ?? "",
-            detail.isin,
-            account?.displayName ?? ""
-        ].joined(separator: " ").localizedCaseInsensitiveContains(query)
-    }
-    
-    private func matchesFilter(_ detail: HoldingDetail) -> Bool {
-        switch filterMode {
-        case .all:
-            return true
-        case .gains:
-            return (detail.changePercentEUR ?? 0) > 0
-        case .losses:
-            return (detail.changePercentEUR ?? 0) < 0
-        case .missingPrice:
-            return detail.currentValueEUR == nil || detail.currentPrice == nil
-        }
-    }
-    
-    private func sorted(_ details: [HoldingDetail]) -> [HoldingDetail] {
-        switch sortMode {
-        case .account:
-            return details.sorted {
-                if $0.accountId == $1.accountId { return $0.instrumentName.localizedCaseInsensitiveCompare($1.instrumentName) == .orderedAscending }
-                return $0.accountId < $1.accountId
-            }
-        case .valueDescending:
-            return details.sorted { ($0.currentValueEUR ?? -Double.greatestFiniteMagnitude) > ($1.currentValueEUR ?? -Double.greatestFiniteMagnitude) }
-        case .valueAscending:
-            return details.sorted { ($0.currentValueEUR ?? Double.greatestFiniteMagnitude) < ($1.currentValueEUR ?? Double.greatestFiniteMagnitude) }
-        case .performanceDescending:
-            return details.sorted { ($0.changePercentEUR ?? -Double.greatestFiniteMagnitude) > ($1.changePercentEUR ?? -Double.greatestFiniteMagnitude) }
-        case .performanceAscending:
-            return details.sorted { ($0.changePercentEUR ?? Double.greatestFiniteMagnitude) < ($1.changePercentEUR ?? Double.greatestFiniteMagnitude) }
-        case .name:
-            return details.sorted { $0.instrumentName.localizedCaseInsensitiveCompare($1.instrumentName) == .orderedAscending }
-        }
-    }
-    
-    private func allocationText(for detail: HoldingDetail, totalValue: Double) -> String {
-        guard totalValue > 0, let value = detail.currentValueEUR else { return L10n.generalNa }
-        return formatPercent((value / totalValue) * 100, fractionDigits: 1)
+    private func resetFilters() {
+        selectedAccountId = -1; filterMode = .all; sortMode = .valueDescending
+        searchText = ""; groupByAccount = false
     }
 }
 
-@available(iOS 26.0, *)
-private struct iOSHoldingsFilterBar: View {
-    let visibleCount: Int
-    let totalCount: Int
-    let visibleValue: Double?
-    let accountName: String
-    let filterName: String
-    let sortName: String
-    let onTap: () -> Void
+struct iOSHoldingRow: View {
+    @EnvironmentObject private var viewModel: AppViewModel
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let detail: HoldingDetail
+    let privacyMode: Bool
 
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 12) {
-                Image(systemName: "line.3.horizontal.decrease.circle.fill")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(Color.accentColor)
-
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 6) {
-                        Text(L10n.holdingsShowingCount(visibleCount, totalCount))
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.primary)
-                        if let visibleValue {
-                            Text(formatCompactCurrency(visibleValue))
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    Text("\(accountName) • \(filterName) • \(sortName)")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+        let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
+        layout {
+            VStack(alignment: .leading, spacing: 5) {
+                Text(detail.instrumentName).font(.body.weight(.semibold)).foregroundStyle(.primary).lineLimit(2)
+                Text(viewModel.bankAccounts.first { $0.id == detail.accountId }?.displayName ?? detail.isin)
+                    .font(.caption).foregroundStyle(.secondary)
+                if detail.currentValueEUR == nil {
+                    Label(L10n.designQuoteUnavailable, systemImage: "exclamationmark.triangle")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
-
-                Spacer()
-
-                Image(systemName: "slider.horizontal.3")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 11)
-            .portfolioGlassSurface(cornerRadius: 18, interactive: true)
+            }.frame(maxWidth: .infinity, alignment: .leading)
+            VStack(alignment: typeSize.isAccessibilitySize ? .leading : .trailing, spacing: 5) {
+                Text(privacyMode ? L10n.privacyHiddenLong : detail.currentValueEUR.map { formatCurrency($0, currency: "EUR") } ?? L10n.generalNA)
+                    .font(AppTheme.Typography.rowValue).foregroundStyle(.primary)
+                if !privacyMode, let change = viewModel.cachedPositionTWR[detail.id] {
+                    ChangeLabel(change: change).font(.caption)
+                }
+            }.fixedSize(horizontal: !typeSize.isAccessibilitySize, vertical: false)
         }
-        .buttonStyle(.plain)
+        .padding(.vertical, 6).frame(minHeight: 60)
+        .accessibilityElement(children: .combine)
     }
 }
 
-// MARK: - Previews
-
-#Preview("iOSAllHoldingsView") {
-    NavigationStack {
-        iOSAllHoldingsView(privacyMode: false)
-            .environmentObject(AppViewModel.preview)
+struct iOSClosedPositionsView: View {
+    @EnvironmentObject private var viewModel: AppViewModel
+    @State private var positions: [HoldingEditItem] = []
+    var body: some View {
+        List {
+            ForEach(positions) { position in
+                NavigationLink {
+                    HoldingDetailView(accountId: position.accountId, isin: position.isin)
+                } label: {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(viewModel.instruments.first { $0.isin == position.isin }?.displayName ?? position.isin)
+                        Text(viewModel.bankAccounts.first { $0.id == position.accountId }?.displayName ?? "")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+            }
+            if positions.isEmpty { ContentUnavailableView(L10n.designNoClosedPositions, systemImage: "archivebox") }
+        }
+        .navigationTitle(L10n.designClosedPositions)
+        .task {
+            let transactions = await viewModel.db.getAllHoldingTransactions()
+            let live = Set(viewModel.holdings.map { HoldingEditItem(accountId: $0.accountId, isin: $0.isin).id })
+            var seen = Set<String>()
+            positions = transactions.compactMap { transaction in
+                let position = HoldingEditItem(accountId: transaction.accountId, isin: transaction.isin)
+                return !live.contains(position.id) && seen.insert(position.id).inserted ? position : nil
+            }.sorted { $0.isin < $1.isin }
+        }
     }
 }

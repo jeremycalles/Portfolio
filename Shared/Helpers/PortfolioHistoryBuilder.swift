@@ -125,37 +125,43 @@ enum PortfolioHistoryBuilder {
         nav: [(date: String, value: Double)],
         cashflows: [(date: String, amountEUR: Double)]
     ) -> Double? {
-        guard let first = nav.first else { return nil }
-        var cfByDate: [String: Double] = [:]
-        for cf in cashflows {
-            if abs(cf.amountEUR) > 1e-12 {
-                cfByDate[cf.date, default: 0] += cf.amountEUR
-            }
-        }
-        let startDate = first.date
-        cfByDate[startDate] = nil
+        timeWeightedReturnSeries(nav: nav, cashflows: cashflows).last?.value
+    }
 
-        if cfByDate.isEmpty {
-            return percentChange(from: first.value, to: nav.last?.value ?? first.value)
-        }
-
+    /// The curve and headline share one calculation. NAV observations are after
+    /// flows; contributions never appear as investment gains. A fully withdrawn
+    /// portfolio retains its earned return until it is funded again.
+    static func timeWeightedReturnSeries(
+        nav: [(date: String, value: Double)],
+        cashflows: [(date: String, amountEUR: Double)]
+    ) -> [(date: String, value: Double)] {
+        guard let first = nav.first, first.value.isFinite, first.value >= 0 else { return [] }
+        let flows = cashflows.filter { $0.date > first.date }.sorted { $0.date < $1.date }
+        var flowIndex = 0
+        var previous = first.value
         var factor = 1.0
-        var start = first.value
-        var started = first.value > 0
-
+        var started = previous > 0
+        var result: [(date: String, value: Double)] = started ? [(first.date, 0)] : []
         for point in nav.dropFirst() {
-            if let cf = cfByDate[point.date], abs(cf) > 1e-12 {
-                let before = point.value - cf
-                if started, start > 0, before > 0 {
-                    factor *= before / start
-                }
-                start = point.value
-                started = start > 0
+            guard point.value.isFinite, point.value >= 0 else { return [] }
+            var flow = 0.0
+            while flowIndex < flows.count, flows[flowIndex].date <= point.date {
+                flow += flows[flowIndex].amountEUR
+                flowIndex += 1
             }
+            if previous > 0 {
+                let beforeFlow = point.value - flow
+                guard beforeFlow >= -1e-9, beforeFlow.isFinite else { return [] }
+                factor *= max(0, beforeFlow) / previous
+            } else if point.value > 0 {
+                // Without a recorded contribution there is no defensible return
+                // for a position that previously had zero value.
+                guard flow > 0 else { return [] }
+                started = true
+            }
+            previous = point.value
+            if started { result.append((point.date, (factor - 1) * 100)) }
         }
-
-        guard started, start > 0, let last = nav.last else { return nil }
-        factor *= last.value / start
-        return (factor - 1) * 100
+        return result
     }
 }

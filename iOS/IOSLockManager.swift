@@ -1,6 +1,7 @@
 #if os(iOS)
 import SwiftUI
 import UIKit
+import LocalAuthentication
 
 private let iosBiometricProtectionEnabledKey = "ios_biometric_protection_enabled"
 
@@ -80,53 +81,147 @@ final class IOSLockManager: ObservableObject {
 }
 
 // MARK: - Lock Screen View
+private enum IOSUnlockMethod {
+    case faceID, touchID, device
+
+    static var available: IOSUnlockMethod {
+        let context = LAContext()
+        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) else { return .device }
+        switch context.biometryType {
+        case .faceID: return .faceID
+        case .touchID: return .touchID
+        default: return .device
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .faceID: return L10n.lockFaceID
+        case .touchID: return L10n.lockUnlockButton
+        case .device: return L10n.lockActionUnlock
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .faceID: return "faceid"
+        case .touchID: return "touchid"
+        case .device: return "lock.open"
+        }
+    }
+}
+
 struct IOSLockScreenView: View {
     @ObservedObject var lockManager: IOSLockManager
+    @Environment(\.scenePhase) private var scenePhase
     @State private var isAuthenticating = false
+    @State private var unlockMethod: IOSUnlockMethod = .device
 
     var body: some View {
-        ZStack {
-            Color(.systemBackground)
-                .ignoresSafeArea()
+        IOSLockScreenContent(
+            unlockMethod: unlockMethod,
+            isAuthenticating: isAuthenticating,
+            errorMessage: lockManager.unlockErrorMessage,
+            onUnlock: unlock
+        )
+        .onAppear { unlockMethod = .available }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { unlockMethod = .available }
+        }
+    }
 
-            VStack(spacing: 24) {
-                Image(systemName: "lock.fill")
-                    .font(.system(size: 56))
-                    .foregroundStyle(.secondary)
+    private func unlock() {
+        guard !isAuthenticating else { return }
+        isAuthenticating = true
+        Task {
+            await lockManager.unlock(reason: L10n.lockReason)
+            isAuthenticating = false
+        }
+    }
+}
 
-                Text(L10n.lockReason)
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: 320)
+/// The same branding remains visible behind the system authentication prompt
+/// and in the app switcher. This view never reads portfolio data.
+private struct IOSLockScreenContent: View {
+    var unlockMethod: IOSUnlockMethod = .device
+    var isAuthenticating = false
+    var errorMessage: String?
+    var onUnlock: (() -> Void)?
+    @Environment(\.dynamicTypeSize) private var typeSize
 
-                if let message = lockManager.unlockErrorMessage {
-                    Text(message)
-                        .font(.caption)
-                        .foregroundStyle(.red)
+    var body: some View {
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(spacing: 32) {
+                    Spacer(minLength: 20)
+                    VStack(spacing: 20) {
+                        Image("PortfolioLogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 104, height: 104)
+                            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                            .shadow(color: .black.opacity(0.12), radius: 18, y: 8)
+                            .accessibilityHidden(true)
+                        Text(L10n.appName)
+                            .font(.system(.largeTitle, design: .rounded).weight(.bold))
+                            .multilineTextAlignment(.center)
+                            .accessibilityAddTraits(.isHeader)
+                        Text(L10n.designWelcomeTitle)
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    VStack(spacing: 16) {
+                        Label(L10n.lockPortfolioLocked, systemImage: "lock.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Button(action: { onUnlock?() }) {
+                            HStack(spacing: 10) {
+                                if isAuthenticating { ProgressView().tint(AppTheme.onSelection) }
+                                else { Image(systemName: unlockMethod.symbol).accessibilityHidden(true) }
+                                Text(isAuthenticating ? L10n.lockAuthenticating : unlockMethod.title)
+                                    .multilineTextAlignment(.center)
+                            }
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, minHeight: 28)
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 16)
+                            .foregroundStyle(AppTheme.onSelection)
+                            .background(AppTheme.selection, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(isAuthenticating || onUnlock == nil)
+                        .opacity(onUnlock == nil ? 0 : 1)
+                        .accessibilityHidden(onUnlock == nil)
+                        .accessibilityLabel(isAuthenticating ? L10n.lockAuthenticating : unlockMethod.title)
+                        .accessibilityHint(L10n.lockReason)
+                        if onUnlock != nil, let errorMessage {
+                            Text(errorMessage)
+                                .font(.callout)
+                                .foregroundStyle(.red)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+                    Spacer(minLength: 20)
+                    Text(L10n.lockPrivacyReassurance)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                 }
-
-                Button {
-                    isAuthenticating = true
-                    lockManager.unlockErrorMessage = nil
-                    Task {
-                        await lockManager.unlock(reason: L10n.lockReason)
-                        isAuthenticating = false
-                    }
-                } label: {
-                    Label(L10n.lockUnlockButton, systemImage: "faceid")
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(isAuthenticating)
+                .frame(maxWidth: typeSize.isAccessibilitySize ? 440 : 360)
+                .padding(.horizontal, 28)
+                .padding(.vertical, 32)
+                .frame(maxWidth: .infinity, minHeight: geometry.size.height)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .scrollBounceBehavior(.basedOnSize)
+            .background(Color(.systemBackground).ignoresSafeArea())
         }
     }
 }
 
 // MARK: - Gate View
 struct IOSLockGateView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject var viewModel: AppViewModel
     @EnvironmentObject var languageManager: LanguageManager
     @EnvironmentObject var lockManager: IOSLockManager
@@ -144,6 +239,12 @@ struct IOSLockGateView: View {
                 IOSLockScreenView(lockManager: lockManager)
             }
         }
+        .overlay {
+            if scenePhase != .active && lockManager.isTouchIDProtectionEnabled {
+                IOSLockScreenContent()
+                    .accessibilityHidden(true)
+            }
+        }
     }
 }
 #endif
@@ -154,4 +255,18 @@ struct IOSLockGateView: View {
     IOSLockGateView()
         .environmentObject(AppViewModel.preview)
         .environmentObject(IOSLockManager.shared)
+}
+
+#Preview("Unlock — Face ID") {
+    IOSLockScreenContent(unlockMethod: .faceID, onUnlock: {})
+}
+
+#Preview("Unlock — Dark") {
+    IOSLockScreenContent(unlockMethod: .faceID, onUnlock: {})
+        .preferredColorScheme(.dark)
+}
+
+#Preview("Unlock — Large text") {
+    IOSLockScreenContent(unlockMethod: .faceID, onUnlock: {})
+        .environment(\.dynamicTypeSize, .accessibility3)
 }

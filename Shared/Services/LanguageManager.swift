@@ -538,3 +538,128 @@ struct L10n {
     static var errorSaveFailed: String { manager.localized("error.saveFailed") }
     static var errorDeleteFailed: String { manager.localized("error.deleteFailed") }
 }
+
+// MARK: - Portfolio experience
+extension L10n {
+    static var designOverview: String { manager.localized("design.overview") }
+    static var designAllocation: String { manager.localized("design.allocation") }
+    static var designCategories: String { manager.localized("design.categories") }
+    static var designValuesHidden: String { manager.localized("design.valuesHidden") }
+    static var designShowToEdit: String { manager.localized("design.showToEdit") }
+    static var designHideValues: String { manager.localized("design.hideValues") }
+    static var designShowValues: String { manager.localized("design.showValues") }
+    static var designWelcomeTitle: String { manager.localized("design.welcomeTitle") }
+    static var designWelcomeMessage: String { manager.localized("design.welcomeMessage") }
+    static var designFirstHolding: String { manager.localized("design.firstHolding") }
+    static var designRestoreBackup: String { manager.localized("design.restoreBackup") }
+    static var designStoredLocally: String { manager.localized("design.storedLocally") }
+    static var designYourHoldings: String { manager.localized("design.yourHoldings") }
+    static var designSeeAll: String { manager.localized("design.seeAll") }
+    static var designInvestmentReturn: String { manager.localized("design.investmentReturn") }
+    static var designGain: String { manager.localized("design.gain") }
+    static var designReturnExplanation: String { manager.localized("design.returnExplanation") }
+    static var designReturnAdjusted: String { manager.localized("design.returnAdjusted") }
+    static var designValueChange: String { manager.localized("design.valueChange") }
+    static var designCompare: String { manager.localized("design.compare") }
+    static var designExpandChart: String { manager.localized("design.expandChart") }
+    static var designPeriod: String { manager.localized("design.period") }
+    static var designPricesAsOf: String { manager.localized("design.pricesAsOf") }
+    static var designLastChecked: String { manager.localized("design.lastChecked") }
+    static var designUnavailablePrices: String { manager.localized("design.unavailablePrices") }
+    static var designReviewPrices: String { manager.localized("design.reviewPrices") }
+    static var designNoHistoryAction: String { manager.localized("design.noHistoryAction") }
+    static var designDownloadHistory: String { manager.localized("design.downloadHistory") }
+    static var designManageInstruments: String { manager.localized("design.manageInstruments") }
+    static var designManageAccounts: String { manager.localized("design.manageAccounts") }
+    static var designManageCategories: String { manager.localized("design.manageCategories") }
+    static var designGroupByAccount: String { manager.localized("design.groupByAccount") }
+    static var designResetFilters: String { manager.localized("design.resetFilters") }
+    static var designQuoteUnavailable: String { manager.localized("design.quoteUnavailable") }
+    static var designNoAllocation: String { manager.localized("design.noAllocation") }
+    static var designBuyMore: String { manager.localized("design.buyMore") }
+    static var designSetBalance: String { manager.localized("design.setBalance") }
+    static var designNewBalance: String { manager.localized("design.newBalance") }
+    static var designBuyExplanation: String { manager.localized("design.buyExplanation") }
+    static var designBalanceExplanation: String { manager.localized("design.balanceExplanation") }
+    static var designTransactionDate: String { manager.localized("design.transactionDate") }
+    static var designOptionalPrice: String { manager.localized("design.optionalPrice") }
+    static var designOptionalPriceHint: String { manager.localized("design.optionalPriceHint") }
+    static var designInvalidNumber: String { manager.localized("design.invalidNumber") }
+    static var designSaving: String { manager.localized("design.saving") }
+    static var designNewAccount: String { manager.localized("design.newAccount") }
+    static var designNewInstrument: String { manager.localized("design.newInstrument") }
+    static var designIdentifier: String { manager.localized("design.identifier") }
+    static var designIdentifierHint: String { manager.localized("design.identifierHint") }
+    static var designLookUp: String { manager.localized("design.lookUp") }
+    static var designConfirmInstrument: String { manager.localized("design.confirmInstrument") }
+    static var designManualInstrument: String { manager.localized("design.manualInstrument") }
+    static var designLookupFailed: String { manager.localized("design.lookupFailed") }
+    static var designInstrumentSearch: String { manager.localized("design.instrumentSearch") }
+    static var designNoInstruments: String { manager.localized("design.noInstruments") }
+    static var designDeleteInstrumentWarning: String { manager.localized("design.deleteInstrumentWarning") }
+    static var designDeleteAccountWarning: String { manager.localized("design.deleteAccountWarning") }
+    static var designDeleteTransactionWarning: String { manager.localized("design.deleteTransactionWarning") }
+    static var designPrivacySecurity: String { manager.localized("design.privacySecurity") }
+    static var designBackupRestore: String { manager.localized("design.backupRestore") }
+    static var designAppearanceLanguage: String { manager.localized("design.appearanceLanguage") }
+    static var designAdvanced: String { manager.localized("design.advanced") }
+    static var designAppLock: String { manager.localized("design.appLock") }
+    static var designAppLockDescription: String { manager.localized("design.appLockDescription") }
+    static var designUnlock: String { manager.localized("design.unlock") }
+    static var designExportBackup: String { manager.localized("design.exportBackup") }
+    static var designRestoreWarning: String { manager.localized("design.restoreWarning") }
+    static var designRestoreConfirm: String { manager.localized("design.restoreConfirm") }
+    static var designRestoreSuccess: String { manager.localized("design.restoreSuccess") }
+    static var designRestoreRecovery: String { manager.localized("design.restoreRecovery") }
+    static var designInvalidBackup: String { manager.localized("design.invalidBackup") }
+    static var designBackupHint: String { manager.localized("design.backupHint") }
+    static var designDemoBanner: String { manager.localized("design.demoBanner") }
+    static var designDemoEditHint: String { manager.localized("design.demoEditHint") }
+    static var designCurrentValue: String { manager.localized("design.currentValue") }
+    static var designPositionDetails: String { manager.localized("design.positionDetails") }
+    static var designManagePrices: String { manager.localized("design.managePrices") }
+    static var designNoMatches: String { manager.localized("design.noMatches") }
+    static var designConfirm: String { manager.localized("design.confirm") }
+    static var designRefreshDetails: String { manager.localized("design.refreshDetails") }
+    static var designRetryRefresh: String { manager.localized("design.retryRefresh") }
+    static var designClose: String { manager.localized("design.close") }
+    static var designGoldUnits: String { manager.localized("design.goldUnits") }
+    static var designCurrencyEUR: String { manager.localized("design.currencyEUR") }
+    static var designUnassignedCategory: String { manager.localized("design.unassignedCategory") }
+    static var designHistoryRange: String { manager.localized("design.historyRange") }
+}
+
+extension L10n {
+    static var designReturnUnavailable: String { manager.localized("design.returnUnavailable") }
+}
+
+extension L10n {
+    static var designExportRecovery: String { manager.localized("design.exportRecovery") }
+    static var designRestoreFailed: String { manager.localized("design.restoreFailed") }
+    static var designRecoveryRequired: String { manager.localized("design.recoveryRequired") }
+    static var designCorrectionDeltaHint: String { manager.localized("design.correctionDeltaHint") }
+    static var designUnitPriceOptional: String { manager.localized("design.unitPriceOptional") }
+}
+
+extension L10n {
+    static var designClosedPositions: String { manager.localized("design.closedPositions") }
+    static var designNoClosedPositions: String { manager.localized("design.noClosedPositions") }
+}
+
+extension L10n {
+    static var designChoose: String { manager.localized("design.choose") }
+}
+
+extension L10n {
+    static var designKnownValue: String { manager.localized("design.knownValue") }
+    static var designOldestQuote: String { manager.localized("design.oldestQuote") }
+}
+
+// MARK: - Branded unlock screen
+extension L10n {
+    static var lockActionUnlock: String { manager.localized("lock.actionUnlock") }
+    static var lockFaceID: String { manager.localized("lock.faceID") }
+    static var lockPortfolioLocked: String { manager.localized("lock.portfolioLocked") }
+    static var lockAuthenticating: String { manager.localized("lock.authenticating") }
+    static var lockPrivacyReassurance: String { manager.localized("lock.privacyReassurance") }
+}

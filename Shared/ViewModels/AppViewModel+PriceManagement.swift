@@ -18,11 +18,15 @@ struct RefreshResult: Identifiable {
 
 extension AppViewModel {
     // MARK: - Manual Price Management
-    func addManualPrice(isin: String, date: String, value: Double, currency: String) async {
+    @discardableResult
+    func addManualPrice(isin: String, date: String, value: Double, currency: String, replacingDate: String? = nil) async -> Bool {
+        guard value.isFinite, value >= 0 else { errorMessage = L10n.designInvalidNumber; return false }
         let price = Price(id: nil, isin: isin, date: date, value: value, currency: currency)
-        await db.addPrice(price)
+        guard await db.savePrice(price, replacingDate: replacingDate) else { errorMessage = L10n.errorSaveFailed; return false }
+        await recomputeDashboardCache()
+        return true
     }
-    
+
     // MARK: - Update Prices
 
     /// Use from SwiftUI `.refreshable` so the refresh is not cancelled when the user releases.

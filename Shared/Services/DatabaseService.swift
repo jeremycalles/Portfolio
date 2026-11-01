@@ -30,7 +30,7 @@ struct StorageLogEntry: Codable, Identifiable {
 
 #if canImport(SQLite)
 // MARK: - Database Actor (runs all SQLite I/O off the main thread)
-private actor DatabaseActor {
+actor DatabaseActor {
     private let dbPath: String
     private var connection: Connection?
     
@@ -41,7 +41,8 @@ private actor DatabaseActor {
     private func ensureConnected() throws {
         if connection == nil {
             connection = try Connection(dbPath)
-            try initializeDatabase()
+            do { try initializeDatabase() }
+            catch { connection = nil; throw error }
         }
     }
     
@@ -133,8 +134,8 @@ private actor DatabaseActor {
         return result
     }
     
-    private func initializeDatabase() throws {
-        guard let db = connection else { return }
+    private func initializeDatabase(_ target: Connection? = nil) throws {
+        guard let db = target ?? connection else { return }
         try db.run(instruments.create(ifNotExists: true) { t in
             t.column(isin, primaryKey: true)
             t.column(ticker)
@@ -258,6 +259,95 @@ private actor DatabaseActor {
         try ensureConnected()
     }
     
+    enum BackupError: Error { case invalidFile, unavailable, recoveryRequired }
+
+    /// SQLite's backup API includes committed WAL pages, unlike copying the live file.
+    func exportSnapshot(to url: URL) throws {
+        try ensureConnected()
+        guard let connection else { throw BackupError.unavailable }
+        let destination = try Connection(url.path)
+        try connection.backup(usingConnection: destination).step()
+    }
+
+    private func validateBackup(_ db: Connection) throws {
+        guard try db.scalar("PRAGMA integrity_check") as? String == "ok" else { throw BackupError.invalidFile }
+        let required: [String: Set<String>] = [
+            "instruments": ["isin", "ticker", "name", "currency", "quadrant_id"],
+            "prices": ["id", "isin", "date", "value", "currency"],
+            "exchange_rates": ["id", "date", "from_currency", "to_currency", "rate"],
+            "quadrants": ["id", "name"],
+            "bank_accounts": ["id", "bank_name", "account_name"],
+            "holdings": ["id", "account_id", "isin", "quantity", "purchase_date", "purchase_price", "last_updated"]
+        ]
+        for (table, columns) in required {
+            let found = Set(try db.prepare("PRAGMA table_info(\(table))").compactMap { $0[1] as? String })
+            guard columns.isSubset(of: found) else { throw BackupError.invalidFile }
+        }
+        // Backups may predate the ledger, but an existing ledger must be structurally valid.
+        if try db.scalar("SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'holding_transactions'") as? Int64 == 1 {
+            let found = Set(try db.prepare("PRAGMA table_info(holding_transactions)").compactMap { $0[1] as? String })
+            guard Set(["id", "account_id", "isin", "date", "quantity_delta", "unit_price", "created_at"]).isSubset(of: found) else {
+                throw BackupError.invalidFile
+            }
+        }
+    }
+
+    /// Validates and migrates a staging copy before touching the active database.
+    /// All steps are synchronous on this actor, so writes cannot interleave with restore.
+    func restoreSnapshot(from url: URL) throws {
+        let fm = FileManager.default
+        let live = URL(fileURLWithPath: dbPath)
+        let staging = live.deletingLastPathComponent().appendingPathComponent("restore-\(UUID().uuidString).db")
+        let recovery = URL(fileURLWithPath: dbPath + ".recovery")
+        let nextRecovery = live.deletingLastPathComponent().appendingPathComponent("recovery-\(UUID().uuidString).db")
+        defer {
+            try? fm.removeItem(at: staging)
+            try? fm.removeItem(at: nextRecovery)
+        }
+        do {
+            let source = try Connection(url.path, readonly: true)
+            try validateBackup(source)
+            let candidate = try Connection(staging.path)
+            try source.backup(usingConnection: candidate).step()
+            try initializeDatabase(candidate)
+            try validateBackup(candidate)
+        } catch { throw BackupError.invalidFile }
+        try exportSnapshot(to: nextRecovery)
+        if fm.fileExists(atPath: recovery.path) {
+            _ = try fm.replaceItemAt(recovery, withItemAt: nextRecovery)
+        } else {
+            try fm.moveItem(at: nextRecovery, to: recovery)
+        }
+        connection = nil
+        // The recovery snapshot already contains committed WAL data. Remove old
+        // sidecars only after closing the connection, before swapping the main file.
+        do {
+            for suffix in ["-wal", "-shm", "-journal"] {
+                let path = dbPath + suffix
+                if fm.fileExists(atPath: path) { try fm.removeItem(atPath: path) }
+            }
+            _ = try fm.replaceItemAt(live, withItemAt: staging)
+            try reconnect()
+        } catch {
+            connection = nil
+            // Leave the recovery file available even if the filesystem prevents rollback.
+            let rollback = live.deletingLastPathComponent().appendingPathComponent("rollback-\(UUID().uuidString).db")
+            defer { try? fm.removeItem(at: rollback) }
+            do {
+                try fm.copyItem(at: recovery, to: rollback)
+                for suffix in ["-wal", "-shm", "-journal"] {
+                    let path = dbPath + suffix
+                    if fm.fileExists(atPath: path) { try fm.removeItem(atPath: path) }
+                }
+                if fm.fileExists(atPath: live.path) {
+                    _ = try fm.replaceItemAt(live, withItemAt: rollback)
+                } else { try fm.moveItem(at: rollback, to: live) }
+                try reconnect()
+            } catch { throw BackupError.recoveryRequired }
+            throw error
+        }
+    }
+
     func getAllInstruments() throws -> [Instrument] {
         try ensureConnected()
         return try fetchAll(query: instruments, mapper: instrumentFromRow)
@@ -278,13 +368,34 @@ private actor DatabaseActor {
         try db.run(instruments.insert(or: .replace, isin <- instrument.isin, ticker <- instrument.ticker, name <- instrument.name, currency <- instrument.currency, quadrantId <- instrument.quadrantId))
     }
     
+    func createInstrument(_ instrument: Instrument, price: Price?) throws {
+        try ensureConnected()
+        guard let db = connection else { throw BackupError.unavailable }
+        if let price, !price.value.isFinite || price.value < 0 { throw BackupError.invalidFile }
+        try db.transaction {
+            try addOrUpdateInstrument(instrument)
+            if let price { try addPrice(price) }
+        }
+    }
+
+    func deletePositionWithHistory(accountId: Int, isin: String) throws {
+        try ensureConnected()
+        guard let db = connection else { throw BackupError.unavailable }
+        try db.transaction {
+            try deleteHoldingTransactions(accountId: accountId, isin: isin)
+            try deleteHolding(accountIdValue: accountId, instrumentIsin: isin)
+        }
+    }
+
     func deleteInstrument(_ instrumentIsin: String) throws {
         try ensureConnected()
         guard let db = connection else { return }
-        try db.run(instruments.filter(isin == instrumentIsin).delete())
-        try db.run(prices.filter(priceIsin == instrumentIsin).delete())
-        try db.run(holdings.filter(holdingIsin == instrumentIsin).delete())
-        try db.run(holdingTransactions.filter(txIsin == instrumentIsin).delete())
+        try db.transaction {
+            try db.run(instruments.filter(isin == instrumentIsin).delete())
+            try db.run(prices.filter(priceIsin == instrumentIsin).delete())
+            try db.run(holdings.filter(holdingIsin == instrumentIsin).delete())
+            try db.run(holdingTransactions.filter(txIsin == instrumentIsin).delete())
+        }
     }
     
     func assignQuadrant(instrumentIsin: String, quadrantId newQuadrantId: Int?) throws {
@@ -445,9 +556,11 @@ private actor DatabaseActor {
     func deleteBankAccount(id accountIdValue: Int) throws {
         try ensureConnected()
         guard let db = connection else { return }
-        try db.run(holdingTransactions.filter(txAccountId == accountIdValue).delete())
-        try db.run(holdings.filter(holdingAccountId == accountIdValue).delete())
-        try db.run(bankAccounts.filter(accountId == accountIdValue).delete())
+        try db.transaction {
+            try db.run(holdingTransactions.filter(txAccountId == accountIdValue).delete())
+            try db.run(holdings.filter(holdingAccountId == accountIdValue).delete())
+            try db.run(bankAccounts.filter(accountId == accountIdValue).delete())
+        }
     }
     
     func getHoldings(forAccount accountIdValue: Int) throws -> [Holding] {
@@ -482,6 +595,41 @@ private actor DatabaseActor {
         try ensureConnected()
         guard let db = connection else { return 0 }
         return try db.scalar(holdings.filter(holdingIsin == instrumentIsin).select(quantity.sum)) ?? 0
+    }
+
+    func saveTransaction(_ transaction: HoldingTransaction, now: String, updating: Bool) throws {
+        try ensureConnected()
+        guard let db = connection else { throw BackupError.unavailable }
+        guard transaction.quantityDelta.isFinite, abs(transaction.quantityDelta) > HoldingLedger.epsilon,
+              transaction.unitPrice.map({ $0.isFinite && $0 >= 0 }) ?? true,
+              transaction.fees.map({ $0.isFinite && $0 >= 0 }) ?? true else { throw HoldingLedgerValidationError.invalidQuantity }
+        try db.transaction {
+            if updating { try updateHoldingTransaction(transaction, now: now) }
+            else { try addHoldingTransaction(transaction, now: now) }
+            let ledger = try getHoldingTransactions(accountId: transaction.accountId, isin: transaction.isin)
+            try HoldingLedger.validateSequence(ledger)
+            try synchronizeHoldingFromTransactions(accountId: transaction.accountId, isin: transaction.isin, now: now)
+        }
+    }
+
+    func removeTransaction(id: Int, now: String) throws {
+        try ensureConnected()
+        guard let db = connection, let row = try db.pluck(holdingTransactions.filter(txId == id)) else { throw BackupError.unavailable }
+        let transaction = holdingTransactionFromRow(row)
+        try db.transaction {
+            try deleteHoldingTransaction(id: id)
+            try HoldingLedger.validateSequence(getHoldingTransactions(accountId: transaction.accountId, isin: transaction.isin))
+            try synchronizeHoldingFromTransactions(accountId: transaction.accountId, isin: transaction.isin, now: now)
+        }
+    }
+
+    func savePrice(_ price: Price, replacingDate: String?) throws {
+        try ensureConnected()
+        guard let db = connection, price.value.isFinite, price.value >= 0 else { throw BackupError.unavailable }
+        try db.transaction {
+            try addPrice(price)
+            if let replacingDate, replacingDate != price.date { try deletePrice(isin: price.isin, date: replacingDate) }
+        }
     }
 
     func addHoldingTransaction(_ transaction: HoldingTransaction, now: String) throws {
@@ -739,14 +887,17 @@ class DatabaseService: ObservableObject {
         
         let lastBackupKey = Self.lastBackupTimeKey
         let completionCapture = completion
+        let backupActor = dbActor
         Task.detached(priority: .userInitiated) {
             let fm = FileManager.default
             do {
                 try fm.createDirectory(at: backupDir, withIntermediateDirectories: true)
+                let staged = backupDir.appendingPathComponent("backup-\(UUID().uuidString).db")
+                defer { try? fm.removeItem(at: staged) }
+                try await backupActor.exportSnapshot(to: staged)
                 if fm.fileExists(atPath: backupURL.path) {
-                    try fm.removeItem(at: backupURL)
-                }
-                try fm.copyItem(atPath: path, toPath: backupURL.path)
+                    _ = try fm.replaceItemAt(backupURL, withItemAt: staged)
+                } else { try fm.moveItem(at: staged, to: backupURL) }
                 UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: lastBackupKey)
                 await MainActor.run {
                     Self.shared.appendStorageLog(message: "Backed up to iCloud.", isWarning: false, isError: false)
@@ -792,6 +943,33 @@ class DatabaseService: ObservableObject {
         }
     }
     
+    var recoveryBackupURL: URL? {
+        let url = URL(fileURLWithPath: getDatabasePath() + ".recovery")
+        return FileManager.default.fileExists(atPath: url.path) ? url : nil
+    }
+
+    func exportSnapshot() async throws -> URL {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("PortfolioBackup-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let url = directory.appendingPathComponent("PortfolioVault.db")
+        try await dbActor.exportSnapshot(to: url)
+        return url
+    }
+
+    func restoreSnapshot(from url: URL) async throws {
+        try await dbActor.restoreSnapshot(from: url)
+    }
+
+    func createInstrument(_ instrument: Instrument, price: Price?) async -> Bool {
+        do { try await dbActor.createInstrument(instrument, price: price); return true }
+        catch { logActorError(error, "createInstrument"); return false }
+    }
+
+    func deletePositionWithHistory(accountId: Int, isin: String) async -> Bool {
+        do { try await dbActor.deletePositionWithHistory(accountId: accountId, isin: isin); return true }
+        catch { logActorError(error, "deletePositionWithHistory"); return false }
+    }
+
     // MARK: - Instruments
     func getAllInstruments() async -> [Instrument] {
         do { return try await dbActor.getAllInstruments() } catch { logActorError(error, "getAllInstruments"); return [] }
@@ -801,12 +979,16 @@ class DatabaseService: ObservableObject {
         do { return try await dbActor.getInstrument(byIsin: instrumentIsin) } catch { logActorError(error, "getInstrument"); return nil }
     }
     
-    func addOrUpdateInstrument(_ instrument: Instrument) async {
-        do { try await dbActor.addOrUpdateInstrument(instrument) } catch { logActorError(error, "addOrUpdateInstrument") }
+    @discardableResult
+    func addOrUpdateInstrument(_ instrument: Instrument) async -> Bool {
+        do { try await dbActor.addOrUpdateInstrument(instrument); return true }
+        catch { logActorError(error, "addOrUpdateInstrument"); return false }
     }
     
-    func deleteInstrument(_ instrumentIsin: String) async {
-        do { try await dbActor.deleteInstrument(instrumentIsin) } catch { logActorError(error, "deleteInstrument") }
+    @discardableResult
+    func deleteInstrument(_ instrumentIsin: String) async -> Bool {
+        do { try await dbActor.deleteInstrument(instrumentIsin); return true }
+        catch { logActorError(error, "deleteInstrument"); return false }
     }
     
     func assignQuadrant(instrumentIsin: String, quadrantId newQuadrantId: Int?) async {
@@ -818,8 +1000,15 @@ class DatabaseService: ObservableObject {
         do { try await dbActor.addPrice(price) } catch { logActorError(error, "addPrice") }
     }
     
-    func deletePrice(isin instrumentIsin: String, date priceDate: String) async {
-        do { try await dbActor.deletePrice(isin: instrumentIsin, date: priceDate) } catch { logActorError(error, "deletePrice") }
+    func savePrice(_ price: Price, replacingDate: String? = nil) async -> Bool {
+        do { try await dbActor.savePrice(price, replacingDate: replacingDate); return true }
+        catch { logActorError(error, "savePrice"); return false }
+    }
+
+    @discardableResult
+    func deletePrice(isin instrumentIsin: String, date priceDate: String) async -> Bool {
+        do { try await dbActor.deletePrice(isin: instrumentIsin, date: priceDate); return true }
+        catch { logActorError(error, "deletePrice"); return false }
     }
     
     func getLatestPrice(forIsin instrumentIsin: String) async -> Price? {
@@ -893,8 +1082,10 @@ class DatabaseService: ObservableObject {
         do { return try await dbActor.addBankAccount(bank: bank, account: account) } catch { logActorError(error, "addBankAccount"); return false }
     }
     
-    func deleteBankAccount(id accountIdValue: Int) async {
-        do { try await dbActor.deleteBankAccount(id: accountIdValue) } catch { logActorError(error, "deleteBankAccount") }
+    @discardableResult
+    func deleteBankAccount(id accountIdValue: Int) async -> Bool {
+        do { try await dbActor.deleteBankAccount(id: accountIdValue); return true }
+        catch { logActorError(error, "deleteBankAccount"); return false }
     }
     
     // MARK: - Holdings
@@ -924,6 +1115,7 @@ class DatabaseService: ObservableObject {
         do { return try await dbActor.getTotalQuantity(forIsin: instrumentIsin) } catch { logActorError(error, "getTotalQuantity"); return 0 }
     }
 
+    @discardableResult
     func addHoldingTransaction(
         accountId: Int,
         isin: String,
@@ -933,7 +1125,7 @@ class DatabaseService: ObservableObject {
         kind: HoldingTransactionKind? = nil,
         fees: Double? = nil,
         note: String? = nil
-    ) async {
+    ) async -> Bool {
         let now = AppDateFormatter.iso8601.string(from: Date())
         let tx = HoldingTransaction(
             id: nil,
@@ -947,16 +1139,21 @@ class DatabaseService: ObservableObject {
             fees: fees,
             note: note
         )
-        do { try await dbActor.addHoldingTransaction(tx, now: now) } catch { logActorError(error, "addHoldingTransaction") }
+        do { try await dbActor.saveTransaction(tx, now: now, updating: false); return true }
+        catch { logActorError(error, "addHoldingTransaction"); return false }
     }
 
-    func updateHoldingTransaction(_ transaction: HoldingTransaction) async {
+    @discardableResult
+    func updateHoldingTransaction(_ transaction: HoldingTransaction) async -> Bool {
         let now = AppDateFormatter.iso8601.string(from: Date())
-        do { try await dbActor.updateHoldingTransaction(transaction, now: now) } catch { logActorError(error, "updateHoldingTransaction") }
+        do { try await dbActor.saveTransaction(transaction, now: now, updating: true); return true }
+        catch { logActorError(error, "updateHoldingTransaction"); return false }
     }
 
-    func deleteHoldingTransaction(id: Int) async {
-        do { try await dbActor.deleteHoldingTransaction(id: id) } catch { logActorError(error, "deleteHoldingTransaction") }
+    @discardableResult
+    func deleteHoldingTransaction(id: Int) async -> Bool {
+        do { try await dbActor.removeTransaction(id: id, now: AppDateFormatter.iso8601.string(from: Date())); return true }
+        catch { logActorError(error, "deleteHoldingTransaction"); return false }
     }
 
     func deleteHoldingTransactions(accountId: Int, isin: String) async {

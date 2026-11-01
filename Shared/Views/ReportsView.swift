@@ -365,10 +365,9 @@ struct PriceHistoryView: View {
                     instrument: instrument,
                     existingPrice: nil,
                     onSave: { date, value, currency in
-                        Task {
-                            await viewModel.addManualPrice(isin: instrument.isin, date: date, value: value, currency: currency)
-                            await refreshPriceHistory()
-                        }
+                        let saved = await viewModel.addManualPrice(isin: instrument.isin, date: date, value: value, currency: currency)
+                        await refreshPriceHistory()
+                        return saved
                     }
                 )
             }
@@ -379,13 +378,9 @@ struct PriceHistoryView: View {
                     instrument: instrument,
                     existingPrice: price,
                     onSave: { date, value, currency in
-                        Task {
-                            if date != price.date {
-                                await viewModel.deletePrice(isin: instrument.isin, date: price.date)
-                            }
-                            await viewModel.addManualPrice(isin: instrument.isin, date: date, value: value, currency: currency)
-                            await refreshPriceHistory()
-                        }
+                        let saved = await viewModel.addManualPrice(isin: instrument.isin, date: date, value: value, currency: currency, replacingDate: price.date)
+                        await refreshPriceHistory()
+                        return saved
                     }
                 )
             }

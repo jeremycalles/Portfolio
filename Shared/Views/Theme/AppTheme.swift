@@ -1,6 +1,11 @@
 import SwiftUI
 
 enum AppTheme {
+    #if os(iOS)
+    static let surface = Color(uiColor: .secondarySystemGroupedBackground)
+    #else
+    static let surface = Color(nsColor: .controlBackgroundColor)
+    #endif
     enum Spacing {
         static let xSmall: CGFloat = 4
         static let small: CGFloat = 8
@@ -70,11 +75,41 @@ struct PortfolioCardModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .padding(padding)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: AppTheme.Radius.card, style: .continuous))
+            .background(AppTheme.surface, in: RoundedRectangle(cornerRadius: AppTheme.Radius.card, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: AppTheme.Radius.card, style: .continuous)
                     .stroke(Color.primary.opacity(0.08), lineWidth: 1)
             }
+    }
+}
+
+/// Sensitive content is removed from both the visual and accessibility trees.
+struct PrivateValuesPlaceholder: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "eye.slash").font(.title2)
+            Text(L10n.designValuesHidden).font(.subheadline)
+        }
+        .foregroundStyle(.secondary)
+        .frame(maxWidth: .infinity, minHeight: 160)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+struct PrivacyProtectedEditor<Content: View>: View {
+    @AppStorage("privacyMode") private var privacyMode = false
+    @ViewBuilder var content: () -> Content
+    var body: some View {
+        if privacyMode {
+            VStack {
+                PrivateValuesPlaceholder()
+                Button(L10n.designShowToEdit) { privacyMode = false }
+                    .buttonStyle(.borderedProminent)
+            }
+            .padding()
+        } else {
+            content()
+        }
     }
 }
 
@@ -175,5 +210,22 @@ struct FlowLayout: Layout {
         }
         if !current.indices.isEmpty { rows.append(current) }
         return rows
+    }
+}
+
+/// Persistent labels remain visible while numeric values are being edited.
+struct PortfolioDecimalField: View {
+    let title: String
+    @Binding var text: String
+    var body: some View {
+        LabeledContent(title) {
+            TextField("—", text: $text)
+                .multilineTextAlignment(.trailing)
+                .accessibilityLabel(title)
+                #if os(iOS)
+                .keyboardType(.decimalPad)
+                #endif
+                .frame(minWidth: 70)
+        }
     }
 }
