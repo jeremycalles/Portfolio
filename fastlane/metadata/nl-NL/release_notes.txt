@@ -1,5 +1,7 @@
-De positiehistorie is nu volledig gebaseerd op bewerkbare aankopen, verkopen en correcties, met grafieken voor geïnvesteerd kapitaal en tijdgewogen rendement. Positiedetails bevatten gemiddelde kostprijs en gerealiseerde of ongerealiseerde winst.
+Een duidelijker beeld van uw beleggingen.
 
-Een overzichtelijker dashboard: de periodekeuze zit nu in de portefeuillekaart, en waarde, verandering, beste en slechtste posities en de grafiek volgen die. Percentages en bedragen volgen de notatie van je regio, en verdelingskleuren lijken niet meer op winst- en verlieskleuren.
-
-Koersupdates op de achtergrond zijn betrouwbaarder en fondskoersen van de Financial Times werken weer. Instellingen laat nu zien wanneer Ververs op achtergrond uit staat.
+• Vernieuwd iPhone-overzicht met waarde, rendement en één periodekiezer.
+• Rendementsgrafiek die rekening houdt met vastgelegde stortingen en opnames, met marktvergelijkingen wanneer gegevens beschikbaar zijn.
+• Zoek en filter posities; bekijk de verdeling per rekening of categorie.
+• Duidelijkere koersdatums en ontbrekende gegevens.
+• Verbeteringen voor grote tekst, VoiceOver en privacybediening.

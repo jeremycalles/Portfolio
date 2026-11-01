@@ -1,28 +1,21 @@
-Actions, ETF, or, crypto — sans compte. Données sur l’appareil. Seuls des identifiants publics (tickers, VL) partent pour actualiser les cours.
+Voyez ce que vous détenez, ce que vos placements rapportent et comment votre argent est réparti. Suivez actions, ETF, fonds, or et crypto sur iPhone et Mac, sans créer de compte ni connecter votre banque.
 
-Portfolio Vault suit aussi les fonds (OPCVM), l’or physique et les comptes, sur iPhone et Mac. Pas de liaison de compte, pas de serveur, pas de publicité.
+COMPRENEZ VOTRE PORTEFEUILLE
 
-CE QUE VOUS POUVEZ SUIVRE
+• Une vue d’ensemble claire — Valeur totale en EUR, rendement et gains ou pertes sur la période choisie.
+• La performance en contexte — Explorez la valeur du portefeuille, le capital investi et les opérations. Comparez avec le S&P 500, le MSCI World et l’or lorsque l’historique est disponible.
+• Vos apports ne sont pas des gains — Le rendement pondéré dans le temps tient compte des flux enregistrés pour distinguer la performance des versements et retraits.
+• Chaque position en détail — Saisissez et modifiez achats, ventes et ajustements. Consultez quantités, prix de revient moyen et gains réalisés ou latents lorsque les prix des opérations sont connus.
+• Une répartition plus lisible — Organisez vos avoirs par compte et catégorie pour repérer les concentrations.
 
-• Actions et ETF — Cours en temps réel (p. ex. Yahoo Finance)
-• Fonds (OPCVM) — VL fiables depuis des sources reconnues
-• Métaux précieux — Or et argent au comptant (p. ex. Veracash) et pièces physiques avec prime de marché (p. ex. AuCOFFRE)
-• Cryptomonnaies — Principales paires
-• Comptes bancaires — Positions de cash saisies manuellement
+RASSEMBLEZ VOS PLACEMENTS
 
-FONCTIONNALITÉS
+Actions, ETF, fonds et OPCVM, cryptomonnaies, or, argent, pièces physiques prises en charge et soldes de liquidités saisis manuellement. Ajoutez un instrument par ISIN ou ticker et regroupez vos positions chez plusieurs banques et courtiers. Les positions et opérations sont saisies manuellement, sans connexion bancaire.
 
-• Multi-comptes — Suivez vos avoirs chez plusieurs banques et courtiers
-• Prix de revient et performance — Dates d’achat, plus/moins-values, comparaison 1J, 1S, 1M, 1A, YTD
-• Quadrants — Regroupez les instruments par catégorie (Technologie, Métaux précieux, Taux, etc.)
-• Graphiques de performance — Valeur, capital investi, opérations, indices de référence et rendement pondéré dans le temps
-• Registre d’opérations et gains — Modifiez achats, ventes et ajustements ; consultez coût moyen, gains réalisés et latents
-• Tutoriel — Court guidage sur iPhone et Mac
-• Valorisation en or — Voir la valeur du portefeuille en onces d’or, pour une lecture ajustée de l’inflation
-• Données intelligentes — Meilleure source selon le type d’instrument ; historique pour les tendances
-• Mises à jour en arrière-plan — Actualisation automatique ; l’assistant Mac réveille l’app pour ne pas perdre les mises à jour
-• Mode confidentialité — Masquez les montants à l’écran ; Face ID / Touch ID / verrouillage optionnels
-• Bilingue — Anglais et français
-• Sauvegarde iCloud optionnelle — Copie de la base locale ; l’app ne s’exécute jamais depuis iCloud
+LA CONFIDENTIALITÉ AU CŒUR DE L’APP
 
-Vos données ne quittent l’appareil que pour des requêtes de marché publiques (tickers, VL). Pas d’analytics, pas de publicité.
+Votre portefeuille est stocké localement. Aucun compte Portfolio Vault, aucune publicité, aucune analyse d’usage. Les requêtes de cours transmettent des identifiants de marché publics, pas vos avoirs ni vos soldes. Masquez les montants à l’écran et activez la protection biométrique sur les appareils compatibles. Une sauvegarde iCloud est proposée lorsque l’accès à iCloud est activé.
+
+Apps natives pour iPhone et Mac, avec une interface en français et en anglais. Consultez les données enregistrées hors ligne ; une connexion est nécessaire pour actualiser les cours. Les prix et historiques dépendent des sources et peuvent être différés. L’actualisation en arrière-plan dépend du système.
+
+Ouvrez votre portefeuille. Comprenez vos chiffres. Gardez le contrôle de vos données.

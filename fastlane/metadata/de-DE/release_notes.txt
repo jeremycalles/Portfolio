@@ -1,5 +1,7 @@
-Der Positionsverlauf basiert jetzt vollständig auf bearbeitbaren Käufen, Verkäufen und Anpassungen, mit Diagrammen für investiertes Kapital und zeitgewichtete Rendite. Positionsdetails enthalten Einstandskurs sowie realisierte und unrealisierte Gewinne.
+Mehr Überblick über Ihre Anlagen.
 
-Ein aufgeräumteres Dashboard: Die Zeitraumauswahl sitzt jetzt in der Portfoliokarte, und Wert, Veränderung, beste und schlechteste Positionen sowie das Diagramm folgen ihr. Prozente und Beträge folgen dem Format Ihrer Region, und Aufteilungsfarben verwechseln sich nicht mehr mit Gewinn- und Verlustfarben.
-
-Kursaktualisierungen im Hintergrund sind zuverlässiger, und Fondskurse der Financial Times funktionieren wieder. Die Einstellungen zeigen jetzt an, wenn die Hintergrundaktualisierung ausgeschaltet ist.
+• Neue iPhone-Übersicht mit Portfoliowert, Rendite und gemeinsamer Zeitraumauswahl.
+• Renditekurve unter Berücksichtigung erfasster Ein- und Auszahlungen, mit Marktvergleichen bei verfügbaren Daten.
+• Positionen suchen und filtern, Verteilung nach Konto oder Kategorie prüfen.
+• Kursdaten und fehlende Werte leichter erkennen.
+• Verbesserungen für große Schrift, VoiceOver und Datenschutzfunktionen.

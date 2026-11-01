@@ -1,15 +1,13 @@
-Aktien, ETFs, Gold und Krypto auf iPhone und Mac. Kein Konto, kein Bank-Login. Bestände bleiben auf dem Gerät; nur öffentliche Ticker gehen für Kurse raus.
+Verstehen Sie Ihre Anlagen: Wert, Rendite und Verteilung an einem Ort. Verfolgen Sie Aktien, ETFs, Fonds, Gold und Krypto auf iPhone und Mac, ohne Konto oder Bankverbindung.
 
-Portfolio Vault erfasst auch Fonds (OPCVM), Edelmetalle, Münzen und Bargeld. Native Apps für iOS und macOS. Keine Kontoanbindung, keine Werbung.
+• Überblick: Portfoliowert in EUR und Wertentwicklung im gewählten Zeitraum.
+• Interaktive Diagramme: Wert, investiertes Kapital und Transaktionen. Vergleich mit S&P 500, MSCI World und Gold bei verfügbarer Historie.
+• Zeitgewichtete Rendite: Erfasste Ein- und Auszahlungen werden berücksichtigt.
+• Positionen im Detail: Käufe, Verkäufe und Anpassungen bearbeiten; durchschnittliche Kosten sowie realisierte und unrealisierte Gewinne bei bekannten Transaktionspreisen prüfen.
+• Verteilung: Bestände nach Konto und Kategorie organisieren.
 
-WAS SIE VERFOLGEN KÖNNEN
+Auch unterstützte physische Münzen, Silber und manuell erfasste Barbestände. Positionen und Transaktionen werden manuell eingegeben; keine Bankanbindung.
 
-• Aktien & ETFs — Kurse in Echtzeit
-• Fonds (OPCVM) — NAV aus verlässlichen Quellen
-• Edelmetalle — Gold- und Silber-Spot sowie physische Münzen
-• Kryptowährungen — gängige Paare
-• Bankkonten — manuelle Cash-Positionen
+Ihre Portfoliodaten bleiben lokal. Kursanfragen senden öffentliche Kennungen, keine Bestände oder Kontostände. Keine Werbung, keine Nutzungsanalyse. Beträge ausblenden, biometrischen Schutz aktivieren und bei aktiviertem iCloud-Zugriff optional ein Backup erstellen.
 
-Funktionen: mehrere Konten, bearbeitbares Transaktionsbuch, durchschnittlicher Einstandskurs, realisierte/unrealisierte Gewinne, investiertes Kapital und zeitgewichtete Rendite in interaktiven Diagrammen, Goldunzen, zuverlässige Hintergrund-Updates, Datenschutzmodus, Face ID / Touch ID, optionales iCloud-Backup.
-
-Es gehen nur öffentliche Marktdaten-Anfragen (Ticker, NAVs) raus. Keine Analytics, keine Werbung.
+Die Oberfläche ist auf Englisch und Französisch verfügbar. Gespeicherte Daten sind offline zugänglich; Kursabrufe benötigen Internet. Kurse können verzögert sein, historische Daten und Hintergrundaktualisierungen sind abhängig von Quelle und System.

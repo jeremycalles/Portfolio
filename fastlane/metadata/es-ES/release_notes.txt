@@ -1,5 +1,7 @@
-El historial de posiciones ahora se basa por completo en compras, ventas y ajustes editables, con gráficos de capital invertido y rentabilidad ponderada por tiempo. El detalle de cada posición añade coste medio y ganancias realizadas o latentes.
+Una visión más clara de tus inversiones.
 
-Un panel más claro: el selector de periodo está ahora dentro de la tarjeta de la cartera, y el valor, su variación, las mejores y peores posiciones y el gráfico lo siguen. Porcentajes e importes siguen el formato de tu región, y los colores de reparto ya no se confunden con los de ganancias y pérdidas.
-
-Las actualizaciones de precios en segundo plano son más fiables y los precios de fondos del Financial Times vuelven a funcionar. Ajustes ahora indica cuándo la actualización en segundo plano está desactivada.
+• Vista general renovada en iPhone con valor, rentabilidad y un mismo selector de periodo.
+• Curva de rentabilidad que tiene en cuenta las aportaciones y retiradas registradas, con comparaciones de mercado cuando hay datos.
+• Busca y filtra posiciones; revisa la distribución por cuenta o categoría.
+• Identifica mejor las fechas de los precios y los datos que faltan.
+• Mejoras para texto grande, VoiceOver y controles de privacidad.

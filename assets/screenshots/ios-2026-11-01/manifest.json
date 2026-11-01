@@ -1,0 +1,142 @@
+[
+  {
+    "file": "en-US/1320x2868/01-overview.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB",
+    "headline": "See your investments clearly."
+  },
+  {
+    "file": "en-US/1206x2622/01-overview.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB",
+    "headline": "See your investments clearly."
+  },
+  {
+    "file": "en-US/1320x2868/02-performance.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB",
+    "headline": "Understand what you earned."
+  },
+  {
+    "file": "en-US/1206x2622/02-performance.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB",
+    "headline": "Understand what you earned."
+  },
+  {
+    "file": "en-US/1320x2868/03-holdings.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB",
+    "headline": "All your positions. One place."
+  },
+  {
+    "file": "en-US/1206x2622/03-holdings.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB",
+    "headline": "All your positions. One place."
+  },
+  {
+    "file": "en-US/1320x2868/04-allocation.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB",
+    "headline": "Know where your money sits."
+  },
+  {
+    "file": "en-US/1206x2622/04-allocation.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB",
+    "headline": "Know where your money sits."
+  },
+  {
+    "file": "en-US/1320x2868/05-privacy.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB",
+    "headline": "Your portfolio. Your privacy."
+  },
+  {
+    "file": "en-US/1206x2622/05-privacy.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB",
+    "headline": "Your portfolio. Your privacy."
+  },
+  {
+    "file": "fr-FR/1320x2868/01-overview.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB",
+    "headline": "Vos placements, en toute clarté."
+  },
+  {
+    "file": "fr-FR/1206x2622/01-overview.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB",
+    "headline": "Vos placements, en toute clarté."
+  },
+  {
+    "file": "fr-FR/1320x2868/02-performance.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB",
+    "headline": "Comprenez votre rendement."
+  },
+  {
+    "file": "fr-FR/1206x2622/02-performance.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB",
+    "headline": "Comprenez votre rendement."
+  },
+  {
+    "file": "fr-FR/1320x2868/03-holdings.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB",
+    "headline": "Toutes vos positions. Au même endroit."
+  },
+  {
+    "file": "fr-FR/1206x2622/03-holdings.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB",
+    "headline": "Toutes vos positions. Au même endroit."
+  },
+  {
+    "file": "fr-FR/1320x2868/04-allocation.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB",
+    "headline": "Voyez où va votre argent."
+  },
+  {
+    "file": "fr-FR/1206x2622/04-allocation.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB",
+    "headline": "Voyez où va votre argent."
+  },
+  {
+    "file": "fr-FR/1320x2868/05-privacy.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB",
+    "headline": "Votre portefeuille. Votre vie privée."
+  },
+  {
+    "file": "fr-FR/1206x2622/05-privacy.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB",
+    "headline": "Votre portefeuille. Votre vie privée."
+  }
+]

@@ -1,1 +1,1 @@
-actions,investissement,placement,CTO,bitcoin,VL,bourse,courtier,lingot,argent,patrimoine,isin,cash
+actions,ETF,suivi,rendement,répartition,gain,CTO,bitcoin,bourse,patrimoine,ISIN,confidentialité

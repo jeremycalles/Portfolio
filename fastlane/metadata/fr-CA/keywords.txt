@@ -1,1 +1,1 @@
-investissement,placement,bitcoin,VL,bourse,courtier,lingot,argent,patrimoine,isin,OPCVM,privacy,cash
+suivi,rendement,répartition,placement,bitcoin,bourse,patrimoine,fonds,OPCVM,ISIN,confidentialité

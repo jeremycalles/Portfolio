@@ -1,88 +1,76 @@
-# App Store Metadata
+# App Store metadata review — 1 November 2026
 
-> **Source of truth:** edit `fastlane/metadata/<locale>/*.txt`, then run `bundle exec fastlane metadata_upload`.
-> Setup: [fastlane/README.md](fastlane/README.md).
->
-> Name, subtitle, keywords, and description are locked on a live version. `metadata_upload` creates the next Prepare for Submission version (currently **1.0.7**) and uploads indexed copy there. Promotional text is also patched on the live listing.
->
-> When committing user-facing app work to `main`, rewrite What’s New (and FEATURES if needed) and upload before or in that commit. See `.cursor/rules/aso-on-main.mdc`.
+Source files: `fastlane/metadata/<locale>/*.txt`. Home-screen name remains **Portfolio Vault**.
 
-App name on the home screen stays **Portfolio Vault**. One App Store Connect app (`com.portfolio.app.ios`) covers iOS and macOS (universal purchase).
+## Status
 
-Apple search ranks **name + subtitle + keywords only** (160 characters per locale). Do **not** repeat a word across those three fields. Description and promotional text are for conversion (and Google), not Apple ranking. Categories: **Finance / Productivity**. Do not put Yahoo, Veracash, or AuCOFFRE in keywords.
+App Store Connect has **1.1.0** drafts (`PREPARE_FOR_SUBMISSION`) for iOS and macOS. Description, keywords, promotional text and What’s New have been uploaded and verified across all nine locales. New iPhone screenshots are being uploaded; existing iPad and macOS images are retained. Version 1.0.9 remains live. This release is being prepared for review and has not been submitted to Apple.
 
----
+The release uses the committed iPhone redesign and branded unlock screen. Screenshot fixture changes remain outside the shipping source. All three app targets and tooling defaults are aligned to **1.1.0 (55)**. Build 55 is one greater than the highest uploaded build (54), verified directly through App Store Connect before the bump. The existing combined Xcode Cloud workflow will archive and upload both platforms.
 
-## Indexed copy (findability)
+## Review findings and changes
 
-### English (US) and English (Canada)
+- The live opening listed asset types but did little to explain the insight users get. New copy leads with ownership, return and allocation, followed by concrete capabilities.
+- “Real-time prices” was too broad for source-dependent market data. Copy now explains that prices may be delayed and historical coverage varies.
+- Valuing a portfolio in gold ounces is not an inflation adjustment. Removed that claim. Gold remains an asset and benchmark where supported.
+- “Your data never leaves your device” conflicted with optional cloud backup. New copy distinguishes local portfolio storage, public-identifier price requests, and optional iCloud backup. Current iOS entitlements include iCloud; runtime availability is still required.
+- Holdings and transactions are manual. The description now says so explicitly, avoiding an expectation of automatic bank imports.
+- New benefit-led What’s New focuses on the iPhone redesign and improvements visible in the working source. Already-live transaction-ledger features are described as lasting capabilities rather than presented as newly released.
+- Removed unsupported “watchlist” and German “Sparplan” search terms. Revised English/French/German terms toward tracking, performance, allocation and privacy. Name and subtitle remain unchanged to preserve their asset-specific search coverage.
+- Descriptions and release notes are aligned across all nine storefront locales. Additional storefronts explicitly state that the interface supports English and French.
 
-| Field | Copy | Limit |
-|-------|------|-------|
-| Name | `Portfolio Vault` | 15 / 30 |
-| Subtitle | `Stocks, ETFs, Gold & Crypto` | 27 / 30 |
-| Keywords | `mutual fund,NAV,OPCVM,bitcoin,silver,holdings,brokerage,watchlist,ISIN,wealth,offline,privacy,coin` | 98 / 100 |
+Keywords are relevance-based candidates, not measured search-volume or ranking recommendations. No acquisition or conversion analytics were available for this review.
 
-### English (UK)
+## Keyword candidates
 
-Same name and subtitle. Keywords: `shares,ISA,unit trust,NAV,OPCVM,bitcoin,silver,holdings,ISIN,wealth,offline,privacy,gilt,cash,coin` (98 / 100).
+Apple limits keywords to 100 characters. Avoid repeating words from the existing name and subtitle. Retain the current localized names and subtitles for this iteration.
 
-### French (France)
+| Locale | Length | Keywords |
+|---|---:|---|
+| en-US | 97/100 | `tracker,investment,performance,allocation,profit,holdings,bitcoin,silver,mutual fund,ISIN,privacy` |
+| en-GB | 98/100 | `tracker,investment,performance,allocation,profit,shares,ISA,bitcoin,silver,unit trust,ISIN,privacy` |
+| en-CA | 97/100 | `tracker,investment,performance,allocation,profit,holdings,bitcoin,silver,mutual fund,ISIN,privacy` |
+| fr-FR | 95/100 | `actions,ETF,suivi,rendement,répartition,gain,CTO,bitcoin,bourse,patrimoine,ISIN,confidentialité` |
+| fr-CA | 96/100 | `suivi,rendement,répartition,placement,bitcoin,bourse,patrimoine,fonds,OPCVM,ISIN,confidentialité` |
+| de-DE | 92/100 | `Fonds,Rendite,Allokation,Gewinn,Depot,bitcoin,Silber,ISIN,Vermögen,offline,Datenschutz,Münze` |
+| es-ES | 97/100 | `fondos,NAV,bitcoin,plata,ISIN,patrimonio,offline,privacidad,moneda,broker,efectivo,cartera,divisa` |
+| it | 98/100 | `fondi,NAV,bitcoin,argento,ISIN,patrimonio,offline,privacy,moneta,broker,contanti,obbligazioni,cash` |
+| nl-NL | 97/100 | `fonds,NAV,bitcoin,zilver,ISIN,vermogen,offline,privacy,munt,broker,cash,depot,belegging,obligatie` |
 
-| Field | Copy | Limit |
-|-------|------|-------|
-| Name | `Portfolio Vault Portefeuille` | 28 / 30 |
-| Subtitle | `PEA, OPCVM, or et crypto` | 24 / 30 |
-| Keywords | `actions,investissement,placement,CTO,bitcoin,VL,bourse,courtier,lingot,argent,patrimoine,isin,cash` | 98 / 100 |
+## What’s New — English
 
-Store name adds **portefeuille** (what people type). Home screen stays Portfolio Vault.
+A clearer view of your investments.
 
-### French (Canada)
+• A redesigned iPhone overview puts portfolio value and investment return first, with one period selector for a consistent view.
+• Understand performance with a return chart that accounts for recorded contributions and withdrawals, plus comparisons with market benchmarks when data is available.
+• Find positions more easily with search and filters, then explore allocation by account or category.
+• Review price dates and missing data more clearly, so you know what is behind your totals.
+• Improved layouts for larger text, VoiceOver and privacy controls make everyday checks easier.
 
-Same name. Subtitle: `Actions, ETF, or et crypto` (no PEA/CTO). Keywords omit those France-specific wrappers.
+Your portfolio stays under your control: no account, no bank connection, no analytics.
 
-### Extra locales (UI stays EN+FR)
+French and other localized versions live in the corresponding `release_notes.txt` files.
 
-de-DE, es-ES, it, nl-NL: translated name/subtitle/keywords plus a short description so the storefront is not empty. Each locale adds another 160 indexed characters.
+## iPhone screenshots
 
----
+Prepared under `assets/screenshots/ios-2026-11-01/`, with localized English and French sets. Recommended order:
 
-## Promotional text
+1. **See your investments clearly** — overview and portfolio value.
+2. **Understand what you earned** — actual investment-return chart and benchmark comparisons.
+3. **All your positions. One place.** — searchable positions and their returns.
+4. **Know where your money sits** — allocation by category.
+5. **Your portfolio. Your privacy.** — masked amounts and the dark appearance.
 
-**Limit: 170** • Not indexed • Editable without a new version.
+Screens use the current SwiftUI views in a temporary screenshot-only build, with a deterministic fictional EUR portfolio. The screenshot fixture is outside the repository and is excluded from shipping code. No personal holdings were read. Percentage returns and allocations are illustrative, not a promise of investment results.
 
-```
-Track stocks, ETFs, gold, and crypto on iPhone and Mac. No account, no bank login. Data stays on device. Optional iCloud backup. Coins, funds, Face ID.
-```
+PNG exports are RGB, without transparency, at **1320 × 2868** and **1206 × 2622**, accepted iPhone portrait dimensions. The smaller export is composed from the same large-device capture; it is not a separate device interaction test. Contact sheets are previews and must not be uploaded. Use the five numbered PNGs in the appropriate locale/size folder. Keep existing macOS screenshots.
 
-FR: *Actions, ETF, or et crypto sur iPhone et Mac. Sans compte, sans banque. Données sur l’appareil. Sauvegarde iCloud optionnelle. Pièces d’or, OPCVM, Face ID.*
+## Validation and publication
 
----
+Run `python3 scripts/validate_app_store_metadata.py` for listing limits. Screenshot dimensions, color mode, ordering and text fit are checked by the screenshot generator, and the English/French contact sheets are reviewed visually.
 
-## Description
+The user authorized publishing the package to the 1.1.0 drafts and uploading a new build through Xcode Cloud. Metadata and screenshots are uploaded directly through Apple’s API because the local pinned fastlane tools are unavailable. No live promotional text was changed. The metadata lane deliberately skips screenshots. Before a release, follow the repository’s App Store Connect build-number and Xcode Cloud checklist.
 
-**Limit: 4,000** • First ~255 characters are the search-result / Google hook.
-
-Lead with what people type (stocks, gold, crypto, no account), then WHAT YOU CAN TRACK / FEATURES. Mention OPCVM NAV, physical coins, gold ounces, Face ID, EN+FR, optional iCloud backup. Full text lives in `fastlane/metadata/<locale>/description.txt`.
-
----
-
-## What’s New
-
-```
-Position history is now fully transaction-driven, with editable buys, sells and adjustments. New charts show invested capital, transaction markers and time-weighted performance. Position details add average cost and realized/unrealized gains. We also improved accessibility and made scheduled Mac refreshes more reliable after a cold launch.
-```
-
----
-
-## App Icon
-
-Generated from `assets/app-icon-source.jpg` into `Shared/Assets.xcassets/AppIcon.appiconset/`. Same catalog for iOS and macOS.
-
----
-
-## Storefronts and screenshots
-
-- Confirm **Pricing and Availability** includes FR, BE, CH, LU, CA, US, GB, and the rest of the EU. A listing in a disabled storefront does not rank.
-- Screenshots are not uploaded by `metadata_upload`. First screenshot should be the dashboard total + chart (stocks / gold / on-device), not Settings. Files live in `assets/screenshots/`.
-- Ratings are per country; French installs matter more than extra keywords.
+Apple references:
+- https://developer.apple.com/app-store/product-page/
+- https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/

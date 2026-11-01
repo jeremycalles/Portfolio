@@ -1,15 +1,13 @@
-Azioni, ETF, oro e crypto su iPhone e Mac. Nessun account né login bancario. Le posizioni restano sul dispositivo; escono solo ticker pubblici per i prezzi.
+Comprendi i tuoi investimenti: valore, rendimento e distribuzione in un solo posto. Segui azioni, ETF, fondi, oro e crypto su iPhone e Mac, senza creare un account o collegare la banca.
 
-Portfolio Vault segue anche fondi (OPCVM), metalli, monete e contanti. App native iOS e macOS. Niente collegamento conti, niente ads.
+• Panoramica: valore in EUR e risultati nel periodo scelto.
+• Grafici interattivi: valore, capitale investito e operazioni. Confronta S&P 500, MSCI World e oro quando è disponibile lo storico.
+• Rendimento ponderato nel tempo: tiene conto di versamenti e prelievi registrati.
+• Dettaglio delle posizioni: modifica acquisti, vendite e rettifiche; consulta costo medio e guadagni realizzati e non realizzati quando i prezzi delle operazioni sono noti.
+• Distribuzione: organizza le posizioni per conto e categoria.
 
-COSA PUOI SEGUIRE
+Anche argento, monete fisiche supportate e saldi di liquidità manuali. Posizioni e operazioni vengono inserite manualmente, senza collegamento bancario.
 
-• Azioni ed ETF — prezzi in tempo reale
-• Fondi (OPCVM) — NAV da fonti attendibili
-• Metalli preziosi — oro e argento spot e monete fisiche
-• Criptovalute — coppie principali
-• Conti bancari — cassa inserita a mano
+Il portafoglio è conservato localmente. Le richieste di prezzo inviano identificativi pubblici, non posizioni o saldi. Nessuna pubblicità o analisi di utilizzo. Nascondi gli importi, attiva la protezione biometrica e crea un backup opzionale quando l’accesso a iCloud è attivo.
 
-Più conti, registro operazioni modificabile, costo medio, profitti realizzati e latenti, capitale investito e rendimento ponderato nel tempo nei grafici interattivi, once d’oro, aggiornamenti affidabili in background, modalità privacy, Face ID / Touch ID e backup iCloud opzionale.
-
-Escono solo richieste di dati di mercato pubblici. Niente analytics, niente pubblicità.
+Interfaccia disponibile in inglese e francese. I dati salvati sono consultabili offline; aggiornare i prezzi richiede internet. I prezzi possono essere ritardati. Storico e aggiornamenti in background dipendono dalla fonte e dal sistema.

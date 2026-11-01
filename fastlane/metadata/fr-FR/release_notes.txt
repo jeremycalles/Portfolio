@@ -1,5 +1,9 @@
-L’historique des positions repose désormais entièrement sur vos achats, ventes et ajustements, tous modifiables, avec des graphiques du capital investi et de la performance pondérée dans le temps. Le détail d’une position ajoute le PRU et les plus-values réalisées ou latentes.
+Un regard plus clair sur vos placements.
 
-Un tableau de bord plus clair : le choix de la période est désormais intégré à la carte du portefeuille, et la valeur, sa variation, les meilleures et pires performances ainsi que le graphique le suivent. Pourcentages et montants respectent le format de votre région, et les couleurs de répartition ne se confondent plus avec celles des gains et pertes.
+• La vue d’ensemble repensée sur iPhone met la valeur et le rendement au premier plan, avec un même choix de période pour une lecture cohérente.
+• Comprenez la performance grâce à une courbe de rendement qui tient compte des apports et retraits enregistrés, et comparez-la aux indices lorsque les données sont disponibles.
+• Retrouvez vos positions avec la recherche et les filtres, puis explorez la répartition par compte ou catégorie.
+• Repérez plus facilement les dates de cours et les données manquantes pour comprendre vos totaux.
+• Des améliorations pour les grands caractères, VoiceOver et les commandes de confidentialité facilitent la consultation.
 
-Les mises à jour des prix en arrière-plan sont plus fiables et les cours des fonds issus du Financial Times fonctionnent à nouveau. Les Réglages indiquent maintenant quand l’actualisation en arrière-plan est désactivée.
+Vous gardez le contrôle : sans compte, sans connexion bancaire, sans analyse d’usage.

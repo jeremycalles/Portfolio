@@ -1,15 +1,13 @@
-Acciones, ETF, oro y cripto en iPhone y Mac. Sin cuenta ni inicio de sesión bancario. Las posiciones se quedan en el dispositivo; solo salen identificadores públicos para los precios.
+Entiende tus inversiones: valor, rentabilidad y distribución en un solo lugar. Sigue acciones, ETF, fondos, oro y cripto en iPhone y Mac, sin crear una cuenta ni conectar tu banco.
 
-Portfolio Vault también sigue fondos (OPCVM), metales, monedas y efectivo. Apps nativas iOS y macOS. Sin vincular cuentas, sin anuncios.
+• Vista general: valor en EUR y resultados del periodo elegido.
+• Gráficos interactivos: valor, capital invertido y operaciones. Compara con S&P 500, MSCI World y oro cuando haya histórico.
+• Rentabilidad ponderada por tiempo: tiene en cuenta las aportaciones y retiradas registradas.
+• Detalle por posición: edita compras, ventas y ajustes; consulta coste medio y ganancias realizadas y latentes cuando se conocen los precios de las operaciones.
+• Distribución: organiza las posiciones por cuenta y categoría.
 
-QUÉ PUEDE SEGUIR
+También admite plata, monedas físicas compatibles y saldos de efectivo manuales. Las posiciones y operaciones se introducen manualmente, sin conexión bancaria.
 
-• Acciones y ETF — precios en tiempo real
-• Fondos (OPCVM) — VL de fuentes fiables
-• Metales preciosos — oro y plata al contado y monedas físicas
-• Criptomonedas — pares principales
-• Cuentas bancarias — efectivo manual
+Tu cartera se guarda localmente. Las consultas de precios envían identificadores públicos, no tus posiciones ni saldos. Sin anuncios ni analítica de uso. Oculta importes, activa la protección biométrica y crea una copia opcional cuando el acceso a iCloud esté activado.
 
-Varias cuentas, registro de operaciones editable, coste medio, ganancias realizadas y latentes, capital invertido y rentabilidad ponderada por tiempo en gráficos interactivos, onzas de oro, actualizaciones fiables en segundo plano, modo privacidad, Face ID / Touch ID y copia iCloud opcional.
-
-Solo salen peticiones de datos de mercado públicos. Sin analítica ni anuncios.
+Interfaz disponible en inglés y francés. Consulta datos guardados sin conexión; actualizar precios requiere internet. Los precios pueden tener retraso. El histórico y las actualizaciones en segundo plano dependen de la fuente y del sistema.

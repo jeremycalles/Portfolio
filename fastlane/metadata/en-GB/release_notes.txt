@@ -1,5 +1,9 @@
-Position history is now fully transaction-driven, with editable buys, sells and adjustments, and charts for invested capital and time-weighted performance. Position details add average cost and realised/unrealised gains.
+A clearer view of your investments.
 
-A cleaner dashboard: the period picker now sits inside the portfolio card, so the value, its change, your best and worst performers and the chart all follow it. Percentages and amounts follow your region's format, and allocation colours no longer clash with gain and loss colours.
+• A redesigned iPhone overview puts portfolio value and investment return first, with one period selector for a consistent view.
+• Understand performance with a return chart that accounts for recorded contributions and withdrawals, plus comparisons with market benchmarks when data is available.
+• Find positions more easily with search and filters, then explore allocation by account or category.
+• Review price dates and missing data more clearly, so you know what is behind your totals.
+• Improved layouts for larger text, VoiceOver and privacy controls make everyday checks easier.
 
-Background price updates are more reliable, and fund prices from the Financial Times work again. Settings now tells you when Background App Refresh is off.
+Your portfolio stays under your control: no account, no bank connection, no analytics.

@@ -1,1 +1,1 @@
-Fonds,NAV,bitcoin,Silber,Depot,ISIN,Vermögen,offline,Datenschutz,Münze,Bar,Watchlist,Sparplan,Cash
+Fonds,Rendite,Allokation,Gewinn,Depot,bitcoin,Silber,ISIN,Vermögen,offline,Datenschutz,Münze

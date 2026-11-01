@@ -1,28 +1,21 @@
-Track stocks, ETFs, gold, and crypto on iPhone and Mac. No account, no bank login. Holdings stay on your device; only public tickers go out for prices.
+See what you own, how it is performing, and where your money is invested. Track stocks, ETFs, funds, gold and crypto on iPhone and Mac, without creating an account or linking your bank.
 
-Portfolio Vault tracks mutual funds, precious metals, coins, and cash accounts too. Native iOS and macOS. No account linking, no backend, no ads.
+MAKE SENSE OF YOUR PORTFOLIO
 
-WHAT YOU CAN TRACK
+• Your investments at a glance — See total value in EUR, investment return, and gains or losses for your selected period.
+• Performance with context — Explore portfolio value, invested capital and transaction markers. Compare with the S&P 500, MSCI World and gold when market history is available.
+• Money added is not money earned — Time-weighted return accounts for recorded cash flows, helping you distinguish investment performance from contributions and withdrawals.
+• Every position, explained — Record and edit buys, sells and adjustments. Review quantities, average cost, and realized and unrealized gains when transaction prices are known.
+• A clearer allocation — Organize holdings by account and category to see where your portfolio is concentrated.
 
-• Stocks & ETFs — Real-time prices (e.g. Yahoo Finance)
-• Mutual funds (OPCVM) — Accurate NAV from trusted sources
-• Precious metals — Gold and silver spot (e.g. Veracash) and physical coins with market premiums (e.g. AuCOFFRE)
-• Cryptocurrencies — Major pairs
-• Bank accounts — Manual cash positions
+BRING YOUR ASSETS TOGETHER
 
-FEATURES
+Track stocks, ETFs, mutual funds, cryptocurrencies, gold, silver, supported physical coins and manually entered cash balances. Add instruments by ISIN or ticker and organize positions across banks and brokers. Holdings and transactions are entered manually; bank accounts are not connected.
 
-• Multi-account support — Track holdings across several banks and brokers
-• Cost basis & performance — Purchase dates, prices, gain/loss, comparison over 1D, 1W, 1M, 1Y, YTD
-• Quadrant organization — Group instruments by category (Technology, Precious Metals, Fixed Income, etc.)
-• Performance charts — Compare value, invested capital, transactions, benchmarks, and time-weighted return
-• Transaction ledger & P&L — Edit buys, sells, and adjustments; see average cost and realized/unrealized gains
-• Guided walkthrough — Short onboarding on iPhone and Mac
-• Gold valuation — See portfolio value in gold ounces for an inflation-adjusted view
-• Smart data — Best source per instrument type; historical backfill for trends
-• Background updates — Automatic price refresh on iOS and macOS; the Mac helper wakes the app so scheduled updates are not dropped
-• Privacy mode — Hide sensitive values on screen; Face ID / Touch ID / device lock optional
-• Bilingual — Full English and French
-• Optional iCloud backup — Copy the local database to your iCloud; the app never runs from iCloud
+PRIVACY BUILT IN
 
-Your data never leaves your device except public market data requests (tickers, NAVs). No analytics, no ads.
+Your portfolio is stored locally. No Portfolio Vault account, no advertising and no analytics. Price requests send public market identifiers, not your holdings or balances. Hide amounts on screen and enable biometric protection on supported devices. Optional iCloud backup is available when iCloud access is enabled.
+
+Native apps for iPhone and Mac, with English and French interfaces. Browse saved data offline; internet access is needed to retrieve market prices. Prices and historical coverage depend on the source and may be delayed. Background updates depend on system availability.
+
+Open your portfolio. Understand the numbers. Keep control of your data.

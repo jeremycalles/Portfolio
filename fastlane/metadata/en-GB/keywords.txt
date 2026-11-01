@@ -1,1 +1,1 @@
-shares,ISA,unit trust,NAV,OPCVM,bitcoin,silver,holdings,ISIN,wealth,offline,privacy,gilt,cash,coin
+tracker,investment,performance,allocation,profit,shares,ISA,bitcoin,silver,unit trust,ISIN,privacy

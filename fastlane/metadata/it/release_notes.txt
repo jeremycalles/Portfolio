@@ -1,5 +1,7 @@
-La cronologia delle posizioni ora deriva interamente da acquisti, vendite e rettifiche modificabili, con grafici del capitale investito e del rendimento ponderato nel tempo. Il dettaglio della posizione aggiunge costo medio e profitti realizzati o latenti.
+Una visione più chiara dei tuoi investimenti.
 
-Una dashboard più pulita: il selettore del periodo è ora nella scheda del portafoglio, e valore, variazione, posizioni migliori e peggiori e grafico lo seguono. Percentuali e importi seguono il formato della tua regione, e i colori di ripartizione non si confondono più con quelli di guadagni e perdite.
-
-Gli aggiornamenti dei prezzi in background sono più affidabili e i prezzi dei fondi dal Financial Times funzionano di nuovo. Le Impostazioni ora indicano quando l’aggiornamento in background è disattivato.
+• Panoramica iPhone rinnovata con valore, rendimento e un unico selettore del periodo.
+• Grafico del rendimento che tiene conto di versamenti e prelievi registrati, con confronti di mercato quando i dati sono disponibili.
+• Cerca e filtra le posizioni; esplora la distribuzione per conto o categoria.
+• Date dei prezzi e dati mancanti più chiari.
+• Miglioramenti per testo grande, VoiceOver e controlli della privacy.
