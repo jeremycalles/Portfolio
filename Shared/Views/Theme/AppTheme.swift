@@ -38,7 +38,7 @@ enum AppTheme {
     static let neutral = Color.secondary
     static let portfolio = Color.indigo
     static let investedCapital = Color.secondary
-    static let sp500 = Color.orange
+    static let sp500 = Color.pink
     static let gold = Color(red: 0.72, green: 0.48, blue: 0.05)
     static let msciWorld = Color.cyan
 

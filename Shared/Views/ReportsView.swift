@@ -285,12 +285,12 @@ struct PriceHistoryView: View {
                                 HStack(spacing: 12) {
                                     PriceMetricCard(
                                         title: "Latest",
-                                        value: formatCurrency(priceHistory.first?.value ?? 0, currency: instrument.currency ?? "EUR"),
+                                        value: formatCurrency(priceHistory.first?.value ?? 0, currency: priceHistory.first?.currency ?? instrument.currency ?? "EUR"),
                                         subtitle: priceHistory.first.map { L10n.reportsAsOf($0.date) }
                                     )
                                     PriceMetricCard(
                                         title: "Oldest",
-                                        value: formatCurrency(priceHistory.last?.value ?? 0, currency: instrument.currency ?? "EUR"),
+                                        value: formatCurrency(priceHistory.last?.value ?? 0, currency: priceHistory.last?.currency ?? instrument.currency ?? "EUR"),
                                         subtitle: priceHistory.last?.date
                                     )
                                     PriceMetricCard(
@@ -306,7 +306,7 @@ struct PriceHistoryView: View {
                                         .width(120)
                                     
                                     TableColumn("Price") { price in
-                                        Text(formatCurrency(price.value, currency: instrument.currency ?? "EUR"))
+                                        Text(formatCurrency(price.value, currency: price.currency ?? instrument.currency ?? "EUR"))
                                             .fontWeight(.medium)
                                     }
                                     .width(min: 100, ideal: 150)

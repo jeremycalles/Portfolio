@@ -10,7 +10,7 @@ private struct LatestPriceCell: View {
         Group {
             if let price = price {
                 VStack(alignment: .trailing) {
-                    Text(formatCurrency(price.value, currency: currency))
+                    Text(formatCurrency(price.value, currency: price.currency ?? currency))
                     Text(price.date)
                         .font(.caption2)
                         .foregroundColor(.secondary)

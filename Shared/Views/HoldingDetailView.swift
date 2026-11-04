@@ -234,14 +234,14 @@ struct HoldingDetailView: View {
     private func load() async {
         async let loadedTransactions = viewModel.db.getHoldingTransactions(accountId: accountId, isin: isin)
         async let loadedHistory = viewModel.getPositionValueHistory(accountId: accountId, isin: isin)
-        async let loadedPrice = viewModel.db.getLatestPrice(forIsin: isin)
+        async let loadedPrice = viewModel.latestPriceInInstrumentCurrency(forIsin: isin)
         transactions = await loadedTransactions
         history = await loadedHistory
         latestPrice = await loadedPrice
         let data = await viewModel.cashflowData(transactions: transactions)
         cashflows = data.cashflows
         events = data.events
-        hasCompleteCashflows = data.isComplete
+        hasCompleteCashflows = await viewModel.hasCompletePeriodCashflows(transactions)
     }
 }
 

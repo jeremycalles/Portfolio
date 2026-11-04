@@ -34,7 +34,7 @@ struct PortfolioTrendChart: View {
     var hasCompleteCashflows = true
     @ObservedObject private var demoMode = DemoModeManager.shared
     private var sensitiveHidden: Bool { privacyMode || demoMode.isDemoModeEnabled }
-    @State private var showsComparisons = false
+    @State private var showsComparisons = true
     @State private var didSetInitialMode = false
     @State private var showingExplanation = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion

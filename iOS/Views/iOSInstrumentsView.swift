@@ -107,7 +107,7 @@ struct iOSInstrumentDetailView: View {
                                 Text(AppDateFormatter.displayDate(price.date))
                                     .foregroundColor(.primary)
                                 Spacer()
-                                Text(formatCurrency(price.value, currency: instrument.currency ?? "EUR"))
+                                Text(formatCurrency(price.value, currency: price.currency ?? instrument.currency ?? "EUR"))
                                     .fontWeight(.medium)
                                     .foregroundColor(.primary)
                                 Image(systemName: "chevron.right")

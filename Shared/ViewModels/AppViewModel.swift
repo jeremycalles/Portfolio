@@ -116,6 +116,32 @@ class AppViewModel: ObservableObject {
         return CurrencyConversion.euros(value: value, fromCurrency: currency, rate: nil)
     }
     
+    /// Expresses prices in their instrument's currency. Providers can quote one fund in
+    /// different currencies, so a row's own currency is the one to trust. A row with no
+    /// rate available is omitted rather than valued as if it were already converted.
+    func pricesInInstrumentCurrency(_ prices: [Price]) async -> [Price] {
+        var converted: [Price] = []
+        converted.reserveCapacity(prices.count)
+        for price in prices {
+            let target = currencyByIsin[price.isin]
+            guard CurrencyConversion.needsConversion(from: price.currency, to: target) else {
+                converted.append(price)
+                continue
+            }
+            let fromRate = await convertToEUR(value: 1, fromCurrency: price.currency, onDate: price.date)
+            let toRate = await convertToEUR(value: 1, fromCurrency: target, onDate: price.date)
+            guard let value = CurrencyConversion.converted(
+                value: price.value, from: price.currency, to: target, fromRate: fromRate, toRate: toRate
+            ) else { continue }
+            converted.append(Price(id: price.id, isin: price.isin, date: price.date, value: value, currency: target))
+        }
+        return converted
+    }
+
+    func latestPriceInInstrumentCurrency(forIsin isin: String) async -> Price? {
+        (await pricesInInstrumentCurrency(await db.getPriceHistory(forIsin: isin))).last
+    }
+
     /// Clears the exchange rate cache. Call at the start of each history/report computation.
     func clearRateCache() {
         eurRateCache.removeAll(keepingCapacity: true)
@@ -194,7 +220,7 @@ class AppViewModel: ObservableObject {
             let history = await getPositionValueHistory(accountId: holding.accountId, isin: holding.isin)
             let transactions = await db.getHoldingTransactions(accountId: holding.accountId, isin: holding.isin)
             let flowData = await cashflowData(transactions: transactions)
-            if flowData.isComplete {
+            if await hasCompletePeriodCashflows(transactions) {
                 positionReturns[HoldingEditItem(accountId: holding.accountId, isin: holding.isin).id] =
                     PortfolioAnalytics.returnSeries(history, cashflows: flowData.cashflows).last?.value
             }

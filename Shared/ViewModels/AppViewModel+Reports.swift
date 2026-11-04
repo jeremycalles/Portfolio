@@ -12,7 +12,7 @@ extension AppViewModel {
         let comparisonDate = selectedPeriod.comparisonDate
         let comparisonDateStr = AppDateFormatter.yearMonthDay.string(from: comparisonDate)
         let todayStr = AppDateFormatter.todayString
-        let histories = await db.getPriceHistory(forIsins: Array(Set(holdings.map(\.isin))))
+        let histories = await pricesInInstrumentCurrency(await db.getPriceHistory(forIsins: Array(Set(holdings.map(\.isin)))))
         let pricesByIsin = Dictionary(grouping: histories, by: \.isin)
         let transactions = await db.getAllHoldingTransactions()
         let transactionsByPosition = Dictionary(grouping: transactions) { "\($0.accountId)|\($0.isin)" }
@@ -135,7 +135,7 @@ extension AppViewModel {
     func getAllHoldingsWithQuantity() async -> [(isin: String, name: String, quantity: Double)] {
         let totals = Dictionary(grouping: holdings, by: \.isin)
             .mapValues { $0.reduce(0) { $0 + $1.quantity } }
-        let latestPrices = await db.getLatestPrices(forIsins: instruments.map(\.isin))
+        let latestPrices = await pricesInInstrumentCurrency(await db.getLatestPrices(forIsins: instruments.map(\.isin)))
         let priceByISIN = Dictionary(uniqueKeysWithValues: latestPrices.map { ($0.isin, $0.value) })
         return instruments.compactMap { instrument in
             let original = totals[instrument.isin] ?? 0

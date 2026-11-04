@@ -56,6 +56,27 @@ enum CurrencyConversion {
         guard let rate else { return nil }
         return value * rate
     }
+
+    /// Converts between two currencies through EUR. Rates are per one EUR-quoted unit of
+    /// each currency. A missing currency means the value is already in the target currency.
+    static func converted(value: Double, from: String?, to: String?, fromRate: Double?, toRate: Double?) -> Double? {
+        guard needsConversion(from: from, to: to) else { return value }
+        guard let euros = euros(value: value, fromCurrency: from, rate: fromRate) else { return nil }
+        if normalizedCode(to) == "EUR" { return euros }
+        guard let toRate, toRate > 0 else { return nil }
+        return euros / toRate
+    }
+
+    static func needsConversion(from: String?, to: String?) -> Bool {
+        guard let from = normalizedCode(from), let to = normalizedCode(to) else { return false }
+        return from != to
+    }
+
+    private static func normalizedCode(_ currency: String?) -> String? {
+        guard let code = currency?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(),
+              !code.isEmpty else { return nil }
+        return code
+    }
 }
 
 /// Locale-aware decimal parsing (handles comma or period as decimal separator).

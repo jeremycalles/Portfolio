@@ -6,7 +6,7 @@ extension AppViewModel {
     /// Builds an ascending-sorted price index for each ISIN, loading all data from DB once.
     private func buildPriceIndex(for isins: [String]) async -> [String: [(date: String, value: Double)]] {
         let unique = Array(Set(isins))
-        let prices = await db.getPriceHistory(forIsins: unique)
+        let prices = await pricesInInstrumentCurrency(await db.getPriceHistory(forIsins: unique))
         var index = Dictionary(uniqueKeysWithValues: unique.map { ($0, [(date: String, value: Double)]()) })
         for price in prices {
             index[price.isin, default: []].append((price.date, price.value))
@@ -50,6 +50,20 @@ extension AppViewModel {
             result[tx.isin, default: []].append((tx.date, tx.quantityDelta))
         }
         return result
+    }
+
+    /// Whether the selected period's return can be computed. Only that period's
+    /// transactions need a price, so an unpriced older one must not hide the return.
+    /// An all-time return starts at the first transaction, so it needs them all.
+    func hasCompletePeriodCashflows(_ transactions: [HoldingTransaction]) async -> Bool {
+        guard selectedPeriod != .all else {
+            return await cashflowData(transactions: transactions).isComplete
+        }
+        let cutoff = historyCutoff(for: transactions)
+        let today = AppDateFormatter.todayString
+        return await cashflowData(
+            transactions: transactions.filter { $0.date > cutoff && $0.date <= today }
+        ).isComplete
     }
 
     private func historyCutoff(for transactions: [HoldingTransaction]) -> String {
@@ -181,6 +195,7 @@ extension AppViewModel {
         let cutoff = historyCutoff(for: transactions)
         let today = AppDateFormatter.todayString
         let periodFlows = flowData.cashflows.filter { $0.date > cutoff && $0.date <= today }
+        let hasCompleteReturns = await hasCompletePeriodCashflows(transactions)
         let benchmarkIDs = [SP500IndexIsin, GoldIndexIsin, MSCIWorldIndexIsin, "VERACASH:GOLD_SPOT"]
         let indices = await buildPriceIndex(for: benchmarkIDs)
         let derived = await PortfolioAnalytics.deriveDashboardSeries(
@@ -208,18 +223,18 @@ extension AppViewModel {
         return DashboardSnapshot(
             portfolio: portfolio,
             investedCapital: flowData.isComplete ? derived.investedCapital : [],
-            sp500: flowData.isComplete ? derived.sp500 : [],
-            gold: flowData.isComplete ? derived.gold : [],
-            msciWorld: flowData.isComplete ? derived.msciWorld : [],
+            sp500: hasCompleteReturns ? derived.sp500 : [],
+            gold: hasCompleteReturns ? derived.gold : [],
+            msciWorld: hasCompleteReturns ? derived.msciWorld : [],
             goldOunces: goldOunces,
             events: flowData.events.filter {
                 let date = AppDateFormatter.yearMonthDay.string(from: $0.date)
                 return date >= cutoff && date <= today
             },
-            timeWeightedReturn: flowData.isComplete ? derived.timeWeightedReturn : nil,
-            gainEUR: flowData.isComplete && gainEUR.isFinite ? gainEUR : nil,
+            timeWeightedReturn: hasCompleteReturns ? derived.timeWeightedReturn : nil,
+            gainEUR: hasCompleteReturns && gainEUR.isFinite ? gainEUR : nil,
             cashflows: flowData.cashflows,
-            hasCompleteCashflows: flowData.isComplete
+            hasCompleteCashflows: hasCompleteReturns
         )
     }
 

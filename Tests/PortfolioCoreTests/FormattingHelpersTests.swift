@@ -130,6 +130,32 @@ struct FormattingHelpersTests {
 
     // MARK: - CurrencyConversion
 
+    @Test("A USD price on an EUR instrument converts to EUR")
+    func convertsForeignPriceToInstrumentCurrency() {
+        let value = CurrencyConversion.converted(value: 100, from: "USD", to: "EUR", fromRate: 0.9, toRate: 1)
+        #expect(value == 90)
+    }
+
+    @Test("An EUR price on a USD instrument converts to USD")
+    func convertsEuroPriceToForeignInstrumentCurrency() {
+        let value = CurrencyConversion.converted(value: 90, from: "EUR", to: "USD", fromRate: 1, toRate: 0.9)
+        #expect(value == 100)
+    }
+
+    @Test("Matching or unknown currencies keep the value")
+    func keepsValueWithoutCurrencyMismatch() {
+        #expect(CurrencyConversion.converted(value: 10, from: " usd ", to: "USD", fromRate: nil, toRate: nil) == 10)
+        #expect(CurrencyConversion.converted(value: 10, from: nil, to: "USD", fromRate: nil, toRate: nil) == 10)
+        #expect(CurrencyConversion.converted(value: 10, from: "USD", to: nil, fromRate: nil, toRate: nil) == 10)
+    }
+
+    @Test("A missing rate never passes the raw amount through")
+    func missingRateReturnsNil() {
+        #expect(CurrencyConversion.converted(value: 10, from: "USD", to: "EUR", fromRate: nil, toRate: 1) == nil)
+        #expect(CurrencyConversion.converted(value: 10, from: "EUR", to: "USD", fromRate: 1, toRate: nil) == nil)
+        #expect(CurrencyConversion.converted(value: 10, from: "EUR", to: "USD", fromRate: 1, toRate: 0) == nil)
+    }
+
     @Test("euros returns the raw value for EUR or missing currency")
     func eurosPassthroughForEUR() {
         #expect(CurrencyConversion.euros(value: 10, fromCurrency: "EUR", rate: nil) == 10)
