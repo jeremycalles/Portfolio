@@ -1,6 +1,7 @@
 #if os(iOS)
 import SwiftUI
 import UIKit
+import UIKit.UIGestureRecognizerSubclass
 import LocalAuthentication
 
 private let iosBiometricProtectionEnabledKey = "ios_biometric_protection_enabled"
@@ -219,6 +220,58 @@ private struct IOSLockScreenContent: View {
     }
 }
 
+// MARK: - Touch Activity
+/// Reports every touch in the window without taking part in gesture handling.
+/// A SwiftUI gesture on the root view stops List rows from receiving taps.
+private final class TouchActivityRecognizer: UIGestureRecognizer {
+    var onTouch: (() -> Void)?
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+        onTouch?()
+        state = .failed
+    }
+}
+
+private final class TouchActivityMonitorView: UIView {
+    private let recognizer = TouchActivityRecognizer()
+
+    var onTouch: (() -> Void)? {
+        didSet { recognizer.onTouch = onTouch }
+    }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isUserInteractionEnabled = false
+        recognizer.cancelsTouchesInView = false
+        recognizer.delaysTouchesBegan = false
+        recognizer.delaysTouchesEnded = false
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        recognizer.view?.removeGestureRecognizer(recognizer)
+        window?.addGestureRecognizer(recognizer)
+    }
+}
+
+private struct TouchActivityMonitor: UIViewRepresentable {
+    let onTouch: () -> Void
+
+    func makeUIView(context: Context) -> TouchActivityMonitorView {
+        let view = TouchActivityMonitorView()
+        view.onTouch = onTouch
+        return view
+    }
+
+    func updateUIView(_ uiView: TouchActivityMonitorView, context: Context) {
+        uiView.onTouch = onTouch
+    }
+}
+
 // MARK: - Gate View
 struct IOSLockGateView: View {
     @Environment(\.scenePhase) private var scenePhase
@@ -230,11 +283,7 @@ struct IOSLockGateView: View {
         Group {
             if !lockManager.isTouchIDProtectionEnabled || lockManager.isUnlocked {
                 iOSRootView()
-                    .simultaneousGesture(
-                        TapGesture().onEnded { _ in
-                            lockManager.recordActivity()
-                        }
-                    )
+                    .background(TouchActivityMonitor { lockManager.recordActivity() })
             } else {
                 IOSLockScreenView(lockManager: lockManager)
             }
