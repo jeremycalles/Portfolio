@@ -1,0 +1,122 @@
+[
+  {
+    "file": "en-US/1320x2868/01-overview.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB"
+  },
+  {
+    "file": "en-US/1320x2868/02-performance.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB"
+  },
+  {
+    "file": "en-US/1320x2868/03-holdings.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB"
+  },
+  {
+    "file": "en-US/1320x2868/04-allocation.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB"
+  },
+  {
+    "file": "en-US/1320x2868/05-privacy.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB"
+  },
+  {
+    "file": "en-US/1206x2622/01-overview.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB"
+  },
+  {
+    "file": "en-US/1206x2622/02-performance.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB"
+  },
+  {
+    "file": "en-US/1206x2622/03-holdings.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB"
+  },
+  {
+    "file": "en-US/1206x2622/04-allocation.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB"
+  },
+  {
+    "file": "en-US/1206x2622/05-privacy.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB"
+  },
+  {
+    "file": "fr-FR/1320x2868/01-overview.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB"
+  },
+  {
+    "file": "fr-FR/1320x2868/02-performance.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB"
+  },
+  {
+    "file": "fr-FR/1320x2868/03-holdings.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB"
+  },
+  {
+    "file": "fr-FR/1320x2868/04-allocation.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB"
+  },
+  {
+    "file": "fr-FR/1320x2868/05-privacy.png",
+    "width": 1320,
+    "height": 2868,
+    "mode": "RGB"
+  },
+  {
+    "file": "fr-FR/1206x2622/01-overview.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB"
+  },
+  {
+    "file": "fr-FR/1206x2622/02-performance.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB"
+  },
+  {
+    "file": "fr-FR/1206x2622/03-holdings.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB"
+  },
+  {
+    "file": "fr-FR/1206x2622/04-allocation.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB"
+  },
+  {
+    "file": "fr-FR/1206x2622/05-privacy.png",
+    "width": 1206,
+    "height": 2622,
+    "mode": "RGB"
+  }
+]

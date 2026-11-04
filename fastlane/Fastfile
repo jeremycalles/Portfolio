@@ -59,22 +59,29 @@ rescue => e
   UI.important("Live promotional text update skipped: #{e.message}")
 end
 
+# Returns the platforms that have an editable version. Apple refuses a new version
+# while another is in review, and that must not block the other platform's archive.
 def ensure_editable_app_store_versions!
   configure_connect_api!
   app = Spaceship::ConnectAPI::App.find(APP_IDENTIFIER)
   UI.user_error!("App #{APP_IDENTIFIER} not found") unless app
 
-  DELIVER_PLATFORMS.each_key do |platform|
-    edit = app.get_edit_app_store_version(platform: platform)
-    next if edit
+  DELIVER_PLATFORMS.keys.select do |platform|
+    next true if app.get_edit_app_store_version(platform: platform)
 
     latest = app.get_latest_app_store_version(platform: platform)
     nxt = ENV.fetch("APP_VERSION") { bump_patch(latest&.version_string || "1.1.1") }
     UI.message("Creating App Store version #{nxt} (#{platform}) for editable listing copy")
-    Spaceship::ConnectAPI.post_app_store_version(
-      app_id: app.id,
-      attributes: { versionString: nxt, platform: platform }
-    )
+    begin
+      Spaceship::ConnectAPI.post_app_store_version(
+        app_id: app.id,
+        attributes: { versionString: nxt, platform: platform }
+      )
+      true
+    rescue Spaceship::UnexpectedResponse => e
+      UI.important("Skipping #{platform} metadata: #{e.message}")
+      false
+    end
   end
 end
 
@@ -131,9 +138,8 @@ platform :ios do
   lane :metadata_upload do
     MetadataValidate.run(File.expand_path("metadata", __dir__))
     update_live_conversion_copy!
-    ensure_editable_app_store_versions!
-    DELIVER_PLATFORMS.each_value do |deliver_platform|
-      deliver(**deliver_options, platform: deliver_platform)
+    ensure_editable_app_store_versions!.each do |platform|
+      deliver(**deliver_options, platform: DELIVER_PLATFORMS.fetch(platform))
     end
     UI.success("Metadata uploaded. Check App Store Connect for the editable version.")
   end
