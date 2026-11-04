@@ -1,9 +1,8 @@
-A clearer view of your investments.
+More accurate numbers and smoother navigation.
 
-• A redesigned iPhone overview puts portfolio value and investment return first, with one period selector for a consistent view.
-• Understand performance with a return chart that accounts for recorded contributions and withdrawals, plus comparisons with market benchmarks when data is available.
-• Find positions more easily with search and filters, then explore allocation by account or category.
-• Review price dates and missing data more clearly, so you know what is behind your totals.
-• Improved layouts for larger text, VoiceOver and privacy controls make everyday checks easier.
+• Portfolio values and returns are now correct when a fund's prices arrive in different currencies.
+• Returns now appear for a period whenever its prices are available, even if an older transaction has no price.
+• S&P 500, Gold and MSCI World comparison lines are back on your return chart, each in its own colour.
+• Fixed rows in Settings and other lists that could ignore taps.
 
 Your portfolio stays under your control: no account, no bank connection, no analytics.

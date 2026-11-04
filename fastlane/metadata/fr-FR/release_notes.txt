@@ -1,9 +1,8 @@
-Un regard plus clair sur vos placements.
+Des chiffres plus justes et une navigation plus fluide.
 
-• La vue d’ensemble repensée sur iPhone met la valeur et le rendement au premier plan, avec un même choix de période pour une lecture cohérente.
-• Comprenez la performance grâce à une courbe de rendement qui tient compte des apports et retraits enregistrés, et comparez-la aux indices lorsque les données sont disponibles.
-• Retrouvez vos positions avec la recherche et les filtres, puis explorez la répartition par compte ou catégorie.
-• Repérez plus facilement les dates de cours et les données manquantes pour comprendre vos totaux.
-• Des améliorations pour les grands caractères, VoiceOver et les commandes de confidentialité facilitent la consultation.
+• La valeur et le rendement du portefeuille sont désormais corrects lorsque les cours d’un fonds arrivent dans plusieurs devises.
+• Le rendement s’affiche pour une période dès que ses cours sont disponibles, même si une transaction plus ancienne n’a pas de prix.
+• Les courbes de comparaison S&P 500, Or et MSCI World sont de retour sur votre graphique de rendement, chacune avec sa couleur.
+• Correction des lignes des Paramètres et d’autres listes qui pouvaient ignorer les touchers.
 
 Vous gardez le contrôle : sans compte, sans connexion bancaire, sans analyse d’usage.

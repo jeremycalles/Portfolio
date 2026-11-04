@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       app_version:
-        description: "Marketing version for release_notes (e.g. 1.1.0)"
+        description: "Marketing version for release_notes (e.g. 1.1.1)"
         required: true
-        default: "1.1.0"
+        default: "1.1.1"
       upload:
         description: "Upload to App Store Connect (false = validate only)"
         required: true

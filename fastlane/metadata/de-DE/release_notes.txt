@@ -1,7 +1,6 @@
-Mehr Überblick über Ihre Anlagen.
+Genauere Zahlen und flüssigere Bedienung.
 
-• Neue iPhone-Übersicht mit Portfoliowert, Rendite und gemeinsamer Zeitraumauswahl.
-• Renditekurve unter Berücksichtigung erfasster Ein- und Auszahlungen, mit Marktvergleichen bei verfügbaren Daten.
-• Positionen suchen und filtern, Verteilung nach Konto oder Kategorie prüfen.
-• Kursdaten und fehlende Werte leichter erkennen.
-• Verbesserungen für große Schrift, VoiceOver und Datenschutzfunktionen.
+• Depotwert und Rendite stimmen jetzt, auch wenn die Kurse eines Fonds in verschiedenen Währungen eintreffen.
+• Die Rendite wird für einen Zeitraum angezeigt, sobald dessen Kurse vorliegen, auch wenn einer älteren Transaktion ein Preis fehlt.
+• Die Vergleichslinien für S&P 500, Gold und MSCI World sind zurück im Renditediagramm, jede in eigener Farbe.
+• Zeilen in den Einstellungen und anderen Listen reagieren nun zuverlässig auf Tippen.

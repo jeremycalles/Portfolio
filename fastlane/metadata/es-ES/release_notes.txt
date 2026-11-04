@@ -1,7 +1,6 @@
-Una visión más clara de tus inversiones.
+Cifras más precisas y una navegación más fluida.
 
-• Vista general renovada en iPhone con valor, rentabilidad y un mismo selector de periodo.
-• Curva de rentabilidad que tiene en cuenta las aportaciones y retiradas registradas, con comparaciones de mercado cuando hay datos.
-• Busca y filtra posiciones; revisa la distribución por cuenta o categoría.
-• Identifica mejor las fechas de los precios y los datos que faltan.
-• Mejoras para texto grande, VoiceOver y controles de privacidad.
+• El valor y la rentabilidad de la cartera ahora son correctos cuando los precios de un fondo llegan en varias divisas.
+• La rentabilidad aparece en un periodo en cuanto sus precios están disponibles, aunque una transacción anterior no tenga precio.
+• Vuelven las líneas de comparación de S&P 500, Oro y MSCI World en tu gráfico de rentabilidad, cada una con su color.
+• Corregidas las filas de Ajustes y otras listas que podían ignorar los toques.

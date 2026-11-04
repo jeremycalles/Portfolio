@@ -1,7 +1,6 @@
-Una visione più chiara dei tuoi investimenti.
+Numeri più precisi e navigazione più fluida.
 
-• Panoramica iPhone rinnovata con valore, rendimento e un unico selettore del periodo.
-• Grafico del rendimento che tiene conto di versamenti e prelievi registrati, con confronti di mercato quando i dati sono disponibili.
-• Cerca e filtra le posizioni; esplora la distribuzione per conto o categoria.
-• Date dei prezzi e dati mancanti più chiari.
-• Miglioramenti per testo grande, VoiceOver e controlli della privacy.
+• Il valore e il rendimento del portafoglio ora sono corretti quando i prezzi di un fondo arrivano in valute diverse.
+• Il rendimento appare per un periodo non appena i suoi prezzi sono disponibili, anche se una transazione precedente non ha un prezzo.
+• Tornano le linee di confronto S&P 500, Oro e MSCI World nel grafico del rendimento, ognuna con il proprio colore.
+• Corrette le righe di Impostazioni e di altri elenchi che potevano ignorare i tocchi.
