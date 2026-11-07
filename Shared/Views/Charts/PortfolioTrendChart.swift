@@ -119,8 +119,6 @@ struct PortfolioTrendChart: View {
     private func setComparison(_ comparison: ChartComparison, selected: Bool) {
         if selected {
             comparisonSelection = ChartComparisonSelection.adding(comparison.id, to: comparisonSelection)
-            // A quadrant has no meaning as an amount: it is a return.
-            if comparison.kind == .precomputedReturn { displayMode = .percent }
             // Averages and comparisons would crowd the same chart.
             movingAverageSelection = ""
         } else {
@@ -612,7 +610,8 @@ struct PortfolioTrendChart: View {
             if !quadrants.isEmpty {
                 Section(L10n.chartCompareQuadrants) {
                     ForEach(quadrants) { comparison in
-                        comparisonToggle(comparison)
+                        // A quadrant is a return, not an amount: only offered in return mode.
+                        comparisonToggle(comparison).disabled(displayMode != .percent)
                     }
                 }
             }
