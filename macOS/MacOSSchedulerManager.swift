@@ -417,12 +417,14 @@ class MacOSSchedulerManager: ObservableObject {
         async let sp500Prices = MarketDataService.shared.fetchSP500History(period: "2y", interval: "1d")
         async let goldPrices = MarketDataService.shared.fetchGoldHistory(period: "2y", interval: "1d")
         async let msciPrices = MarketDataService.shared.fetchMSCIWorldHistory(period: "2y", interval: "1d")
+        async let oilPrices = MarketDataService.shared.fetchOilBrentHistory(period: "2y", interval: "1d")
         
-        let (sp500Result, goldResult, msciResult) = await (sp500Prices, goldPrices, msciPrices)
+        let (sp500Result, goldResult, msciResult, oilResult) = await (sp500Prices, goldPrices, msciPrices, oilPrices)
         
         for price in sp500Result { await DatabaseService.shared.addPrice(price) }
         for price in goldResult { await DatabaseService.shared.addPrice(price) }
         for price in msciResult { await DatabaseService.shared.addPrice(price) }
+        for price in oilResult { await DatabaseService.shared.addPrice(price) }
         
         appendLog("Benchmarks updated (S&P500: \(sp500Result.count), Gold: \(goldResult.count), MSCI: \(msciResult.count))")
         

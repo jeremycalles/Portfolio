@@ -13,6 +13,8 @@ class AppViewModel: ObservableObject {
     @Published var statusMessage = ""
     @Published var errorMessage: String?
     @Published var refreshResult: RefreshResult?
+    /// Bumped each time benchmark prices (indices, gold, Brent) were stored.
+    @Published var benchmarkRevision = 0
     
     @Published var selectedPeriod: ReportPeriod = .oneWeek {
         didSet {

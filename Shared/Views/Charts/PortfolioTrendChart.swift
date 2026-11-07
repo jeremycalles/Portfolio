@@ -5,9 +5,6 @@ import Charts
 enum PortfolioChartSeries: String, CaseIterable, Plottable {
     case portfolio
     case investedCapital
-    case sp500
-    case gold
-    case msciWorld
     case movingAverage30
     case movingAverage200
     case movingAverage7y
@@ -42,14 +39,17 @@ struct PortfolioTrendChart: View {
     let history: [(date: Date, value: Double)]
     var investedCapitalHistory: [(date: Date, value: Double)]? = nil
     var transactionEvents: [PortfolioChartEvent] = []
-    var sp500History: [(date: Date, value: Double)]? = nil  // Optional S&P 500 comparison (same amount invested)
-    var goldHistory: [(date: Date, value: Double)]? = nil   // Optional Gold comparison
-    var msciWorldHistory: [(date: Date, value: Double)]? = nil // Optional MSCI World comparison
+    /// Series that can be drawn next to the main line, chosen from the Compare menu.
+    var comparisons: [ChartComparison] = []
     var performancePercent: Double? = nil
     var compact: Bool = false
-    var unit: String = "EUR"  // "EUR" or "oz" for gold ounces
+    var unit: String = "EUR"  // "EUR", "oz" for gold ounces, or "ratio" for a unitless value
+    /// Name of the main line; the portfolio unless the chart shows something else.
+    var seriesLabel: String? = nil
     var interactive: Bool = false
     var privacyMode: Bool = false
+    /// False for data that is not about the user's holdings, so demo mode keeps it visible.
+    var isSensitive = true
     var cashflows: [PortfolioCashflow]? = nil
     var startsWithReturn = false
     var hasCompleteCashflows = true
@@ -61,8 +61,8 @@ struct PortfolioTrendChart: View {
     @AppStorage("chartMovingAverages") private var movingAverageSelection = ""
     @State private var isDownloadingHistory = false
     @ObservedObject private var demoMode = DemoModeManager.shared
-    private var sensitiveHidden: Bool { privacyMode || demoMode.isDemoModeEnabled }
-    @State private var showsComparisons = true
+    private var sensitiveHidden: Bool { isSensitive && (privacyMode || demoMode.isDemoModeEnabled) }
+    @AppStorage(ChartComparisonSelection.storageKey) private var comparisonSelection = ChartComparisonSelection.defaultValue
     @State private var didSetInitialMode = false
     @State private var showingExplanation = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -86,7 +86,48 @@ struct PortfolioTrendChart: View {
         return transactionEvents.filter { $0.date >= start && $0.date <= end }
     }
 
+    private var mainSeriesLabel: String { seriesLabel ?? L10n.chartPortfolioLabel }
+
     private var displayedHistory: [(date: Date, value: Double)] { displayed(history) }
+
+    /// Comparisons drawn right now: chosen, not capped away, and valid in the current mode.
+    private var activeComparisons: [ActiveComparison] {
+        let chosen = ChartComparisonSelection.ids(comparisonSelection)
+        var result: [ActiveComparison] = []
+        for id in chosen {
+            guard result.count < ChartComparisonSelection.limit,
+                  let comparison = comparisons.first(where: { $0.id == id }) else { continue }
+            let series: [(date: Date, value: Double)]
+            switch comparison.kind {
+            case .benchmark: series = displayed(comparison.history)
+            case .precomputedReturn: series = displayMode == .percent ? comparison.history : []
+            }
+            if !series.isEmpty { result.append(ActiveComparison(comparison: comparison, series: series)) }
+        }
+        return result
+    }
+
+    private struct ActiveComparison {
+        let comparison: ChartComparison
+        let series: [(date: Date, value: Double)]
+    }
+
+    private func isComparisonSelected(_ id: String) -> Bool {
+        ChartComparisonSelection.ids(comparisonSelection).contains(id)
+    }
+
+    private func setComparison(_ comparison: ChartComparison, selected: Bool) {
+        if selected {
+            comparisonSelection = ChartComparisonSelection.adding(comparison.id, to: comparisonSelection)
+            // A quadrant has no meaning as an amount: it is a return.
+            if comparison.kind == .precomputedReturn { displayMode = .percent }
+            // Averages and comparisons would crowd the same chart.
+            movingAverageSelection = ""
+        } else {
+            comparisonSelection = ChartComparisonSelection.removing(comparison.id, from: comparisonSelection)
+        }
+        clearScrubbedPoint()
+    }
 
     private var selectedMovingAverages: [MovingAverageWindow] {
         let selected = Set(movingAverageSelection.split(separator: ",").map(String.init))
@@ -101,7 +142,12 @@ struct PortfolioTrendChart: View {
 
     private func setMovingAverage(_ window: MovingAverageWindow, selected: Bool) {
         var values = Set(movingAverageSelection.split(separator: ",").map(String.init))
-        if selected { values.insert(window.rawValue) } else { values.remove(window.rawValue) }
+        if selected {
+            values.insert(window.rawValue)
+            comparisonSelection = ""
+        } else {
+            values.remove(window.rawValue)
+        }
         movingAverageSelection = MovingAverageWindow.allCases.map(\.rawValue).filter(values.contains).joined(separator: ",")
         clearScrubbedPoint()
     }
@@ -144,9 +190,7 @@ struct PortfolioTrendChart: View {
         }
         scan(displayedHistory)
         scan(displayedInvested)
-        scan(displayed(showsComparisons ? sp500History : nil))
-        scan(displayed(showsComparisons ? goldHistory : nil))
-        scan(displayed(showsComparisons ? msciWorldHistory : nil))
+        for item in activeComparisons { scan(item.series) }
         for window in selectedMovingAverages { scan(displayedMovingAverage(window)) }
         // Nothing scanned leaves lo > hi; an inverted range crashes Swift Charts.
         guard lo <= hi else { return (0, 1) }
@@ -213,6 +257,9 @@ struct PortfolioTrendChart: View {
         if displayMode == .percent {
             return formatPercentChange(value, fractionDigits: abs(maxValue - minValue) < 1 ? 2 : 1)
         }
+        if unit == "ratio" {
+            return String(format: abs(value) >= 100 ? "%.0f" : "%.1f", value)
+        }
         if unit == "oz" {
             // Gold ounces format
             if value >= 100 {
@@ -231,6 +278,9 @@ struct PortfolioTrendChart: View {
     private func formatScrubbedValue(_ value: Double) -> String {
         if displayMode == .percent {
             return formatPercentChange(value)
+        }
+        if unit == "ratio" {
+            return String(format: "%.2f", value)
         }
         if unit == "oz" {
             return String(format: "%.3f oz", value)
@@ -288,13 +338,8 @@ struct PortfolioTrendChart: View {
                     .buttonStyle(.plain)
                     .frame(minHeight: 44)
                     Spacer()
-                    if sp500History?.isEmpty == false || goldHistory?.isEmpty == false || msciWorldHistory?.isEmpty == false {
-                        Button { showsComparisons.toggle(); clearScrubbedPoint() } label: {
-                            Label(L10n.designCompare, systemImage: showsComparisons ? "checkmark.circle.fill" : "plus.circle")
-                                .font(.caption)
-                        }
-                        .frame(minHeight: 44)
-                        .accessibilityAddTraits(showsComparisons ? .isSelected : [])
+                    if !comparisons.isEmpty {
+                        comparisonMenu
                     }
                     if movingAverageRatios != nil {
                         movingAverageMenu
@@ -306,30 +351,23 @@ struct PortfolioTrendChart: View {
                 Text(L10n.designReturnUnavailable).font(.caption).foregroundStyle(.secondary).padding(.horizontal, 16)
             }
             // Legend and % on the same line
-            let hasSp500 = showsComparisons && sp500History != nil && !(sp500History?.isEmpty ?? true)
-            let hasGold = showsComparisons && goldHistory != nil && !(goldHistory?.isEmpty ?? true)
-            let hasMsci = showsComparisons && msciWorldHistory != nil && !(msciWorldHistory?.isEmpty ?? true)
+            let activeComparisons = activeComparisons
+            let hasComparisons = !activeComparisons.isEmpty
             let hasInvested = !displayedInvested.isEmpty
             let movingAverages = selectedMovingAverages
             let hasMovingAverages = !movingAverages.isEmpty
 
-            if (performanceBadge != nil) || hasInvested || hasSp500 || hasGold || hasMsci || hasMovingAverages {
+            if (performanceBadge != nil) || hasInvested || hasComparisons || hasMovingAverages {
                 HStack(alignment: .firstTextBaseline) {
-                    if hasInvested || hasSp500 || hasGold || hasMsci || hasMovingAverages {
+                    if hasInvested || hasComparisons || hasMovingAverages {
                         // Wrap whole items onto a new line instead of hyphenating labels.
                         FlowLayout(spacing: 12, lineSpacing: 4) {
-                            legendItem(L10n.chartPortfolioLabel, color: chartColor)
+                            legendItem(mainSeriesLabel, color: chartColor)
                             if hasInvested {
                                 legendItem(L10n.chartInvestedCapital, color: AppTheme.investedCapital, isLine: true)
                             }
-                            if hasSp500 {
-                                legendItem(L10n.chartSp500Comparison, color: AppTheme.sp500)
-                            }
-                            if hasGold {
-                                legendItem(L10n.chartGoldComparison, color: AppTheme.gold)
-                            }
-                            if hasMsci {
-                                legendItem(L10n.chartMsciWorldComparison, color: AppTheme.msciWorld)
+                            ForEach(activeComparisons, id: \.comparison.id) { item in
+                                legendItem(item.comparison.label, color: item.comparison.color)
                             }
                             ForEach(movingAverages) { window in
                                 legendItem(window.label, color: window.color, isLine: true)
@@ -394,36 +432,14 @@ struct PortfolioTrendChart: View {
                         .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
                     }
                 }
-                let sp = displayed(showsComparisons ? sp500History : nil)
-                if !sp.isEmpty {
-                    ForEach(Array(sp.enumerated()), id: \.offset) { _, item in
+                ForEach(activeComparisons, id: \.comparison.id) { item in
+                    ForEach(Array(item.series.enumerated()), id: \.offset) { _, point in
                         LineMark(
-                            x: .value("Date", item.date),
-                            y: .value("Value", item.value)
+                            x: .value("Date", point.date),
+                            y: .value("Value", point.value),
+                            series: .value("Comparison", item.comparison.id)
                         )
-                        .foregroundStyle(by: .value("Series", PortfolioChartSeries.sp500))
-                        .interpolationMethod(.linear)
-                    }
-                }
-                let gd = displayed(showsComparisons ? goldHistory : nil)
-                if !gd.isEmpty {
-                    ForEach(Array(gd.enumerated()), id: \.offset) { _, item in
-                        LineMark(
-                            x: .value("Date", item.date),
-                            y: .value("Value", item.value)
-                        )
-                        .foregroundStyle(by: .value("Series", PortfolioChartSeries.gold))
-                        .interpolationMethod(.linear)
-                    }
-                }
-                let mw = displayed(showsComparisons ? msciWorldHistory : nil)
-                if !mw.isEmpty {
-                    ForEach(Array(mw.enumerated()), id: \.offset) { _, item in
-                        LineMark(
-                            x: .value("Date", item.date),
-                            y: .value("Value", item.value)
-                        )
-                        .foregroundStyle(by: .value("Series", PortfolioChartSeries.msciWorld))
+                        .foregroundStyle(item.comparison.color)
                         .interpolationMethod(.linear)
                     }
                 }
@@ -465,9 +481,6 @@ struct PortfolioTrendChart: View {
             .chartForegroundStyleScale([
                 PortfolioChartSeries.portfolio: chartColor,
                 PortfolioChartSeries.investedCapital: AppTheme.investedCapital,
-                PortfolioChartSeries.sp500: AppTheme.sp500,
-                PortfolioChartSeries.gold: AppTheme.gold,
-                PortfolioChartSeries.msciWorld: AppTheme.msciWorld,
                 PortfolioChartSeries.movingAverage30: AppTheme.movingAverageShort,
                 PortfolioChartSeries.movingAverage200: AppTheme.movingAverageMedium,
                 PortfolioChartSeries.movingAverage7y: AppTheme.movingAverageLong
@@ -532,11 +545,11 @@ struct PortfolioTrendChart: View {
                 Text("••••••")
                     .font(.caption.weight(.semibold))
             } else {
-                calloutLine(L10n.chartPortfolioLabel, value: point.value, color: chartColor)
+                calloutLine(mainSeriesLabel, value: point.value, color: chartColor)
                 calloutSeriesLine(L10n.chartInvestedCapital, series: displayedInvested, date: point.date, color: AppTheme.investedCapital)
-                calloutSeriesLine(L10n.chartSp500Comparison, series: displayed(showsComparisons ? sp500History : nil), date: point.date, color: AppTheme.sp500)
-                calloutSeriesLine(L10n.chartGoldComparison, series: displayed(showsComparisons ? goldHistory : nil), date: point.date, color: AppTheme.gold)
-                calloutSeriesLine(L10n.chartMsciWorldComparison, series: displayed(showsComparisons ? msciWorldHistory : nil), date: point.date, color: AppTheme.msciWorld)
+                ForEach(activeComparisons, id: \.comparison.id) { item in
+                    calloutSeriesLine(item.comparison.label, series: item.series, date: point.date, color: item.comparison.color)
+                }
                 ForEach(selectedMovingAverages) { window in
                     calloutMovingAverageLine(window, date: point.date)
                 }
@@ -584,6 +597,43 @@ struct PortfolioTrendChart: View {
                 }
                 .font(.caption2)
             }
+        }
+    }
+
+    private var comparisonMenu: some View {
+        let selectedCount = comparisons.filter { isComparisonSelected($0.id) }.count
+        return Menu {
+            Section(L10n.chartCompareIndices) {
+                ForEach(comparisons.filter { $0.group == .index }) { comparison in
+                    comparisonToggle(comparison)
+                }
+            }
+            let quadrants = comparisons.filter { $0.group == .quadrant }
+            if !quadrants.isEmpty {
+                Section(L10n.chartCompareQuadrants) {
+                    ForEach(quadrants) { comparison in
+                        comparisonToggle(comparison)
+                    }
+                }
+            }
+        } label: {
+            Label(
+                L10n.chartCompareTo,
+                systemImage: selectedCount == 0 ? "plus.circle" : "checkmark.circle.fill"
+            )
+            .font(.caption)
+        }
+        .fixedSize()
+        .frame(minHeight: 44)
+        .accessibilityLabel(L10n.chartCompareTo)
+    }
+
+    private func comparisonToggle(_ comparison: ChartComparison) -> some View {
+        Toggle(isOn: Binding(
+            get: { isComparisonSelected(comparison.id) },
+            set: { setComparison(comparison, selected: $0) }
+        )) {
+            Text(comparison.label)
         }
     }
 
@@ -743,7 +793,7 @@ extension PortfolioTrendChart: AXChartDescriptorRepresentable {
             formatScrubbedValue(value)
         }
         let series = AXDataSeriesDescriptor(
-            name: L10n.chartPortfolioLabel,
+            name: mainSeriesLabel,
             isContinuous: true,
             dataPoints: (sensitiveHidden ? [] : displayedHistory).map {
                 AXDataPoint(x: $0.date.timeIntervalSinceReferenceDate, y: $0.value)

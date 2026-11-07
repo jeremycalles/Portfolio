@@ -186,6 +186,17 @@ extension AppViewModel {
         return await db.getAllHoldingTransactions().filter { matchingISINs.contains($0.isin) }
     }
 
+    /// Time-weighted return of a quadrant over the selected period, with its own
+    /// cashflows. Empty when a transaction of the period has no price.
+    func getQuadrantReturnSeries(quadrantId: Int?) async -> [(date: Date, value: Double)] {
+        let history = await getQuadrantValueHistory(quadrantId: quadrantId)
+        guard !history.isEmpty else { return [] }
+        let transactions = await getQuadrantTransactions(quadrantId: quadrantId)
+        guard await hasCompletePeriodCashflows(transactions) else { return [] }
+        let flows = await cashflowData(transactions: transactions)
+        return PortfolioAnalytics.returnSeries(history, cashflows: flows.cashflows)
+    }
+
     /// Computes all top-level chart series from one portfolio history and one set of
     /// transaction cashflows. The resulting value can be published atomically.
     func makeDashboardSnapshot() async -> DashboardSnapshot {
@@ -442,4 +453,39 @@ extension AppViewModel {
             .map { (date: $0.date, value: 1 + $0.value / 100) }
         return MovingAverage.ratiosByWindow(index, at: dates)
     }
+
+    // MARK: - Gold / Oil
+
+    /// Gold/Oil ratio over the selected period, with moving-average ratios computed
+    /// on the full stored history so a long window can use data before the period.
+    func goldOilRatioData() async -> GoldOilRatioData {
+        let index = await buildPriceIndex(for: [GoldIndexIsin, OilBrentIndexIsin])
+        let full = GoldOilRatio.ratioSeries(
+            gold: index[GoldIndexIsin] ?? [],
+            oil: index[OilBrentIndexIsin] ?? []
+        )
+        let cutoff = selectedPeriod == .all ? "" : AppDateFormatter.yearMonthDay.string(from: selectedPeriod.comparisonDate)
+        let points = full.compactMap { point -> (date: Date, value: Double)? in
+            AppDateFormatter.yearMonthDay.date(from: point.date).map { ($0, point.value) }
+        }
+        let shown = zip(full, points).filter { $0.0.date >= cutoff }.map(\.1)
+        return GoldOilRatioData(
+            history: shown,
+            movingAverageRatios: MovingAverage.ratiosByWindow(points, at: shown.map(\.date))
+        )
+    }
+
+    /// Weekly gold and Brent history since the start, so the 7-year average has data.
+    func downloadGoldOilLongHistory() async {
+        async let gold = marketData.fetchGoldHistory(period: "max", interval: "1wk")
+        async let oil = marketData.fetchOilBrentHistory(period: "max", interval: "1wk")
+        let (goldPrices, oilPrices) = await (gold, oil)
+        for price in goldPrices { await db.addPrice(price) }
+        for price in oilPrices { await db.addPrice(price) }
+    }
+}
+
+struct GoldOilRatioData {
+    var history: [(date: Date, value: Double)] = []
+    var movingAverageRatios: [MovingAverageWindow: [(date: Date, value: Double)]] = [:]
 }

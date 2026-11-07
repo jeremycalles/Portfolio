@@ -4,6 +4,8 @@ import Foundation
 let SP500IndexIsin = "INDEX:SP500"
 /// Synthetic ISIN for Gold index levels (benchmark comparison).
 let GoldIndexIsin = "INDEX:GOLD"
+/// Synthetic ISIN for Brent crude levels (Gold/Oil ratio). Brent, not WTI: WTI went negative in April 2020.
+let OilBrentIndexIsin = "INDEX:OIL_BRENT"
 /// Synthetic ISIN for MSCI World index levels (benchmark comparison).
 let MSCIWorldIndexIsin = "INDEX:MSCI_WORLD"
 

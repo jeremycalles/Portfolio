@@ -134,12 +134,15 @@ extension AppViewModel {
         async let sp500Prices = marketData.fetchSP500History(period: "2y", interval: "1d")
         async let goldPrices = marketData.fetchGoldHistory(period: "2y", interval: "1d")
         async let msciPrices = marketData.fetchMSCIWorldHistory(period: "2y", interval: "1d")
+        async let oilPrices = marketData.fetchOilBrentHistory(period: "2y", interval: "1d")
         
-        let (sp500Result, goldResult, msciResult) = await (sp500Prices, goldPrices, msciPrices)
+        let (sp500Result, goldResult, msciResult, oilResult) = await (sp500Prices, goldPrices, msciPrices, oilPrices)
         
         for price in sp500Result { await db.addPrice(price) }
         for price in goldResult { await db.addPrice(price) }
         for price in msciResult { await db.addPrice(price) }
+        for price in oilResult { await db.addPrice(price) }
+        benchmarkRevision += 1
     }
     
     // MARK: - Backfill Historical Data

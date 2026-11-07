@@ -204,35 +204,22 @@ struct DashboardView: View {
                     // Portfolio Trend Chart
                     GroupBox(L10n.dashboardPortfolioTrend) {
                         let history = viewModel.cachedPortfolioHistory
-                        let sp500History = viewModel.cachedSP500History
-                        let goldHistory = viewModel.cachedGoldHistory
-                        let msciWorldHistory = viewModel.cachedMSCIWorldHistory
-                        
                         if history.isEmpty {
                             Text(L10n.dashboardNoHistoricalData)
                                 .foregroundColor(.secondary)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                         } else {
                             Group {
-                                PortfolioTrendChart(
-                                    history: history,
-                                    investedCapitalHistory: viewModel.cachedInvestedCapitalHistory,
-                                    transactionEvents: viewModel.cachedTransactionEvents,
-                                    sp500History: sp500History.isEmpty ? nil : sp500History,
-                                    goldHistory: goldHistory.isEmpty ? nil : goldHistory,
-                                    msciWorldHistory: msciWorldHistory.isEmpty ? nil : msciWorldHistory,
-                                    performancePercent: viewModel.cachedPeriodTWR,
-                                    interactive: true,
-                                    privacyMode: privacyMode,
-                                    cashflows: viewModel.cachedCashflows,
-                                hasCompleteCashflows: viewModel.cachedHasCompleteCashflows
-                                )
+                                PortfolioPerformanceChart(privacyMode: privacyMode)
                             }
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                         }
                     }
                     .frame(maxWidth: .infinity, minHeight: 230, maxHeight: .infinity)
                     
+                    GoldOilRatioCard()
+                        .frame(minWidth: 220, maxWidth: 220, alignment: .top)
+
                     // Allocation Pie Chart (for Quadrants or Accounts view mode)
                     if viewMode == .quadrants {
                         GroupBox(L10n.dashboardQuadrantAllocation) {

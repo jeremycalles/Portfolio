@@ -379,6 +379,12 @@
 "chart.goldComparison" = "Gold";
 "chart.msciWorldComparison" = "MSCI World";
 "chart.movingAverages" = "Moving averages";
+"chart.compareTo" = "Compare to";
+"chart.compareIndices" = "INDICES";
+"chart.compareQuadrants" = "QUADRANTS (RETURN)";
+"goldOil.title" = "Gold / Oil";
+"goldOil.subtitle" = "Barrels of Brent crude per ounce of gold";
+"goldOil.openChart" = "Opens the full chart";
 "chart.movingAverage30d" = "30-day MA";
 "chart.movingAverage200d" = "200-day MA";
 "chart.movingAverage7y" = "7-year MA";

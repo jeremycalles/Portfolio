@@ -1335,6 +1335,12 @@ actor MarketDataService {
         await fetchHistoricalPricesFromYahooChart(tickerSymbol: "GC=F", isin: GoldIndexIsin, period: period, interval: interval)
     }
 
+    /// Fetches Brent crude futures history from Yahoo Finance (BZ=F), in USD per barrel.
+    /// Store with isin OilBrentIndexIsin; used with gold for the Gold/Oil ratio.
+    func fetchOilBrentHistory(period: String = "2y", interval: String = "1d") async -> [Price] {
+        await fetchHistoricalPricesFromYahooChart(tickerSymbol: "BZ=F", isin: OilBrentIndexIsin, period: period, interval: interval)
+    }
+
     /// Fetches MSCI World daily history from Yahoo Finance (URTH) for benchmark comparison.
     /// Store with isin MSCIWorldIndexIsin; call in background after instrument price updates.
     func fetchMSCIWorldHistory(period: String = "2y", interval: String = "1d") async -> [Price] {

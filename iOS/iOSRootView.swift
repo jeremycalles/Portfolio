@@ -115,6 +115,7 @@ struct iOSDashboardView: View {
                         .buttonStyle(.plain).padding(.horizontal)
                     }
                     performancePanel
+                    GoldOilRatioCard().padding(.horizontal)
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
                             Text(L10n.designYourHoldings).font(.headline)
@@ -198,20 +199,7 @@ struct iOSDashboardView: View {
     }
 
     private var portfolioChart: some View {
-        PortfolioTrendChart(
-            history: viewModel.cachedPortfolioHistory,
-            investedCapitalHistory: viewModel.cachedInvestedCapitalHistory,
-            transactionEvents: viewModel.cachedTransactionEvents,
-            sp500History: viewModel.cachedSP500History,
-            goldHistory: viewModel.cachedGoldHistory,
-            msciWorldHistory: viewModel.cachedMSCIWorldHistory,
-            performancePercent: viewModel.cachedPeriodTWR,
-            interactive: true,
-            privacyMode: privacyMode,
-            cashflows: viewModel.cachedCashflows,
-            startsWithReturn: true,
-            hasCompleteCashflows: viewModel.cachedHasCompleteCashflows
-        )
+        PortfolioPerformanceChart(privacyMode: privacyMode, startsWithReturn: true)
     }
 }
 

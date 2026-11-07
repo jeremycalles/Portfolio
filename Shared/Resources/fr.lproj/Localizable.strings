@@ -379,6 +379,12 @@
 "chart.goldComparison" = "Or";
 "chart.msciWorldComparison" = "MSCI World";
 "chart.movingAverages" = "Moyennes mobiles";
+"chart.compareTo" = "Comparer à";
+"chart.compareIndices" = "INDICES";
+"chart.compareQuadrants" = "QUADRANTS (RENDEMENT)";
+"goldOil.title" = "Or / Pétrole";
+"goldOil.subtitle" = "Barils de Brent pour une once d’or";
+"goldOil.openChart" = "Ouvre le graphique complet";
 "chart.movingAverage30d" = "MM 30 j";
 "chart.movingAverage200d" = "MM 200 j";
 "chart.movingAverage7y" = "MM 7 ans";

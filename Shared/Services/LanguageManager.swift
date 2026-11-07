@@ -496,6 +496,12 @@ struct L10n {
     static var chartGoldComparison: String { manager.localized("chart.goldComparison") }
     static var chartMsciWorldComparison: String { manager.localized("chart.msciWorldComparison") }
     static var chartMovingAverages: String { manager.localized("chart.movingAverages") }
+    static var chartCompareTo: String { manager.localized("chart.compareTo") }
+    static var chartCompareIndices: String { manager.localized("chart.compareIndices") }
+    static var chartCompareQuadrants: String { manager.localized("chart.compareQuadrants") }
+    static var goldOilTitle: String { manager.localized("goldOil.title") }
+    static var goldOilSubtitle: String { manager.localized("goldOil.subtitle") }
+    static var goldOilOpenChart: String { manager.localized("goldOil.openChart") }
     static var chartMovingAverage30d: String { manager.localized("chart.movingAverage30d") }
     static var chartMovingAverage200d: String { manager.localized("chart.movingAverage200d") }
     static var chartMovingAverage7y: String { manager.localized("chart.movingAverage7y") }
