@@ -70,11 +70,46 @@ struct PortfolioTrendChart: View {
     @State private var scrubbedXPosition: CGFloat?
     @State private var displayMode: PortfolioChartDisplayMode = .value
 
+    /// Return series are recomputed by every axis label and legend pass while the
+    /// page scrolls, so the last results are kept per input.
+    private final class DisplayCache {
+        struct Key: Hashable {
+            let count: Int
+            let first: Date?
+            let last: Date?
+            let firstValue: Double?
+            let lastValue: Double?
+            let cashflowCount: Int?
+            let cashflowTotal: Double?
+            let complete: Bool
+        }
+        var store: [Key: [(date: Date, value: Double)]] = [:]
+    }
+    @State private var displayCache = DisplayCache()
+
     private func displayed(_ items: [(date: Date, value: Double)]?) -> [(date: Date, value: Double)] {
         guard let items else { return [] }
         guard displayMode == .percent else { return items }
-        if let cashflows { return hasCompleteCashflows ? PortfolioAnalytics.returnSeries(items, cashflows: cashflows) : [] }
-        return PortfolioAnalytics.rebasedPercent(items)
+        let key = DisplayCache.Key(
+            count: items.count,
+            first: items.first?.date,
+            last: items.last?.date,
+            firstValue: items.first?.value,
+            lastValue: items.last?.value,
+            cashflowCount: cashflows?.count,
+            cashflowTotal: cashflows?.reduce(0) { $0 + $1.amountEUR },
+            complete: hasCompleteCashflows
+        )
+        if let cached = displayCache.store[key] { return cached }
+        let result: [(date: Date, value: Double)]
+        if let cashflows {
+            result = hasCompleteCashflows ? PortfolioAnalytics.returnSeries(items, cashflows: cashflows) : []
+        } else {
+            result = PortfolioAnalytics.rebasedPercent(items)
+        }
+        if displayCache.store.count > 24 { displayCache.store.removeAll() }
+        displayCache.store[key] = result
+        return result
     }
 
     private var displayedInvested: [(date: Date, value: Double)] {
