@@ -8,6 +8,27 @@ enum PortfolioChartSeries: String, CaseIterable, Plottable {
     case sp500
     case gold
     case msciWorld
+    case movingAverage30
+    case movingAverage200
+    case movingAverage7y
+}
+
+private extension MovingAverageWindow {
+    var chartSeries: PortfolioChartSeries {
+        switch self {
+        case .days30: return .movingAverage30
+        case .days200: return .movingAverage200
+        case .years7: return .movingAverage7y
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .days30: return AppTheme.movingAverageShort
+        case .days200: return AppTheme.movingAverageMedium
+        case .years7: return AppTheme.movingAverageLong
+        }
+    }
 }
 
 private enum PortfolioChartDisplayMode: String, CaseIterable, Identifiable {
@@ -32,6 +53,13 @@ struct PortfolioTrendChart: View {
     var cashflows: [PortfolioCashflow]? = nil
     var startsWithReturn = false
     var hasCompleteCashflows = true
+    /// Moving average divided by the underlying series, at the dates of `history`.
+    /// Nil hides the moving-average menu; a missing window means not enough history.
+    var movingAverageRatios: [MovingAverageWindow: [(date: Date, value: Double)]]? = nil
+    /// Downloads a longer price history so long windows become available.
+    var onRequestLongHistory: (() async -> Void)? = nil
+    @AppStorage("chartMovingAverages") private var movingAverageSelection = ""
+    @State private var isDownloadingHistory = false
     @ObservedObject private var demoMode = DemoModeManager.shared
     private var sensitiveHidden: Bool { privacyMode || demoMode.isDemoModeEnabled }
     @State private var showsComparisons = true
@@ -60,6 +88,42 @@ struct PortfolioTrendChart: View {
 
     private var displayedHistory: [(date: Date, value: Double)] { displayed(history) }
 
+    private var selectedMovingAverages: [MovingAverageWindow] {
+        let selected = Set(movingAverageSelection.split(separator: ",").map(String.init))
+        return MovingAverageWindow.allCases.filter {
+            selected.contains($0.rawValue) && movingAverageRatios?[$0]?.isEmpty == false
+        }
+    }
+
+    private func isMovingAverageSelected(_ window: MovingAverageWindow) -> Bool {
+        movingAverageSelection.split(separator: ",").contains { $0 == window.rawValue }
+    }
+
+    private func setMovingAverage(_ window: MovingAverageWindow, selected: Bool) {
+        var values = Set(movingAverageSelection.split(separator: ",").map(String.init))
+        if selected { values.insert(window.rawValue) } else { values.remove(window.rawValue) }
+        movingAverageSelection = MovingAverageWindow.allCases.map(\.rawValue).filter(values.contains).joined(separator: ",")
+        clearScrubbedPoint()
+    }
+
+    private func movingAverageRatio(_ window: MovingAverageWindow) -> [Date: Double] {
+        Dictionary((movingAverageRatios?[window] ?? []).map { ($0.date, $0.value) }, uniquingKeysWith: { _, last in last })
+    }
+
+    /// The average projected onto the displayed line: value × ratio, or the
+    /// return of the averaged index in percent mode.
+    private func displayedMovingAverage(_ window: MovingAverageWindow) -> [(date: Date, value: Double)] {
+        let ratios = movingAverageRatio(window)
+        guard !ratios.isEmpty else { return [] }
+        return displayedHistory.compactMap { point in
+            guard let ratio = ratios[point.date] else { return nil }
+            let value = displayMode == .percent
+                ? ((1 + point.value / 100) * ratio - 1) * 100
+                : point.value * ratio
+            return value.isFinite ? (point.date, value) : nil
+        }
+    }
+
     private var portfolioCapitalSpread: [(date: Date, portfolio: Double, capital: Double)] {
         let capital = displayedInvested
         guard !capital.isEmpty else { return [] }
@@ -83,7 +147,9 @@ struct PortfolioTrendChart: View {
         scan(displayed(showsComparisons ? sp500History : nil))
         scan(displayed(showsComparisons ? goldHistory : nil))
         scan(displayed(showsComparisons ? msciWorldHistory : nil))
-        guard lo.isFinite, hi.isFinite else { return (0, 1) }
+        for window in selectedMovingAverages { scan(displayedMovingAverage(window)) }
+        // Nothing scanned leaves lo > hi; an inverted range crashes Swift Charts.
+        guard lo <= hi else { return (0, 1) }
         if abs(hi - lo) < 1e-9 { return (lo - 1, hi + 1) }
         return (lo, hi)
     }
@@ -230,6 +296,9 @@ struct PortfolioTrendChart: View {
                         .frame(minHeight: 44)
                         .accessibilityAddTraits(showsComparisons ? .isSelected : [])
                     }
+                    if movingAverageRatios != nil {
+                        movingAverageMenu
+                    }
                 }
                 .padding(.horizontal, 8)
             }
@@ -241,10 +310,12 @@ struct PortfolioTrendChart: View {
             let hasGold = showsComparisons && goldHistory != nil && !(goldHistory?.isEmpty ?? true)
             let hasMsci = showsComparisons && msciWorldHistory != nil && !(msciWorldHistory?.isEmpty ?? true)
             let hasInvested = !displayedInvested.isEmpty
-            
-            if (performanceBadge != nil) || hasInvested || hasSp500 || hasGold || hasMsci {
+            let movingAverages = selectedMovingAverages
+            let hasMovingAverages = !movingAverages.isEmpty
+
+            if (performanceBadge != nil) || hasInvested || hasSp500 || hasGold || hasMsci || hasMovingAverages {
                 HStack(alignment: .firstTextBaseline) {
-                    if hasInvested || hasSp500 || hasGold || hasMsci {
+                    if hasInvested || hasSp500 || hasGold || hasMsci || hasMovingAverages {
                         // Wrap whole items onto a new line instead of hyphenating labels.
                         FlowLayout(spacing: 12, lineSpacing: 4) {
                             legendItem(L10n.chartPortfolioLabel, color: chartColor)
@@ -259,6 +330,9 @@ struct PortfolioTrendChart: View {
                             }
                             if hasMsci {
                                 legendItem(L10n.chartMsciWorldComparison, color: AppTheme.msciWorld)
+                            }
+                            ForEach(movingAverages) { window in
+                                legendItem(window.label, color: window.color, isLine: true)
                             }
                         }
                     }
@@ -353,6 +427,17 @@ struct PortfolioTrendChart: View {
                         .interpolationMethod(.linear)
                     }
                 }
+                ForEach(movingAverages) { window in
+                    ForEach(Array(displayedMovingAverage(window).enumerated()), id: \.offset) { _, item in
+                        LineMark(
+                            x: .value("Date", item.date),
+                            y: .value("Value", item.value)
+                        )
+                        .foregroundStyle(by: .value("Series", window.chartSeries))
+                        .interpolationMethod(.linear)
+                        .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
+                    }
+                }
                 ForEach(visibleTransactionEvents) { event in
                     if let eventY = nearestValue(in: displayedHistory, to: event.date) {
                         PointMark(
@@ -382,7 +467,10 @@ struct PortfolioTrendChart: View {
                 PortfolioChartSeries.investedCapital: AppTheme.investedCapital,
                 PortfolioChartSeries.sp500: AppTheme.sp500,
                 PortfolioChartSeries.gold: AppTheme.gold,
-                PortfolioChartSeries.msciWorld: AppTheme.msciWorld
+                PortfolioChartSeries.msciWorld: AppTheme.msciWorld,
+                PortfolioChartSeries.movingAverage30: AppTheme.movingAverageShort,
+                PortfolioChartSeries.movingAverage200: AppTheme.movingAverageMedium,
+                PortfolioChartSeries.movingAverage7y: AppTheme.movingAverageLong
             ])
             .chartYScale(domain: paddedYDomain)
             .chartYAxis {
@@ -449,6 +537,9 @@ struct PortfolioTrendChart: View {
                 calloutSeriesLine(L10n.chartSp500Comparison, series: displayed(showsComparisons ? sp500History : nil), date: point.date, color: AppTheme.sp500)
                 calloutSeriesLine(L10n.chartGoldComparison, series: displayed(showsComparisons ? goldHistory : nil), date: point.date, color: AppTheme.gold)
                 calloutSeriesLine(L10n.chartMsciWorldComparison, series: displayed(showsComparisons ? msciWorldHistory : nil), date: point.date, color: AppTheme.msciWorld)
+                ForEach(selectedMovingAverages) { window in
+                    calloutMovingAverageLine(window, date: point.date)
+                }
             }
         }
         .padding(.horizontal, 10)
@@ -475,6 +566,67 @@ struct PortfolioTrendChart: View {
                 calloutLine(label, value: value, color: color)
             }
         }
+    }
+
+    /// Average value plus how far the line sits above or below it.
+    private func calloutMovingAverageLine(_ window: MovingAverageWindow, date: Date) -> some View {
+        Group {
+            if let value = nearestValue(in: displayedMovingAverage(window), to: date),
+               let ratio = nearestValue(in: movingAverageRatios?[window] ?? [], to: date), ratio > 0 {
+                HStack(spacing: AppTheme.Spacing.xSmall) {
+                    Capsule().fill(window.color).frame(width: 8, height: 3)
+                    Text(window.label).foregroundStyle(.secondary)
+                    Spacer(minLength: AppTheme.Spacing.small)
+                    Text(formatScrubbedValue(value)).monospacedDigit()
+                    Text(formatPercentChange((1 / ratio - 1) * 100))
+                        .monospacedDigit()
+                        .foregroundStyle(AppTheme.changeColor(1 / ratio - 1))
+                }
+                .font(.caption2)
+            }
+        }
+    }
+
+    private var movingAverageMenu: some View {
+        Menu {
+            ForEach(MovingAverageWindow.allCases) { window in
+                let available = movingAverageRatios?[window]?.isEmpty == false
+                Toggle(isOn: Binding(
+                    get: { available && isMovingAverageSelected(window) },
+                    set: { setMovingAverage(window, selected: $0) }
+                )) {
+                    Text(available ? window.label : "\(window.label) · \(L10n.chartInsufficientHistory)")
+                }
+                .disabled(!available)
+            }
+            if let onRequestLongHistory,
+               MovingAverageWindow.allCases.contains(where: { movingAverageRatios?[$0]?.isEmpty != false }) {
+                Divider()
+                Button {
+                    Task {
+                        isDownloadingHistory = true
+                        await onRequestLongHistory()
+                        isDownloadingHistory = false
+                    }
+                } label: {
+                    Label(L10n.chartDownloadLongHistory, systemImage: "arrow.down.circle")
+                }
+                .disabled(isDownloadingHistory)
+            }
+        } label: {
+            if isDownloadingHistory {
+                ProgressView().controlSize(.small)
+            } else {
+                Label(
+                    L10n.chartMovingAverages,
+                    systemImage: selectedMovingAverages.isEmpty ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill"
+                )
+                .font(.caption)
+            }
+        }
+        .fixedSize()
+        .frame(minHeight: 44)
+        .accessibilityLabel(L10n.chartMovingAverages)
     }
 
     private func calloutLine(_ label: String, value: Double, color: Color) -> some View {

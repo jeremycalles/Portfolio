@@ -5,6 +5,7 @@ struct iOSQuadrantReportView: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     let privacyMode: Bool
     @State private var byAccount = false
+    @State private var detailQuadrant: Quadrant?
 
     private var groups: [AllocationGroup] {
         if byAccount {
@@ -17,7 +18,7 @@ struct iOSQuadrantReportView: View {
         var groups = viewModel.quadrants.map { quadrant in
             let isins = Set(viewModel.instruments.filter { $0.quadrantId == quadrant.id }.map(\.isin))
             return AllocationGroup(id: "category-\(quadrant.id)", name: quadrant.name,
-                holdings: details.filter { isins.contains($0.isin) })
+                holdings: details.filter { isins.contains($0.isin) }, quadrant: quadrant)
         }
         let unassigned = Set(viewModel.instruments.filter { $0.quadrantId == nil }.map(\.isin))
         groups.append(AllocationGroup(id: "unassigned", name: L10n.designUnassignedCategory, holdings: details.filter { unassigned.contains($0.isin) }))
@@ -40,6 +41,11 @@ struct iOSQuadrantReportView: View {
                 ForEach(groups) { group in
                     NavigationLink {
                         List {
+                            if let quadrant = group.quadrant {
+                                Button { detailQuadrant = quadrant } label: {
+                                    Label(L10n.chartShowDetailedChart, systemImage: "chart.xyaxis.line")
+                                }
+                            }
                             ForEach(group.holdings.sorted { ($0.currentValueEUR ?? 0) > ($1.currentValueEUR ?? 0) }) { holding in
                                 NavigationLink {
                                     HoldingDetailView(accountId: holding.accountId, isin: holding.isin, privacyMode: privacyMode)
@@ -74,6 +80,10 @@ struct iOSQuadrantReportView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .sheet(item: $detailQuadrant) { quadrant in
+            QuadrantTrendDetailView(quadrant: quadrant)
+                .environmentObject(viewModel)
+        }
         .refreshable { await viewModel.startRefreshTask(showCompletionDelay: false).value }
     }
 }
@@ -82,6 +92,7 @@ private struct AllocationGroup: Identifiable {
     let id: String
     let name: String
     let holdings: [HoldingDetail]
+    var quadrant: Quadrant? = nil
     var value: Double { holdings.compactMap(\.currentValueEUR).reduce(0, +) }
 }
 

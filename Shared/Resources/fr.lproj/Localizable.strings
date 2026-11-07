@@ -378,6 +378,13 @@
 "chart.sp500Comparison" = "S&P 500";
 "chart.goldComparison" = "Or";
 "chart.msciWorldComparison" = "MSCI World";
+"chart.movingAverages" = "Moyennes mobiles";
+"chart.movingAverage30d" = "MM 30 j";
+"chart.movingAverage200d" = "MM 200 j";
+"chart.movingAverage7y" = "MM 7 ans";
+"chart.insufficientHistory" = "Historique insuffisant";
+"chart.downloadLongHistory" = "Télécharger tout l’historique des cours";
+"chart.showDetailedChart" = "Graphe détaillé";
 "chart.investedCapital" = "Capital investi";
 "chart.valueView" = "Valeur";
 "chart.percentView" = "Performance %";

@@ -32,6 +32,7 @@ struct DashboardView: View {
     @State private var viewMode: DashboardViewMode = .quadrants
     @AppStorage("privacyMode") private var privacyMode = false
     @State private var quadrantGoldMode: Set<Int> = []
+    @State private var detailQuadrant: Quadrant?
     
     private static let lastUpdateFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -293,9 +294,16 @@ struct DashboardView: View {
                                 }
                             }
                             .help(L10n.chartClickToToggle)
+                            .contextMenu {
+                                Button(L10n.chartShowDetailedChart) { detailQuadrant = quadrant }
+                            }
                         }
                     }
                     .padding(.horizontal)
+                    .sheet(item: $detailQuadrant) { quadrant in
+                        QuadrantTrendDetailView(quadrant: quadrant)
+                            .environmentObject(viewModel)
+                    }
                     
                 case .holdings:
                     LazyVGrid(columns: [

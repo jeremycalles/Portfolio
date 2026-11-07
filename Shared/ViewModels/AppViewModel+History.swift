@@ -178,9 +178,12 @@ extension AppViewModel {
     }
 
     func getQuadrantTWR(quadrantId: Int?, history: [(date: Date, value: Double)]) async -> Double? {
+        await periodTWR(from: history, transactions: await getQuadrantTransactions(quadrantId: quadrantId))
+    }
+
+    func getQuadrantTransactions(quadrantId: Int?) async -> [HoldingTransaction] {
         let matchingISINs = Set(instruments.filter { $0.quadrantId == quadrantId }.map(\.isin))
-        let transactions = await db.getAllHoldingTransactions().filter { matchingISINs.contains($0.isin) }
-        return await periodTWR(from: history, transactions: transactions)
+        return await db.getAllHoldingTransactions().filter { matchingISINs.contains($0.isin) }
     }
 
     /// Computes all top-level chart series from one portfolio history and one set of
@@ -394,5 +397,49 @@ extension AppViewModel {
             transactions: universe.transactions,
             cutoffStr: historyCutoff(for: universe.transactions)
         )
+    }
+
+    // MARK: - Moving Averages
+
+    /// Moving average of the instrument price divided by the price, at each of `dates`.
+    /// The chart multiplies the position line by it, so quantity changes and
+    /// currency conversion never distort the average.
+    func instrumentMovingAverageRatios(
+        isin: String,
+        at dates: [Date]
+    ) async -> [MovingAverageWindow: [(date: Date, value: Double)]] {
+        guard !dates.isEmpty else { return [:] }
+        let prices = (await buildPriceIndex(for: [isin]))[isin] ?? []
+        let points = prices.compactMap { price -> (date: Date, value: Double)? in
+            AppDateFormatter.yearMonthDay.date(from: price.date).map { ($0, price.value) }
+        }
+        return MovingAverage.ratiosByWindow(points, at: dates)
+    }
+
+    /// Same ratio for a quadrant, computed on its time-weighted performance index
+    /// over its whole history, so contributions and withdrawals do not move the average.
+    func quadrantMovingAverageRatios(
+        quadrantId: Int,
+        at dates: [Date]
+    ) async -> [MovingAverageWindow: [(date: Date, value: Double)]] {
+        guard !dates.isEmpty else { return [:] }
+        clearRateCache()
+        let universe = await historyUniverse(instrumentFilter: { $0.quadrantId == quadrantId })
+        let isins = Set(universe.isins)
+        let transactions = universe.transactions.filter { isins.contains($0.isin) }
+        let priceIndex = await buildPriceIndex(for: universe.isins)
+        let earliestPrice = priceIndex.values.compactMap { $0.first?.date }.min()
+        guard let start = transactions.map(\.date).min() ?? earliestPrice else { return [:] }
+        let nav = await aggregatedValueHistory(
+            isins: universe.isins,
+            fallbackQuantityByIsin: universe.fallback,
+            transactions: transactions,
+            cutoffStr: start
+        )
+        let flows = await cashflowData(transactions: transactions)
+        guard flows.isComplete else { return [:] }
+        let index = PortfolioAnalytics.returnSeries(nav, cashflows: flows.cashflows)
+            .map { (date: $0.date, value: 1 + $0.value / 100) }
+        return MovingAverage.ratiosByWindow(index, at: dates)
     }
 }

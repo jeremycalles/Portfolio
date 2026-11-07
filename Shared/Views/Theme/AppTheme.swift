@@ -41,6 +41,10 @@ enum AppTheme {
     static let sp500 = Color.pink
     static let gold = Color(red: 0.72, green: 0.48, blue: 0.05)
     static let msciWorld = Color.cyan
+    // Distinct from gain/loss line colors and from the benchmark colors.
+    static let movingAverageShort = Color.purple
+    static let movingAverageMedium = Color.green
+    static let movingAverageLong = Color.brown
 
     /// Selected state for pills and segmented controls. Neutral on purpose:
     /// blue and orange already mean gain and loss.

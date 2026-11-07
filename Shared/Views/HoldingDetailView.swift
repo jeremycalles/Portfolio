@@ -17,6 +17,7 @@ struct HoldingDetailView: View {
 
     @State private var transactions: [HoldingTransaction] = []
     @State private var history: [(date: Date, value: Double)] = []
+    @State private var movingAverageRatios: [MovingAverageWindow: [(date: Date, value: Double)]] = [:]
     @State private var latestPrice: Price?
     @State private var showingNewTransaction = false
     @State private var editingTransaction: HoldingTransaction?
@@ -69,7 +70,14 @@ struct HoldingDetailView: View {
                     privacyMode: hideValues,
                     cashflows: cashflows,
                     startsWithReturn: true,
-                    hasCompleteCashflows: hasCompleteCashflows
+                    hasCompleteCashflows: hasCompleteCashflows,
+                    movingAverageRatios: movingAverageRatios,
+                    onRequestLongHistory: instrument.map { instrument in
+                        {
+                            await viewModel.backfillSingleInstrument(instrument, period: "max", interval: "1wk", silent: true)
+                            await load()
+                        }
+                    }
                 )
                 .frame(minHeight: 250)
                 .listRowInsets(EdgeInsets())
@@ -237,6 +245,7 @@ struct HoldingDetailView: View {
         async let loadedPrice = viewModel.latestPriceInInstrumentCurrency(forIsin: isin)
         transactions = await loadedTransactions
         history = await loadedHistory
+        movingAverageRatios = await viewModel.instrumentMovingAverageRatios(isin: isin, at: history.map(\.date))
         latestPrice = await loadedPrice
         let data = await viewModel.cashflowData(transactions: transactions)
         cashflows = data.cashflows
