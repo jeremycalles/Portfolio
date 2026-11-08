@@ -1,6 +1,11 @@
-Cifras más precisas y una navegación más fluida.
+Compara tu cartera con tus propias categorías y lee las tendencias con medias móviles.
 
-• El valor y la rentabilidad de la cartera ahora son correctos cuando los precios de un fondo llegan en varias divisas.
-• La rentabilidad aparece en un periodo en cuanto sus precios están disponibles, aunque una transacción anterior no tenga precio.
-• Vuelven las líneas de comparación de S&P 500, Oro y MSCI World en tu gráfico de rentabilidad, cada una con su color.
-• Corregidas las filas de Ajustes y otras listas que podían ignorar los toques.
+• Comparar con: muestra la rentabilidad de tu cartera frente al MSCI World, el S&P 500, el oro o cualquiera de tus categorías, hasta tres líneas a la vez. El gráfico de cada categoría también se puede comparar.
+• Medias móviles: añade medias de 30 días, 200 días y 7 años a los gráficos de posiciones y categorías, con una breve guía para interpretarlas.
+• Oro / Petróleo: una nueva tarjeta muestra cuántos barriles de Brent compra una onza de oro, con su propio gráfico.
+• Deslizar sobre un gráfico ahora desplaza la página; mantén pulsado para leer los valores.
+• La línea de la cartera mantiene un solo color, las fichas de posición ya no muestran un espacio vacío y las cantidades usan el formato numérico de tu región.
+
+Tu cartera sigue bajo tu control: sin cuenta, sin conexión bancaria, sin analítica.
+
+La app está disponible en inglés y francés.

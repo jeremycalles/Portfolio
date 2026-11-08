@@ -1,6 +1,11 @@
-Genauere Zahlen und flüssigere Bedienung.
+Vergleichen Sie Ihr Depot mit Ihren eigenen Kategorien und erkennen Sie Trends mit gleitenden Durchschnitten.
 
-• Depotwert und Rendite stimmen jetzt, auch wenn die Kurse eines Fonds in verschiedenen Währungen eintreffen.
-• Die Rendite wird für einen Zeitraum angezeigt, sobald dessen Kurse vorliegen, auch wenn einer älteren Transaktion ein Preis fehlt.
-• Die Vergleichslinien für S&P 500, Gold und MSCI World sind zurück im Renditediagramm, jede in eigener Farbe.
-• Zeilen in den Einstellungen und anderen Listen reagieren nun zuverlässig auf Tippen.
+• Vergleichen mit: Stellen Sie die Rendite Ihres Depots dem MSCI World, dem S&P 500, Gold oder einer Ihrer Kategorien gegenüber – bis zu drei Linien gleichzeitig. Auch das Diagramm jeder Kategorie lässt sich vergleichen.
+• Gleitende Durchschnitte: 30-Tage-, 200-Tage- und 7-Jahres-Durchschnitte für Positions- und Kategoriediagramme, mit einer kurzen Erklärung.
+• Gold / Öl: Eine neue Karte zeigt, wie viele Barrel Brent eine Unze Gold kauft, mit eigenem Diagramm.
+• Wischen auf einem Diagramm scrollt jetzt die Seite; halten Sie den Finger, um Werte abzulesen.
+• Die Depotlinie behält eine Farbe, Positionsseiten haben keine leere Lücke mehr und Stückzahlen nutzen das Zahlenformat Ihrer Region.
+
+Ihr Depot bleibt unter Ihrer Kontrolle: kein Konto, keine Bankverbindung, keine Analyse.
+
+Die App ist auf Englisch und Französisch verfügbar.

@@ -1,7 +1,7 @@
 Begrijp uw beleggingen: waarde, rendement en verdeling op één plek. Volg aandelen, ETF’s, fondsen, goud en crypto op iPhone en Mac, zonder account of bankkoppeling.
 
 • Overzicht: waarde in EUR en resultaten over de gekozen periode.
-• Interactieve grafieken: waarde, ingelegd kapitaal en transacties. Vergelijk met S&P 500, MSCI World en goud wanneer historie beschikbaar is.
+• Interactieve grafieken: waarde, ingelegd kapitaal en transacties. Vergelijk met S&P 500, MSCI World en goud wanneer historie beschikbaar is. Vergelijk ook met je eigen categorieën en voeg voortschrijdende gemiddelden toe.
 • Tijdgewogen rendement: houdt rekening met vastgelegde stortingen en opnames.
 • Posities in detail: bewerk aankopen, verkopen en correcties; bekijk gemiddelde kosten en gerealiseerde en ongerealiseerde winst wanneer transactieprijzen bekend zijn.
 • Verdeling: organiseer posities per rekening en categorie.

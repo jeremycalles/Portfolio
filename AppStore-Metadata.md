@@ -37,15 +37,15 @@ Apple limits keywords to 100 characters. Avoid repeating words from the existing
 | it | 98/100 | `fondi,NAV,bitcoin,argento,ISIN,patrimonio,offline,privacy,moneta,broker,contanti,obbligazioni,cash` |
 | nl-NL | 97/100 | `fonds,NAV,bitcoin,zilver,ISIN,vermogen,offline,privacy,munt,broker,cash,depot,belegging,obligatie` |
 
-## What’s New — English
+## What’s New — English (1.2.0)
 
-A clearer view of your investments.
+Compare your portfolio with your own categories, and read trends with moving averages.
 
-• A redesigned iPhone overview puts portfolio value and investment return first, with one period selector for a consistent view.
-• Understand performance with a return chart that accounts for recorded contributions and withdrawals, plus comparisons with market benchmarks when data is available.
-• Find positions more easily with search and filters, then explore allocation by account or category.
-• Review price dates and missing data more clearly, so you know what is behind your totals.
-• Improved layouts for larger text, VoiceOver and privacy controls make everyday checks easier.
+• Compare to: plot your portfolio's return against MSCI World, the S&P 500, gold or any of your categories, up to three lines at a time. Each category's chart can be compared too.
+• Moving averages: add 30-day, 200-day and 7-year averages to holding and category charts, with a short guide to what they show.
+• Gold / Oil: a new card shows how many barrels of Brent crude an ounce of gold buys, with its own chart.
+• Swiping on a chart now scrolls the page; touch and hold to read values.
+• Your portfolio line keeps one color, holding pages no longer show a blank gap, and quantities use your region's number format.
 
 Your portfolio stays under your control: no account, no bank connection, no analytics.
 

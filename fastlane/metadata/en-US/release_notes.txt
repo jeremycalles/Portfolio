@@ -1,8 +1,9 @@
-More accurate numbers and smoother navigation.
+Compare your portfolio with your own categories, and read trends with moving averages.
 
-• Portfolio values and returns are now correct when a fund's prices arrive in different currencies.
-• Returns now appear for a period whenever its prices are available, even if an older transaction has no price.
-• S&P 500, Gold and MSCI World comparison lines are back on your return chart, each in its own color.
-• Fixed rows in Settings and other lists that could ignore taps.
+• Compare to: plot your portfolio's return against MSCI World, the S&P 500, gold or any of your categories, up to three lines at a time. Each category's chart can be compared too.
+• Moving averages: add 30-day, 200-day and 7-year averages to holding and category charts, with a short guide to what they show.
+• Gold / Oil: a new card shows how many barrels of Brent crude an ounce of gold buys, with its own chart.
+• Swiping on a chart now scrolls the page; touch and hold to read values.
+• Your portfolio line keeps one color, holding pages no longer show a blank gap, and quantities use your region's number format.
 
 Your portfolio stays under your control: no account, no bank connection, no analytics.

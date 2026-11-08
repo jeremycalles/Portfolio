@@ -1,6 +1,11 @@
-Numeri più precisi e navigazione più fluida.
+Confronta il tuo portafoglio con le tue categorie e leggi le tendenze con le medie mobili.
 
-• Il valore e il rendimento del portafoglio ora sono corretti quando i prezzi di un fondo arrivano in valute diverse.
-• Il rendimento appare per un periodo non appena i suoi prezzi sono disponibili, anche se una transazione precedente non ha un prezzo.
-• Tornano le linee di confronto S&P 500, Oro e MSCI World nel grafico del rendimento, ognuna con il proprio colore.
-• Corrette le righe di Impostazioni e di altri elenchi che potevano ignorare i tocchi.
+• Confronta con: mostra il rendimento del portafoglio rispetto a MSCI World, S&P 500, oro o una delle tue categorie, fino a tre linee alla volta. Anche il grafico di ogni categoria si può confrontare.
+• Medie mobili: aggiungi le medie a 30 giorni, 200 giorni e 7 anni ai grafici di posizioni e categorie, con una breve guida per interpretarle.
+• Oro / Petrolio: una nuova scheda mostra quanti barili di Brent compra un'oncia d'oro, con il suo grafico.
+• Scorrere su un grafico ora fa scorrere la pagina; tieni premuto per leggere i valori.
+• La linea del portafoglio mantiene un solo colore, le pagine delle posizioni non hanno più uno spazio vuoto e le quantità usano il formato numerico della tua regione.
+
+Il tuo portafoglio resta sotto il tuo controllo: nessun account, nessun collegamento bancario, nessuna analisi.
+
+L'app è disponibile in inglese e francese.

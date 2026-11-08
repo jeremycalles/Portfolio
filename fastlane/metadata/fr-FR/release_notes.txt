@@ -1,8 +1,9 @@
-Des chiffres plus justes et une navigation plus fluide.
+Comparez votre portefeuille à vos propres catégories et lisez les tendances avec les moyennes mobiles.
 
-• La valeur et le rendement du portefeuille sont désormais corrects lorsque les cours d’un fonds arrivent dans plusieurs devises.
-• Le rendement s’affiche pour une période dès que ses cours sont disponibles, même si une transaction plus ancienne n’a pas de prix.
-• Les courbes de comparaison S&P 500, Or et MSCI World sont de retour sur votre graphique de rendement, chacune avec sa couleur.
-• Correction des lignes des Paramètres et d’autres listes qui pouvaient ignorer les touchers.
+• Comparer à : affichez le rendement de votre portefeuille face au MSCI World, au S&P 500, à l’or ou à l’une de vos catégories, jusqu’à trois courbes à la fois. Le graphique de chaque catégorie peut aussi être comparé.
+• Moyennes mobiles : ajoutez les moyennes 30 jours, 200 jours et 7 ans aux graphiques des positions et des catégories, avec un court guide pour les interpréter.
+• Or / Pétrole : une nouvelle carte indique combien de barils de Brent achète une once d’or, avec son propre graphique.
+• Glisser sur un graphique fait désormais défiler la page ; maintenez le doigt pour lire les valeurs.
+• La courbe du portefeuille garde une seule couleur, les fiches de position n’ont plus d’espace vide et les quantités suivent le format de nombre de votre région.
 
 Vous gardez le contrôle : sans compte, sans connexion bancaire, sans analyse d’usage.

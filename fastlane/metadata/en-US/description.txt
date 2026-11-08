@@ -3,7 +3,7 @@ See what you own, how it is performing, and where your money is invested. Track 
 MAKE SENSE OF YOUR PORTFOLIO
 
 • Your investments at a glance — See total value in EUR, investment return, and gains or losses for your selected period.
-• Performance with context — Explore portfolio value, invested capital and transaction markers. Compare with the S&P 500, MSCI World and gold when market history is available.
+• Performance with context — Explore portfolio value, invested capital and transaction markers. Compare with the S&P 500, MSCI World and gold when market history is available. Compare with your own categories and add moving averages.
 • Money added is not money earned — Time-weighted return accounts for recorded cash flows, helping you distinguish investment performance from contributions and withdrawals.
 • Every position, explained — Record and edit buys, sells and adjustments. Review quantities, average cost, and realized and unrealized gains when transaction prices are known.
 • A clearer allocation — Organize holdings by account and category to see where your portfolio is concentrated.

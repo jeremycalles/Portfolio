@@ -1,7 +1,7 @@
 Verstehen Sie Ihre Anlagen: Wert, Rendite und Verteilung an einem Ort. Verfolgen Sie Aktien, ETFs, Fonds, Gold und Krypto auf iPhone und Mac, ohne Konto oder Bankverbindung.
 
 • Überblick: Portfoliowert in EUR und Wertentwicklung im gewählten Zeitraum.
-• Interaktive Diagramme: Wert, investiertes Kapital und Transaktionen. Vergleich mit S&P 500, MSCI World und Gold bei verfügbarer Historie.
+• Interaktive Diagramme: Wert, investiertes Kapital und Transaktionen. Vergleich mit S&P 500, MSCI World und Gold bei verfügbarer Historie. Auch mit eigenen Kategorien vergleichen und gleitende Durchschnitte einblenden.
 • Zeitgewichtete Rendite: Erfasste Ein- und Auszahlungen werden berücksichtigt.
 • Positionen im Detail: Käufe, Verkäufe und Anpassungen bearbeiten; durchschnittliche Kosten sowie realisierte und unrealisierte Gewinne bei bekannten Transaktionspreisen prüfen.
 • Verteilung: Bestände nach Konto und Kategorie organisieren.

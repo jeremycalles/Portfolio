@@ -1,6 +1,11 @@
-Nauwkeurigere cijfers en soepelere navigatie.
+Vergelijk je portefeuille met je eigen categorieën en lees trends af met voortschrijdende gemiddelden.
 
-• Portefeuillewaarde en rendement kloppen nu ook als de koersen van een fonds in verschillende valuta binnenkomen.
-• Het rendement verschijnt voor een periode zodra de koersen beschikbaar zijn, ook als een oudere transactie geen prijs heeft.
-• De vergelijkingslijnen voor S&P 500, Goud en MSCI World zijn terug in uw rendementsgrafiek, elk met een eigen kleur.
-• Rijen in Instellingen en andere lijsten die tikken konden negeren, zijn opgelost.
+• Vergelijk met: zet het rendement van je portefeuille af tegen MSCI World, de S&P 500, goud of een van je categorieën, tot drie lijnen tegelijk. Ook de grafiek van elke categorie kun je vergelijken.
+• Voortschrijdende gemiddelden: voeg gemiddelden over 30 dagen, 200 dagen en 7 jaar toe aan grafieken van posities en categorieën, met een korte uitleg.
+• Goud / Olie: een nieuwe kaart toont hoeveel vaten Brent je met een ons goud koopt, met een eigen grafiek.
+• Vegen over een grafiek scrolt nu de pagina; houd je vinger vast om waarden af te lezen.
+• De portefeuillelijn houdt één kleur, positiepagina's tonen geen lege ruimte meer en aantallen volgen de getalnotatie van je regio.
+
+Je portefeuille blijft onder jouw controle: geen account, geen bankkoppeling, geen analytics.
+
+De app is beschikbaar in het Engels en Frans.

@@ -3,7 +3,7 @@ Voyez ce que vous détenez, ce que vos placements rapportent et comment votre ar
 COMPRENEZ VOTRE PORTEFEUILLE
 
 • Une vue d’ensemble claire — Valeur totale en EUR, rendement et gains ou pertes sur la période choisie.
-• La performance en contexte — Explorez la valeur du portefeuille, le capital investi et les opérations. Comparez avec le S&P 500, le MSCI World et l’or lorsque l’historique est disponible.
+• La performance en contexte — Explorez la valeur du portefeuille, le capital investi et les opérations. Comparez avec le S&P 500, le MSCI World et l’or lorsque l’historique est disponible. Comparez aussi avec vos propres catégories et ajoutez des moyennes mobiles.
 • Vos apports ne sont pas des gains — Le rendement pondéré dans le temps tient compte des flux enregistrés pour distinguer la performance des versements et retraits.
 • Chaque position en détail — Saisissez et modifiez achats, ventes et ajustements. Consultez quantités, prix de revient moyen et gains réalisés ou latents lorsque les prix des opérations sont connus.
 • Une répartition plus lisible — Organisez vos avoirs par compte et catégorie pour repérer les concentrations.

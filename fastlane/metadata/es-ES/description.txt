@@ -1,7 +1,7 @@
 Entiende tus inversiones: valor, rentabilidad y distribución en un solo lugar. Sigue acciones, ETF, fondos, oro y cripto en iPhone y Mac, sin crear una cuenta ni conectar tu banco.
 
 • Vista general: valor en EUR y resultados del periodo elegido.
-• Gráficos interactivos: valor, capital invertido y operaciones. Compara con S&P 500, MSCI World y oro cuando haya histórico.
+• Gráficos interactivos: valor, capital invertido y operaciones. Compara con S&P 500, MSCI World y oro cuando haya histórico. Compara también con tus categorías y añade medias móviles.
 • Rentabilidad ponderada por tiempo: tiene en cuenta las aportaciones y retiradas registradas.
 • Detalle por posición: edita compras, ventas y ajustes; consulta coste medio y ganancias realizadas y latentes cuando se conocen los precios de las operaciones.
 • Distribución: organiza las posiciones por cuenta y categoría.

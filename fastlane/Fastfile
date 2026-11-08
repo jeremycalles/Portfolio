@@ -70,7 +70,7 @@ def ensure_editable_app_store_versions!
     next true if app.get_edit_app_store_version(platform: platform)
 
     latest = app.get_latest_app_store_version(platform: platform)
-    nxt = ENV.fetch("APP_VERSION") { bump_patch(latest&.version_string || "1.1.1") }
+    nxt = ENV.fetch("APP_VERSION") { bump_patch(latest&.version_string || "1.2.0") }
     UI.message("Creating App Store version #{nxt} (#{platform}) for editable listing copy")
     begin
       Spaceship::ConnectAPI.post_app_store_version(
@@ -93,9 +93,9 @@ def deliver_options
     run_precheck_before_submit: false,
     precheck_include_in_app_purchases: false,
     # Don't recreate/rename APP_VERSION: upload to the existing Prepare for
-    # Submission version (1.1.1) even if CI still passes an older fallback.
+    # Submission version (1.2.0) even if CI still passes an older fallback.
     skip_app_version_update: true,
-    app_version: ENV.fetch("APP_VERSION", "1.1.1")
+    app_version: ENV.fetch("APP_VERSION", "1.2.0")
   }
 
   key_path = ENV["APP_STORE_CONNECT_API_KEY_PATH"]
