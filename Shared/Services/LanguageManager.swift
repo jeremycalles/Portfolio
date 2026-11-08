@@ -651,7 +651,17 @@ extension L10n {
     static var designRestoreFailed: String { manager.localized("design.restoreFailed") }
     static var designRecoveryRequired: String { manager.localized("design.recoveryRequired") }
     static var designCorrectionDeltaHint: String { manager.localized("design.correctionDeltaHint") }
-    static var designUnitPriceOptional: String { manager.localized("design.unitPriceOptional") }
+    static var designUnitPrice: String { manager.localized("design.unitPrice") }
+    static var designOptional: String { manager.localized("design.optional") }
+    static var chartMAHelpButton: String { manager.localized("chart.maHelp.button") }
+    static var chartMAHelpIntro: String { manager.localized("chart.maHelp.intro") }
+    static var chartMAHelp30d: String { manager.localized("chart.maHelp.30d") }
+    static var chartMAHelp200d: String { manager.localized("chart.maHelp.200d") }
+    static var chartMAHelp7y: String { manager.localized("chart.maHelp.7y") }
+    static var chartMAHelpGapTitle: String { manager.localized("chart.maHelp.gapTitle") }
+    static var chartMAHelpGap: String { manager.localized("chart.maHelp.gap") }
+    static var chartMAHelpLimitsTitle: String { manager.localized("chart.maHelp.limitsTitle") }
+    static var chartMAHelpLimits: String { manager.localized("chart.maHelp.limits") }
 }
 
 extension L10n {

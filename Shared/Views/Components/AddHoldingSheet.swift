@@ -63,7 +63,7 @@ struct AddHoldingSheet: View {
                             DatePicker(L10n.designTransactionDate, selection: $date, in: ...Date(), displayedComponents: .date)
                                 .disabled(correctBalance)
                             PortfolioDecimalField(title: L10n.holdingsQuantity, text: $quantityText)
-                            PortfolioDecimalField(title: "\(L10n.designUnitPriceOptional) · \(currency)", text: $priceText)
+                            PortfolioDecimalField(title: "\(L10n.designUnitPrice) · \(currency)", text: $priceText, placeholder: L10n.designOptional)
                         } footer: { Text(L10n.designOptionalPriceHint) }
                         if let quantity, quantity > 0 {
                             Section {

@@ -65,6 +65,7 @@ struct PortfolioTrendChart: View {
     @AppStorage(ChartComparisonSelection.storageKey) private var comparisonSelection = ChartComparisonSelection.defaultValue
     @State private var didSetInitialMode = false
     @State private var showingExplanation = false
+    @State private var showingMovingAverageHelp = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var scrubbedPoint: (date: Date, value: Double)?
     @State private var scrubbedXPosition: CGFloat?
@@ -247,12 +248,9 @@ struct PortfolioTrendChart: View {
         return PortfolioHistoryBuilder.percentChange(from: first, to: last)
     }
 
-    private var chartColor: Color {
-        if let change = performanceBadge {
-            return change >= 0 ? AppTheme.gain : AppTheme.loss
-        }
-        return AppTheme.portfolio
-    }
+    /// Fixed series identity. Gain/loss color stays on the badge; recoloring the line
+    /// orange on a loss made it indistinguishable from the gold benchmark.
+    private var chartColor: Color { AppTheme.portfolio }
 
     private var calloutBackground: Color {
         #if os(macOS)
@@ -361,15 +359,19 @@ struct PortfolioTrendChart: View {
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal, 16)
+                .fixedSize(horizontal: false, vertical: true)
             }
             if !compact {
                 HStack {
-                    Button { showingExplanation = true } label: {
-                        Label(cashflows == nil ? L10n.designValueChange : L10n.designReturnAdjusted, systemImage: "info.circle")
-                            .font(.caption)
+                    // The cash-flow note only describes the return view.
+                    if displayMode == .percent || cashflows == nil {
+                        Button { showingExplanation = true } label: {
+                            Label(cashflows == nil ? L10n.designValueChange : L10n.designReturnAdjusted, systemImage: "info.circle")
+                                .font(.caption)
+                        }
+                        .buttonStyle(.plain)
+                        .frame(minHeight: 44)
                     }
-                    .buttonStyle(.plain)
-                    .frame(minHeight: 44)
                     Spacer()
                     if !comparisons.isEmpty {
                         comparisonMenu
@@ -379,6 +381,7 @@ struct PortfolioTrendChart: View {
                     }
                 }
                 .padding(.horizontal, 8)
+                .fixedSize(horizontal: false, vertical: true)
             }
             if displayMode == .percent && displayedHistory.isEmpty {
                 Text(L10n.designReturnUnavailable).font(.caption).foregroundStyle(.secondary).padding(.horizontal, 16)
@@ -425,6 +428,7 @@ struct PortfolioTrendChart: View {
                     }
                 }
                 .padding(.horizontal, compact ? 8 : 16)
+                .fixedSize(horizontal: false, vertical: true)
             }
 
             Chart {
@@ -567,6 +571,7 @@ struct PortfolioTrendChart: View {
         .alert(L10n.designInvestmentReturn, isPresented: $showingExplanation) {
             Button(L10n.generalOk, role: .cancel) { }
         } message: { Text(L10n.designReturnExplanation) }
+        .sheet(isPresented: $showingMovingAverageHelp) { MovingAverageExplanationView() }
     }
 
     private func scrubbedCallout(for point: (date: Date, value: Double)) -> some View {
@@ -657,8 +662,9 @@ struct PortfolioTrendChart: View {
             )
             .font(.caption)
         }
-        .fixedSize()
-        .frame(minHeight: 44)
+        // Cap the height: inside a List row a Menu reports a very tall ideal height.
+        .fixedSize(horizontal: true, vertical: false)
+        .frame(minWidth: 44, minHeight: 44, maxHeight: 44)
         .accessibilityLabel(L10n.chartCompareTo)
     }
 
@@ -697,6 +703,10 @@ struct PortfolioTrendChart: View {
                 }
                 .disabled(isDownloadingHistory)
             }
+            Divider()
+            Button(L10n.chartMAHelpButton, systemImage: "questionmark.circle") {
+                showingMovingAverageHelp = true
+            }
         } label: {
             if isDownloadingHistory {
                 ProgressView().controlSize(.small)
@@ -708,8 +718,10 @@ struct PortfolioTrendChart: View {
                 .font(.caption)
             }
         }
-        .fixedSize()
-        .frame(minHeight: 44)
+        // Cap the height: inside a List row the Menu reported a very tall ideal height,
+        // which opened a ~250pt blank band above the holding chart.
+        .fixedSize(horizontal: true, vertical: false)
+        .frame(minWidth: 44, minHeight: 44, maxHeight: 44)
         .accessibilityLabel(L10n.chartMovingAverages)
     }
 
@@ -754,7 +766,9 @@ struct PortfolioTrendChart: View {
             }
         #else
         // A normal drag continues to scroll the page; holding first explores the chart.
-        surface.gesture(
+        // Simultaneous so the enclosing ScrollView/List still receives the pan: an
+        // exclusive `.gesture` swallowed every vertical swipe that started on the chart.
+        surface.simultaneousGesture(
             LongPressGesture(minimumDuration: 0.25)
                 .sequenced(before: DragGesture(minimumDistance: 0))
                 .onChanged { value in
@@ -855,4 +869,47 @@ extension PortfolioTrendChart: AXChartDescriptorRepresentable {
     PortfolioTrendChart(history: history)
         .frame(height: 300)
         .padding()
+}
+
+/// Plain-language guide to the moving-average lines, opened from the chart's menu.
+struct MovingAverageExplanationView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section { Text(L10n.chartMAHelpIntro) }
+                Section {
+                    windowRow(.days30, text: L10n.chartMAHelp30d)
+                    windowRow(.days200, text: L10n.chartMAHelp200d)
+                    windowRow(.years7, text: L10n.chartMAHelp7y)
+                }
+                Section(L10n.chartMAHelpGapTitle) { Text(L10n.chartMAHelpGap) }
+                Section(L10n.chartMAHelpLimitsTitle) { Text(L10n.chartMAHelpLimits) }
+            }
+            .navigationTitle(L10n.chartMovingAverages)
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(L10n.generalDone) { dismiss() }
+                }
+            }
+        }
+        #if os(iOS)
+        .presentationDetents([.medium, .large])
+        #else
+        .frame(minWidth: 460, minHeight: 480)
+        #endif
+    }
+
+    private func windowRow(_ window: MovingAverageWindow, text: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(window.label).font(.headline)
+            Text(text).foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
+    }
 }

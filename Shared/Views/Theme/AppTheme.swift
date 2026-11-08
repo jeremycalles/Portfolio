@@ -221,9 +221,10 @@ struct FlowLayout: Layout {
 struct PortfolioDecimalField: View {
     let title: String
     @Binding var text: String
+    var placeholder = "—"
     var body: some View {
         LabeledContent(title) {
-            TextField("—", text: $text)
+            TextField(placeholder, text: $text)
                 .multilineTextAlignment(.trailing)
                 .accessibilityLabel(title)
                 #if os(iOS)

@@ -517,7 +517,17 @@
 "design.restoreFailed" = "La restauration a échoué. Votre portefeuille précédent a été conservé.";
 "design.recoveryRequired" = "La restauration a échoué. Exportez la copie de récupération ci-dessous pour conserver votre portefeuille précédent, puis essayez de restaurer ce fichier.";
 "design.correctionDeltaHint" = "Ajoute ou retire cette quantité à la date choisie sans enregistrer d’achat ou de vente. Les opérations précédentes sont conservées.";
-"design.unitPriceOptional" = "Prix unitaire (facultatif)";
+"design.unitPrice" = "Prix unitaire";
+"design.optional" = "Facultatif";
+"chart.maHelp.button" = "Que signifient-elles ?";
+"chart.maHelp.intro" = "Une moyenne mobile est le cours moyen sur une période récente, recalculé chaque jour. Elle lisse le bruit quotidien pour faire apparaître la tendance de fond.";
+"chart.maHelp.30d" = "La direction à court terme, sur environ un mois.";
+"chart.maHelp.200d" = "La tendance de long terme, sur environ 40 semaines — la ligne la plus suivie par les investisseurs. Cours au-dessus : tendance haussière. En dessous : tendance baissière.";
+"chart.maHelp.7y" = "La position du cours actuel dans un cycle de marché complet : haut ou bas par rapport aux sept dernières années.";
+"chart.maHelp.gapTitle" = "Écart à la moyenne";
+"chart.maHelp.gap" = "Explorez le graphique pour voir de combien le cours est au-dessus ou en dessous de chaque moyenne. Très au-dessus : il a monté vite — réfléchissez avant de renforcer. Très en dessous : il peut être bon marché par rapport à son passé récent, ou en difficulté.";
+"chart.maHelp.limitsTitle" = "Limites";
+"chart.maHelp.limits" = "Les moyennes sont calculées sur les cours passés : elles confirment une tendance déjà engagée et ne prédisent rien. Quand les cours évoluent sans direction, elles donnent de faux signaux. Utilisez-les en complément de votre allocation, pas à sa place.";
 
 "design.closedPositions" = "Positions clôturées";
 "design.noClosedPositions" = "Aucune position clôturée";

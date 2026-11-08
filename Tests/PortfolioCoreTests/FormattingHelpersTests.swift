@@ -7,24 +7,33 @@ struct FormattingHelpersTests {
 
     // MARK: - formatQuantity
 
+    private let en = Locale(identifier: "en_US")
+
     @Test("formatQuantity formats whole numbers without decimals")
     func formatQuantityWholeNumber() {
-        #expect(formatQuantity(10.0) == "10")
-        #expect(formatQuantity(0.0) == "0")
-        #expect(formatQuantity(1000.0) == "1000")
+        #expect(formatQuantity(10.0, locale: en) == "10")
+        #expect(formatQuantity(0.0, locale: en) == "0")
+        #expect(formatQuantity(1000.0, locale: en) == "1000")
     }
 
     @Test("formatQuantity formats one-decimal values with 1 digit")
     func formatQuantityOneDecimal() {
-        #expect(formatQuantity(10.5) == "10.5")
-        #expect(formatQuantity(0.3) == "0.3")
+        #expect(formatQuantity(10.5, locale: en) == "10.5")
+        #expect(formatQuantity(0.3, locale: en) == "0.3")
     }
 
     @Test("formatQuantity formats multi-decimal values with 4 digits")
     func formatQuantityMultiDecimal() {
-        #expect(formatQuantity(10.25) == "10.2500")
-        #expect(formatQuantity(0.1234) == "0.1234")
-        #expect(formatQuantity(1.0001) == "1.0001")
+        #expect(formatQuantity(10.25, locale: en) == "10.2500")
+        #expect(formatQuantity(0.1234, locale: en) == "0.1234")
+        #expect(formatQuantity(1.0001, locale: en) == "1.0001")
+    }
+
+    @Test("formatQuantity uses the locale's decimal separator and no grouping")
+    func formatQuantityFrench() {
+        let fr = Locale(identifier: "fr_FR")
+        #expect(formatQuantity(378.54, locale: fr) == "378,5400")
+        #expect(formatQuantity(1234.5, locale: fr) == "1234,5")
     }
 
     // MARK: - formatCompactCurrency

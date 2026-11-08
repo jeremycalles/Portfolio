@@ -517,7 +517,17 @@
 "design.restoreFailed" = "Restore could not complete. Your previous portfolio was kept.";
 "design.recoveryRequired" = "Restore could not complete. Export the recovery copy below to keep your previous portfolio safe, then try restoring that file.";
 "design.correctionDeltaHint" = "Adds or removes this quantity on the selected date without recording a purchase or sale. Past transactions are preserved.";
-"design.unitPriceOptional" = "Price per unit (optional)";
+"design.unitPrice" = "Price per unit";
+"design.optional" = "Optional";
+"chart.maHelp.button" = "What do these mean?";
+"chart.maHelp.intro" = "A moving average is the average price over a recent period, recalculated every day. It smooths out daily noise so you can see the underlying trend.";
+"chart.maHelp.30d" = "Short-term direction over about a month.";
+"chart.maHelp.200d" = "The long-term trend, over about 40 weeks — the line most investors watch. Price above it: uptrend. Below it: downtrend.";
+"chart.maHelp.7y" = "Where today's price sits within a full market cycle: high or low compared with the last seven years.";
+"chart.maHelp.gapTitle" = "Distance from the average";
+"chart.maHelp.gap" = "Explore the chart to see how far the price is above or below each average. Far above means it has run up quickly — think twice before buying more. Far below can mean it is cheap compared with its recent past, or that something is wrong.";
+"chart.maHelp.limitsTitle" = "Limits";
+"chart.maHelp.limits" = "Averages are built from past prices: they confirm a trend after it has started and predict nothing. When prices move sideways they give false signals. Use them alongside your allocation, not instead of it.";
 
 "design.closedPositions" = "Closed positions";
 "design.noClosedPositions" = "No closed positions";

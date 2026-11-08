@@ -10,14 +10,18 @@ func formatCurrency(_ value: Double, currency: String) -> String {
     return formatter.string(from: NSNumber(value: value)) ?? "\(currency) \(value)"
 }
 
-func formatQuantity(_ value: Double) -> String {
+/// Uses the same locale as currency amounts, so "378,5400" sits next to "44 421,67 €"
+/// instead of mixing decimal separators on one screen.
+func formatQuantity(_ value: Double, locale: Locale = .autoupdatingCurrent) -> String {
+    let digits: Int
     if value == floor(value) {
-        return String(format: "%.0f", value)
+        digits = 0
     } else if value * 10 == floor(value * 10) {
-        return String(format: "%.1f", value)
+        digits = 1
     } else {
-        return String(format: "%.4f", value)
+        digits = 4
     }
+    return value.formatted(.number.precision(.fractionLength(digits)).grouping(.never).locale(locale))
 }
 
 /// Compact amount for axes and ring centers ("13,2 k", "1,2 M").

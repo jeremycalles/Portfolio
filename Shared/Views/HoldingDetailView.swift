@@ -306,7 +306,7 @@ private struct TransactionEditorView: View {
 
                 DatePicker(L10n.reportsDate, selection: $date, in: ...Date(), displayedComponents: .date)
                 PortfolioDecimalField(title: L10n.holdingsQuantity, text: $quantityText)
-                PortfolioDecimalField(title: "\(L10n.designUnitPriceOptional) · \(currency)", text: $priceText)
+                PortfolioDecimalField(title: "\(L10n.designUnitPrice) · \(currency)", text: $priceText, placeholder: L10n.designOptional)
                 if kind != .adjustment {
                     PortfolioDecimalField(title: "\(L10n.holdingsFees) · \(currency)", text: $feesText)
                 }

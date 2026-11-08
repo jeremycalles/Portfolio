@@ -13,6 +13,38 @@ struct QuadrantTrendDetailView: View {
     @State private var hasCompleteCashflows = true
     @State private var movingAverageRatios: [MovingAverageWindow: [(date: Date, value: Double)]] = [:]
     @State private var isLoading = true
+    @AppStorage(ChartComparisonSelection.storageKey) private var comparisonSelection = ChartComparisonSelection.defaultValue
+    /// Market lines replayed with this category's cash flows.
+    @State private var marketComparisons: [ChartComparison] = []
+    /// Returns of the other categories that are checked in the Compare menu.
+    @State private var otherReturns: [Int: [(date: Date, value: Double)]] = [:]
+
+    private var comparisons: [ChartComparison] {
+        let others = viewModel.quadrants.filter { $0.id != quadrant.id }.map { other in
+            ChartComparison(
+                id: ChartComparison.quadrantID(other.id),
+                label: other.name,
+                color: AppTheme.allocationColor(id: other.id),
+                history: otherReturns[other.id] ?? [],
+                kind: .precomputedReturn,
+                group: .quadrant
+            )
+        }
+        return marketComparisons + others
+    }
+
+    private struct OtherReturnsKey: Equatable {
+        let ids: [Int]
+        let period: ReportPeriod
+    }
+
+    private var otherReturnsKey: OtherReturnsKey {
+        OtherReturnsKey(
+            ids: ChartComparisonSelection.quadrantIDs(comparisonSelection)
+                .filter { id in id != quadrant.id && viewModel.quadrants.contains { $0.id == id } },
+            period: viewModel.selectedPeriod
+        )
+    }
 
     var body: some View {
         NavigationStack {
@@ -28,7 +60,9 @@ struct QuadrantTrendDetailView: View {
                     } else {
                         PortfolioTrendChart(
                             history: history,
+                            comparisons: comparisons,
                             performancePercent: viewModel.cachedQuadrantTWR[quadrant.id],
+                            seriesLabel: quadrant.name,
                             interactive: true,
                             privacyMode: privacyMode,
                             cashflows: cashflows,
@@ -52,6 +86,7 @@ struct QuadrantTrendDetailView: View {
         .frame(minWidth: 640, minHeight: 520)
         #endif
         .task(id: viewModel.selectedPeriod) { await load() }
+        .task(id: otherReturnsKey) { await loadOtherReturns() }
     }
 
     private func load() async {
@@ -63,10 +98,33 @@ struct QuadrantTrendDetailView: View {
         cashflows = data.cashflows
         hasCompleteCashflows = await viewModel.hasCompletePeriodCashflows(transactions)
         isLoading = false
+        // Same rule as the portfolio chart: no market comparison without complete cash flows.
+        if hasCompleteCashflows {
+            let markets = await viewModel.marketComparisonSeries(base: loadedHistory, baseCashflows: data.cashflows)
+            marketComparisons = [
+                (ChartComparison.msciWorldID, L10n.chartMsciWorldComparison, AppTheme.msciWorld, markets.msciWorld),
+                (ChartComparison.sp500ID, L10n.chartSp500Comparison, AppTheme.sp500, markets.sp500),
+                (ChartComparison.goldID, L10n.chartGoldComparison, AppTheme.gold, markets.gold)
+            ]
+            .filter { !$0.3.isEmpty }
+            .map { ChartComparison(id: $0.0, label: $0.1, color: $0.2, history: $0.3) }
+        } else {
+            marketComparisons = []
+        }
         movingAverageRatios = await viewModel.quadrantMovingAverageRatios(
             quadrantId: quadrant.id,
             at: loadedHistory.map(\.date)
         )
+    }
+
+    private func loadOtherReturns() async {
+        var loaded: [Int: [(date: Date, value: Double)]] = [:]
+        for id in otherReturnsKey.ids {
+            if Task.isCancelled { return }
+            loaded[id] = await viewModel.getQuadrantReturnSeries(quadrantId: id)
+        }
+        if Task.isCancelled { return }
+        otherReturns = loaded
     }
 
     private func downloadLongHistory() async {

@@ -197,6 +197,20 @@ extension AppViewModel {
         return PortfolioAnalytics.returnSeries(history, cashflows: flows.cashflows)
     }
 
+    /// Market benchmark lines replayed with `base`'s own cash flows, so a category
+    /// chart can be compared with the market the way the portfolio chart is.
+    func marketComparisonSeries(
+        base: [(date: Date, value: Double)],
+        baseCashflows: [PortfolioCashflow]
+    ) async -> (sp500: [(date: Date, value: Double)], gold: [(date: Date, value: Double)], msciWorld: [(date: Date, value: Double)]) {
+        guard !base.isEmpty else { return ([], [], []) }
+        let indices = await buildPriceIndex(for: [SP500IndexIsin, GoldIndexIsin, MSCIWorldIndexIsin])
+        func series(_ isin: String) -> [(date: Date, value: Double)] {
+            PortfolioAnalytics.benchmarkSeries(portfolio: base, benchmark: indices[isin] ?? [], cashflows: baseCashflows)
+        }
+        return (series(SP500IndexIsin), series(GoldIndexIsin), series(MSCIWorldIndexIsin))
+    }
+
     /// Computes all top-level chart series from one portfolio history and one set of
     /// transaction cashflows. The resulting value can be published atomically.
     func makeDashboardSnapshot() async -> DashboardSnapshot {
